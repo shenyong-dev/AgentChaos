@@ -1,0 +1,62 @@
+# T01 deployment draft. Local verification uses existing MySQL + native Windows Redis-compatible host.
+name: agentchaos
+services:
+  mysql:
+    image: mysql:8.0.39@sha256:ccb8f749bb5e59f9f8f03bf7282c7ef27a93a1814a24f0a8a926fb4e19b7fb97
+    environment:
+      MYSQL_DATABASE: agentchaos
+      MYSQL_USER: agentchaos
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?Create .env first}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Create .env first}
+    ports: ["127.0.0.1:${COMPOSE_MYSQL_PORT:-13306}:3306"]
+    volumes: ["./.local/compose/mysql:/var/lib/mysql"]
+    healthcheck:
+      test: ["CMD-SHELL", "MYSQL_PWD=$$MYSQL_PASSWORD mysql -uagentchaos -Dagentchaos -e 'SELECT 1' >/dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    restart: unless-stopped
+  redis:
+    image: redis:8.2@sha256:e5f23377739f95a2f530b9c99f93accb4f634577f09d00a7d8e0638f2fdf69e0
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?Create .env first}
+    entrypoint: ["/bin/sh", "/etc/agentchaos/start-redis.sh"]
+    ports: ["127.0.0.1:${COMPOSE_REDIS_PORT:-16379}:6379"]
+    volumes:
+      - ./.local/compose/redis:/data
+      - ./deploy/redis.conf:/etc/agentchaos/redis.conf:ro
+      - ./deploy/start-redis.sh:/etc/agentchaos/start-redis.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "export REDISCLI_AUTH=$$REDIS_PASSWORD; redis-cli -e PING >/dev/null && redis-cli -e JSON.TYPE ac:health:probe >/dev/null && redis-cli -e FT._LIST >/dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    restart: unless-stopped
+  api:
+    build: {context: ., dockerfile: backend/Dockerfile}
+    env_file: .env
+    environment: &app_environment
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_USER: agentchaos
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    ports: ["127.0.0.1:${API_PORT:-8000}:8000"]
+    depends_on:
+      mysql: {condition: service_healthy}
+      redis: {condition: service_healthy}
+    restart: unless-stopped
+  worker:
+    build: {context: ., dockerfile: backend/Dockerfile}
+    profiles: [worker]
+    env_file: .env
+    environment: *app_environment
+    command: ["celery", "-A", "app.workers.celery_app:celery_app", "worker", "--loglevel=INFO", "--concurrency=1"]
+    depends_on:
+      mysql: {condition: service_healthy}
+      redis: {condition: service_healthy}
+  frontend:
+    build: {context: ., dockerfile: frontend/Dockerfile}
+    ports: ["127.0.0.1:${FRONTEND_PORT:-5173}:80"]
+    depends_on: [api]
+    restart: unless-stopped

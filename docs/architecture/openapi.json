@@ -1,0 +1,352 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "AgentChaos API",
+    "description": "T01 工程基础；评测、预约与模型执行接口尚未实现。",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/api/v1/health/live": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Liveness",
+        "operationId": "liveness_api_v1_health_live_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_dict_str__str__"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/health": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Health",
+        "operationId": "health_api_v1_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_HealthReport_"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "依赖未就绪",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_HealthReport_"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/system/config": {
+      "get": {
+        "tags": [
+          "system"
+        ],
+        "summary": "Public Config",
+        "operationId": "public_config_api_v1_system_config_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_PublicConfig_"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ComponentCheck": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "enum": [
+              "api",
+              "mysql",
+              "redis",
+              "model"
+            ],
+            "title": "Name"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "error",
+              "not_configured",
+              "not_probed"
+            ],
+            "title": "Status"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "latency_ms": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latency Ms"
+          },
+          "version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version"
+          },
+          "capabilities": {
+            "additionalProperties": {
+              "type": "boolean"
+            },
+            "type": "object",
+            "title": "Capabilities"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "status",
+          "code",
+          "message"
+        ],
+        "title": "ComponentCheck"
+      },
+      "Envelope_HealthReport_": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/HealthReport"
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "request_id"
+        ],
+        "title": "Envelope[HealthReport]"
+      },
+      "Envelope_PublicConfig_": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/PublicConfig"
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "request_id"
+        ],
+        "title": "Envelope[PublicConfig]"
+      },
+      "Envelope_dict_str__str__": {
+        "properties": {
+          "data": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Data"
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "request_id"
+        ],
+        "title": "Envelope[dict[str, str]]"
+      },
+      "HealthReport": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "infrastructure_ready",
+              "degraded"
+            ],
+            "title": "Status"
+          },
+          "checked_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Checked At"
+          },
+          "checks": {
+            "items": {
+              "$ref": "#/components/schemas/ComponentCheck"
+            },
+            "type": "array",
+            "title": "Checks"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "checked_at",
+          "checks"
+        ],
+        "title": "HealthReport"
+      },
+      "ModelRoleConfig": {
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "agent",
+              "case_generator",
+              "judge"
+            ],
+            "title": "Role"
+          },
+          "model": {
+            "type": "string",
+            "title": "Model"
+          },
+          "thinking": {
+            "type": "string",
+            "enum": [
+              "enabled",
+              "disabled"
+            ],
+            "title": "Thinking"
+          },
+          "max_output_tokens": {
+            "type": "integer",
+            "title": "Max Output Tokens"
+          },
+          "budget_usd": {
+            "type": "number",
+            "title": "Budget Usd"
+          }
+        },
+        "type": "object",
+        "required": [
+          "role",
+          "model",
+          "thinking",
+          "max_output_tokens",
+          "budget_usd"
+        ],
+        "title": "ModelRoleConfig"
+      },
+      "PublicConfig": {
+        "properties": {
+          "app_version": {
+            "type": "string",
+            "title": "App Version"
+          },
+          "environment": {
+            "type": "string",
+            "title": "Environment"
+          },
+          "task": {
+            "type": "string",
+            "const": "T01",
+            "title": "Task",
+            "default": "T01"
+          },
+          "api_prefix": {
+            "type": "string",
+            "title": "Api Prefix",
+            "default": "/api/v1"
+          },
+          "model_provider": {
+            "type": "string",
+            "title": "Model Provider",
+            "default": "DeepSeek 官方 API"
+          },
+          "model_key_configured": {
+            "type": "boolean",
+            "title": "Model Key Configured"
+          },
+          "model_connectivity": {
+            "type": "string",
+            "const": "not_probed",
+            "title": "Model Connectivity",
+            "default": "not_probed"
+          },
+          "paid_calls_enabled": {
+            "type": "boolean",
+            "title": "Paid Calls Enabled"
+          },
+          "run_concurrency": {
+            "type": "integer",
+            "title": "Run Concurrency"
+          },
+          "roles": {
+            "items": {
+              "$ref": "#/components/schemas/ModelRoleConfig"
+            },
+            "type": "array",
+            "title": "Roles"
+          },
+          "test_execution_available": {
+            "type": "boolean",
+            "title": "Test Execution Available",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "app_version",
+          "environment",
+          "model_key_configured",
+          "paid_calls_enabled",
+          "run_concurrency",
+          "roles"
+        ],
+        "title": "PublicConfig"
+      }
+    }
+  }
+}

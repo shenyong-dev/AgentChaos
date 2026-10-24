@@ -1,0 +1,224 @@
+{
+  "$defs": {
+    "BookingCount": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "booking_count",
+          "title": "Type",
+          "type": "string"
+        },
+        "equals": {
+          "minimum": 0,
+          "title": "Equals",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "type",
+        "equals"
+      ],
+      "title": "BookingCount",
+      "type": "object"
+    },
+    "BookingMatches": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "booking_matches",
+          "title": "Type",
+          "type": "string"
+        },
+        "date": {
+          "format": "date",
+          "title": "Date",
+          "type": "string"
+        },
+        "attendees": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Attendees"
+        },
+        "room_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Room Code"
+        }
+      },
+      "required": [
+        "type",
+        "date"
+      ],
+      "title": "BookingMatches",
+      "type": "object"
+    },
+    "NoBookingOn": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "no_booking_on",
+          "title": "Type",
+          "type": "string"
+        },
+        "date": {
+          "format": "date",
+          "title": "Date",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "date"
+      ],
+      "title": "NoBookingOn",
+      "type": "object"
+    },
+    "UserTurn": {
+      "additionalProperties": false,
+      "properties": {
+        "user": {
+          "maxLength": 12000,
+          "minLength": 1,
+          "title": "User",
+          "type": "string"
+        }
+      },
+      "required": [
+        "user"
+      ],
+      "title": "UserTurn",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0",
+      "default": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "case_key": {
+      "pattern": "^[A-Z][A-Z0-9-]{2,79}$",
+      "title": "Case Key",
+      "type": "string"
+    },
+    "revision": {
+      "minimum": 1,
+      "title": "Revision",
+      "type": "integer"
+    },
+    "family_key": {
+      "maxLength": 100,
+      "minLength": 1,
+      "title": "Family Key",
+      "type": "string"
+    },
+    "category": {
+      "enum": [
+        "normal",
+        "tool_execution",
+        "memory_and_tool",
+        "retrieval",
+        "security",
+        "robustness"
+      ],
+      "title": "Category",
+      "type": "string"
+    },
+    "dataset_split": {
+      "enum": [
+        "dev",
+        "calibration",
+        "holdout"
+      ],
+      "title": "Dataset Split",
+      "type": "string"
+    },
+    "reference_clock": {
+      "format": "date-time",
+      "title": "Reference Clock",
+      "type": "string"
+    },
+    "fixture": {
+      "maxLength": 100,
+      "minLength": 1,
+      "title": "Fixture",
+      "type": "string"
+    },
+    "turns": {
+      "items": {
+        "$ref": "#/$defs/UserTurn"
+      },
+      "maxItems": 50,
+      "minItems": 1,
+      "title": "Turns",
+      "type": "array"
+    },
+    "assertions": {
+      "items": {
+        "discriminator": {
+          "mapping": {
+            "booking_count": "#/$defs/BookingCount",
+            "booking_matches": "#/$defs/BookingMatches",
+            "no_booking_on": "#/$defs/NoBookingOn"
+          },
+          "propertyName": "type"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/$defs/BookingMatches"
+          },
+          {
+            "$ref": "#/$defs/BookingCount"
+          },
+          {
+            "$ref": "#/$defs/NoBookingOn"
+          }
+        ]
+      },
+      "maxItems": 100,
+      "minItems": 1,
+      "title": "Assertions",
+      "type": "array"
+    },
+    "review_status": {
+      "default": "draft",
+      "enum": [
+        "draft",
+        "approved",
+        "rejected"
+      ],
+      "title": "Review Status",
+      "type": "string"
+    }
+  },
+  "required": [
+    "case_key",
+    "revision",
+    "family_key",
+    "category",
+    "dataset_split",
+    "reference_clock",
+    "fixture",
+    "turns",
+    "assertions"
+  ],
+  "title": "TestCaseDraft",
+  "type": "object"
+}
