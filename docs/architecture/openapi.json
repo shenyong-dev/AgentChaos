@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "AgentChaos API",
-    "description": "T01 工程基础；评测、预约与模型执行接口尚未实现。",
+    "description": "T04 真实预约Agent与确定性服务；正式批量评测和SSE在后续实现。",
     "version": "0.1.0"
   },
   "paths": {
@@ -78,10 +78,1831 @@
           }
         }
       }
+    },
+    "/api/v1/booking/availability": {
+      "post": {
+        "tags": [
+          "booking"
+        ],
+        "summary": "Availability",
+        "operationId": "availability_api_v1_booking_availability_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvailabilityQuery"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_BookingToolResult_AvailabilityView__"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Gone",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBasic": []
+          }
+        ]
+      }
+    },
+    "/api/v1/booking/drafts": {
+      "post": {
+        "tags": [
+          "booking"
+        ],
+        "summary": "Preview",
+        "operationId": "preview_api_v1_booking_drafts_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PreviewBooking"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_BookingToolResult_DraftView__"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Gone",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBasic": []
+          }
+        ]
+      }
+    },
+    "/api/v1/booking/confirm": {
+      "post": {
+        "tags": [
+          "booking"
+        ],
+        "summary": "Confirm",
+        "operationId": "confirm_api_v1_booking_confirm_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfirmBooking"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_BookingToolResult_BookingView__"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Gone",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBasic": []
+          }
+        ]
+      }
+    },
+    "/api/v1/booking/requests/{idempotency_key}": {
+      "get": {
+        "tags": [
+          "booking"
+        ],
+        "summary": "Lookup",
+        "operationId": "lookup_api_v1_booking_requests__idempotency_key__get",
+        "security": [
+          {
+            "HTTPBasic": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "idempotency_key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Idempotency Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_BookingToolResult_Union_BookingView__NoneType___"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "410": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Gone"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/booking/bookings/{booking_id}": {
+      "delete": {
+        "tags": [
+          "booking"
+        ],
+        "summary": "Cancel",
+        "operationId": "cancel_api_v1_booking_bookings__booking_id__delete",
+        "security": [
+          {
+            "HTTPBasic": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "booking_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Booking Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_BookingToolResult_BookingView__"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "410": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Gone"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/demo/sessions": {
+      "post": {
+        "tags": [
+          "agent-demo"
+        ],
+        "summary": "Create Session",
+        "operationId": "create_session_api_v1_demo_sessions_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DemoSessionCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_dict_"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Gateway Timeout",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBasic": []
+          }
+        ]
+      }
+    },
+    "/api/v1/demo/sessions/{session_id}": {
+      "get": {
+        "tags": [
+          "agent-demo"
+        ],
+        "summary": "Read Session",
+        "operationId": "read_session_api_v1_demo_sessions__session_id__get",
+        "security": [
+          {
+            "HTTPBasic": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Session Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_dict_"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          },
+          "504": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Gateway Timeout"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/demo/sessions/{session_id}/messages": {
+      "post": {
+        "tags": [
+          "agent-demo"
+        ],
+        "summary": "Send Message",
+        "operationId": "send_message_api_v1_demo_sessions__session_id__messages_post",
+        "security": [
+          {
+            "HTTPBasic": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Session Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DemoMessage"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_dict_"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          },
+          "504": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Gateway Timeout"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/demo/sessions/{session_id}/resume": {
+      "post": {
+        "tags": [
+          "agent-demo"
+        ],
+        "summary": "Resume Session",
+        "operationId": "resume_session_api_v1_demo_sessions__session_id__resume_post",
+        "security": [
+          {
+            "HTTPBasic": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Session Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DemoResume"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_dict_"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          },
+          "504": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Gateway Timeout"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/demo/sessions/{session_id}/retry": {
+      "post": {
+        "tags": [
+          "agent-demo"
+        ],
+        "summary": "Retry Session",
+        "operationId": "retry_session_api_v1_demo_sessions__session_id__retry_post",
+        "security": [
+          {
+            "HTTPBasic": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Session Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DemoRetry"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_dict_"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          },
+          "504": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Gateway Timeout"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/demo/sessions/{session_id}/history": {
+      "get": {
+        "tags": [
+          "agent-demo"
+        ],
+        "summary": "Session History",
+        "operationId": "session_history_api_v1_demo_sessions__session_id__history_get",
+        "security": [
+          {
+            "HTTPBasic": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Session Id"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Cursor"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 20,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_dict_"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          },
+          "504": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Gateway Timeout"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "AvailabilityQuery": {
+        "properties": {
+          "start_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Start At"
+          },
+          "end_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "End At"
+          },
+          "attendees": {
+            "type": "integer",
+            "maximum": 2147483647.0,
+            "minimum": 1.0,
+            "title": "Attendees"
+          },
+          "room_code": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,31}$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Room Code"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "start_at",
+          "end_at",
+          "attendees"
+        ],
+        "title": "AvailabilityQuery"
+      },
+      "AvailabilityView": {
+        "properties": {
+          "rooms": {
+            "items": {
+              "$ref": "#/components/schemas/RoomView"
+            },
+            "type": "array",
+            "title": "Rooms"
+          },
+          "start_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Start At"
+          },
+          "end_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "End At"
+          },
+          "attendees": {
+            "type": "integer",
+            "title": "Attendees"
+          },
+          "truncated": {
+            "type": "boolean",
+            "title": "Truncated",
+            "default": false
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "rooms",
+          "start_at",
+          "end_at",
+          "attendees"
+        ],
+        "title": "AvailabilityView"
+      },
+      "BookingToolResult_AvailabilityView_": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "not_found"
+            ],
+            "title": "Status",
+            "default": "ok"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "summary": {
+            "type": "string",
+            "title": "Summary"
+          },
+          "data": {
+            "$ref": "#/components/schemas/AvailabilityView"
+          },
+          "request_key": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Request Key"
+          },
+          "retryable": {
+            "type": "boolean",
+            "title": "Retryable",
+            "default": false
+          },
+          "commit_state": {
+            "type": "string",
+            "enum": [
+              "not_applicable",
+              "not_committed",
+              "committed",
+              "unknown"
+            ],
+            "title": "Commit State"
+          },
+          "evidence_refs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Evidence Refs"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "summary",
+          "data",
+          "commit_state"
+        ],
+        "title": "BookingToolResult[AvailabilityView]"
+      },
+      "BookingToolResult_BookingView_": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "not_found"
+            ],
+            "title": "Status",
+            "default": "ok"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "summary": {
+            "type": "string",
+            "title": "Summary"
+          },
+          "data": {
+            "$ref": "#/components/schemas/BookingView"
+          },
+          "request_key": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Request Key"
+          },
+          "retryable": {
+            "type": "boolean",
+            "title": "Retryable",
+            "default": false
+          },
+          "commit_state": {
+            "type": "string",
+            "enum": [
+              "not_applicable",
+              "not_committed",
+              "committed",
+              "unknown"
+            ],
+            "title": "Commit State"
+          },
+          "evidence_refs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Evidence Refs"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "summary",
+          "data",
+          "commit_state"
+        ],
+        "title": "BookingToolResult[BookingView]"
+      },
+      "BookingToolResult_DraftView_": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "not_found"
+            ],
+            "title": "Status",
+            "default": "ok"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "summary": {
+            "type": "string",
+            "title": "Summary"
+          },
+          "data": {
+            "$ref": "#/components/schemas/DraftView"
+          },
+          "request_key": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Request Key"
+          },
+          "retryable": {
+            "type": "boolean",
+            "title": "Retryable",
+            "default": false
+          },
+          "commit_state": {
+            "type": "string",
+            "enum": [
+              "not_applicable",
+              "not_committed",
+              "committed",
+              "unknown"
+            ],
+            "title": "Commit State"
+          },
+          "evidence_refs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Evidence Refs"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "summary",
+          "data",
+          "commit_state"
+        ],
+        "title": "BookingToolResult[DraftView]"
+      },
+      "BookingToolResult_Union_BookingView__NoneType__": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "not_found"
+            ],
+            "title": "Status",
+            "default": "ok"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "summary": {
+            "type": "string",
+            "title": "Summary"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BookingView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "request_key": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Request Key"
+          },
+          "retryable": {
+            "type": "boolean",
+            "title": "Retryable",
+            "default": false
+          },
+          "commit_state": {
+            "type": "string",
+            "enum": [
+              "not_applicable",
+              "not_committed",
+              "committed",
+              "unknown"
+            ],
+            "title": "Commit State"
+          },
+          "evidence_refs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Evidence Refs"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "summary",
+          "data",
+          "commit_state"
+        ],
+        "title": "BookingToolResult[Union[BookingView, NoneType]]"
+      },
+      "BookingView": {
+        "properties": {
+          "booking_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Booking Id"
+          },
+          "draft_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Draft Id"
+          },
+          "idempotency_key": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Idempotency Key"
+          },
+          "room_code": {
+            "type": "string",
+            "title": "Room Code"
+          },
+          "start_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Start At"
+          },
+          "end_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "End At"
+          },
+          "attendees": {
+            "type": "integer",
+            "title": "Attendees"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "confirmed",
+              "cancelled"
+            ],
+            "title": "Status"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "booking_id",
+          "draft_id",
+          "idempotency_key",
+          "room_code",
+          "start_at",
+          "end_at",
+          "attendees",
+          "status",
+          "created_at"
+        ],
+        "title": "BookingView"
+      },
       "ComponentCheck": {
         "properties": {
           "name": {
@@ -151,6 +1972,276 @@
         ],
         "title": "ComponentCheck"
       },
+      "ConfirmBooking": {
+        "properties": {
+          "draft_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Draft Id"
+          },
+          "draft_hash": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Draft Hash"
+          },
+          "idempotency_key": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Idempotency Key"
+          },
+          "confirmed": {
+            "type": "boolean",
+            "title": "Confirmed"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "draft_id",
+          "draft_hash",
+          "idempotency_key",
+          "confirmed"
+        ],
+        "title": "ConfirmBooking"
+      },
+      "DemoMessage": {
+        "properties": {
+          "request_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Request Id"
+          },
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Expected Revision"
+          },
+          "text": {
+            "type": "string",
+            "maxLength": 12000,
+            "minLength": 1,
+            "title": "Text"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "request_id",
+          "expected_revision",
+          "text"
+        ],
+        "title": "DemoMessage"
+      },
+      "DemoResume": {
+        "properties": {
+          "request_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Request Id"
+          },
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Expected Revision"
+          },
+          "decision": {
+            "type": "string",
+            "enum": [
+              "confirm",
+              "reject"
+            ],
+            "title": "Decision"
+          },
+          "draft_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Draft Id"
+          },
+          "draft_hash": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Draft Hash"
+          },
+          "confirmation_revision": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Confirmation Revision"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "request_id",
+          "expected_revision",
+          "decision",
+          "draft_id",
+          "draft_hash",
+          "confirmation_revision"
+        ],
+        "title": "DemoResume"
+      },
+      "DemoRetry": {
+        "properties": {
+          "request_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Request Id"
+          },
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Expected Revision"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "request_id",
+          "expected_revision"
+        ],
+        "title": "DemoRetry"
+      },
+      "DemoSessionCreate": {
+        "properties": {},
+        "additionalProperties": false,
+        "type": "object",
+        "title": "DemoSessionCreate"
+      },
+      "DraftView": {
+        "properties": {
+          "draft_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Draft Id"
+          },
+          "draft_hash": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Draft Hash"
+          },
+          "suggested_idempotency_key": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Suggested Idempotency Key"
+          },
+          "room_code": {
+            "type": "string",
+            "title": "Room Code"
+          },
+          "start_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Start At"
+          },
+          "end_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "End At"
+          },
+          "attendees": {
+            "type": "integer",
+            "title": "Attendees"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "confirmed",
+              "expired",
+              "superseded",
+              "rejected"
+            ],
+            "title": "Status"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Expires At"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "draft_id",
+          "draft_hash",
+          "suggested_idempotency_key",
+          "room_code",
+          "start_at",
+          "end_at",
+          "attendees",
+          "status",
+          "expires_at"
+        ],
+        "title": "DraftView"
+      },
+      "Envelope_BookingToolResult_AvailabilityView__": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/BookingToolResult_AvailabilityView_"
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "request_id"
+        ],
+        "title": "Envelope[BookingToolResult[AvailabilityView]]"
+      },
+      "Envelope_BookingToolResult_BookingView__": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/BookingToolResult_BookingView_"
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "request_id"
+        ],
+        "title": "Envelope[BookingToolResult[BookingView]]"
+      },
+      "Envelope_BookingToolResult_DraftView__": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/BookingToolResult_DraftView_"
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "request_id"
+        ],
+        "title": "Envelope[BookingToolResult[DraftView]]"
+      },
+      "Envelope_BookingToolResult_Union_BookingView__NoneType___": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/BookingToolResult_Union_BookingView__NoneType__"
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "request_id"
+        ],
+        "title": "Envelope[BookingToolResult[Union[BookingView, NoneType]]]"
+      },
       "Envelope_HealthReport_": {
         "properties": {
           "data": {
@@ -185,6 +2276,25 @@
         ],
         "title": "Envelope[PublicConfig]"
       },
+      "Envelope_dict_": {
+        "properties": {
+          "data": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Data"
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "request_id"
+        ],
+        "title": "Envelope[dict]"
+      },
       "Envelope_dict_str__str__": {
         "properties": {
           "data": {
@@ -205,6 +2315,62 @@
           "request_id"
         ],
         "title": "Envelope[dict[str, str]]"
+      },
+      "ErrorBody": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "details": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Details"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "title": "ErrorBody"
+      },
+      "ErrorEnvelope": {
+        "properties": {
+          "error": {
+            "$ref": "#/components/schemas/ErrorBody"
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "error",
+          "request_id"
+        ],
+        "title": "ErrorEnvelope"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
       },
       "HealthReport": {
         "properties": {
@@ -279,6 +2445,40 @@
         ],
         "title": "ModelRoleConfig"
       },
+      "PreviewBooking": {
+        "properties": {
+          "start_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Start At"
+          },
+          "end_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "End At"
+          },
+          "attendees": {
+            "type": "integer",
+            "maximum": 2147483647.0,
+            "minimum": 1.0,
+            "title": "Attendees"
+          },
+          "room_code": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,31}$",
+            "title": "Room Code"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "start_at",
+          "end_at",
+          "attendees",
+          "room_code"
+        ],
+        "title": "PreviewBooking"
+      },
       "PublicConfig": {
         "properties": {
           "app_version": {
@@ -291,9 +2491,9 @@
           },
           "task": {
             "type": "string",
-            "const": "T01",
+            "const": "T04",
             "title": "Task",
-            "default": "T01"
+            "default": "T04"
           },
           "api_prefix": {
             "type": "string",
@@ -311,7 +2511,10 @@
           },
           "model_connectivity": {
             "type": "string",
-            "const": "not_probed",
+            "enum": [
+              "not_probed",
+              "historically_verified"
+            ],
             "title": "Model Connectivity",
             "default": "not_probed"
           },
@@ -334,6 +2537,11 @@
             "type": "boolean",
             "title": "Test Execution Available",
             "default": false
+          },
+          "agent_demo_available": {
+            "type": "boolean",
+            "title": "Agent Demo Available",
+            "default": true
           }
         },
         "type": "object",
@@ -346,6 +2554,71 @@
           "roles"
         ],
         "title": "PublicConfig"
+      },
+      "RoomView": {
+        "properties": {
+          "room_code": {
+            "type": "string",
+            "title": "Room Code"
+          },
+          "capacity": {
+            "type": "integer",
+            "title": "Capacity"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "room_code",
+          "capacity"
+        ],
+        "title": "RoomView"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    },
+    "securitySchemes": {
+      "HTTPBasic": {
+        "type": "http",
+        "scheme": "basic"
       }
     }
   }

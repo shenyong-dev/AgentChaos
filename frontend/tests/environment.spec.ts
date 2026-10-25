@@ -1,12 +1,17 @@
 import { expect, test } from '@playwright/test'
 import { resolve } from 'node:path'
 
-test('real services show verified infrastructure and an unprobed model', async ({ page, request }) => {
+const evidenceRoot = process.env.AC_E2E_EVIDENCE_DIR
+  ?? resolve(import.meta.dirname, '../../.local/playwright-evidence', new Date().toISOString().replace(/[:.]/g, '-'))
+
+test('real services show infrastructure and the configured model observation status', async ({ page, request }) => {
   const failures: string[] = []
   page.on('pageerror', (error) => failures.push(error.message))
   const response = await request.get('/api/v1/health')
   expect(response.status()).toBe(200)
   const body = await response.json()
+  const config = (await (await request.get('/api/v1/system/config')).json()).data
+  const model = body.data.checks.find((c: { name: string }) => c.name === 'model')
   expect(body.data.status).toBe('infrastructure_ready')
   expect(body.data.checks.find((c: { name: string }) => c.name === 'redis').capabilities)
     .toEqual({ json: true, search: true })
@@ -15,9 +20,17 @@ test('real services show verified infrastructure and an unprobed model', async (
   await expect(page.getByRole('heading', { name: '基础服务已连通' })).toBeVisible()
   await expect(page.getByText('JSON ✓', { exact: true })).toBeVisible()
   await expect(page.getByText('SEARCH ✓', { exact: true })).toBeVisible()
-  await expect(page.getByText('付费调用关闭', { exact: true })).toBeVisible()
+  await expect(page.getByText(config.paid_calls_enabled
+    ? '调用开关已启用 · 受角色预算限制' : '付费调用关闭', { exact: true })).toBeVisible()
+  if (config.model_connectivity === 'historically_verified') {
+    expect(model.code).toBe('model_historically_verified')
+    await expect(page.getByText(/此页显示历史结果/)).toBeVisible()
+  } else {
+    expect(['not_probed', 'not_configured']).toContain(model.status)
+    await expect(page.getByText(/此页显示历史结果/)).not.toBeVisible()
+  }
   await expect.poll(async () => (await page.locator('.service-card .el-tag').first().boundingBox())?.width ?? 0).toBeGreaterThan(35)
-  await page.screenshot({ path: resolve(import.meta.dirname, '../../docs/evidence/T01/environment-desktop.png'), fullPage: true, animations: 'disabled' })
+  await page.screenshot({ path: resolve(evidenceRoot, 'environment-desktop.png'), fullPage: true, animations: 'disabled' })
   expect(failures).toEqual([])
 })
 
@@ -32,7 +45,7 @@ test('mobile view fits and refresh makes another real health request', async ({ 
   await response
   await expect(refresh).toBeEnabled()
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
-  await page.screenshot({ path: resolve(import.meta.dirname, '../../docs/evidence/T01/environment-mobile.png'), fullPage: true, animations: 'disabled' })
+  await page.screenshot({ path: resolve(evidenceRoot, 'environment-mobile.png'), fullPage: true, animations: 'disabled' })
 })
 
 test('a simulated network failure shows an error and no fake health result', async ({ page }) => {

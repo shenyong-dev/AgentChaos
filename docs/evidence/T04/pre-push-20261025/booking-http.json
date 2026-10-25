@@ -1,0 +1,134 @@
+{
+  "checked_at": "2026-10-25T15:23:58.303544+00:00",
+  "transport": "real loopback HTTP",
+  "routes": {
+    "/api/v1/booking/availability": [
+      "post"
+    ],
+    "/api/v1/booking/drafts": [
+      "post"
+    ],
+    "/api/v1/booking/confirm": [
+      "post"
+    ],
+    "/api/v1/booking/requests/{idempotency_key}": [
+      "get"
+    ],
+    "/api/v1/booking/bookings/{booking_id}": [
+      "delete"
+    ]
+  },
+  "health_http": 200,
+  "health": {
+    "data": {
+      "status": "infrastructure_ready",
+      "checked_at": "2026-10-25T15:23:56.583326Z",
+      "checks": [
+        {
+          "name": "api",
+          "status": "ok",
+          "code": "api_running",
+          "message": "API 进程正常响应。",
+          "latency_ms": null,
+          "version": "0.1.0",
+          "capabilities": {}
+        },
+        {
+          "name": "mysql",
+          "status": "ok",
+          "code": "mysql_connected",
+          "message": "已连接应用数据库。",
+          "latency_ms": 54.3,
+          "version": "8.0.39",
+          "capabilities": {}
+        },
+        {
+          "name": "redis",
+          "status": "ok",
+          "code": "redis_connected",
+          "message": "PING、JSON 与 Search 已验证。",
+          "latency_ms": 25.31,
+          "version": "8.2.10",
+          "capabilities": {
+            "json": true,
+            "search": true
+          }
+        },
+        {
+          "name": "model",
+          "status": "ok",
+          "code": "model_historically_verified",
+          "message": "agent非思考模式于2026-10-25T15:08:55.432885+00:00真实调用成功；此页显示历史结果，刷新不调用模型。",
+          "latency_ms": null,
+          "version": null,
+          "capabilities": {
+            "historical_agent_probe": true
+          }
+        }
+      ]
+    },
+    "request_id": "53b00e19-d9db-433a-91d3-3f6ce9a12aa1"
+  },
+  "unauthenticated_http": 401,
+  "availability_http": 200,
+  "availability": {
+    "data": {
+      "status": "ok",
+      "code": "availability_checked",
+      "summary": "已查询当前空闲；提交时仍会重新校验。",
+      "data": {
+        "rooms": [
+          {
+            "room_code": "A101",
+            "capacity": 20
+          },
+          {
+            "room_code": "B201",
+            "capacity": 40
+          },
+          {
+            "room_code": "C301",
+            "capacity": 80
+          }
+        ],
+        "start_at": "2026-10-26T14:00:00+08:00",
+        "end_at": "2026-10-26T15:00:00+08:00",
+        "attendees": 10,
+        "truncated": false
+      },
+      "request_key": null,
+      "retryable": false,
+      "commit_state": "not_applicable",
+      "evidence_refs": []
+    },
+    "request_id": "e4b69cc7-b5ed-4793-8d1e-e2cfd7d01687"
+  },
+  "missing_request": {
+    "data": {
+      "status": "not_found",
+      "code": "request_not_found",
+      "summary": "本次查询未见已提交记录；在途事务仍可能随后提交，请保留原标识。",
+      "data": null,
+      "request_key": "6f7cfe5c-04d3-48d5-8fbd-50df29c52ce5",
+      "retryable": false,
+      "commit_state": "unknown",
+      "evidence_refs": []
+    },
+    "request_id": "4bfc3435-f9a7-490e-afdd-e4b049beb190"
+  },
+  "forged_scope_http": 400,
+  "frontend_http": 200,
+  "before": {
+    "sb_rooms": 3,
+    "sb_booking_drafts": 0,
+    "sb_bookings": 0,
+    "sb_booking_slots": 0
+  },
+  "after": {
+    "sb_rooms": 3,
+    "sb_booking_drafts": 0,
+    "sb_bookings": 0,
+    "sb_booking_slots": 0
+  },
+  "model_requests": 0
+}

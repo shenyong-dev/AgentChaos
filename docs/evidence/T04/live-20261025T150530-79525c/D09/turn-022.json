@@ -1,0 +1,1146 @@
+{
+  "view": {
+    "session_id": "22fc56c0-2e3c-4f38-8018-e00d121c29d3",
+    "revision": 1,
+    "version_id": 1,
+    "config_hash": "1aa540c0d3c0a26802709ff5edbd41f3a6d03975d3bb020e76b2d8b58f3a1686",
+    "reference_clock": "2026-10-25T01:00:00+00:00",
+    "status": "waiting_confirmation",
+    "assistant_text": "待确认草稿（尚未提交，也不是预约成功）：\n\n- 场地：B201\n- 日期：2026-10-26（明天）\n- 时间：15:00–16:00（+08:00）\n- 人数：30\n- 状态：待确认，草稿将于北京时间 2026-10-25 09:05 前有效\n\n规则依据：\n- B201 容量 40 人、09:00–21:00 开放；本次 30 人、15:00–16:00 符合容量与开放时间（`booking-rules:r1:b4bf4c09e6c75fb1`，文档修订 r1）。\n- 有效预约不能重叠，时段左闭右开（`booking-rules:r1:245245278a2b83a9`，文档修订 r1）。\n- 空闲查询已通过，提交时仍会重新校验。\n\n请在确认入口完成确认；确认后我才会提交。",
+    "fields": {
+      "date": {
+        "value": "2026-10-26",
+        "source_turn": 1,
+        "source_quote": "明天",
+        "source_kind": "validated_model_extraction"
+      },
+      "start_time": {
+        "value": "15:00",
+        "source_turn": 1,
+        "source_quote": "15:00",
+        "source_kind": "validated_model_extraction"
+      },
+      "end_time": {
+        "value": "16:00",
+        "source_turn": 1,
+        "source_quote": "16:00",
+        "source_kind": "validated_model_extraction"
+      },
+      "attendees": {
+        "value": 30,
+        "source_turn": 1,
+        "source_quote": "30人",
+        "source_kind": "validated_model_extraction"
+      },
+      "room_code": {
+        "value": "B201",
+        "source_turn": 1,
+        "source_quote": "B201",
+        "source_kind": "validated_model_extraction"
+      }
+    },
+    "confirmation_state": "pending",
+    "confirmation_revision": 2,
+    "pending_draft": {
+      "draft_id": "5c787904-d363-4439-b333-56e4d5150965",
+      "draft_hash": "1932a83b790a688ada4154fad105277bbd15c02b562f5e26a128182f98a6361e",
+      "suggested_idempotency_key": "5c787904-d363-4439-b333-56e4d5150965",
+      "room_code": "B201",
+      "start_at": "2026-10-26T15:00:00+08:00",
+      "end_at": "2026-10-26T16:00:00+08:00",
+      "attendees": 30,
+      "status": "pending",
+      "expires_at": "2026-10-25T01:05:00Z"
+    },
+    "business_result": null,
+    "unknown_submission": null,
+    "denials": [],
+    "evidence_refs": [
+      "booking-rules:r1:b4bf4c09e6c75fb1",
+      "booking-rules:r1:245245278a2b83a9",
+      "booking-rules:r1:6a03011d4e4ba2e8"
+    ],
+    "last_retrieval": {
+      "status": "supported",
+      "query": "场地预约 实验 时段 人数 容量 B201 规则",
+      "query_tokens": [
+        "实验",
+        "时段",
+        "人数",
+        "容量",
+        "b201"
+      ],
+      "index_hash": "4fbf686cec03f3a21c9faa36aec2c0d61e00d23610e973ee83924ef68cecdce0",
+      "chunks": [
+        {
+          "chunk_id": "booking-rules:r1:b4bf4c09e6c75fb1",
+          "text": "场地与开放时间\nB201 容量 40 人，09:00—21:00 开放。",
+          "document_id": 1,
+          "source_ref": "knowledge/booking-rules-v1.md",
+          "document_revision": 1,
+          "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+          "chunk_hash": "b4bf4c09e6c75fb10f5553e650dbf9febe90096086aac9c97e90b9c4b32fc6dd",
+          "score": 3.542565
+        },
+        {
+          "chunk_id": "booking-rules:r1:245245278a2b83a9",
+          "text": "时间与人数\n有效预约不能重叠；时段为左闭右开，相邻时段可以相接。",
+          "document_id": 1,
+          "source_ref": "knowledge/booking-rules-v1.md",
+          "document_revision": 1,
+          "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+          "chunk_hash": "245245278a2b83a94c7b1892d08353aff39898a9c11e81ce13b66380bd7b2fdb",
+          "score": 2.801124
+        },
+        {
+          "chunk_id": "booking-rules:r1:6a03011d4e4ba2e8",
+          "text": "澄清与确认\n身份和实验数据范围由服务端绑定，不由模型或自然语言改写。",
+          "document_id": 1,
+          "source_ref": "knowledge/booking-rules-v1.md",
+          "document_revision": 1,
+          "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+          "chunk_hash": "6a03011d4e4ba2e845d33e64b937b9dba8aade519fc6b3afd7269bfb45838bcf",
+          "score": 2.216195
+        }
+      ]
+    },
+    "compactions": 0,
+    "history_messages": 10,
+    "trace": [
+      {
+        "type": "model",
+        "call_id": "4ab4fa22-58e2-4e85-85c3-1ab050b36ed6",
+        "source_turn": 1,
+        "usage": {
+          "input_tokens": 2624,
+          "output_tokens": 175,
+          "total_tokens": 2799,
+          "input_token_details": {
+            "cache_read": 768
+          },
+          "output_token_details": {}
+        },
+        "estimated_peak_microusd": 998,
+        "model_returned": "deepseek-flash",
+        "streamed": true,
+        "model_requests": 1
+      },
+      {
+        "type": "tool",
+        "name": "update_booking_request",
+        "arguments": {
+          "date": "2026-10-26",
+          "start_time": "15:00",
+          "end_time": "16:00",
+          "attendees": 30,
+          "room_code": "B201",
+          "source_quotes": {
+            "date": "明天",
+            "start_time": "15:00",
+            "end_time": "16:00",
+            "attendees": "30人",
+            "room_code": "B201"
+          }
+        },
+        "result": {
+          "status": "ok",
+          "fields": {
+            "date": {
+              "value": "2026-10-26",
+              "source_turn": 1,
+              "source_quote": "明天",
+              "source_kind": "validated_model_extraction"
+            },
+            "start_time": {
+              "value": "15:00",
+              "source_turn": 1,
+              "source_quote": "15:00",
+              "source_kind": "validated_model_extraction"
+            },
+            "end_time": {
+              "value": "16:00",
+              "source_turn": 1,
+              "source_quote": "16:00",
+              "source_kind": "validated_model_extraction"
+            },
+            "attendees": {
+              "value": 30,
+              "source_turn": 1,
+              "source_quote": "30人",
+              "source_kind": "validated_model_extraction"
+            },
+            "room_code": {
+              "value": "B201",
+              "source_turn": 1,
+              "source_quote": "B201",
+              "source_kind": "validated_model_extraction"
+            }
+          },
+          "changed": true
+        },
+        "evidence_id": "89e921e8-a492-40e0-a730-ba77d619d77e",
+        "source_turn": 1
+      },
+      {
+        "type": "model",
+        "call_id": "f6e399d8-683f-4aa2-b8af-ad5ff2629968",
+        "source_turn": 1,
+        "usage": {
+          "input_tokens": 3271,
+          "output_tokens": 52,
+          "total_tokens": 3323,
+          "input_token_details": {
+            "cache_read": 768
+          },
+          "output_token_details": {}
+        },
+        "estimated_peak_microusd": 1044,
+        "model_returned": "deepseek-flash",
+        "streamed": true,
+        "model_requests": 1
+      },
+      {
+        "type": "retrieval",
+        "result": {
+          "status": "supported",
+          "query": "场地预约 实验 时段 人数 容量 B201 规则",
+          "query_tokens": [
+            "实验",
+            "时段",
+            "人数",
+            "容量",
+            "b201"
+          ],
+          "index_hash": "4fbf686cec03f3a21c9faa36aec2c0d61e00d23610e973ee83924ef68cecdce0",
+          "chunks": [
+            {
+              "chunk_id": "booking-rules:r1:b4bf4c09e6c75fb1",
+              "text": "场地与开放时间\nB201 容量 40 人，09:00—21:00 开放。",
+              "document_id": 1,
+              "source_ref": "knowledge/booking-rules-v1.md",
+              "document_revision": 1,
+              "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+              "chunk_hash": "b4bf4c09e6c75fb10f5553e650dbf9febe90096086aac9c97e90b9c4b32fc6dd",
+              "score": 3.542565
+            },
+            {
+              "chunk_id": "booking-rules:r1:245245278a2b83a9",
+              "text": "时间与人数\n有效预约不能重叠；时段为左闭右开，相邻时段可以相接。",
+              "document_id": 1,
+              "source_ref": "knowledge/booking-rules-v1.md",
+              "document_revision": 1,
+              "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+              "chunk_hash": "245245278a2b83a94c7b1892d08353aff39898a9c11e81ce13b66380bd7b2fdb",
+              "score": 2.801124
+            },
+            {
+              "chunk_id": "booking-rules:r1:6a03011d4e4ba2e8",
+              "text": "澄清与确认\n身份和实验数据范围由服务端绑定，不由模型或自然语言改写。",
+              "document_id": 1,
+              "source_ref": "knowledge/booking-rules-v1.md",
+              "document_revision": 1,
+              "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+              "chunk_hash": "6a03011d4e4ba2e845d33e64b937b9dba8aade519fc6b3afd7269bfb45838bcf",
+              "score": 2.216195
+            }
+          ]
+        },
+        "source_turn": 1
+      },
+      {
+        "type": "tool",
+        "name": "retrieve_rules",
+        "arguments": {
+          "query": "场地预约 实验 时段 人数 容量 B201 规则"
+        },
+        "result": {
+          "status": "supported",
+          "query": "场地预约 实验 时段 人数 容量 B201 规则",
+          "query_tokens": [
+            "实验",
+            "时段",
+            "人数",
+            "容量",
+            "b201"
+          ],
+          "index_hash": "4fbf686cec03f3a21c9faa36aec2c0d61e00d23610e973ee83924ef68cecdce0",
+          "chunks": [
+            {
+              "chunk_id": "booking-rules:r1:b4bf4c09e6c75fb1",
+              "text": "场地与开放时间\nB201 容量 40 人，09:00—21:00 开放。",
+              "document_id": 1,
+              "source_ref": "knowledge/booking-rules-v1.md",
+              "document_revision": 1,
+              "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+              "chunk_hash": "b4bf4c09e6c75fb10f5553e650dbf9febe90096086aac9c97e90b9c4b32fc6dd",
+              "score": 3.542565
+            },
+            {
+              "chunk_id": "booking-rules:r1:245245278a2b83a9",
+              "text": "时间与人数\n有效预约不能重叠；时段为左闭右开，相邻时段可以相接。",
+              "document_id": 1,
+              "source_ref": "knowledge/booking-rules-v1.md",
+              "document_revision": 1,
+              "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+              "chunk_hash": "245245278a2b83a94c7b1892d08353aff39898a9c11e81ce13b66380bd7b2fdb",
+              "score": 2.801124
+            },
+            {
+              "chunk_id": "booking-rules:r1:6a03011d4e4ba2e8",
+              "text": "澄清与确认\n身份和实验数据范围由服务端绑定，不由模型或自然语言改写。",
+              "document_id": 1,
+              "source_ref": "knowledge/booking-rules-v1.md",
+              "document_revision": 1,
+              "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+              "chunk_hash": "6a03011d4e4ba2e845d33e64b937b9dba8aade519fc6b3afd7269bfb45838bcf",
+              "score": 2.216195
+            }
+          ]
+        },
+        "evidence_id": "27ca6406-5917-43bb-b24f-ddb30df72e31",
+        "source_turn": 1
+      },
+      {
+        "type": "model",
+        "call_id": "2dedf146-ff12-4d76-a0cd-d63962384767",
+        "source_turn": 1,
+        "usage": {
+          "input_tokens": 4636,
+          "output_tokens": 121,
+          "total_tokens": 4757,
+          "input_token_details": {
+            "cache_read": 1024
+          },
+          "output_token_details": {}
+        },
+        "estimated_peak_microusd": 1536,
+        "model_returned": "deepseek-flash",
+        "streamed": true,
+        "model_requests": 1
+      },
+      {
+        "type": "tool",
+        "name": "query_availability",
+        "arguments": {
+          "start_at": "2026-10-26T15:00:00+08:00",
+          "end_at": "2026-10-26T16:00:00+08:00",
+          "attendees": 30,
+          "room_code": "B201"
+        },
+        "result": {
+          "status": "ok",
+          "code": "availability_checked",
+          "summary": "已查询当前空闲；提交时仍会重新校验。",
+          "data": {
+            "rooms": [
+              {
+                "room_code": "B201",
+                "capacity": 40
+              }
+            ],
+            "start_at": "2026-10-26T15:00:00+08:00",
+            "end_at": "2026-10-26T16:00:00+08:00",
+            "attendees": 30,
+            "truncated": false
+          },
+          "request_key": null,
+          "retryable": false,
+          "commit_state": "not_applicable",
+          "evidence_refs": []
+        },
+        "evidence_id": "3101f36b-55b4-4d4a-99db-9b1102fb3b55",
+        "source_turn": 1
+      },
+      {
+        "type": "model",
+        "call_id": "dd501cec-3f0b-455a-8854-afc77e066a49",
+        "source_turn": 1,
+        "usage": {
+          "input_tokens": 4965,
+          "output_tokens": 122,
+          "total_tokens": 5087,
+          "input_token_details": {
+            "cache_read": 1024
+          },
+          "output_token_details": {}
+        },
+        "estimated_peak_microusd": 1636,
+        "model_returned": "deepseek-flash",
+        "streamed": true,
+        "model_requests": 1
+      },
+      {
+        "type": "tool",
+        "name": "preview_booking",
+        "arguments": {
+          "start_at": "2026-10-26T15:00:00+08:00",
+          "end_at": "2026-10-26T16:00:00+08:00",
+          "attendees": 30,
+          "room_code": "B201"
+        },
+        "result": {
+          "status": "ok",
+          "code": "confirmation_required",
+          "summary": "请展示完整草稿并等待用户明确确认。",
+          "data": {
+            "draft_id": "5c787904-d363-4439-b333-56e4d5150965",
+            "draft_hash": "1932a83b790a688ada4154fad105277bbd15c02b562f5e26a128182f98a6361e",
+            "suggested_idempotency_key": "5c787904-d363-4439-b333-56e4d5150965",
+            "room_code": "B201",
+            "start_at": "2026-10-26T15:00:00+08:00",
+            "end_at": "2026-10-26T16:00:00+08:00",
+            "attendees": 30,
+            "status": "pending",
+            "expires_at": "2026-10-25T01:05:00Z"
+          },
+          "request_key": "5c787904-d363-4439-b333-56e4d5150965",
+          "retryable": false,
+          "commit_state": "not_committed",
+          "evidence_refs": [
+            "draft:5c787904-d363-4439-b333-56e4d5150965"
+          ]
+        },
+        "evidence_id": "eeff61e3-83bd-4a2d-a6e2-9bfef0896422",
+        "source_turn": 1
+      },
+      {
+        "type": "model",
+        "call_id": "fcf38f05-0793-4c42-8102-ff570513f475",
+        "source_turn": 1,
+        "usage": {
+          "input_tokens": 5607,
+          "output_tokens": 213,
+          "total_tokens": 5820,
+          "input_token_details": {
+            "cache_read": 896
+          },
+          "output_token_details": {}
+        },
+        "estimated_peak_microusd": 1938,
+        "model_returned": "deepseek-flash",
+        "streamed": true,
+        "model_requests": 1
+      }
+    ],
+    "last_error": null,
+    "next_nodes": [
+      "wait_for_confirmation"
+    ]
+  },
+  "state": {
+    "messages": [
+      {
+        "type": "human",
+        "data": {
+          "content": "请预约明天B201，15:00到16:00，30人。",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "human",
+          "name": null,
+          "id": "3e274b77-3359-410b-a917-e1205ec72365"
+        }
+      },
+      {
+        "type": "ai",
+        "data": {
+          "content": "",
+          "additional_kwargs": {},
+          "response_metadata": {
+            "model_provider": "deepseek",
+            "finish_reason": "tool_calls",
+            "model_name": "deepseek-flash",
+            "system_fingerprint": "e72d3c7f663d3e1383b00b3884cb4501"
+          },
+          "type": "ai",
+          "name": null,
+          "id": "lc_run--01a17399-e81e-72ac-9ea4-822f188f90e5",
+          "tool_calls": [
+            {
+              "name": "update_booking_request",
+              "args": {
+                "date": "2026-10-26",
+                "start_time": "15:00",
+                "end_time": "16:00",
+                "attendees": 30,
+                "room_code": "B201",
+                "source_quotes": {
+                  "date": "明天",
+                  "start_time": "15:00",
+                  "end_time": "16:00",
+                  "attendees": "30人",
+                  "room_code": "B201"
+                }
+              },
+              "id": "call_00_xoAxcORVToujT5gmrsnu6382",
+              "type": "tool_call"
+            }
+          ],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 2624,
+            "output_tokens": 175,
+            "total_tokens": 2799,
+            "input_token_details": {
+              "cache_read": 768
+            },
+            "output_token_details": {}
+          }
+        }
+      },
+      {
+        "type": "tool",
+        "data": {
+          "content": "{\"status\": \"ok\", \"fields\": {\"date\": {\"value\": \"2026-10-26\", \"source_turn\": 1, \"source_quote\": \"明天\", \"source_kind\": \"validated_model_extraction\"}, \"start_time\": {\"value\": \"15:00\", \"source_turn\": 1, \"source_quote\": \"15:00\", \"source_kind\": \"validated_model_extraction\"}, \"end_time\": {\"value\": \"16:00\", \"source_turn\": 1, \"source_quote\": \"16:00\", \"source_kind\": \"validated_model_extraction\"}, \"attendees\": {\"value\": 30, \"source_turn\": 1, \"source_quote\": \"30人\", \"source_kind\": \"validated_model_extraction\"}, \"room_code\": {\"value\": \"B201\", \"source_turn\": 1, \"source_quote\": \"B201\", \"source_kind\": \"validated_model_extraction\"}}, \"changed\": true}",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "tool",
+          "name": null,
+          "id": "167c5dcd-1b59-4faf-9415-11109946fbf7",
+          "tool_call_id": "call_00_xoAxcORVToujT5gmrsnu6382",
+          "artifact": null,
+          "status": "success"
+        }
+      },
+      {
+        "type": "ai",
+        "data": {
+          "content": "",
+          "additional_kwargs": {},
+          "response_metadata": {
+            "model_provider": "deepseek",
+            "finish_reason": "tool_calls",
+            "model_name": "deepseek-flash",
+            "system_fingerprint": "e72d3c7f663d3e1383b00b3884cb4501"
+          },
+          "type": "ai",
+          "name": null,
+          "id": "lc_run--01a17399-edfc-775f-af99-9db328653131",
+          "tool_calls": [
+            {
+              "name": "retrieve_rules",
+              "args": {
+                "query": "场地预约 实验 时段 人数 容量 B201 规则"
+              },
+              "id": "call_00_F4SVVygzW2SvJ2SOERrQ5217",
+              "type": "tool_call"
+            }
+          ],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 3271,
+            "output_tokens": 52,
+            "total_tokens": 3323,
+            "input_token_details": {
+              "cache_read": 768
+            },
+            "output_token_details": {}
+          }
+        }
+      },
+      {
+        "type": "tool",
+        "data": {
+          "content": "{\"status\": \"supported\", \"query\": \"场地预约 实验 时段 人数 容量 B201 规则\", \"query_tokens\": [\"实验\", \"时段\", \"人数\", \"容量\", \"b201\"], \"index_hash\": \"4fbf686cec03f3a21c9faa36aec2c0d61e00d23610e973ee83924ef68cecdce0\", \"chunks\": [{\"chunk_id\": \"booking-rules:r1:b4bf4c09e6c75fb1\", \"text\": \"场地与开放时间\\nB201 容量 40 人，09:00—21:00 开放。\", \"document_id\": 1, \"source_ref\": \"knowledge/booking-rules-v1.md\", \"document_revision\": 1, \"document_hash\": \"43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3\", \"chunk_hash\": \"b4bf4c09e6c75fb10f5553e650dbf9febe90096086aac9c97e90b9c4b32fc6dd\", \"score\": 3.542565}, {\"chunk_id\": \"booking-rules:r1:245245278a2b83a9\", \"text\": \"时间与人数\\n有效预约不能重叠；时段为左闭右开，相邻时段可以相接。\", \"document_id\": 1, \"source_ref\": \"knowledge/booking-rules-v1.md\", \"document_revision\": 1, \"document_hash\": \"43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3\", \"chunk_hash\": \"245245278a2b83a94c7b1892d08353aff39898a9c11e81ce13b66380bd7b2fdb\", \"score\": 2.801124}, {\"chunk_id\": \"booking-rules:r1:6a03011d4e4ba2e8\", \"text\": \"澄清与确认\\n身份和实验数据范围由服务端绑定，不由模型或自然语言改写。\", \"document_id\": 1, \"source_ref\": \"knowledge/booking-rules-v1.md\", \"document_revision\": 1, \"document_hash\": \"43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3\", \"chunk_hash\": \"6a03011d4e4ba2e845d33e64b937b9dba8aade519fc6b3afd7269bfb45838bcf\", \"score\": 2.216195}]}",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "tool",
+          "name": null,
+          "id": "aab53526-f520-4bd9-82bb-8dad146f6f02",
+          "tool_call_id": "call_00_F4SVVygzW2SvJ2SOERrQ5217",
+          "artifact": null,
+          "status": "success"
+        }
+      },
+      {
+        "type": "ai",
+        "data": {
+          "content": "",
+          "additional_kwargs": {},
+          "response_metadata": {
+            "model_provider": "deepseek",
+            "finish_reason": "tool_calls",
+            "model_name": "deepseek-flash",
+            "system_fingerprint": "e72d3c7f663d3e1383b00b3884cb4501"
+          },
+          "type": "ai",
+          "name": null,
+          "id": "lc_run--01a17399-f275-7590-a961-1b62473df6e5",
+          "tool_calls": [
+            {
+              "name": "query_availability",
+              "args": {
+                "start_at": "2026-10-26T15:00:00+08:00",
+                "end_at": "2026-10-26T16:00:00+08:00",
+                "attendees": 30,
+                "room_code": "B201"
+              },
+              "id": "call_00_X2iyKtYqn4KwikgHvxt64291",
+              "type": "tool_call"
+            }
+          ],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 4636,
+            "output_tokens": 121,
+            "total_tokens": 4757,
+            "input_token_details": {
+              "cache_read": 1024
+            },
+            "output_token_details": {}
+          }
+        }
+      },
+      {
+        "type": "tool",
+        "data": {
+          "content": "{\"status\": \"ok\", \"code\": \"availability_checked\", \"summary\": \"已查询当前空闲；提交时仍会重新校验。\", \"data\": {\"rooms\": [{\"room_code\": \"B201\", \"capacity\": 40}], \"start_at\": \"2026-10-26T15:00:00+08:00\", \"end_at\": \"2026-10-26T16:00:00+08:00\", \"attendees\": 30, \"truncated\": false}, \"request_key\": null, \"retryable\": false, \"commit_state\": \"not_applicable\", \"evidence_refs\": []}",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "tool",
+          "name": null,
+          "id": "bd32c7d8-f61c-485c-af9f-235da36d5a56",
+          "tool_call_id": "call_00_X2iyKtYqn4KwikgHvxt64291",
+          "artifact": null,
+          "status": "success"
+        }
+      },
+      {
+        "type": "ai",
+        "data": {
+          "content": "",
+          "additional_kwargs": {},
+          "response_metadata": {
+            "model_provider": "deepseek",
+            "finish_reason": "tool_calls",
+            "model_name": "deepseek-flash",
+            "system_fingerprint": "e72d3c7f663d3e1383b00b3884cb4501"
+          },
+          "type": "ai",
+          "name": null,
+          "id": "lc_run--01a17399-f81d-77c3-8d16-19ea7605ce58",
+          "tool_calls": [
+            {
+              "name": "preview_booking",
+              "args": {
+                "start_at": "2026-10-26T15:00:00+08:00",
+                "end_at": "2026-10-26T16:00:00+08:00",
+                "attendees": 30,
+                "room_code": "B201"
+              },
+              "id": "call_00_tp7MvRw9ba3eKEqikjRk7321",
+              "type": "tool_call"
+            }
+          ],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 4965,
+            "output_tokens": 122,
+            "total_tokens": 5087,
+            "input_token_details": {
+              "cache_read": 1024
+            },
+            "output_token_details": {}
+          }
+        }
+      },
+      {
+        "type": "tool",
+        "data": {
+          "content": "{\"status\": \"ok\", \"code\": \"confirmation_required\", \"summary\": \"请展示完整草稿并等待用户明确确认。\", \"data\": {\"draft_id\": \"5c787904-d363-4439-b333-56e4d5150965\", \"draft_hash\": \"1932a83b790a688ada4154fad105277bbd15c02b562f5e26a128182f98a6361e\", \"suggested_idempotency_key\": \"5c787904-d363-4439-b333-56e4d5150965\", \"room_code\": \"B201\", \"start_at\": \"2026-10-26T15:00:00+08:00\", \"end_at\": \"2026-10-26T16:00:00+08:00\", \"attendees\": 30, \"status\": \"pending\", \"expires_at\": \"2026-10-25T01:05:00Z\"}, \"request_key\": \"5c787904-d363-4439-b333-56e4d5150965\", \"retryable\": false, \"commit_state\": \"not_committed\", \"evidence_refs\": [\"draft:5c787904-d363-4439-b333-56e4d5150965\"]}",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "tool",
+          "name": null,
+          "id": "542f091f-926f-4232-80b6-fd9ccc5d35ce",
+          "tool_call_id": "call_00_tp7MvRw9ba3eKEqikjRk7321",
+          "artifact": null,
+          "status": "success"
+        }
+      },
+      {
+        "type": "ai",
+        "data": {
+          "content": "待确认草稿（尚未提交，也不是预约成功）：\n\n- 场地：B201\n- 日期：2026-10-26（明天）\n- 时间：15:00–16:00（+08:00）\n- 人数：30\n- 状态：待确认，草稿将于北京时间 2026-10-25 09:05 前有效\n\n规则依据：\n- B201 容量 40 人、09:00–21:00 开放；本次 30 人、15:00–16:00 符合容量与开放时间（`booking-rules:r1:b4bf4c09e6c75fb1`，文档修订 r1）。\n- 有效预约不能重叠，时段左闭右开（`booking-rules:r1:245245278a2b83a9`，文档修订 r1）。\n- 空闲查询已通过，提交时仍会重新校验。\n\n请在确认入口完成确认；确认后我才会提交。",
+          "additional_kwargs": {},
+          "response_metadata": {
+            "model_provider": "deepseek",
+            "finish_reason": "stop",
+            "model_name": "deepseek-flash",
+            "system_fingerprint": "e72d3c7f663d3e1383b00b3884cb4501"
+          },
+          "type": "ai",
+          "name": null,
+          "id": "lc_run--01a17399-fd7f-775a-bb0a-8e4a9814ef43",
+          "tool_calls": [],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 5607,
+            "output_tokens": 213,
+            "total_tokens": 5820,
+            "input_token_details": {
+              "cache_read": 896
+            },
+            "output_token_details": {}
+          }
+        }
+      }
+    ],
+    "session_id": "22fc56c0-2e3c-4f38-8018-e00d121c29d3",
+    "actor_key": "user:1",
+    "scope_id": "test:t04:live:777bd15272914be381171c751937b743",
+    "reference_clock": "2026-10-25T01:00:00+00:00",
+    "version_id": 1,
+    "fields": {
+      "date": {
+        "value": "2026-10-26",
+        "source_turn": 1,
+        "source_quote": "明天",
+        "source_kind": "validated_model_extraction"
+      },
+      "start_time": {
+        "value": "15:00",
+        "source_turn": 1,
+        "source_quote": "15:00",
+        "source_kind": "validated_model_extraction"
+      },
+      "end_time": {
+        "value": "16:00",
+        "source_turn": 1,
+        "source_quote": "16:00",
+        "source_kind": "validated_model_extraction"
+      },
+      "attendees": {
+        "value": 30,
+        "source_turn": 1,
+        "source_quote": "30人",
+        "source_kind": "validated_model_extraction"
+      },
+      "room_code": {
+        "value": "B201",
+        "source_turn": 1,
+        "source_quote": "B201",
+        "source_kind": "validated_model_extraction"
+      }
+    },
+    "turn_index": 1,
+    "last_user_text": "请预约明天B201，15:00到16:00，30人。",
+    "pending_draft": {
+      "draft_id": "5c787904-d363-4439-b333-56e4d5150965",
+      "draft_hash": "1932a83b790a688ada4154fad105277bbd15c02b562f5e26a128182f98a6361e",
+      "suggested_idempotency_key": "5c787904-d363-4439-b333-56e4d5150965",
+      "room_code": "B201",
+      "start_at": "2026-10-26T15:00:00+08:00",
+      "end_at": "2026-10-26T16:00:00+08:00",
+      "attendees": 30,
+      "status": "pending",
+      "expires_at": "2026-10-25T01:05:00Z"
+    },
+    "confirmation_state": "pending",
+    "confirmation_revision": 2,
+    "grant": null,
+    "denials": [],
+    "business_result": null,
+    "unknown_submission": null,
+    "candidate_rooms": [
+      {
+        "room_code": "B201",
+        "capacity": 40
+      }
+    ],
+    "retrieval_result": {
+      "status": "supported",
+      "query": "场地预约 实验 时段 人数 容量 B201 规则",
+      "query_tokens": [
+        "实验",
+        "时段",
+        "人数",
+        "容量",
+        "b201"
+      ],
+      "index_hash": "4fbf686cec03f3a21c9faa36aec2c0d61e00d23610e973ee83924ef68cecdce0",
+      "chunks": [
+        {
+          "chunk_id": "booking-rules:r1:b4bf4c09e6c75fb1",
+          "text": "场地与开放时间\nB201 容量 40 人，09:00—21:00 开放。",
+          "document_id": 1,
+          "source_ref": "knowledge/booking-rules-v1.md",
+          "document_revision": 1,
+          "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+          "chunk_hash": "b4bf4c09e6c75fb10f5553e650dbf9febe90096086aac9c97e90b9c4b32fc6dd",
+          "score": 3.542565
+        },
+        {
+          "chunk_id": "booking-rules:r1:245245278a2b83a9",
+          "text": "时间与人数\n有效预约不能重叠；时段为左闭右开，相邻时段可以相接。",
+          "document_id": 1,
+          "source_ref": "knowledge/booking-rules-v1.md",
+          "document_revision": 1,
+          "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+          "chunk_hash": "245245278a2b83a94c7b1892d08353aff39898a9c11e81ce13b66380bd7b2fdb",
+          "score": 2.801124
+        },
+        {
+          "chunk_id": "booking-rules:r1:6a03011d4e4ba2e8",
+          "text": "澄清与确认\n身份和实验数据范围由服务端绑定，不由模型或自然语言改写。",
+          "document_id": 1,
+          "source_ref": "knowledge/booking-rules-v1.md",
+          "document_revision": 1,
+          "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+          "chunk_hash": "6a03011d4e4ba2e845d33e64b937b9dba8aade519fc6b3afd7269bfb45838bcf",
+          "score": 2.216195
+        }
+      ]
+    },
+    "evidence_refs": [
+      "booking-rules:r1:b4bf4c09e6c75fb1",
+      "booking-rules:r1:245245278a2b83a9",
+      "booking-rules:r1:6a03011d4e4ba2e8"
+    ],
+    "audit": [
+      {
+        "type": "model",
+        "call_id": "4ab4fa22-58e2-4e85-85c3-1ab050b36ed6",
+        "source_turn": 1,
+        "usage": {
+          "input_tokens": 2624,
+          "output_tokens": 175,
+          "total_tokens": 2799,
+          "input_token_details": {
+            "cache_read": 768
+          },
+          "output_token_details": {}
+        },
+        "estimated_peak_microusd": 998,
+        "model_returned": "deepseek-flash",
+        "streamed": true,
+        "model_requests": 1
+      },
+      {
+        "type": "tool",
+        "name": "update_booking_request",
+        "arguments": {
+          "date": "2026-10-26",
+          "start_time": "15:00",
+          "end_time": "16:00",
+          "attendees": 30,
+          "room_code": "B201",
+          "source_quotes": {
+            "date": "明天",
+            "start_time": "15:00",
+            "end_time": "16:00",
+            "attendees": "30人",
+            "room_code": "B201"
+          }
+        },
+        "result": {
+          "status": "ok",
+          "fields": {
+            "date": {
+              "value": "2026-10-26",
+              "source_turn": 1,
+              "source_quote": "明天",
+              "source_kind": "validated_model_extraction"
+            },
+            "start_time": {
+              "value": "15:00",
+              "source_turn": 1,
+              "source_quote": "15:00",
+              "source_kind": "validated_model_extraction"
+            },
+            "end_time": {
+              "value": "16:00",
+              "source_turn": 1,
+              "source_quote": "16:00",
+              "source_kind": "validated_model_extraction"
+            },
+            "attendees": {
+              "value": 30,
+              "source_turn": 1,
+              "source_quote": "30人",
+              "source_kind": "validated_model_extraction"
+            },
+            "room_code": {
+              "value": "B201",
+              "source_turn": 1,
+              "source_quote": "B201",
+              "source_kind": "validated_model_extraction"
+            }
+          },
+          "changed": true
+        },
+        "evidence_id": "89e921e8-a492-40e0-a730-ba77d619d77e",
+        "source_turn": 1
+      },
+      {
+        "type": "model",
+        "call_id": "f6e399d8-683f-4aa2-b8af-ad5ff2629968",
+        "source_turn": 1,
+        "usage": {
+          "input_tokens": 3271,
+          "output_tokens": 52,
+          "total_tokens": 3323,
+          "input_token_details": {
+            "cache_read": 768
+          },
+          "output_token_details": {}
+        },
+        "estimated_peak_microusd": 1044,
+        "model_returned": "deepseek-flash",
+        "streamed": true,
+        "model_requests": 1
+      },
+      {
+        "type": "retrieval",
+        "result": {
+          "status": "supported",
+          "query": "场地预约 实验 时段 人数 容量 B201 规则",
+          "query_tokens": [
+            "实验",
+            "时段",
+            "人数",
+            "容量",
+            "b201"
+          ],
+          "index_hash": "4fbf686cec03f3a21c9faa36aec2c0d61e00d23610e973ee83924ef68cecdce0",
+          "chunks": [
+            {
+              "chunk_id": "booking-rules:r1:b4bf4c09e6c75fb1",
+              "text": "场地与开放时间\nB201 容量 40 人，09:00—21:00 开放。",
+              "document_id": 1,
+              "source_ref": "knowledge/booking-rules-v1.md",
+              "document_revision": 1,
+              "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+              "chunk_hash": "b4bf4c09e6c75fb10f5553e650dbf9febe90096086aac9c97e90b9c4b32fc6dd",
+              "score": 3.542565
+            },
+            {
+              "chunk_id": "booking-rules:r1:245245278a2b83a9",
+              "text": "时间与人数\n有效预约不能重叠；时段为左闭右开，相邻时段可以相接。",
+              "document_id": 1,
+              "source_ref": "knowledge/booking-rules-v1.md",
+              "document_revision": 1,
+              "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+              "chunk_hash": "245245278a2b83a94c7b1892d08353aff39898a9c11e81ce13b66380bd7b2fdb",
+              "score": 2.801124
+            },
+            {
+              "chunk_id": "booking-rules:r1:6a03011d4e4ba2e8",
+              "text": "澄清与确认\n身份和实验数据范围由服务端绑定，不由模型或自然语言改写。",
+              "document_id": 1,
+              "source_ref": "knowledge/booking-rules-v1.md",
+              "document_revision": 1,
+              "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+              "chunk_hash": "6a03011d4e4ba2e845d33e64b937b9dba8aade519fc6b3afd7269bfb45838bcf",
+              "score": 2.216195
+            }
+          ]
+        },
+        "source_turn": 1
+      },
+      {
+        "type": "tool",
+        "name": "retrieve_rules",
+        "arguments": {
+          "query": "场地预约 实验 时段 人数 容量 B201 规则"
+        },
+        "result": {
+          "status": "supported",
+          "query": "场地预约 实验 时段 人数 容量 B201 规则",
+          "query_tokens": [
+            "实验",
+            "时段",
+            "人数",
+            "容量",
+            "b201"
+          ],
+          "index_hash": "4fbf686cec03f3a21c9faa36aec2c0d61e00d23610e973ee83924ef68cecdce0",
+          "chunks": [
+            {
+              "chunk_id": "booking-rules:r1:b4bf4c09e6c75fb1",
+              "text": "场地与开放时间\nB201 容量 40 人，09:00—21:00 开放。",
+              "document_id": 1,
+              "source_ref": "knowledge/booking-rules-v1.md",
+              "document_revision": 1,
+              "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+              "chunk_hash": "b4bf4c09e6c75fb10f5553e650dbf9febe90096086aac9c97e90b9c4b32fc6dd",
+              "score": 3.542565
+            },
+            {
+              "chunk_id": "booking-rules:r1:245245278a2b83a9",
+              "text": "时间与人数\n有效预约不能重叠；时段为左闭右开，相邻时段可以相接。",
+              "document_id": 1,
+              "source_ref": "knowledge/booking-rules-v1.md",
+              "document_revision": 1,
+              "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+              "chunk_hash": "245245278a2b83a94c7b1892d08353aff39898a9c11e81ce13b66380bd7b2fdb",
+              "score": 2.801124
+            },
+            {
+              "chunk_id": "booking-rules:r1:6a03011d4e4ba2e8",
+              "text": "澄清与确认\n身份和实验数据范围由服务端绑定，不由模型或自然语言改写。",
+              "document_id": 1,
+              "source_ref": "knowledge/booking-rules-v1.md",
+              "document_revision": 1,
+              "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+              "chunk_hash": "6a03011d4e4ba2e845d33e64b937b9dba8aade519fc6b3afd7269bfb45838bcf",
+              "score": 2.216195
+            }
+          ]
+        },
+        "evidence_id": "27ca6406-5917-43bb-b24f-ddb30df72e31",
+        "source_turn": 1
+      },
+      {
+        "type": "model",
+        "call_id": "2dedf146-ff12-4d76-a0cd-d63962384767",
+        "source_turn": 1,
+        "usage": {
+          "input_tokens": 4636,
+          "output_tokens": 121,
+          "total_tokens": 4757,
+          "input_token_details": {
+            "cache_read": 1024
+          },
+          "output_token_details": {}
+        },
+        "estimated_peak_microusd": 1536,
+        "model_returned": "deepseek-flash",
+        "streamed": true,
+        "model_requests": 1
+      },
+      {
+        "type": "tool",
+        "name": "query_availability",
+        "arguments": {
+          "start_at": "2026-10-26T15:00:00+08:00",
+          "end_at": "2026-10-26T16:00:00+08:00",
+          "attendees": 30,
+          "room_code": "B201"
+        },
+        "result": {
+          "status": "ok",
+          "code": "availability_checked",
+          "summary": "已查询当前空闲；提交时仍会重新校验。",
+          "data": {
+            "rooms": [
+              {
+                "room_code": "B201",
+                "capacity": 40
+              }
+            ],
+            "start_at": "2026-10-26T15:00:00+08:00",
+            "end_at": "2026-10-26T16:00:00+08:00",
+            "attendees": 30,
+            "truncated": false
+          },
+          "request_key": null,
+          "retryable": false,
+          "commit_state": "not_applicable",
+          "evidence_refs": []
+        },
+        "evidence_id": "3101f36b-55b4-4d4a-99db-9b1102fb3b55",
+        "source_turn": 1
+      },
+      {
+        "type": "model",
+        "call_id": "dd501cec-3f0b-455a-8854-afc77e066a49",
+        "source_turn": 1,
+        "usage": {
+          "input_tokens": 4965,
+          "output_tokens": 122,
+          "total_tokens": 5087,
+          "input_token_details": {
+            "cache_read": 1024
+          },
+          "output_token_details": {}
+        },
+        "estimated_peak_microusd": 1636,
+        "model_returned": "deepseek-flash",
+        "streamed": true,
+        "model_requests": 1
+      },
+      {
+        "type": "tool",
+        "name": "preview_booking",
+        "arguments": {
+          "start_at": "2026-10-26T15:00:00+08:00",
+          "end_at": "2026-10-26T16:00:00+08:00",
+          "attendees": 30,
+          "room_code": "B201"
+        },
+        "result": {
+          "status": "ok",
+          "code": "confirmation_required",
+          "summary": "请展示完整草稿并等待用户明确确认。",
+          "data": {
+            "draft_id": "5c787904-d363-4439-b333-56e4d5150965",
+            "draft_hash": "1932a83b790a688ada4154fad105277bbd15c02b562f5e26a128182f98a6361e",
+            "suggested_idempotency_key": "5c787904-d363-4439-b333-56e4d5150965",
+            "room_code": "B201",
+            "start_at": "2026-10-26T15:00:00+08:00",
+            "end_at": "2026-10-26T16:00:00+08:00",
+            "attendees": 30,
+            "status": "pending",
+            "expires_at": "2026-10-25T01:05:00Z"
+          },
+          "request_key": "5c787904-d363-4439-b333-56e4d5150965",
+          "retryable": false,
+          "commit_state": "not_committed",
+          "evidence_refs": [
+            "draft:5c787904-d363-4439-b333-56e4d5150965"
+          ]
+        },
+        "evidence_id": "eeff61e3-83bd-4a2d-a6e2-9bfef0896422",
+        "source_turn": 1
+      },
+      {
+        "type": "model",
+        "call_id": "fcf38f05-0793-4c42-8102-ff570513f475",
+        "source_turn": 1,
+        "usage": {
+          "input_tokens": 5607,
+          "output_tokens": 213,
+          "total_tokens": 5820,
+          "input_token_details": {
+            "cache_read": 896
+          },
+          "output_token_details": {}
+        },
+        "estimated_peak_microusd": 1938,
+        "model_returned": "deepseek-flash",
+        "streamed": true,
+        "model_requests": 1
+      }
+    ],
+    "model_calls_this_turn": 5,
+    "last_error": null,
+    "compactions": 0,
+    "last_tool_result": {
+      "status": "ok",
+      "code": "confirmation_required",
+      "summary": "请展示完整草稿并等待用户明确确认。",
+      "data": {
+        "draft_id": "5c787904-d363-4439-b333-56e4d5150965",
+        "draft_hash": "1932a83b790a688ada4154fad105277bbd15c02b562f5e26a128182f98a6361e",
+        "suggested_idempotency_key": "5c787904-d363-4439-b333-56e4d5150965",
+        "room_code": "B201",
+        "start_at": "2026-10-26T15:00:00+08:00",
+        "end_at": "2026-10-26T16:00:00+08:00",
+        "attendees": 30,
+        "status": "pending",
+        "expires_at": "2026-10-25T01:05:00Z"
+      },
+      "request_key": "5c787904-d363-4439-b333-56e4d5150965",
+      "retryable": false,
+      "commit_state": "not_committed",
+      "evidence_refs": [
+        "draft:5c787904-d363-4439-b333-56e4d5150965"
+      ]
+    },
+    "write_attempted_this_turn": false,
+    "business_history": []
+  },
+  "next": [
+    "wait_for_confirmation"
+  ]
+}

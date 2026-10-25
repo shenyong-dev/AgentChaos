@@ -1,0 +1,329 @@
+{
+  "view": {
+    "session_id": "17568b25-b4a3-427a-ae38-55bff82d1e73",
+    "revision": 1,
+    "version_id": 1,
+    "config_hash": "a5574f9bd331d61c74baa083862034f655f2c7cb77f17bb17eea8ca0f4fcae29",
+    "reference_clock": "2026-10-25T01:00:00+00:00",
+    "status": "ready",
+    "assistant_text": "已记录：日期 2026-10-26（明天），人数 10 人。\n\n还缺具体时间，请补充：\n- 开始时间（例如 14:00）\n- 结束时间或时长\n\n你说“下午”不能自动按某个具体时刻处理，请给出明确时间；若有指定场地也请一并说明。",
+    "fields": {
+      "date": {
+        "value": "2026-10-26",
+        "source_turn": 1,
+        "source_quote": "明天",
+        "source_kind": "validated_model_extraction"
+      },
+      "attendees": {
+        "value": 10,
+        "source_turn": 1,
+        "source_quote": "10人",
+        "source_kind": "validated_model_extraction"
+      }
+    },
+    "confirmation_state": "idle",
+    "confirmation_revision": 1,
+    "pending_draft": null,
+    "business_result": null,
+    "unknown_submission": null,
+    "denials": [],
+    "evidence_refs": [],
+    "last_retrieval": null,
+    "compactions": 0,
+    "history_messages": 4,
+    "trace": [
+      {
+        "type": "model",
+        "call_id": "d1a0d272-58ef-4c82-ac28-dfc6693d75cc",
+        "source_turn": 1,
+        "usage": {
+          "input_tokens": 2578,
+          "output_tokens": 93,
+          "total_tokens": 2671,
+          "input_token_details": {
+            "cache_read": 768
+          },
+          "output_token_details": {}
+        },
+        "estimated_peak_microusd": 885,
+        "model_returned": "deepseek-flash",
+        "streamed": true,
+        "model_requests": 1
+      },
+      {
+        "type": "tool",
+        "name": "update_booking_request",
+        "arguments": {
+          "date": "2026-10-26",
+          "attendees": 10,
+          "source_quotes": {
+            "date": "明天",
+            "attendees": "10人"
+          }
+        },
+        "result": {
+          "status": "ok",
+          "fields": {
+            "date": {
+              "value": "2026-10-26",
+              "source_turn": 1,
+              "source_quote": "明天",
+              "source_kind": "validated_model_extraction"
+            },
+            "attendees": {
+              "value": 10,
+              "source_turn": 1,
+              "source_quote": "10人",
+              "source_kind": "validated_model_extraction"
+            }
+          },
+          "changed": true
+        },
+        "evidence_id": "cd5a60c4-70e6-494e-82fc-883ca3f97f7a",
+        "source_turn": 1
+      },
+      {
+        "type": "model",
+        "call_id": "5db16ff8-0c8d-4595-8ab6-2e411046ef70",
+        "source_turn": 1,
+        "usage": {
+          "input_tokens": 2894,
+          "output_tokens": 71,
+          "total_tokens": 2965,
+          "input_token_details": {
+            "cache_read": 896
+          },
+          "output_token_details": {}
+        },
+        "estimated_peak_microusd": 954,
+        "model_returned": "deepseek-flash",
+        "streamed": true,
+        "model_requests": 1
+      }
+    ],
+    "last_error": null,
+    "next_nodes": []
+  },
+  "state": {
+    "messages": [
+      {
+        "type": "human",
+        "data": {
+          "content": "我想预约明天下午，10人。",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "human",
+          "name": null,
+          "id": "36becc96-fc04-401a-8caa-1bd38db46364"
+        }
+      },
+      {
+        "type": "ai",
+        "data": {
+          "content": "",
+          "additional_kwargs": {},
+          "response_metadata": {
+            "model_provider": "deepseek",
+            "finish_reason": "tool_calls",
+            "model_name": "deepseek-flash",
+            "system_fingerprint": "e72d3c7f663d3e1383b00b3884cb4501"
+          },
+          "type": "ai",
+          "name": null,
+          "id": "lc_run--01a17396-aa00-7788-8c72-0f9d4e194ec5",
+          "tool_calls": [
+            {
+              "name": "update_booking_request",
+              "args": {
+                "date": "2026-10-26",
+                "attendees": 10,
+                "source_quotes": {
+                  "date": "明天",
+                  "attendees": "10人"
+                }
+              },
+              "id": "call_00_8KzgzlKriB2F4zpcDv7h5035",
+              "type": "tool_call"
+            }
+          ],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 2578,
+            "output_tokens": 93,
+            "total_tokens": 2671,
+            "input_token_details": {
+              "cache_read": 768
+            },
+            "output_token_details": {}
+          }
+        }
+      },
+      {
+        "type": "tool",
+        "data": {
+          "content": "{\"status\": \"ok\", \"fields\": {\"date\": {\"value\": \"2026-10-26\", \"source_turn\": 1, \"source_quote\": \"明天\", \"source_kind\": \"validated_model_extraction\"}, \"attendees\": {\"value\": 10, \"source_turn\": 1, \"source_quote\": \"10人\", \"source_kind\": \"validated_model_extraction\"}}, \"changed\": true}",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "tool",
+          "name": null,
+          "id": "c68c02f7-11f6-4bb8-baaa-b7066e0d110e",
+          "tool_call_id": "call_00_8KzgzlKriB2F4zpcDv7h5035",
+          "artifact": null,
+          "status": "success"
+        }
+      },
+      {
+        "type": "ai",
+        "data": {
+          "content": "已记录：日期 2026-10-26（明天），人数 10 人。\n\n还缺具体时间，请补充：\n- 开始时间（例如 14:00）\n- 结束时间或时长\n\n你说“下午”不能自动按某个具体时刻处理，请给出明确时间；若有指定场地也请一并说明。",
+          "additional_kwargs": {},
+          "response_metadata": {
+            "model_provider": "deepseek",
+            "finish_reason": "stop",
+            "model_name": "deepseek-flash",
+            "system_fingerprint": "e72d3c7f663d3e1383b00b3884cb4501"
+          },
+          "type": "ai",
+          "name": null,
+          "id": "lc_run--01a17396-afdc-76c5-b304-d552ee9fc891",
+          "tool_calls": [],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 2894,
+            "output_tokens": 71,
+            "total_tokens": 2965,
+            "input_token_details": {
+              "cache_read": 896
+            },
+            "output_token_details": {}
+          }
+        }
+      }
+    ],
+    "session_id": "17568b25-b4a3-427a-ae38-55bff82d1e73",
+    "actor_key": "user:1",
+    "scope_id": "test:t04:live:c5647e38acb543c5b26e99ecf1c57b3e",
+    "reference_clock": "2026-10-25T01:00:00+00:00",
+    "version_id": 1,
+    "fields": {
+      "date": {
+        "value": "2026-10-26",
+        "source_turn": 1,
+        "source_quote": "明天",
+        "source_kind": "validated_model_extraction"
+      },
+      "attendees": {
+        "value": 10,
+        "source_turn": 1,
+        "source_quote": "10人",
+        "source_kind": "validated_model_extraction"
+      }
+    },
+    "turn_index": 1,
+    "last_user_text": "我想预约明天下午，10人。",
+    "pending_draft": null,
+    "confirmation_state": "idle",
+    "confirmation_revision": 1,
+    "grant": null,
+    "denials": [],
+    "business_result": null,
+    "unknown_submission": null,
+    "candidate_rooms": [],
+    "retrieval_result": null,
+    "evidence_refs": [],
+    "audit": [
+      {
+        "type": "model",
+        "call_id": "d1a0d272-58ef-4c82-ac28-dfc6693d75cc",
+        "source_turn": 1,
+        "usage": {
+          "input_tokens": 2578,
+          "output_tokens": 93,
+          "total_tokens": 2671,
+          "input_token_details": {
+            "cache_read": 768
+          },
+          "output_token_details": {}
+        },
+        "estimated_peak_microusd": 885,
+        "model_returned": "deepseek-flash",
+        "streamed": true,
+        "model_requests": 1
+      },
+      {
+        "type": "tool",
+        "name": "update_booking_request",
+        "arguments": {
+          "date": "2026-10-26",
+          "attendees": 10,
+          "source_quotes": {
+            "date": "明天",
+            "attendees": "10人"
+          }
+        },
+        "result": {
+          "status": "ok",
+          "fields": {
+            "date": {
+              "value": "2026-10-26",
+              "source_turn": 1,
+              "source_quote": "明天",
+              "source_kind": "validated_model_extraction"
+            },
+            "attendees": {
+              "value": 10,
+              "source_turn": 1,
+              "source_quote": "10人",
+              "source_kind": "validated_model_extraction"
+            }
+          },
+          "changed": true
+        },
+        "evidence_id": "cd5a60c4-70e6-494e-82fc-883ca3f97f7a",
+        "source_turn": 1
+      },
+      {
+        "type": "model",
+        "call_id": "5db16ff8-0c8d-4595-8ab6-2e411046ef70",
+        "source_turn": 1,
+        "usage": {
+          "input_tokens": 2894,
+          "output_tokens": 71,
+          "total_tokens": 2965,
+          "input_token_details": {
+            "cache_read": 896
+          },
+          "output_token_details": {}
+        },
+        "estimated_peak_microusd": 954,
+        "model_returned": "deepseek-flash",
+        "streamed": true,
+        "model_requests": 1
+      }
+    ],
+    "model_calls_this_turn": 2,
+    "last_error": null,
+    "compactions": 0,
+    "last_tool_result": {
+      "status": "ok",
+      "fields": {
+        "date": {
+          "value": "2026-10-26",
+          "source_turn": 1,
+          "source_quote": "明天",
+          "source_kind": "validated_model_extraction"
+        },
+        "attendees": {
+          "value": 10,
+          "source_turn": 1,
+          "source_quote": "10人",
+          "source_kind": "validated_model_extraction"
+        }
+      },
+      "changed": true
+    },
+    "write_attempted_this_turn": false,
+    "business_history": []
+  },
+  "next": []
+}

@@ -1,0 +1,331 @@
+{
+  "view": {
+    "session_id": "06961fd2-22cb-46ac-92af-2e60d15ba3f8",
+    "revision": 1,
+    "version_id": 1,
+    "config_hash": "1aa540c0d3c0a26802709ff5edbd41f3a6d03975d3bb020e76b2d8b58f3a1686",
+    "reference_clock": "2026-10-25T01:00:00+00:00",
+    "status": "ready",
+    "assistant_text": "检索没有结果（状态为 low_relevance，返回条款为空），因此我无法提供 A101 的押金或收费金额。\n\n根据当前规则库，没有找到任何关于 A101 押金或收费的证据条文，我不能推测金额。如果你能提供其他线索（例如具体费用条款编号或收费类型名称），我可以再检索一次。",
+    "fields": {},
+    "confirmation_state": "idle",
+    "confirmation_revision": 0,
+    "pending_draft": null,
+    "business_result": null,
+    "unknown_submission": null,
+    "denials": [],
+    "evidence_refs": [],
+    "last_retrieval": {
+      "status": "low_relevance",
+      "query": "A101 押金 收费金额 费用",
+      "query_tokens": [
+        "a101",
+        "押金",
+        "收费",
+        "金额",
+        "费用"
+      ],
+      "index_hash": "4fbf686cec03f3a21c9faa36aec2c0d61e00d23610e973ee83924ef68cecdce0",
+      "chunks": []
+    },
+    "compactions": 0,
+    "history_messages": 4,
+    "trace": [
+      {
+        "type": "model",
+        "call_id": "e02a0036-e554-40a1-b540-7b1dccb5bd09",
+        "source_turn": 1,
+        "usage": {
+          "input_tokens": 2640,
+          "output_tokens": 48,
+          "total_tokens": 2688,
+          "input_token_details": {
+            "cache_read": 768
+          },
+          "output_token_details": {}
+        },
+        "estimated_peak_microusd": 850,
+        "model_returned": "deepseek-flash",
+        "streamed": true,
+        "model_requests": 1
+      },
+      {
+        "type": "retrieval",
+        "result": {
+          "status": "low_relevance",
+          "query": "A101 押金 收费金额 费用",
+          "query_tokens": [
+            "a101",
+            "押金",
+            "收费",
+            "金额",
+            "费用"
+          ],
+          "index_hash": "4fbf686cec03f3a21c9faa36aec2c0d61e00d23610e973ee83924ef68cecdce0",
+          "chunks": []
+        },
+        "source_turn": 1
+      },
+      {
+        "type": "tool",
+        "name": "retrieve_rules",
+        "arguments": {
+          "query": "A101 押金 收费金额 费用"
+        },
+        "result": {
+          "status": "low_relevance",
+          "query": "A101 押金 收费金额 费用",
+          "query_tokens": [
+            "a101",
+            "押金",
+            "收费",
+            "金额",
+            "费用"
+          ],
+          "index_hash": "4fbf686cec03f3a21c9faa36aec2c0d61e00d23610e973ee83924ef68cecdce0",
+          "chunks": []
+        },
+        "evidence_id": "b879add0-8db7-4c39-b617-fe344d6f41db",
+        "source_turn": 1
+      },
+      {
+        "type": "model",
+        "call_id": "e369fedb-34c4-4acc-8d60-af33a139b18b",
+        "source_turn": 1,
+        "usage": {
+          "input_tokens": 2921,
+          "output_tokens": 72,
+          "total_tokens": 2993,
+          "input_token_details": {
+            "cache_read": 768
+          },
+          "output_token_details": {}
+        },
+        "estimated_peak_microusd": 963,
+        "model_returned": "deepseek-flash",
+        "streamed": true,
+        "model_requests": 1
+      }
+    ],
+    "last_error": null,
+    "next_nodes": []
+  },
+  "state": {
+    "messages": [
+      {
+        "type": "human",
+        "data": {
+          "content": "请查实验规则，A101的押金和收费金额是多少？只回答有证据的信息。",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "human",
+          "name": null,
+          "id": "cd1720b9-9b3d-4e12-8a30-e6987daa7554"
+        }
+      },
+      {
+        "type": "ai",
+        "data": {
+          "content": "",
+          "additional_kwargs": {},
+          "response_metadata": {
+            "model_provider": "deepseek",
+            "finish_reason": "tool_calls",
+            "model_name": "deepseek-flash",
+            "system_fingerprint": "e72d3c7f663d3e1383b00b3884cb4501"
+          },
+          "type": "ai",
+          "name": null,
+          "id": "lc_run--01a17399-82c5-7422-b294-29b154d10b17",
+          "tool_calls": [
+            {
+              "name": "retrieve_rules",
+              "args": {
+                "query": "A101 押金 收费金额 费用"
+              },
+              "id": "call_00_VTUIteOkVCptzDTDNTfr9814",
+              "type": "tool_call"
+            }
+          ],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 2640,
+            "output_tokens": 48,
+            "total_tokens": 2688,
+            "input_token_details": {
+              "cache_read": 768
+            },
+            "output_token_details": {}
+          }
+        }
+      },
+      {
+        "type": "tool",
+        "data": {
+          "content": "{\"status\": \"low_relevance\", \"query\": \"A101 押金 收费金额 费用\", \"query_tokens\": [\"a101\", \"押金\", \"收费\", \"金额\", \"费用\"], \"index_hash\": \"4fbf686cec03f3a21c9faa36aec2c0d61e00d23610e973ee83924ef68cecdce0\", \"chunks\": []}",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "tool",
+          "name": null,
+          "id": "4a62f245-fd27-42f3-82b1-ea70a76de680",
+          "tool_call_id": "call_00_VTUIteOkVCptzDTDNTfr9814",
+          "artifact": null,
+          "status": "success"
+        }
+      },
+      {
+        "type": "ai",
+        "data": {
+          "content": "检索没有结果（状态为 low_relevance，返回条款为空），因此我无法提供 A101 的押金或收费金额。\n\n根据当前规则库，没有找到任何关于 A101 押金或收费的证据条文，我不能推测金额。如果你能提供其他线索（例如具体费用条款编号或收费类型名称），我可以再检索一次。",
+          "additional_kwargs": {},
+          "response_metadata": {
+            "model_provider": "deepseek",
+            "finish_reason": "stop",
+            "model_name": "deepseek-flash",
+            "system_fingerprint": "e72d3c7f663d3e1383b00b3884cb4501"
+          },
+          "type": "ai",
+          "name": null,
+          "id": "lc_run--01a17399-8567-708c-8d05-e6ef46825730",
+          "tool_calls": [],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 2921,
+            "output_tokens": 72,
+            "total_tokens": 2993,
+            "input_token_details": {
+              "cache_read": 768
+            },
+            "output_token_details": {}
+          }
+        }
+      }
+    ],
+    "session_id": "06961fd2-22cb-46ac-92af-2e60d15ba3f8",
+    "actor_key": "user:1",
+    "scope_id": "test:t04:live:181dc334b80743d398685d690b7c18a6",
+    "reference_clock": "2026-10-25T01:00:00+00:00",
+    "version_id": 1,
+    "fields": {},
+    "turn_index": 1,
+    "last_user_text": "请查实验规则，A101的押金和收费金额是多少？只回答有证据的信息。",
+    "pending_draft": null,
+    "confirmation_state": "idle",
+    "confirmation_revision": 0,
+    "grant": null,
+    "denials": [],
+    "business_result": null,
+    "unknown_submission": null,
+    "candidate_rooms": [],
+    "retrieval_result": {
+      "status": "low_relevance",
+      "query": "A101 押金 收费金额 费用",
+      "query_tokens": [
+        "a101",
+        "押金",
+        "收费",
+        "金额",
+        "费用"
+      ],
+      "index_hash": "4fbf686cec03f3a21c9faa36aec2c0d61e00d23610e973ee83924ef68cecdce0",
+      "chunks": []
+    },
+    "evidence_refs": [],
+    "audit": [
+      {
+        "type": "model",
+        "call_id": "e02a0036-e554-40a1-b540-7b1dccb5bd09",
+        "source_turn": 1,
+        "usage": {
+          "input_tokens": 2640,
+          "output_tokens": 48,
+          "total_tokens": 2688,
+          "input_token_details": {
+            "cache_read": 768
+          },
+          "output_token_details": {}
+        },
+        "estimated_peak_microusd": 850,
+        "model_returned": "deepseek-flash",
+        "streamed": true,
+        "model_requests": 1
+      },
+      {
+        "type": "retrieval",
+        "result": {
+          "status": "low_relevance",
+          "query": "A101 押金 收费金额 费用",
+          "query_tokens": [
+            "a101",
+            "押金",
+            "收费",
+            "金额",
+            "费用"
+          ],
+          "index_hash": "4fbf686cec03f3a21c9faa36aec2c0d61e00d23610e973ee83924ef68cecdce0",
+          "chunks": []
+        },
+        "source_turn": 1
+      },
+      {
+        "type": "tool",
+        "name": "retrieve_rules",
+        "arguments": {
+          "query": "A101 押金 收费金额 费用"
+        },
+        "result": {
+          "status": "low_relevance",
+          "query": "A101 押金 收费金额 费用",
+          "query_tokens": [
+            "a101",
+            "押金",
+            "收费",
+            "金额",
+            "费用"
+          ],
+          "index_hash": "4fbf686cec03f3a21c9faa36aec2c0d61e00d23610e973ee83924ef68cecdce0",
+          "chunks": []
+        },
+        "evidence_id": "b879add0-8db7-4c39-b617-fe344d6f41db",
+        "source_turn": 1
+      },
+      {
+        "type": "model",
+        "call_id": "e369fedb-34c4-4acc-8d60-af33a139b18b",
+        "source_turn": 1,
+        "usage": {
+          "input_tokens": 2921,
+          "output_tokens": 72,
+          "total_tokens": 2993,
+          "input_token_details": {
+            "cache_read": 768
+          },
+          "output_token_details": {}
+        },
+        "estimated_peak_microusd": 963,
+        "model_returned": "deepseek-flash",
+        "streamed": true,
+        "model_requests": 1
+      }
+    ],
+    "model_calls_this_turn": 2,
+    "last_error": null,
+    "compactions": 0,
+    "last_tool_result": {
+      "status": "low_relevance",
+      "query": "A101 押金 收费金额 费用",
+      "query_tokens": [
+        "a101",
+        "押金",
+        "收费",
+        "金额",
+        "费用"
+      ],
+      "index_hash": "4fbf686cec03f3a21c9faa36aec2c0d61e00d23610e973ee83924ef68cecdce0",
+      "chunks": []
+    },
+    "write_attempted_this_turn": false,
+    "business_history": []
+  },
+  "next": []
+}

@@ -1,0 +1,2287 @@
+{
+  "revision": "20261025_0002",
+  "tables": [
+    {
+      "name": "ac_fault_profiles",
+      "purpose": "版本化故障配置；T07实现注入",
+      "columns": [
+        {
+          "name": "profile_key",
+          "type": "VARCHAR(80) COLLATE utf8mb4_bin",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "revision",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "fault_type",
+          "type": "VARCHAR(3)",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "trigger_stage",
+          "type": "VARCHAR(32) COLLATE utf8mb4_bin",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "target_tool",
+          "type": "VARCHAR(128) COLLATE utf8mb4_bin",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "parameters_json",
+          "type": "JSON",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "seed",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "max_triggers",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "enabled_for_test",
+          "type": "BOOL",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": "True"
+        },
+        {
+          "name": "id",
+          "type": "BIGINT UNSIGNED",
+          "nullable": false,
+          "primary_key": true,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME(6)",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": "CURRENT_TIMESTAMP(6)",
+          "application_default": null
+        }
+      ],
+      "constraints": [
+        {
+          "kind": "check",
+          "name": "ck_fault_revision",
+          "sql": "revision >= 1"
+        },
+        {
+          "kind": "check",
+          "name": "ck_fault_triggers",
+          "sql": "max_triggers >= 1"
+        },
+        {
+          "kind": "check",
+          "name": "ck_fault_type",
+          "sql": "fault_type IN ('F01','F02','F03','F04')"
+        },
+        {
+          "kind": "unique",
+          "name": "uq_fault_revision",
+          "columns": [
+            "profile_key",
+            "revision"
+          ]
+        }
+      ],
+      "indexes": []
+    },
+    {
+      "name": "ac_knowledge_documents",
+      "purpose": "有来源与适用条件的不可变规则修订",
+      "columns": [
+        {
+          "name": "document_key",
+          "type": "VARCHAR(128) COLLATE utf8mb4_bin",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "revision",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "title",
+          "type": "VARCHAR(255)",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "source_type",
+          "type": "VARCHAR(32) COLLATE utf8mb4_bin",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "source_ref",
+          "type": "VARCHAR(512)",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "valid_from",
+          "type": "DATETIME(6)",
+          "nullable": true,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "valid_to",
+          "type": "DATETIME(6)",
+          "nullable": true,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "applicability_json",
+          "type": "JSON",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "content",
+          "type": "LONGTEXT",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "content_hash",
+          "type": "VARCHAR(64) COLLATE utf8mb4_bin",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "id",
+          "type": "BIGINT UNSIGNED",
+          "nullable": false,
+          "primary_key": true,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME(6)",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": "CURRENT_TIMESTAMP(6)",
+          "application_default": null
+        }
+      ],
+      "constraints": [
+        {
+          "kind": "check",
+          "name": "ck_knowledge_revision",
+          "sql": "revision >= 1"
+        },
+        {
+          "kind": "check",
+          "name": "ck_knowledge_validity",
+          "sql": "valid_to IS NULL OR valid_from IS NULL OR valid_to > valid_from"
+        },
+        {
+          "kind": "unique",
+          "name": "uq_knowledge_revision",
+          "columns": [
+            "document_key",
+            "revision"
+          ]
+        }
+      ],
+      "indexes": []
+    },
+    {
+      "name": "ac_users",
+      "purpose": "本地演示账号与operator/reviewer角色",
+      "columns": [
+        {
+          "name": "username",
+          "type": "VARCHAR(64) COLLATE utf8mb4_bin",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "password_hash",
+          "type": "VARCHAR(255)",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "role",
+          "type": "VARCHAR(16)",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "enabled",
+          "type": "BOOL",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": "1",
+          "application_default": "True"
+        },
+        {
+          "name": "id",
+          "type": "BIGINT UNSIGNED",
+          "nullable": false,
+          "primary_key": true,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME(6)",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": "CURRENT_TIMESTAMP(6)",
+          "application_default": null
+        }
+      ],
+      "constraints": [
+        {
+          "kind": "check",
+          "name": "ck_users_role",
+          "sql": "role IN ('operator','reviewer')"
+        },
+        {
+          "kind": "unique",
+          "name": "uq_ac_users_username",
+          "columns": [
+            "username"
+          ]
+        }
+      ],
+      "indexes": []
+    },
+    {
+      "name": "sb_rooms",
+      "purpose": "按scope隔离的场地和开放时间",
+      "columns": [
+        {
+          "name": "scope_id",
+          "type": "VARCHAR(64) COLLATE utf8mb4_bin",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "room_code",
+          "type": "VARCHAR(32) COLLATE utf8mb4_bin",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "capacity",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "opening_hours_json",
+          "type": "JSON",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "enabled",
+          "type": "BOOL",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": "True"
+        },
+        {
+          "name": "id",
+          "type": "BIGINT UNSIGNED",
+          "nullable": false,
+          "primary_key": true,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME(6)",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": "CURRENT_TIMESTAMP(6)",
+          "application_default": null
+        }
+      ],
+      "constraints": [
+        {
+          "kind": "check",
+          "name": "ck_room_capacity",
+          "sql": "capacity > 0"
+        },
+        {
+          "kind": "unique",
+          "name": "uq_room_code_scope",
+          "columns": [
+            "scope_id",
+            "room_code"
+          ]
+        },
+        {
+          "kind": "unique",
+          "name": "uq_room_scope_id",
+          "columns": [
+            "scope_id",
+            "id"
+          ]
+        }
+      ],
+      "indexes": []
+    },
+    {
+      "name": "ac_targets",
+      "purpose": "被测对象登记，不表示已实现Agent",
+      "columns": [
+        {
+          "name": "name",
+          "type": "VARCHAR(128)",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "adapter_type",
+          "type": "VARCHAR(64) COLLATE utf8mb4_bin",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "description",
+          "type": "TEXT",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": ""
+        },
+        {
+          "name": "capabilities_json",
+          "type": "JSON",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": "dict"
+        },
+        {
+          "name": "owner_id",
+          "type": "BIGINT UNSIGNED",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "archived_at",
+          "type": "DATETIME(6)",
+          "nullable": true,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "id",
+          "type": "BIGINT UNSIGNED",
+          "nullable": false,
+          "primary_key": true,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME(6)",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": "CURRENT_TIMESTAMP(6)",
+          "application_default": null
+        }
+      ],
+      "constraints": [
+        {
+          "kind": "foreign_key",
+          "name": "fk_ac_targets_owner_id_ac_users",
+          "columns": [
+            "owner_id"
+          ],
+          "references": [
+            "ac_users.id"
+          ]
+        }
+      ],
+      "indexes": []
+    },
+    {
+      "name": "ac_test_cases",
+      "purpose": "用例修订、家族/划分、审核和独立预期",
+      "columns": [
+        {
+          "name": "case_key",
+          "type": "VARCHAR(80) COLLATE utf8mb4_bin",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "revision",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "family_key",
+          "type": "VARCHAR(100) COLLATE utf8mb4_bin",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "category",
+          "type": "VARCHAR(32) COLLATE utf8mb4_bin",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "dataset_split",
+          "type": "VARCHAR(16)",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "source",
+          "type": "VARCHAR(255)",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "turns_json",
+          "type": "JSON",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "fixture_json",
+          "type": "JSON",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "expected_json",
+          "type": "JSON",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "review_status",
+          "type": "VARCHAR(16)",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": "draft",
+          "application_default": "draft"
+        },
+        {
+          "name": "reviewer_id",
+          "type": "BIGINT UNSIGNED",
+          "nullable": true,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "reviewed_at",
+          "type": "DATETIME(6)",
+          "nullable": true,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "content_hash",
+          "type": "VARCHAR(64) COLLATE utf8mb4_bin",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "id",
+          "type": "BIGINT UNSIGNED",
+          "nullable": false,
+          "primary_key": true,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME(6)",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": "CURRENT_TIMESTAMP(6)",
+          "application_default": null
+        }
+      ],
+      "constraints": [
+        {
+          "kind": "check",
+          "name": "ck_case_approval_audit",
+          "sql": "review_status <> 'approved' OR (reviewer_id IS NOT NULL AND reviewed_at IS NOT NULL)"
+        },
+        {
+          "kind": "check",
+          "name": "ck_case_category",
+          "sql": "category IN ('normal','tool_execution','memory_and_tool','retrieval','security','robustness')"
+        },
+        {
+          "kind": "check",
+          "name": "ck_case_review",
+          "sql": "review_status IN ('draft','approved','rejected')"
+        },
+        {
+          "kind": "check",
+          "name": "ck_case_revision",
+          "sql": "revision >= 1"
+        },
+        {
+          "kind": "check",
+          "name": "ck_case_split",
+          "sql": "dataset_split IN ('dev','calibration','holdout')"
+        },
+        {
+          "kind": "foreign_key",
+          "name": "fk_ac_test_cases_reviewer_id_ac_users",
+          "columns": [
+            "reviewer_id"
+          ],
+          "references": [
+            "ac_users.id"
+          ]
+        },
+        {
+          "kind": "unique",
+          "name": "uq_case_revision",
+          "columns": [
+            "case_key",
+            "revision"
+          ]
+        }
+      ],
+      "indexes": [
+        {
+          "name": "ix_case_family",
+          "columns": [
+            "family_key"
+          ],
+          "unique": false
+        },
+        {
+          "name": "ix_case_filter",
+          "columns": [
+            "dataset_split",
+            "review_status",
+            "category"
+          ],
+          "unique": false
+        }
+      ]
+    },
+    {
+      "name": "sb_booking_drafts",
+      "purpose": "绑定身份/场地/参数哈希的确认草稿",
+      "columns": [
+        {
+          "name": "draft_uuid",
+          "type": "VARCHAR(36) COLLATE utf8mb4_bin",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "scope_id",
+          "type": "VARCHAR(64) COLLATE utf8mb4_bin",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "actor_key",
+          "type": "VARCHAR(64) COLLATE utf8mb4_bin",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "session_id",
+          "type": "VARCHAR(36) COLLATE utf8mb4_bin",
+          "nullable": true,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "room_id",
+          "type": "BIGINT UNSIGNED",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "start_at",
+          "type": "DATETIME(6)",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "end_at",
+          "type": "DATETIME(6)",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "attendees",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "payload_hash",
+          "type": "VARCHAR(64) COLLATE utf8mb4_bin",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "status",
+          "type": "VARCHAR(16)",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": "pending",
+          "application_default": "pending"
+        },
+        {
+          "name": "expires_at",
+          "type": "DATETIME(6)",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "confirmed_at",
+          "type": "DATETIME(6)",
+          "nullable": true,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "id",
+          "type": "BIGINT UNSIGNED",
+          "nullable": false,
+          "primary_key": true,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME(6)",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": "CURRENT_TIMESTAMP(6)",
+          "application_default": null
+        }
+      ],
+      "constraints": [
+        {
+          "kind": "check",
+          "name": "ck_draft_status",
+          "sql": "status IN ('pending','confirmed','expired','superseded','rejected')"
+        },
+        {
+          "kind": "check",
+          "name": "ck_draft_values",
+          "sql": "end_at > start_at AND attendees > 0"
+        },
+        {
+          "kind": "foreign_key",
+          "name": "fk_draft_room_scope",
+          "columns": [
+            "scope_id",
+            "room_id"
+          ],
+          "references": [
+            "sb_rooms.scope_id",
+            "sb_rooms.id"
+          ]
+        },
+        {
+          "kind": "unique",
+          "name": "uq_draft_scope_actor_room",
+          "columns": [
+            "scope_id",
+            "actor_key",
+            "room_id",
+            "id"
+          ]
+        },
+        {
+          "kind": "unique",
+          "name": "uq_sb_booking_drafts_draft_uuid",
+          "columns": [
+            "draft_uuid"
+          ]
+        }
+      ],
+      "indexes": [
+        {
+          "name": "ix_draft_session",
+          "columns": [
+            "scope_id",
+            "actor_key",
+            "session_id",
+            "status"
+          ],
+          "unique": false
+        }
+      ]
+    },
+    {
+      "name": "ac_target_versions",
+      "purpose": "不可变对象/模型/工具/知识配置修订",
+      "columns": [
+        {
+          "name": "target_id",
+          "type": "BIGINT UNSIGNED",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "version_no",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "model_config_json",
+          "type": "JSON",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "prompt_hash",
+          "type": "VARCHAR(64) COLLATE utf8mb4_bin",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "graph_revision",
+          "type": "VARCHAR(128) COLLATE utf8mb4_bin",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "kb_manifest_json",
+          "type": "JSON",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "tool_revision",
+          "type": "VARCHAR(128) COLLATE utf8mb4_bin",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "adapter_revision",
+          "type": "VARCHAR(128) COLLATE utf8mb4_bin",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "config_hash",
+          "type": "VARCHAR(64) COLLATE utf8mb4_bin",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "id",
+          "type": "BIGINT UNSIGNED",
+          "nullable": false,
+          "primary_key": true,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME(6)",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": "CURRENT_TIMESTAMP(6)",
+          "application_default": null
+        }
+      ],
+      "constraints": [
+        {
+          "kind": "check",
+          "name": "ck_target_version_positive",
+          "sql": "version_no >= 1"
+        },
+        {
+          "kind": "foreign_key",
+          "name": "fk_ac_target_versions_target_id_ac_targets",
+          "columns": [
+            "target_id"
+          ],
+          "references": [
+            "ac_targets.id"
+          ]
+        },
+        {
+          "kind": "unique",
+          "name": "uq_target_version",
+          "columns": [
+            "target_id",
+            "version_no"
+          ]
+        },
+        {
+          "kind": "unique",
+          "name": "uq_target_version_owner",
+          "columns": [
+            "target_id",
+            "id"
+          ]
+        }
+      ],
+      "indexes": []
+    },
+    {
+      "name": "sb_bookings",
+      "purpose": "预约事实、稳定幂等键和草稿唯一性",
+      "columns": [
+        {
+          "name": "booking_uuid",
+          "type": "VARCHAR(36) COLLATE utf8mb4_bin",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "scope_id",
+          "type": "VARCHAR(64) COLLATE utf8mb4_bin",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "actor_key",
+          "type": "VARCHAR(64) COLLATE utf8mb4_bin",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "room_id",
+          "type": "BIGINT UNSIGNED",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "draft_id",
+          "type": "BIGINT UNSIGNED",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "start_at",
+          "type": "DATETIME(6)",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "end_at",
+          "type": "DATETIME(6)",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "attendees",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "status",
+          "type": "VARCHAR(16)",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": "confirmed",
+          "application_default": "confirmed"
+        },
+        {
+          "name": "idempotency_key",
+          "type": "VARCHAR(128) COLLATE utf8mb4_bin",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "payload_hash",
+          "type": "VARCHAR(64) COLLATE utf8mb4_bin",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "id",
+          "type": "BIGINT UNSIGNED",
+          "nullable": false,
+          "primary_key": true,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME(6)",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": "CURRENT_TIMESTAMP(6)",
+          "application_default": null
+        }
+      ],
+      "constraints": [
+        {
+          "kind": "check",
+          "name": "ck_booking_status",
+          "sql": "status IN ('confirmed','cancelled')"
+        },
+        {
+          "kind": "check",
+          "name": "ck_booking_values",
+          "sql": "end_at > start_at AND attendees > 0"
+        },
+        {
+          "kind": "foreign_key",
+          "name": "fk_booking_draft_scope_actor",
+          "columns": [
+            "scope_id",
+            "actor_key",
+            "room_id",
+            "draft_id"
+          ],
+          "references": [
+            "sb_booking_drafts.scope_id",
+            "sb_booking_drafts.actor_key",
+            "sb_booking_drafts.room_id",
+            "sb_booking_drafts.id"
+          ]
+        },
+        {
+          "kind": "foreign_key",
+          "name": "fk_booking_room_scope",
+          "columns": [
+            "scope_id",
+            "room_id"
+          ],
+          "references": [
+            "sb_rooms.scope_id",
+            "sb_rooms.id"
+          ]
+        },
+        {
+          "kind": "unique",
+          "name": "uq_booking_draft",
+          "columns": [
+            "draft_id"
+          ]
+        },
+        {
+          "kind": "unique",
+          "name": "uq_booking_idempotency",
+          "columns": [
+            "scope_id",
+            "actor_key",
+            "idempotency_key"
+          ]
+        },
+        {
+          "kind": "unique",
+          "name": "uq_booking_scope_room",
+          "columns": [
+            "scope_id",
+            "room_id",
+            "id"
+          ]
+        },
+        {
+          "kind": "unique",
+          "name": "uq_sb_bookings_booking_uuid",
+          "columns": [
+            "booking_uuid"
+          ]
+        }
+      ],
+      "indexes": []
+    },
+    {
+      "name": "ac_test_runs",
+      "purpose": "冻结运行清单与可变运行状态",
+      "columns": [
+        {
+          "name": "run_uuid",
+          "type": "VARCHAR(36) COLLATE utf8mb4_bin",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "target_version_id",
+          "type": "BIGINT UNSIGNED",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "created_by",
+          "type": "BIGINT UNSIGNED",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "status",
+          "type": "VARCHAR(16)",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": "queued",
+          "application_default": "queued"
+        },
+        {
+          "name": "manifest_json",
+          "type": "JSON",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "manifest_hash",
+          "type": "VARCHAR(64) COLLATE utf8mb4_bin",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "budget_json",
+          "type": "JSON",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "started_at",
+          "type": "DATETIME(6)",
+          "nullable": true,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "finished_at",
+          "type": "DATETIME(6)",
+          "nullable": true,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "summary_json",
+          "type": "JSON",
+          "nullable": true,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "id",
+          "type": "BIGINT UNSIGNED",
+          "nullable": false,
+          "primary_key": true,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME(6)",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": "CURRENT_TIMESTAMP(6)",
+          "application_default": null
+        }
+      ],
+      "constraints": [
+        {
+          "kind": "check",
+          "name": "ck_run_status",
+          "sql": "status IN ('queued','running','cancelling','completed','failed','cancelled')"
+        },
+        {
+          "kind": "foreign_key",
+          "name": "fk_ac_test_runs_created_by_ac_users",
+          "columns": [
+            "created_by"
+          ],
+          "references": [
+            "ac_users.id"
+          ]
+        },
+        {
+          "kind": "foreign_key",
+          "name": "fk_ac_test_runs_target_version_id_ac_target_versions",
+          "columns": [
+            "target_version_id"
+          ],
+          "references": [
+            "ac_target_versions.id"
+          ]
+        },
+        {
+          "kind": "unique",
+          "name": "uq_ac_test_runs_run_uuid",
+          "columns": [
+            "run_uuid"
+          ]
+        }
+      ],
+      "indexes": [
+        {
+          "name": "ix_run_creator_created",
+          "columns": [
+            "created_by",
+            "created_at"
+          ],
+          "unique": false
+        },
+        {
+          "name": "ix_run_status_created",
+          "columns": [
+            "status",
+            "created_at"
+          ],
+          "unique": false
+        }
+      ]
+    },
+    {
+      "name": "sb_booking_slots",
+      "purpose": "按scope/场地/30分钟占用片防冲突",
+      "columns": [
+        {
+          "name": "scope_id",
+          "type": "VARCHAR(64) COLLATE utf8mb4_bin",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "room_id",
+          "type": "BIGINT UNSIGNED",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "slot_start",
+          "type": "DATETIME(6)",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "booking_id",
+          "type": "BIGINT UNSIGNED",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "id",
+          "type": "BIGINT UNSIGNED",
+          "nullable": false,
+          "primary_key": true,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME(6)",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": "CURRENT_TIMESTAMP(6)",
+          "application_default": null
+        }
+      ],
+      "constraints": [
+        {
+          "kind": "check",
+          "name": "ck_slot_alignment",
+          "sql": "MINUTE(slot_start) IN (0,30) AND SECOND(slot_start)=0 AND MICROSECOND(slot_start)=0"
+        },
+        {
+          "kind": "foreign_key",
+          "name": "fk_slot_booking_scope_room",
+          "columns": [
+            "scope_id",
+            "room_id",
+            "booking_id"
+          ],
+          "references": [
+            "sb_bookings.scope_id",
+            "sb_bookings.room_id",
+            "sb_bookings.id"
+          ]
+        },
+        {
+          "kind": "foreign_key",
+          "name": "fk_slot_room_scope",
+          "columns": [
+            "scope_id",
+            "room_id"
+          ],
+          "references": [
+            "sb_rooms.scope_id",
+            "sb_rooms.id"
+          ]
+        },
+        {
+          "kind": "unique",
+          "name": "uq_room_slot_scope",
+          "columns": [
+            "scope_id",
+            "room_id",
+            "slot_start"
+          ]
+        }
+      ],
+      "indexes": []
+    },
+    {
+      "name": "ac_artifacts",
+      "purpose": "不可变证据/报告清单，文件下载在后续实现",
+      "columns": [
+        {
+          "name": "run_id",
+          "type": "BIGINT UNSIGNED",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "kind",
+          "type": "VARCHAR(64) COLLATE utf8mb4_bin",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "relative_path",
+          "type": "VARCHAR(512)",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "sha256",
+          "type": "VARCHAR(64) COLLATE utf8mb4_bin",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "size_bytes",
+          "type": "BIGINT UNSIGNED",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "generated_by_revision",
+          "type": "VARCHAR(128) COLLATE utf8mb4_bin",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "metadata_json",
+          "type": "JSON",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "id",
+          "type": "BIGINT UNSIGNED",
+          "nullable": false,
+          "primary_key": true,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME(6)",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": "CURRENT_TIMESTAMP(6)",
+          "application_default": null
+        }
+      ],
+      "constraints": [
+        {
+          "kind": "check",
+          "name": "ck_artifact_size",
+          "sql": "size_bytes >= 0"
+        },
+        {
+          "kind": "foreign_key",
+          "name": "fk_ac_artifacts_run_id_ac_test_runs",
+          "columns": [
+            "run_id"
+          ],
+          "references": [
+            "ac_test_runs.id"
+          ]
+        }
+      ],
+      "indexes": []
+    },
+    {
+      "name": "ac_test_executions",
+      "purpose": "独立计划执行、scope/session、恢复attempt及租约",
+      "columns": [
+        {
+          "name": "execution_uuid",
+          "type": "VARCHAR(36) COLLATE utf8mb4_bin",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "run_id",
+          "type": "BIGINT UNSIGNED",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "case_revision_id",
+          "type": "BIGINT UNSIGNED",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "repeat_no",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "attempt_no",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": "1",
+          "application_default": "1"
+        },
+        {
+          "name": "attempt_history_json",
+          "type": "JSON",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": "list"
+        },
+        {
+          "name": "seed",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "scope_id",
+          "type": "VARCHAR(64) COLLATE utf8mb4_bin",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "session_id",
+          "type": "VARCHAR(128) COLLATE utf8mb4_bin",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "status",
+          "type": "VARCHAR(16)",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": "queued",
+          "application_default": "queued"
+        },
+        {
+          "name": "task_outcome",
+          "type": "VARCHAR(24)",
+          "nullable": true,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "lease_token",
+          "type": "VARCHAR(64) COLLATE utf8mb4_bin",
+          "nullable": true,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "lease_until",
+          "type": "DATETIME(6)",
+          "nullable": true,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "input_snapshot_json",
+          "type": "JSON",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "before_state_json",
+          "type": "JSON",
+          "nullable": true,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "after_state_json",
+          "type": "JSON",
+          "nullable": true,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "final_output_json",
+          "type": "JSON",
+          "nullable": true,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "timing_json",
+          "type": "JSON",
+          "nullable": true,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "usage_json",
+          "type": "JSON",
+          "nullable": true,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "error_json",
+          "type": "JSON",
+          "nullable": true,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "id",
+          "type": "BIGINT UNSIGNED",
+          "nullable": false,
+          "primary_key": true,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME(6)",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": "CURRENT_TIMESTAMP(6)",
+          "application_default": null
+        }
+      ],
+      "constraints": [
+        {
+          "kind": "check",
+          "name": "ck_execution_numbers",
+          "sql": "repeat_no >= 1 AND attempt_no >= 1"
+        },
+        {
+          "kind": "check",
+          "name": "ck_execution_outcome",
+          "sql": "task_outcome IS NULL OR task_outcome IN ('fulfilled','safely_degraded','unknown','not_fulfilled')"
+        },
+        {
+          "kind": "check",
+          "name": "ck_execution_status",
+          "sql": "status IN ('queued','running','waiting_input','passed','failed','inconclusive','error','cancelled','skipped')"
+        },
+        {
+          "kind": "foreign_key",
+          "name": "fk_ac_test_executions_case_revision_id_ac_test_cases",
+          "columns": [
+            "case_revision_id"
+          ],
+          "references": [
+            "ac_test_cases.id"
+          ]
+        },
+        {
+          "kind": "foreign_key",
+          "name": "fk_ac_test_executions_run_id_ac_test_runs",
+          "columns": [
+            "run_id"
+          ],
+          "references": [
+            "ac_test_runs.id"
+          ]
+        },
+        {
+          "kind": "unique",
+          "name": "uq_ac_test_executions_execution_uuid",
+          "columns": [
+            "execution_uuid"
+          ]
+        },
+        {
+          "kind": "unique",
+          "name": "uq_execution_plan",
+          "columns": [
+            "run_id",
+            "case_revision_id",
+            "repeat_no"
+          ]
+        },
+        {
+          "kind": "unique",
+          "name": "uq_execution_scope",
+          "columns": [
+            "scope_id"
+          ]
+        },
+        {
+          "kind": "unique",
+          "name": "uq_execution_session",
+          "columns": [
+            "session_id"
+          ]
+        }
+      ],
+      "indexes": [
+        {
+          "name": "ix_execution_lease",
+          "columns": [
+            "status",
+            "lease_until"
+          ],
+          "unique": false
+        },
+        {
+          "name": "ix_execution_run_status",
+          "columns": [
+            "run_id",
+            "status"
+          ],
+          "unique": false
+        }
+      ]
+    },
+    {
+      "name": "ac_assertion_results",
+      "purpose": "追加式规则/AI/人工判定；T08实现断言引擎",
+      "columns": [
+        {
+          "name": "execution_id",
+          "type": "BIGINT UNSIGNED",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "assertion_key",
+          "type": "VARCHAR(100) COLLATE utf8mb4_bin",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "metric_name",
+          "type": "VARCHAR(100) COLLATE utf8mb4_bin",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "evaluator_kind",
+          "type": "VARCHAR(16)",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "evaluator_version",
+          "type": "VARCHAR(64) COLLATE utf8mb4_bin",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "verdict",
+          "type": "VARCHAR(16)",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "expected_json",
+          "type": "JSON",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "actual_json",
+          "type": "JSON",
+          "nullable": true,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "evidence_refs_json",
+          "type": "JSON",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "reason",
+          "type": "TEXT",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "judge_usage_json",
+          "type": "JSON",
+          "nullable": true,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "id",
+          "type": "BIGINT UNSIGNED",
+          "nullable": false,
+          "primary_key": true,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME(6)",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": "CURRENT_TIMESTAMP(6)",
+          "application_default": null
+        }
+      ],
+      "constraints": [
+        {
+          "kind": "check",
+          "name": "ck_assertion_kind",
+          "sql": "evaluator_kind IN ('rule','ai','human')"
+        },
+        {
+          "kind": "check",
+          "name": "ck_assertion_verdict",
+          "sql": "verdict IN ('passed','failed','inconclusive','error','na')"
+        },
+        {
+          "kind": "foreign_key",
+          "name": "fk_ac_assertion_results_execution_id_ac_test_executions",
+          "columns": [
+            "execution_id"
+          ],
+          "references": [
+            "ac_test_executions.id"
+          ]
+        },
+        {
+          "kind": "unique",
+          "name": "uq_assertion_evaluator",
+          "columns": [
+            "execution_id",
+            "assertion_key",
+            "evaluator_kind",
+            "evaluator_version"
+          ]
+        }
+      ],
+      "indexes": []
+    },
+    {
+      "name": "ac_defects",
+      "purpose": "缺陷归并与人工复核，不覆盖原始判定",
+      "columns": [
+        {
+          "name": "defect_key",
+          "type": "VARCHAR(80) COLLATE utf8mb4_bin",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "target_id",
+          "type": "BIGINT UNSIGNED",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "first_execution_id",
+          "type": "BIGINT UNSIGNED",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "category",
+          "type": "VARCHAR(64) COLLATE utf8mb4_bin",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "severity",
+          "type": "VARCHAR(16)",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "fingerprint",
+          "type": "VARCHAR(64) COLLATE utf8mb4_bin",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "status",
+          "type": "VARCHAR(16)",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": "open",
+          "application_default": "open"
+        },
+        {
+          "name": "evidence_refs_json",
+          "type": "JSON",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "suspected_cause",
+          "type": "TEXT",
+          "nullable": true,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "reviewer_id",
+          "type": "BIGINT UNSIGNED",
+          "nullable": true,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "review_note",
+          "type": "TEXT",
+          "nullable": true,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "fixed_version_id",
+          "type": "BIGINT UNSIGNED",
+          "nullable": true,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "id",
+          "type": "BIGINT UNSIGNED",
+          "nullable": false,
+          "primary_key": true,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME(6)",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": "CURRENT_TIMESTAMP(6)",
+          "application_default": null
+        }
+      ],
+      "constraints": [
+        {
+          "kind": "check",
+          "name": "ck_defect_status",
+          "sql": "status IN ('open','confirmed','fixed','verified','rejected')"
+        },
+        {
+          "kind": "foreign_key",
+          "name": "fk_ac_defects_first_execution_id_ac_test_executions",
+          "columns": [
+            "first_execution_id"
+          ],
+          "references": [
+            "ac_test_executions.id"
+          ]
+        },
+        {
+          "kind": "foreign_key",
+          "name": "fk_ac_defects_reviewer_id_ac_users",
+          "columns": [
+            "reviewer_id"
+          ],
+          "references": [
+            "ac_users.id"
+          ]
+        },
+        {
+          "kind": "foreign_key",
+          "name": "fk_ac_defects_target_id_ac_targets",
+          "columns": [
+            "target_id"
+          ],
+          "references": [
+            "ac_targets.id"
+          ]
+        },
+        {
+          "kind": "foreign_key",
+          "name": "fk_defect_fixed_target",
+          "columns": [
+            "target_id",
+            "fixed_version_id"
+          ],
+          "references": [
+            "ac_target_versions.target_id",
+            "ac_target_versions.id"
+          ]
+        },
+        {
+          "kind": "unique",
+          "name": "uq_ac_defects_defect_key",
+          "columns": [
+            "defect_key"
+          ]
+        }
+      ],
+      "indexes": [
+        {
+          "name": "ix_defect_fingerprint",
+          "columns": [
+            "target_id",
+            "fingerprint"
+          ],
+          "unique": false
+        }
+      ]
+    },
+    {
+      "name": "ac_trace_events",
+      "purpose": "追加式可观察事件与证据；T06实现记录器",
+      "columns": [
+        {
+          "name": "event_uuid",
+          "type": "VARCHAR(36) COLLATE utf8mb4_bin",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "execution_id",
+          "type": "BIGINT UNSIGNED",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "attempt_no",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "seq_no",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "event_type",
+          "type": "VARCHAR(64) COLLATE utf8mb4_bin",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "node_name",
+          "type": "VARCHAR(128) COLLATE utf8mb4_bin",
+          "nullable": true,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "node_visit_no",
+          "type": "INTEGER",
+          "nullable": true,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "tool_call_id",
+          "type": "VARCHAR(128) COLLATE utf8mb4_bin",
+          "nullable": true,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "parent_event_uuid",
+          "type": "VARCHAR(36) COLLATE utf8mb4_bin",
+          "nullable": true,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "occurred_at",
+          "type": "DATETIME(6)",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "payload_json",
+          "type": "JSON",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "payload_hash",
+          "type": "VARCHAR(64) COLLATE utf8mb4_bin",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "id",
+          "type": "BIGINT UNSIGNED",
+          "nullable": false,
+          "primary_key": true,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME(6)",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": "CURRENT_TIMESTAMP(6)",
+          "application_default": null
+        }
+      ],
+      "constraints": [
+        {
+          "kind": "check",
+          "name": "ck_event_sequence",
+          "sql": "attempt_no >= 1 AND seq_no >= 1"
+        },
+        {
+          "kind": "check",
+          "name": "ck_event_visit",
+          "sql": "node_visit_no IS NULL OR node_visit_no >= 1"
+        },
+        {
+          "kind": "foreign_key",
+          "name": "fk_ac_trace_events_execution_id_ac_test_executions",
+          "columns": [
+            "execution_id"
+          ],
+          "references": [
+            "ac_test_executions.id"
+          ]
+        },
+        {
+          "kind": "foreign_key",
+          "name": "fk_event_parent_scope",
+          "columns": [
+            "execution_id",
+            "attempt_no",
+            "parent_event_uuid"
+          ],
+          "references": [
+            "ac_trace_events.execution_id",
+            "ac_trace_events.attempt_no",
+            "ac_trace_events.event_uuid"
+          ]
+        },
+        {
+          "kind": "unique",
+          "name": "uq_ac_trace_events_event_uuid",
+          "columns": [
+            "event_uuid"
+          ]
+        },
+        {
+          "kind": "unique",
+          "name": "uq_event_parent_scope",
+          "columns": [
+            "execution_id",
+            "attempt_no",
+            "event_uuid"
+          ]
+        },
+        {
+          "kind": "unique",
+          "name": "uq_event_sequence",
+          "columns": [
+            "execution_id",
+            "attempt_no",
+            "seq_no"
+          ]
+        }
+      ],
+      "indexes": [
+        {
+          "name": "ix_event_cursor",
+          "columns": [
+            "execution_id",
+            "id"
+          ],
+          "unique": false
+        }
+      ]
+    }
+  ]
+}

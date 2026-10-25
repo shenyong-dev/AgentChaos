@@ -1,0 +1,172 @@
+{
+  "call_id": "3152ba40-7f9e-4953-a2dd-f373e7bc223d",
+  "role": "agent",
+  "model_requested": "deepseek-flash",
+  "started_at": "2026-10-25T13:58:00.163483+00:00",
+  "thinking": "disabled",
+  "request": {
+    "messages": [
+      {
+        "type": "system",
+        "data": {
+          "content": "你是接口协议探测助手。按要求调用工具，不执行预约。",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "system",
+          "name": null,
+          "id": null
+        }
+      },
+      {
+        "type": "human",
+        "data": {
+          "content": "请调用echo_probe，text填写中文连通；得到回传后仅回复测试完成。",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "human",
+          "name": null,
+          "id": null
+        }
+      },
+      {
+        "type": "ai",
+        "data": {
+          "content": "",
+          "additional_kwargs": {},
+          "response_metadata": {
+            "model_provider": "deepseek",
+            "finish_reason": "tool_calls",
+            "model_name": "deepseek-flash",
+            "system_fingerprint": "e72d3c7f663d3e1383b00b3884cb4501"
+          },
+          "type": "ai",
+          "name": null,
+          "id": "lc_run--01a1735a-97fc-7672-bbb7-b14880c41dc0",
+          "tool_calls": [
+            {
+              "name": "echo_probe",
+              "args": {
+                "text": "中文连通"
+              },
+              "id": "call_00_qNzYAYzhWoXxwWzqD3Tv4309",
+              "type": "tool_call"
+            }
+          ],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 311,
+            "output_tokens": 39,
+            "total_tokens": 350,
+            "input_token_details": {
+              "cache_read": 0
+            },
+            "output_token_details": {}
+          }
+        }
+      },
+      {
+        "type": "tool",
+        "data": {
+          "content": "{\"echo\": \"中文连通\"}",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "tool",
+          "name": null,
+          "id": null,
+          "tool_call_id": "call_00_qNzYAYzhWoXxwWzqD3Tv4309",
+          "artifact": null,
+          "status": "success"
+        }
+      }
+    ],
+    "tools": [
+      {
+        "type": "function",
+        "function": {
+          "name": "echo_probe",
+          "description": "连通性探测，原样返回text，不修改业务数据。",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "text": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "text"
+            ],
+            "additionalProperties": false
+          }
+        }
+      }
+    ]
+  },
+  "reservation_microusd": 4661,
+  "pricing": {
+    "model": "deepseek-flash",
+    "verified_on": "2026-10-25",
+    "documented_version": "DeepSeek-V4.1-Flash-1017",
+    "source": "https://api-docs.deepseek.com/quick_start/pricing/",
+    "currency": "USD",
+    "peak_input_miss_per_million": "0.30",
+    "peak_output_per_million": "1.20",
+    "method": "peak-rate upper estimate, all input charged at cache-miss rate; not a bill"
+  },
+  "chunks": [
+    {
+      "content": "",
+      "tool_call_chunks": [],
+      "usage": null
+    },
+    {
+      "content": "测试",
+      "tool_call_chunks": [],
+      "usage": null
+    },
+    {
+      "content": "完成",
+      "tool_call_chunks": [],
+      "usage": null
+    },
+    {
+      "content": "",
+      "tool_call_chunks": [],
+      "usage": {
+        "input_tokens": 369,
+        "output_tokens": 2,
+        "total_tokens": 371,
+        "input_token_details": {
+          "cache_read": 128
+        },
+        "output_token_details": {}
+      }
+    },
+    {
+      "content": "",
+      "tool_call_chunks": [],
+      "usage": null
+    }
+  ],
+  "model_requests": 1,
+  "response": {
+    "content": "测试完成",
+    "tool_calls": [],
+    "invalid_tool_calls": [],
+    "model_returned": "deepseek-flash",
+    "finish_reason": "stop",
+    "id": "lc_run--01a1735a-9ae7-77e8-a710-313231e2f597"
+  },
+  "usage": {
+    "input_tokens": 369,
+    "output_tokens": 2,
+    "total_tokens": 371,
+    "input_token_details": {
+      "cache_read": 128
+    },
+    "output_token_details": {}
+  },
+  "provider_token_usage": null,
+  "estimated_peak_microusd": 114,
+  "status": "completed",
+  "elapsed_ms": 656.0
+}

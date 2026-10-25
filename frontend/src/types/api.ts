@@ -19,12 +19,13 @@ export interface HealthReport {
 export interface PublicConfig {
   app_version: string
   environment: string
-  task: 'T01'
+  task: 'T04'
   model_key_configured: boolean
-  model_connectivity: 'not_probed'
+  model_connectivity: 'not_probed' | 'historically_verified'
   paid_calls_enabled: boolean
   run_concurrency: number
   test_execution_available: boolean
+  agent_demo_available: boolean
   roles: {
     role: 'agent' | 'case_generator' | 'judge'
     model: string

@@ -31,12 +31,18 @@ const title = computed(() => {
 function tagType(check: ComponentCheck) {
   return check.status === 'ok' ? 'success' : check.status === 'error' ? 'danger' : 'info'
 }
+function checkMessage(check: ComponentCheck) {
+  if (check.code !== 'model_historically_verified') return check.message
+  return check.message.replace(/\d{4}-\d{2}-\d{2}T[\d:.]+(?:Z|[+-]\d{2}:\d{2})/, (value) =>
+    new Intl.DateTimeFormat('zh-CN', { timeZone: 'Asia/Shanghai', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date(value)) + '（北京时间）')
+}
 onMounted(store.refresh)
 </script>
 
 <template>
   <div class="page-heading">
-    <div><div class="eyebrow">FOUNDATION / T01</div><h1>工程环境</h1><p>检查服务连接，确认这次实验从哪里开始。</p></div>
+    <div><div class="eyebrow">AGENT BASELINE / {{ config?.task ?? 'T04' }}</div><h1>工程环境</h1><p>检查服务连接，确认这次实验从哪里开始。</p></div>
     <ElButton type="primary" :loading="loading" @click="store.refresh">重新检测</ElButton>
   </div>
 
@@ -55,19 +61,19 @@ onMounted(store.refresh)
   <div v-else-if="!health" class="empty-state"><h3>暂无健康检查结果</h3><p>启动 API 后，点击“重新检测”查看实际连接状态。</p></div>
   <div v-else class="service-grid" :aria-busy="loading">
     <article v-for="check in health.checks" :key="check.name" class="service-card">
-      <div class="service-card-top"><span class="service-code">{{ check.name.toUpperCase() }}</span><ElTag :type="tagType(check)" effect="light" size="small">{{ statusLabels[check.status] }}</ElTag></div>
+      <div class="service-card-top"><span class="service-code">{{ check.name.toUpperCase() }}</span><ElTag :type="tagType(check)" effect="light" size="small">{{ check.code === 'model_historically_verified' ? '历史已验证' : statusLabels[check.status] }}</ElTag></div>
       <h3>{{ labels[check.name] }}</h3><span class="card-description">{{ descriptions[check.name] }}</span>
-      <p class="check-message">{{ check.message }}</p>
-      <div v-if="Object.keys(check.capabilities).length" class="capabilities"><span v-for="(supported, capability) in check.capabilities" :key="capability" :class="{ supported }">{{ capability.toUpperCase() }} {{ supported ? '✓' : '—' }}</span></div>
+      <p class="check-message">{{ checkMessage(check) }}</p>
+      <div v-if="Object.keys(check.capabilities).length" class="capabilities"><span v-for="(supported, capability) in check.capabilities" :key="capability" :class="{ supported }">{{ capability === 'historical_agent_probe' ? '历史调用' : capability.toUpperCase() }} {{ supported ? '✓' : '—' }}</span></div>
       <footer><span>{{ check.version ? `v${check.version}` : '版本待验证' }}</span><span>{{ check.latency_ms === null ? (check.name === 'api' ? '进程响应' : '未请求') : `${check.latency_ms} ms` }}</span></footer>
     </article>
   </div>
 
   <section class="model-panel">
-    <div class="section-heading"><div><h2>模型角色配置</h2><p>同一服务，独立配置与预算。</p></div><ElTag type="info">{{ config?.paid_calls_enabled ? '调用开关已启用 · 尚无执行接口' : '付费调用关闭' }}</ElTag></div>
+    <div class="section-heading"><div><h2>模型角色配置</h2><p>同一服务，独立配置与预算。历史连通记录不代表此刻实时可用。</p></div><ElTag type="info">{{ config?.paid_calls_enabled ? '调用开关已启用 · 受角色预算限制' : '付费调用关闭' }}</ElTag></div>
     <div v-if="!config" class="inline-empty">配置尚未读取成功。</div>
     <div v-else class="role-grid"><article v-for="role in config.roles" :key="role.role"><span class="role-code">{{ role.role }}</span><h3>{{ roleNames[role.role] }}</h3><p>{{ role.model }}</p><dl><div><dt>思考模式</dt><dd>{{ role.thinking === 'disabled' ? '关闭' : '开启' }}</dd></div><div><dt>输出上限</dt><dd>{{ role.max_output_tokens.toLocaleString() }} tokens</dd></div><div><dt>授权预算</dt><dd>{{ role.budget_usd === 0 ? '未设置' : `$${role.budget_usd}` }}</dd></div></dl></article></div>
   </section>
 
-  <footer class="page-footer"><span>当前仅验证工程基础，测试执行功能尚未开放。</span><a href="/docs" target="_blank" rel="noopener">查看 API 契约 ↗</a><small v-if="requestId">请求 {{ requestId }}</small></footer>
+  <footer class="page-footer"><span>预约 Agent 交互接口已开放；批量测试执行尚未开放。</span><a href="/docs" target="_blank" rel="noopener">查看 API 契约 ↗</a><small v-if="requestId">请求 {{ requestId }}</small></footer>
 </template>

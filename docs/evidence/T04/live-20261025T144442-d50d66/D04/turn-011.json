@@ -1,0 +1,3538 @@
+{
+  "view": {
+    "session_id": "9302e9fc-df7b-40b4-b124-df10a11c024f",
+    "revision": 3,
+    "version_id": 1,
+    "config_hash": "9c30becde73e116fb2dca3ebfd3014cffab0dc2f6f9973b4f2d4b1b0a196d778",
+    "reference_clock": "2026-10-25T01:00:00+00:00",
+    "status": "ready",
+    "assistant_text": "预约已提交成功。\n\n- 场地：A101\n- 日期：2026-10-27（Asia/Shanghai）\n- 时间：15:00 – 16:00\n- 人数：10 人\n- 状态：confirmed（已确认）\n- 预约号：eac40999-b341-46bc-a55e-c5e46427d740\n\n依据：人数不超过所选场地容量、时段为左闭右开（booking-rules:r1:6244fec99261083b、booking-rules:r1:245245278a2b83a9，document_revision 1）。",
+    "fields": {
+      "date": {
+        "value": "2026-10-27",
+        "source_turn": 2,
+        "source_quote": "后天",
+        "source_kind": "validated_model_extraction"
+      },
+      "start_time": {
+        "value": "15:00",
+        "source_turn": 2,
+        "source_quote": "15:00",
+        "source_kind": "validated_model_extraction"
+      },
+      "end_time": {
+        "value": "16:00",
+        "source_turn": 2,
+        "source_quote": "16:00",
+        "source_kind": "validated_model_extraction"
+      },
+      "attendees": {
+        "value": 10,
+        "source_turn": 1,
+        "source_quote": "10人",
+        "source_kind": "validated_model_extraction"
+      },
+      "room_code": {
+        "value": "A101",
+        "source_turn": 1,
+        "source_quote": "A101",
+        "source_kind": "validated_model_extraction"
+      }
+    },
+    "confirmation_state": "consumed",
+    "confirmation_revision": 5,
+    "pending_draft": null,
+    "business_result": {
+      "status": "ok",
+      "code": "request_found",
+      "summary": "已查到原预约事实。",
+      "data": {
+        "booking_id": "eac40999-b341-46bc-a55e-c5e46427d740",
+        "draft_id": "95759652-12ab-4d3a-864e-28975a24aebe",
+        "idempotency_key": "95759652-12ab-4d3a-864e-28975a24aebe",
+        "room_code": "A101",
+        "start_at": "2026-10-27T07:00:00Z",
+        "end_at": "2026-10-27T08:00:00Z",
+        "attendees": 10,
+        "status": "confirmed",
+        "created_at": "2026-10-25T14:45:37.935715Z"
+      },
+      "request_key": "95759652-12ab-4d3a-864e-28975a24aebe",
+      "retryable": false,
+      "commit_state": "committed",
+      "evidence_refs": [
+        "booking:eac40999-b341-46bc-a55e-c5e46427d740"
+      ]
+    },
+    "unknown_submission": null,
+    "denials": [],
+    "evidence_refs": [
+      "booking-rules:r1:245245278a2b83a9",
+      "booking-rules:r1:d90836b0c00ba2ef",
+      "booking-rules:r1:6244fec99261083b"
+    ],
+    "last_retrieval": {
+      "status": "supported",
+      "query": "实验室场地预约规则 容量 时段 预约",
+      "query_tokens": [
+        "实验室",
+        "容量",
+        "时段"
+      ],
+      "index_hash": "4fbf686cec03f3a21c9faa36aec2c0d61e00d23610e973ee83924ef68cecdce0",
+      "chunks": [
+        {
+          "chunk_id": "booking-rules:r1:245245278a2b83a9",
+          "text": "时间与人数\n有效预约不能重叠；时段为左闭右开，相邻时段可以相接。",
+          "document_id": 1,
+          "source_ref": "knowledge/booking-rules-v1.md",
+          "document_revision": 1,
+          "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+          "chunk_hash": "245245278a2b83a94c7b1892d08353aff39898a9c11e81ce13b66380bd7b2fdb",
+          "score": 2.419374
+        },
+        {
+          "chunk_id": "booking-rules:r1:d90836b0c00ba2ef",
+          "text": "澄清与确认\n缺日期、起止时间或人数时追问；“下午”不直接等同具体时段。",
+          "document_id": 1,
+          "source_ref": "knowledge/booking-rules-v1.md",
+          "document_revision": 1,
+          "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+          "chunk_hash": "d90836b0c00ba2ef329e89ea4a72b6666007de0e0cc87720a203075621f7d3d4",
+          "score": 1.601078
+        },
+        {
+          "chunk_id": "booking-rules:r1:6244fec99261083b",
+          "text": "时间与人数\n人数为正整数，不超过所选场地容量。",
+          "document_id": 1,
+          "source_ref": "knowledge/booking-rules-v1.md",
+          "document_revision": 1,
+          "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+          "chunk_hash": "6244fec99261083b40684bed190abf59920594aa1a6af687e4ea17ab0fd69e35",
+          "score": 1.071503
+        }
+      ]
+    },
+    "compactions": 6,
+    "history_messages": 22,
+    "trace": [
+      {
+        "type": "model",
+        "call_id": "af208b25-2486-46be-b15e-08a95ada1dc7",
+        "source_turn": 1,
+        "usage": {
+          "input_tokens": 2585,
+          "output_tokens": 175,
+          "total_tokens": 2760,
+          "input_token_details": {
+            "cache_read": 768
+          },
+          "output_token_details": {}
+        },
+        "estimated_peak_microusd": 986,
+        "model_returned": "deepseek-flash",
+        "streamed": true,
+        "model_requests": 1
+      },
+      {
+        "type": "tool",
+        "name": "update_booking_request",
+        "arguments": {
+          "date": "2026-10-26",
+          "start_time": "14:00",
+          "end_time": "15:00",
+          "attendees": 10,
+          "room_code": "A101",
+          "source_quotes": {
+            "date": "明天",
+            "start_time": "14:00",
+            "end_time": "15:00",
+            "attendees": "10人",
+            "room_code": "A101"
+          }
+        },
+        "result": {
+          "status": "ok",
+          "fields": {
+            "date": {
+              "value": "2026-10-26",
+              "source_turn": 1,
+              "source_quote": "明天",
+              "source_kind": "validated_model_extraction"
+            },
+            "start_time": {
+              "value": "14:00",
+              "source_turn": 1,
+              "source_quote": "14:00",
+              "source_kind": "validated_model_extraction"
+            },
+            "end_time": {
+              "value": "15:00",
+              "source_turn": 1,
+              "source_quote": "15:00",
+              "source_kind": "validated_model_extraction"
+            },
+            "attendees": {
+              "value": 10,
+              "source_turn": 1,
+              "source_quote": "10人",
+              "source_kind": "validated_model_extraction"
+            },
+            "room_code": {
+              "value": "A101",
+              "source_turn": 1,
+              "source_quote": "A101",
+              "source_kind": "validated_model_extraction"
+            }
+          },
+          "changed": true
+        },
+        "evidence_id": "0a96fbed-e385-478d-88c6-5dbfb18e5a8e",
+        "source_turn": 1
+      },
+      {
+        "type": "model",
+        "call_id": "fb4480bb-ac87-4fb9-ae16-8605df2fe462",
+        "source_turn": 1,
+        "usage": {
+          "input_tokens": 3233,
+          "output_tokens": 48,
+          "total_tokens": 3281,
+          "input_token_details": {
+            "cache_read": 896
+          },
+          "output_token_details": {}
+        },
+        "estimated_peak_microusd": 1028,
+        "model_returned": "deepseek-flash",
+        "streamed": true,
+        "model_requests": 1
+      },
+      {
+        "type": "retrieval",
+        "result": {
+          "status": "supported",
+          "query": "实验室场地预约规则 容量 时段 预约",
+          "query_tokens": [
+            "实验室",
+            "容量",
+            "时段"
+          ],
+          "index_hash": "4fbf686cec03f3a21c9faa36aec2c0d61e00d23610e973ee83924ef68cecdce0",
+          "chunks": [
+            {
+              "chunk_id": "booking-rules:r1:245245278a2b83a9",
+              "text": "时间与人数\n有效预约不能重叠；时段为左闭右开，相邻时段可以相接。",
+              "document_id": 1,
+              "source_ref": "knowledge/booking-rules-v1.md",
+              "document_revision": 1,
+              "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+              "chunk_hash": "245245278a2b83a94c7b1892d08353aff39898a9c11e81ce13b66380bd7b2fdb",
+              "score": 2.419374
+            },
+            {
+              "chunk_id": "booking-rules:r1:d90836b0c00ba2ef",
+              "text": "澄清与确认\n缺日期、起止时间或人数时追问；“下午”不直接等同具体时段。",
+              "document_id": 1,
+              "source_ref": "knowledge/booking-rules-v1.md",
+              "document_revision": 1,
+              "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+              "chunk_hash": "d90836b0c00ba2ef329e89ea4a72b6666007de0e0cc87720a203075621f7d3d4",
+              "score": 1.601078
+            },
+            {
+              "chunk_id": "booking-rules:r1:6244fec99261083b",
+              "text": "时间与人数\n人数为正整数，不超过所选场地容量。",
+              "document_id": 1,
+              "source_ref": "knowledge/booking-rules-v1.md",
+              "document_revision": 1,
+              "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+              "chunk_hash": "6244fec99261083b40684bed190abf59920594aa1a6af687e4ea17ab0fd69e35",
+              "score": 1.071503
+            }
+          ]
+        },
+        "source_turn": 1
+      },
+      {
+        "type": "tool",
+        "name": "retrieve_rules",
+        "arguments": {
+          "query": "实验室场地预约规则 容量 时段 预约"
+        },
+        "result": {
+          "status": "supported",
+          "query": "实验室场地预约规则 容量 时段 预约",
+          "query_tokens": [
+            "实验室",
+            "容量",
+            "时段"
+          ],
+          "index_hash": "4fbf686cec03f3a21c9faa36aec2c0d61e00d23610e973ee83924ef68cecdce0",
+          "chunks": [
+            {
+              "chunk_id": "booking-rules:r1:245245278a2b83a9",
+              "text": "时间与人数\n有效预约不能重叠；时段为左闭右开，相邻时段可以相接。",
+              "document_id": 1,
+              "source_ref": "knowledge/booking-rules-v1.md",
+              "document_revision": 1,
+              "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+              "chunk_hash": "245245278a2b83a94c7b1892d08353aff39898a9c11e81ce13b66380bd7b2fdb",
+              "score": 2.419374
+            },
+            {
+              "chunk_id": "booking-rules:r1:d90836b0c00ba2ef",
+              "text": "澄清与确认\n缺日期、起止时间或人数时追问；“下午”不直接等同具体时段。",
+              "document_id": 1,
+              "source_ref": "knowledge/booking-rules-v1.md",
+              "document_revision": 1,
+              "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+              "chunk_hash": "d90836b0c00ba2ef329e89ea4a72b6666007de0e0cc87720a203075621f7d3d4",
+              "score": 1.601078
+            },
+            {
+              "chunk_id": "booking-rules:r1:6244fec99261083b",
+              "text": "时间与人数\n人数为正整数，不超过所选场地容量。",
+              "document_id": 1,
+              "source_ref": "knowledge/booking-rules-v1.md",
+              "document_revision": 1,
+              "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+              "chunk_hash": "6244fec99261083b40684bed190abf59920594aa1a6af687e4ea17ab0fd69e35",
+              "score": 1.071503
+            }
+          ]
+        },
+        "evidence_id": "c4c4952c-2cda-45d7-a91d-fd8e4c8a74ff",
+        "source_turn": 1
+      },
+      {
+        "type": "model",
+        "call_id": "4c00c080-aee0-4035-804c-45ed3dcb7f7b",
+        "source_turn": 1,
+        "usage": {
+          "input_tokens": 4521,
+          "output_tokens": 121,
+          "total_tokens": 4642,
+          "input_token_details": {
+            "cache_read": 896
+          },
+          "output_token_details": {}
+        },
+        "estimated_peak_microusd": 1502,
+        "model_returned": "deepseek-flash",
+        "streamed": true,
+        "model_requests": 1
+      },
+      {
+        "type": "tool",
+        "name": "query_availability",
+        "arguments": {
+          "start_at": "2026-10-26T14:00:00+08:00",
+          "end_at": "2026-10-26T15:00:00+08:00",
+          "attendees": 10,
+          "room_code": "A101"
+        },
+        "result": {
+          "status": "ok",
+          "code": "availability_checked",
+          "summary": "已查询当前空闲；提交时仍会重新校验。",
+          "data": {
+            "rooms": [
+              {
+                "room_code": "A101",
+                "capacity": 20
+              }
+            ],
+            "start_at": "2026-10-26T14:00:00+08:00",
+            "end_at": "2026-10-26T15:00:00+08:00",
+            "attendees": 10,
+            "truncated": false
+          },
+          "request_key": null,
+          "retryable": false,
+          "commit_state": "not_applicable",
+          "evidence_refs": []
+        },
+        "evidence_id": "ebe273ee-51c0-4efe-8280-8335cc3acf28",
+        "source_turn": 1
+      },
+      {
+        "type": "model",
+        "call_id": "0cbece5c-896a-4c99-a892-5abd5fddef4c",
+        "source_turn": 1,
+        "usage": {
+          "input_tokens": 4845,
+          "output_tokens": 122,
+          "total_tokens": 4967,
+          "input_token_details": {
+            "cache_read": 1024
+          },
+          "output_token_details": {}
+        },
+        "estimated_peak_microusd": 1600,
+        "model_returned": "deepseek-flash",
+        "streamed": true,
+        "model_requests": 1
+      },
+      {
+        "type": "tool",
+        "name": "preview_booking",
+        "arguments": {
+          "start_at": "2026-10-26T14:00:00+08:00",
+          "end_at": "2026-10-26T15:00:00+08:00",
+          "attendees": 10,
+          "room_code": "A101"
+        },
+        "result": {
+          "status": "ok",
+          "code": "confirmation_required",
+          "summary": "请展示完整草稿并等待用户明确确认。",
+          "data": {
+            "draft_id": "ba347f54-b901-4242-8af4-04a482a197a2",
+            "draft_hash": "517a7ec47f018887b4cbe3fd21af3f64b847390c0a8a7e489658cfa7bdab666f",
+            "suggested_idempotency_key": "ba347f54-b901-4242-8af4-04a482a197a2",
+            "room_code": "A101",
+            "start_at": "2026-10-26T14:00:00+08:00",
+            "end_at": "2026-10-26T15:00:00+08:00",
+            "attendees": 10,
+            "status": "pending",
+            "expires_at": "2026-10-25T01:05:00Z"
+          },
+          "request_key": "ba347f54-b901-4242-8af4-04a482a197a2",
+          "retryable": false,
+          "commit_state": "not_committed",
+          "evidence_refs": [
+            "draft:ba347f54-b901-4242-8af4-04a482a197a2"
+          ]
+        },
+        "evidence_id": "1d6a58ce-127f-4aa4-becc-80862b93d241",
+        "source_turn": 1
+      },
+      {
+        "type": "model",
+        "call_id": "cbc64161-2b51-4b21-82b1-f8b960f55913",
+        "source_turn": 1,
+        "usage": {
+          "input_tokens": 5510,
+          "output_tokens": 165,
+          "total_tokens": 5675,
+          "input_token_details": {
+            "cache_read": 896
+          },
+          "output_token_details": {}
+        },
+        "estimated_peak_microusd": 1851,
+        "model_returned": "deepseek-flash",
+        "streamed": true,
+        "model_requests": 1
+      },
+      {
+        "type": "confirmation_decision",
+        "kind": "message",
+        "source_turn": 2,
+        "revision": 3
+      },
+      {
+        "type": "model",
+        "call_id": "477f2e00-3ee6-43c8-a10e-2c4e33f92482",
+        "source_turn": 2,
+        "usage": {
+          "input_tokens": 3385,
+          "output_tokens": 124,
+          "total_tokens": 3509,
+          "input_token_details": {
+            "cache_read": 896
+          },
+          "output_token_details": {}
+        },
+        "estimated_peak_microusd": 1165,
+        "model_returned": "deepseek-flash",
+        "streamed": true,
+        "model_requests": 1
+      },
+      {
+        "type": "context_compacted",
+        "source_turn": 2,
+        "summary": {
+          "version": "structured-facts-v1",
+          "method": "conservative UTF-8 byte token upper estimate",
+          "estimated_upper_tokens": 12352,
+          "budget": 18000,
+          "dropped_from_model_context": 10,
+          "original_messages_retained": true,
+          "preserved_facts": {
+            "reference_clock": "2026-10-25T01:00:00+00:00",
+            "fields": {
+              "date": {
+                "value": "2026-10-26",
+                "source_turn": 1,
+                "source_quote": "明天",
+                "source_kind": "validated_model_extraction"
+              },
+              "start_time": {
+                "value": "14:00",
+                "source_turn": 1,
+                "source_quote": "14:00",
+                "source_kind": "validated_model_extraction"
+              },
+              "end_time": {
+                "value": "15:00",
+                "source_turn": 1,
+                "source_quote": "15:00",
+                "source_kind": "validated_model_extraction"
+              },
+              "attendees": {
+                "value": 10,
+                "source_turn": 1,
+                "source_quote": "10人",
+                "source_kind": "validated_model_extraction"
+              },
+              "room_code": {
+                "value": "A101",
+                "source_turn": 1,
+                "source_quote": "A101",
+                "source_kind": "validated_model_extraction"
+              }
+            },
+            "confirmation_state": "idle",
+            "confirmation_revision": 3,
+            "pending_draft": null,
+            "grant": null,
+            "denials": [],
+            "business_result": null,
+            "unknown_submission": null,
+            "candidate_rooms": [],
+            "retrieval_result": {
+              "status": "supported",
+              "query": "实验室场地预约规则 容量 时段 预约",
+              "query_tokens": [
+                "实验室",
+                "容量",
+                "时段"
+              ],
+              "index_hash": "4fbf686cec03f3a21c9faa36aec2c0d61e00d23610e973ee83924ef68cecdce0",
+              "chunks": [
+                {
+                  "chunk_id": "booking-rules:r1:245245278a2b83a9",
+                  "text": "时间与人数\n有效预约不能重叠；时段为左闭右开，相邻时段可以相接。",
+                  "document_id": 1,
+                  "source_ref": "knowledge/booking-rules-v1.md",
+                  "document_revision": 1,
+                  "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                  "chunk_hash": "245245278a2b83a94c7b1892d08353aff39898a9c11e81ce13b66380bd7b2fdb",
+                  "score": 2.419374
+                },
+                {
+                  "chunk_id": "booking-rules:r1:d90836b0c00ba2ef",
+                  "text": "澄清与确认\n缺日期、起止时间或人数时追问；“下午”不直接等同具体时段。",
+                  "document_id": 1,
+                  "source_ref": "knowledge/booking-rules-v1.md",
+                  "document_revision": 1,
+                  "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                  "chunk_hash": "d90836b0c00ba2ef329e89ea4a72b6666007de0e0cc87720a203075621f7d3d4",
+                  "score": 1.601078
+                },
+                {
+                  "chunk_id": "booking-rules:r1:6244fec99261083b",
+                  "text": "时间与人数\n人数为正整数，不超过所选场地容量。",
+                  "document_id": 1,
+                  "source_ref": "knowledge/booking-rules-v1.md",
+                  "document_revision": 1,
+                  "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                  "chunk_hash": "6244fec99261083b40684bed190abf59920594aa1a6af687e4ea17ab0fd69e35",
+                  "score": 1.071503
+                }
+              ]
+            },
+            "original_history": {
+              "message_count": 11,
+              "first_id": "8f2cdebc-e232-42b9-b096-a571986cfe81",
+              "last_id": "285206fa-d33d-42ed-9878-75bf2fb11f01"
+            },
+            "current_turn": 2,
+            "executed_tools_this_turn": []
+          },
+          "selected_message_ids": [
+            "285206fa-d33d-42ed-9878-75bf2fb11f01"
+          ]
+        }
+      },
+      {
+        "type": "tool",
+        "name": "update_booking_request",
+        "arguments": {
+          "date": "2026-10-27",
+          "start_time": "15:00",
+          "end_time": "16:00",
+          "source_quotes": {
+            "date": "后天",
+            "start_time": "15:00",
+            "end_time": "16:00"
+          }
+        },
+        "result": {
+          "status": "ok",
+          "fields": {
+            "date": {
+              "value": "2026-10-27",
+              "source_turn": 2,
+              "source_quote": "后天",
+              "source_kind": "validated_model_extraction"
+            },
+            "start_time": {
+              "value": "15:00",
+              "source_turn": 2,
+              "source_quote": "15:00",
+              "source_kind": "validated_model_extraction"
+            },
+            "end_time": {
+              "value": "16:00",
+              "source_turn": 2,
+              "source_quote": "16:00",
+              "source_kind": "validated_model_extraction"
+            },
+            "attendees": {
+              "value": 10,
+              "source_turn": 1,
+              "source_quote": "10人",
+              "source_kind": "validated_model_extraction"
+            },
+            "room_code": {
+              "value": "A101",
+              "source_turn": 1,
+              "source_quote": "A101",
+              "source_kind": "validated_model_extraction"
+            }
+          },
+          "changed": true
+        },
+        "evidence_id": "aba44d22-0cf5-4099-9e2b-ee0fd26f68fa",
+        "source_turn": 2
+      },
+      {
+        "type": "model",
+        "call_id": "41b69cf3-42b9-4e41-bd6c-902144b2d892",
+        "source_turn": 2,
+        "usage": {
+          "input_tokens": 3774,
+          "output_tokens": 121,
+          "total_tokens": 3895,
+          "input_token_details": {
+            "cache_read": 640
+          },
+          "output_token_details": {}
+        },
+        "estimated_peak_microusd": 1278,
+        "model_returned": "deepseek-flash",
+        "streamed": true,
+        "model_requests": 1
+      },
+      {
+        "type": "context_compacted",
+        "source_turn": 2,
+        "summary": {
+          "version": "structured-facts-v1",
+          "method": "conservative UTF-8 byte token upper estimate",
+          "estimated_upper_tokens": 14226,
+          "budget": 18000,
+          "dropped_from_model_context": 10,
+          "original_messages_retained": true,
+          "preserved_facts": {
+            "reference_clock": "2026-10-25T01:00:00+00:00",
+            "fields": {
+              "date": {
+                "value": "2026-10-27",
+                "source_turn": 2,
+                "source_quote": "后天",
+                "source_kind": "validated_model_extraction"
+              },
+              "start_time": {
+                "value": "15:00",
+                "source_turn": 2,
+                "source_quote": "15:00",
+                "source_kind": "validated_model_extraction"
+              },
+              "end_time": {
+                "value": "16:00",
+                "source_turn": 2,
+                "source_quote": "16:00",
+                "source_kind": "validated_model_extraction"
+              },
+              "attendees": {
+                "value": 10,
+                "source_turn": 1,
+                "source_quote": "10人",
+                "source_kind": "validated_model_extraction"
+              },
+              "room_code": {
+                "value": "A101",
+                "source_turn": 1,
+                "source_quote": "A101",
+                "source_kind": "validated_model_extraction"
+              }
+            },
+            "confirmation_state": "idle",
+            "confirmation_revision": 4,
+            "pending_draft": null,
+            "grant": null,
+            "denials": [],
+            "business_result": null,
+            "unknown_submission": null,
+            "candidate_rooms": [],
+            "retrieval_result": {
+              "status": "supported",
+              "query": "实验室场地预约规则 容量 时段 预约",
+              "query_tokens": [
+                "实验室",
+                "容量",
+                "时段"
+              ],
+              "index_hash": "4fbf686cec03f3a21c9faa36aec2c0d61e00d23610e973ee83924ef68cecdce0",
+              "chunks": [
+                {
+                  "chunk_id": "booking-rules:r1:245245278a2b83a9",
+                  "text": "时间与人数\n有效预约不能重叠；时段为左闭右开，相邻时段可以相接。",
+                  "document_id": 1,
+                  "source_ref": "knowledge/booking-rules-v1.md",
+                  "document_revision": 1,
+                  "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                  "chunk_hash": "245245278a2b83a94c7b1892d08353aff39898a9c11e81ce13b66380bd7b2fdb",
+                  "score": 2.419374
+                },
+                {
+                  "chunk_id": "booking-rules:r1:d90836b0c00ba2ef",
+                  "text": "澄清与确认\n缺日期、起止时间或人数时追问；“下午”不直接等同具体时段。",
+                  "document_id": 1,
+                  "source_ref": "knowledge/booking-rules-v1.md",
+                  "document_revision": 1,
+                  "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                  "chunk_hash": "d90836b0c00ba2ef329e89ea4a72b6666007de0e0cc87720a203075621f7d3d4",
+                  "score": 1.601078
+                },
+                {
+                  "chunk_id": "booking-rules:r1:6244fec99261083b",
+                  "text": "时间与人数\n人数为正整数，不超过所选场地容量。",
+                  "document_id": 1,
+                  "source_ref": "knowledge/booking-rules-v1.md",
+                  "document_revision": 1,
+                  "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                  "chunk_hash": "6244fec99261083b40684bed190abf59920594aa1a6af687e4ea17ab0fd69e35",
+                  "score": 1.071503
+                }
+              ]
+            },
+            "original_history": {
+              "message_count": 13,
+              "first_id": "8f2cdebc-e232-42b9-b096-a571986cfe81",
+              "last_id": "e2d01d96-b2fb-4606-80df-57613f67e523"
+            },
+            "current_turn": 2,
+            "executed_tools_this_turn": [
+              {
+                "name": "update_booking_request",
+                "status": "ok",
+                "code": null,
+                "commit_state": null,
+                "booking_id": null
+              }
+            ]
+          },
+          "selected_message_ids": [
+            "285206fa-d33d-42ed-9878-75bf2fb11f01",
+            "lc_run--01a17386-16f4-717b-8c51-95bf07a436f5",
+            "e2d01d96-b2fb-4606-80df-57613f67e523"
+          ]
+        }
+      },
+      {
+        "type": "tool",
+        "name": "query_availability",
+        "arguments": {
+          "start_at": "2026-10-27T15:00:00+08:00",
+          "end_at": "2026-10-27T16:00:00+08:00",
+          "attendees": 10,
+          "room_code": "A101"
+        },
+        "result": {
+          "status": "ok",
+          "code": "availability_checked",
+          "summary": "已查询当前空闲；提交时仍会重新校验。",
+          "data": {
+            "rooms": [
+              {
+                "room_code": "A101",
+                "capacity": 20
+              }
+            ],
+            "start_at": "2026-10-27T15:00:00+08:00",
+            "end_at": "2026-10-27T16:00:00+08:00",
+            "attendees": 10,
+            "truncated": false
+          },
+          "request_key": null,
+          "retryable": false,
+          "commit_state": "not_applicable",
+          "evidence_refs": []
+        },
+        "evidence_id": "2be51472-112e-40a2-947e-011098d66c1a",
+        "source_turn": 2
+      },
+      {
+        "type": "model",
+        "call_id": "62087afc-ace8-427c-ab41-8f1fa907722d",
+        "source_turn": 2,
+        "usage": {
+          "input_tokens": 4100,
+          "output_tokens": 122,
+          "total_tokens": 4222,
+          "input_token_details": {
+            "cache_read": 896
+          },
+          "output_token_details": {}
+        },
+        "estimated_peak_microusd": 1377,
+        "model_returned": "deepseek-flash",
+        "streamed": true,
+        "model_requests": 1
+      },
+      {
+        "type": "context_compacted",
+        "source_turn": 2,
+        "summary": {
+          "version": "structured-facts-v1",
+          "method": "conservative UTF-8 byte token upper estimate",
+          "estimated_upper_tokens": 15836,
+          "budget": 18000,
+          "dropped_from_model_context": 10,
+          "original_messages_retained": true,
+          "preserved_facts": {
+            "reference_clock": "2026-10-25T01:00:00+00:00",
+            "fields": {
+              "date": {
+                "value": "2026-10-27",
+                "source_turn": 2,
+                "source_quote": "后天",
+                "source_kind": "validated_model_extraction"
+              },
+              "start_time": {
+                "value": "15:00",
+                "source_turn": 2,
+                "source_quote": "15:00",
+                "source_kind": "validated_model_extraction"
+              },
+              "end_time": {
+                "value": "16:00",
+                "source_turn": 2,
+                "source_quote": "16:00",
+                "source_kind": "validated_model_extraction"
+              },
+              "attendees": {
+                "value": 10,
+                "source_turn": 1,
+                "source_quote": "10人",
+                "source_kind": "validated_model_extraction"
+              },
+              "room_code": {
+                "value": "A101",
+                "source_turn": 1,
+                "source_quote": "A101",
+                "source_kind": "validated_model_extraction"
+              }
+            },
+            "confirmation_state": "idle",
+            "confirmation_revision": 4,
+            "pending_draft": null,
+            "grant": null,
+            "denials": [],
+            "business_result": null,
+            "unknown_submission": null,
+            "candidate_rooms": [
+              {
+                "room_code": "A101",
+                "capacity": 20
+              }
+            ],
+            "retrieval_result": {
+              "status": "supported",
+              "query": "实验室场地预约规则 容量 时段 预约",
+              "query_tokens": [
+                "实验室",
+                "容量",
+                "时段"
+              ],
+              "index_hash": "4fbf686cec03f3a21c9faa36aec2c0d61e00d23610e973ee83924ef68cecdce0",
+              "chunks": [
+                {
+                  "chunk_id": "booking-rules:r1:245245278a2b83a9",
+                  "text": "时间与人数\n有效预约不能重叠；时段为左闭右开，相邻时段可以相接。",
+                  "document_id": 1,
+                  "source_ref": "knowledge/booking-rules-v1.md",
+                  "document_revision": 1,
+                  "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                  "chunk_hash": "245245278a2b83a94c7b1892d08353aff39898a9c11e81ce13b66380bd7b2fdb",
+                  "score": 2.419374
+                },
+                {
+                  "chunk_id": "booking-rules:r1:d90836b0c00ba2ef",
+                  "text": "澄清与确认\n缺日期、起止时间或人数时追问；“下午”不直接等同具体时段。",
+                  "document_id": 1,
+                  "source_ref": "knowledge/booking-rules-v1.md",
+                  "document_revision": 1,
+                  "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                  "chunk_hash": "d90836b0c00ba2ef329e89ea4a72b6666007de0e0cc87720a203075621f7d3d4",
+                  "score": 1.601078
+                },
+                {
+                  "chunk_id": "booking-rules:r1:6244fec99261083b",
+                  "text": "时间与人数\n人数为正整数，不超过所选场地容量。",
+                  "document_id": 1,
+                  "source_ref": "knowledge/booking-rules-v1.md",
+                  "document_revision": 1,
+                  "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                  "chunk_hash": "6244fec99261083b40684bed190abf59920594aa1a6af687e4ea17ab0fd69e35",
+                  "score": 1.071503
+                }
+              ]
+            },
+            "original_history": {
+              "message_count": 15,
+              "first_id": "8f2cdebc-e232-42b9-b096-a571986cfe81",
+              "last_id": "03235dd0-9776-47cc-8464-d4845f5c8b40"
+            },
+            "current_turn": 2,
+            "executed_tools_this_turn": [
+              {
+                "name": "update_booking_request",
+                "status": "ok",
+                "code": null,
+                "commit_state": null,
+                "booking_id": null
+              },
+              {
+                "name": "query_availability",
+                "status": "ok",
+                "code": "availability_checked",
+                "commit_state": "not_applicable",
+                "booking_id": null
+              }
+            ]
+          },
+          "selected_message_ids": [
+            "285206fa-d33d-42ed-9878-75bf2fb11f01",
+            "lc_run--01a17386-16f4-717b-8c51-95bf07a436f5",
+            "e2d01d96-b2fb-4606-80df-57613f67e523",
+            "lc_run--01a17386-1bed-7714-8446-7c3890e73333",
+            "03235dd0-9776-47cc-8464-d4845f5c8b40"
+          ]
+        }
+      },
+      {
+        "type": "tool",
+        "name": "preview_booking",
+        "arguments": {
+          "start_at": "2026-10-27T15:00:00+08:00",
+          "end_at": "2026-10-27T16:00:00+08:00",
+          "attendees": 10,
+          "room_code": "A101"
+        },
+        "result": {
+          "status": "ok",
+          "code": "confirmation_required",
+          "summary": "请展示完整草稿并等待用户明确确认。",
+          "data": {
+            "draft_id": "95759652-12ab-4d3a-864e-28975a24aebe",
+            "draft_hash": "c859f193da72643f0a8817363c5ea21093e6a7a78809e8cd2ff7e1e7f074e315",
+            "suggested_idempotency_key": "95759652-12ab-4d3a-864e-28975a24aebe",
+            "room_code": "A101",
+            "start_at": "2026-10-27T15:00:00+08:00",
+            "end_at": "2026-10-27T16:00:00+08:00",
+            "attendees": 10,
+            "status": "pending",
+            "expires_at": "2026-10-25T01:05:00Z"
+          },
+          "request_key": "95759652-12ab-4d3a-864e-28975a24aebe",
+          "retryable": false,
+          "commit_state": "not_committed",
+          "evidence_refs": [
+            "draft:95759652-12ab-4d3a-864e-28975a24aebe"
+          ]
+        },
+        "evidence_id": "4324317f-452e-4c55-bd32-16716f8ccf6a",
+        "source_turn": 2
+      },
+      {
+        "type": "model",
+        "call_id": "8295eb61-0ef5-4fcf-b353-149a14ec8662",
+        "source_turn": 2,
+        "usage": {
+          "input_tokens": 4765,
+          "output_tokens": 168,
+          "total_tokens": 4933,
+          "input_token_details": {
+            "cache_read": 896
+          },
+          "output_token_details": {}
+        },
+        "estimated_peak_microusd": 1632,
+        "model_returned": "deepseek-flash",
+        "streamed": true,
+        "model_requests": 1
+      },
+      {
+        "type": "context_compacted",
+        "source_turn": 2,
+        "summary": {
+          "version": "structured-facts-v1",
+          "method": "conservative UTF-8 byte token upper estimate",
+          "estimated_upper_tokens": 18088,
+          "budget": 18000,
+          "dropped_from_model_context": 10,
+          "original_messages_retained": true,
+          "preserved_facts": {
+            "reference_clock": "2026-10-25T01:00:00+00:00",
+            "fields": {
+              "date": {
+                "value": "2026-10-27",
+                "source_turn": 2,
+                "source_quote": "后天",
+                "source_kind": "validated_model_extraction"
+              },
+              "start_time": {
+                "value": "15:00",
+                "source_turn": 2,
+                "source_quote": "15:00",
+                "source_kind": "validated_model_extraction"
+              },
+              "end_time": {
+                "value": "16:00",
+                "source_turn": 2,
+                "source_quote": "16:00",
+                "source_kind": "validated_model_extraction"
+              },
+              "attendees": {
+                "value": 10,
+                "source_turn": 1,
+                "source_quote": "10人",
+                "source_kind": "validated_model_extraction"
+              },
+              "room_code": {
+                "value": "A101",
+                "source_turn": 1,
+                "source_quote": "A101",
+                "source_kind": "validated_model_extraction"
+              }
+            },
+            "confirmation_state": "pending",
+            "confirmation_revision": 5,
+            "pending_draft": {
+              "draft_id": "95759652-12ab-4d3a-864e-28975a24aebe",
+              "draft_hash": "c859f193da72643f0a8817363c5ea21093e6a7a78809e8cd2ff7e1e7f074e315",
+              "suggested_idempotency_key": "95759652-12ab-4d3a-864e-28975a24aebe",
+              "room_code": "A101",
+              "start_at": "2026-10-27T15:00:00+08:00",
+              "end_at": "2026-10-27T16:00:00+08:00",
+              "attendees": 10,
+              "status": "pending",
+              "expires_at": "2026-10-25T01:05:00Z"
+            },
+            "grant": null,
+            "denials": [],
+            "business_result": null,
+            "unknown_submission": null,
+            "candidate_rooms": [
+              {
+                "room_code": "A101",
+                "capacity": 20
+              }
+            ],
+            "retrieval_result": {
+              "status": "supported",
+              "query": "实验室场地预约规则 容量 时段 预约",
+              "query_tokens": [
+                "实验室",
+                "容量",
+                "时段"
+              ],
+              "index_hash": "4fbf686cec03f3a21c9faa36aec2c0d61e00d23610e973ee83924ef68cecdce0",
+              "chunks": [
+                {
+                  "chunk_id": "booking-rules:r1:245245278a2b83a9",
+                  "text": "时间与人数\n有效预约不能重叠；时段为左闭右开，相邻时段可以相接。",
+                  "document_id": 1,
+                  "source_ref": "knowledge/booking-rules-v1.md",
+                  "document_revision": 1,
+                  "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                  "chunk_hash": "245245278a2b83a94c7b1892d08353aff39898a9c11e81ce13b66380bd7b2fdb",
+                  "score": 2.419374
+                },
+                {
+                  "chunk_id": "booking-rules:r1:d90836b0c00ba2ef",
+                  "text": "澄清与确认\n缺日期、起止时间或人数时追问；“下午”不直接等同具体时段。",
+                  "document_id": 1,
+                  "source_ref": "knowledge/booking-rules-v1.md",
+                  "document_revision": 1,
+                  "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                  "chunk_hash": "d90836b0c00ba2ef329e89ea4a72b6666007de0e0cc87720a203075621f7d3d4",
+                  "score": 1.601078
+                },
+                {
+                  "chunk_id": "booking-rules:r1:6244fec99261083b",
+                  "text": "时间与人数\n人数为正整数，不超过所选场地容量。",
+                  "document_id": 1,
+                  "source_ref": "knowledge/booking-rules-v1.md",
+                  "document_revision": 1,
+                  "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                  "chunk_hash": "6244fec99261083b40684bed190abf59920594aa1a6af687e4ea17ab0fd69e35",
+                  "score": 1.071503
+                }
+              ]
+            },
+            "original_history": {
+              "message_count": 17,
+              "first_id": "8f2cdebc-e232-42b9-b096-a571986cfe81",
+              "last_id": "9539c14d-9529-470a-9037-5110a02a81f5"
+            },
+            "current_turn": 2,
+            "executed_tools_this_turn": [
+              {
+                "name": "update_booking_request",
+                "status": "ok",
+                "code": null,
+                "commit_state": null,
+                "booking_id": null
+              },
+              {
+                "name": "query_availability",
+                "status": "ok",
+                "code": "availability_checked",
+                "commit_state": "not_applicable",
+                "booking_id": null
+              },
+              {
+                "name": "preview_booking",
+                "status": "ok",
+                "code": "confirmation_required",
+                "commit_state": "not_committed",
+                "booking_id": null
+              }
+            ]
+          },
+          "selected_message_ids": [
+            "285206fa-d33d-42ed-9878-75bf2fb11f01",
+            "lc_run--01a17386-16f4-717b-8c51-95bf07a436f5",
+            "e2d01d96-b2fb-4606-80df-57613f67e523",
+            "lc_run--01a17386-1bed-7714-8446-7c3890e73333",
+            "03235dd0-9776-47cc-8464-d4845f5c8b40",
+            "lc_run--01a17386-2042-7131-9393-a5936f176b28",
+            "9539c14d-9529-470a-9037-5110a02a81f5"
+          ]
+        }
+      },
+      {
+        "type": "confirmation_decision",
+        "kind": "confirm",
+        "source_turn": 3,
+        "revision": 5
+      },
+      {
+        "type": "model",
+        "call_id": "36e878dc-d706-4e2c-a5c6-ed5ff0e03442",
+        "source_turn": 3,
+        "usage": {
+          "input_tokens": 3702,
+          "output_tokens": 156,
+          "total_tokens": 3858,
+          "input_token_details": {
+            "cache_read": 896
+          },
+          "output_token_details": {}
+        },
+        "estimated_peak_microusd": 1298,
+        "model_returned": "deepseek-flash",
+        "streamed": true,
+        "model_requests": 1
+      },
+      {
+        "type": "context_compacted",
+        "source_turn": 3,
+        "summary": {
+          "version": "structured-facts-v1",
+          "method": "conservative UTF-8 byte token upper estimate",
+          "estimated_upper_tokens": 12971,
+          "budget": 18000,
+          "dropped_from_model_context": 18,
+          "original_messages_retained": true,
+          "preserved_facts": {
+            "reference_clock": "2026-10-25T01:00:00+00:00",
+            "fields": {
+              "date": {
+                "value": "2026-10-27",
+                "source_turn": 2,
+                "source_quote": "后天",
+                "source_kind": "validated_model_extraction"
+              },
+              "start_time": {
+                "value": "15:00",
+                "source_turn": 2,
+                "source_quote": "15:00",
+                "source_kind": "validated_model_extraction"
+              },
+              "end_time": {
+                "value": "16:00",
+                "source_turn": 2,
+                "source_quote": "16:00",
+                "source_kind": "validated_model_extraction"
+              },
+              "attendees": {
+                "value": 10,
+                "source_turn": 1,
+                "source_quote": "10人",
+                "source_kind": "validated_model_extraction"
+              },
+              "room_code": {
+                "value": "A101",
+                "source_turn": 1,
+                "source_quote": "A101",
+                "source_kind": "validated_model_extraction"
+              }
+            },
+            "confirmation_state": "authorized",
+            "confirmation_revision": 5,
+            "pending_draft": {
+              "draft_id": "95759652-12ab-4d3a-864e-28975a24aebe",
+              "draft_hash": "c859f193da72643f0a8817363c5ea21093e6a7a78809e8cd2ff7e1e7f074e315",
+              "suggested_idempotency_key": "95759652-12ab-4d3a-864e-28975a24aebe",
+              "room_code": "A101",
+              "start_at": "2026-10-27T15:00:00+08:00",
+              "end_at": "2026-10-27T16:00:00+08:00",
+              "attendees": 10,
+              "status": "pending",
+              "expires_at": "2026-10-25T01:05:00Z"
+            },
+            "grant": {
+              "draft_id": "95759652-12ab-4d3a-864e-28975a24aebe",
+              "draft_hash": "c859f193da72643f0a8817363c5ea21093e6a7a78809e8cd2ff7e1e7f074e315",
+              "revision": 5,
+              "user_request_id": "605acd51-b118-4c1f-8d3f-a7b79eae48b1"
+            },
+            "denials": [],
+            "business_result": null,
+            "unknown_submission": null,
+            "candidate_rooms": [
+              {
+                "room_code": "A101",
+                "capacity": 20
+              }
+            ],
+            "retrieval_result": {
+              "status": "supported",
+              "query": "实验室场地预约规则 容量 时段 预约",
+              "query_tokens": [
+                "实验室",
+                "容量",
+                "时段"
+              ],
+              "index_hash": "4fbf686cec03f3a21c9faa36aec2c0d61e00d23610e973ee83924ef68cecdce0",
+              "chunks": [
+                {
+                  "chunk_id": "booking-rules:r1:245245278a2b83a9",
+                  "text": "时间与人数\n有效预约不能重叠；时段为左闭右开，相邻时段可以相接。",
+                  "document_id": 1,
+                  "source_ref": "knowledge/booking-rules-v1.md",
+                  "document_revision": 1,
+                  "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                  "chunk_hash": "245245278a2b83a94c7b1892d08353aff39898a9c11e81ce13b66380bd7b2fdb",
+                  "score": 2.419374
+                },
+                {
+                  "chunk_id": "booking-rules:r1:d90836b0c00ba2ef",
+                  "text": "澄清与确认\n缺日期、起止时间或人数时追问；“下午”不直接等同具体时段。",
+                  "document_id": 1,
+                  "source_ref": "knowledge/booking-rules-v1.md",
+                  "document_revision": 1,
+                  "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                  "chunk_hash": "d90836b0c00ba2ef329e89ea4a72b6666007de0e0cc87720a203075621f7d3d4",
+                  "score": 1.601078
+                },
+                {
+                  "chunk_id": "booking-rules:r1:6244fec99261083b",
+                  "text": "时间与人数\n人数为正整数，不超过所选场地容量。",
+                  "document_id": 1,
+                  "source_ref": "knowledge/booking-rules-v1.md",
+                  "document_revision": 1,
+                  "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                  "chunk_hash": "6244fec99261083b40684bed190abf59920594aa1a6af687e4ea17ab0fd69e35",
+                  "score": 1.071503
+                }
+              ]
+            },
+            "original_history": {
+              "message_count": 19,
+              "first_id": "8f2cdebc-e232-42b9-b096-a571986cfe81",
+              "last_id": "605acd51-b118-4c1f-8d3f-a7b79eae48b1"
+            },
+            "current_turn": 3,
+            "executed_tools_this_turn": []
+          },
+          "selected_message_ids": [
+            "605acd51-b118-4c1f-8d3f-a7b79eae48b1"
+          ]
+        }
+      },
+      {
+        "type": "tool",
+        "name": "confirm_booking",
+        "arguments": {
+          "draft_id": "95759652-12ab-4d3a-864e-28975a24aebe",
+          "draft_hash": "c859f193da72643f0a8817363c5ea21093e6a7a78809e8cd2ff7e1e7f074e315",
+          "idempotency_key": "95759652-12ab-4d3a-864e-28975a24aebe"
+        },
+        "result": {
+          "status": "ok",
+          "code": "booking_confirmed",
+          "summary": "已查到原预约事实。",
+          "data": {
+            "booking_id": "eac40999-b341-46bc-a55e-c5e46427d740",
+            "draft_id": "95759652-12ab-4d3a-864e-28975a24aebe",
+            "idempotency_key": "95759652-12ab-4d3a-864e-28975a24aebe",
+            "room_code": "A101",
+            "start_at": "2026-10-27T07:00:00Z",
+            "end_at": "2026-10-27T08:00:00Z",
+            "attendees": 10,
+            "status": "confirmed",
+            "created_at": "2026-10-25T14:45:37.935715Z"
+          },
+          "request_key": "95759652-12ab-4d3a-864e-28975a24aebe",
+          "retryable": false,
+          "commit_state": "committed",
+          "evidence_refs": [
+            "booking:eac40999-b341-46bc-a55e-c5e46427d740"
+          ]
+        },
+        "evidence_id": "0a73639b-2fed-4751-b642-4afc69c03238",
+        "source_turn": 3
+      },
+      {
+        "type": "model",
+        "call_id": "ce1a8124-93fb-46b4-99d0-19de08216358",
+        "source_turn": 3,
+        "usage": {
+          "input_tokens": 4144,
+          "output_tokens": 137,
+          "total_tokens": 4281,
+          "input_token_details": {
+            "cache_read": 896
+          },
+          "output_token_details": {}
+        },
+        "estimated_peak_microusd": 1408,
+        "model_returned": "deepseek-flash",
+        "streamed": true,
+        "model_requests": 1
+      },
+      {
+        "type": "context_compacted",
+        "source_turn": 3,
+        "summary": {
+          "version": "structured-facts-v1",
+          "method": "conservative UTF-8 byte token upper estimate",
+          "estimated_upper_tokens": 14897,
+          "budget": 18000,
+          "dropped_from_model_context": 18,
+          "original_messages_retained": true,
+          "preserved_facts": {
+            "reference_clock": "2026-10-25T01:00:00+00:00",
+            "fields": {
+              "date": {
+                "value": "2026-10-27",
+                "source_turn": 2,
+                "source_quote": "后天",
+                "source_kind": "validated_model_extraction"
+              },
+              "start_time": {
+                "value": "15:00",
+                "source_turn": 2,
+                "source_quote": "15:00",
+                "source_kind": "validated_model_extraction"
+              },
+              "end_time": {
+                "value": "16:00",
+                "source_turn": 2,
+                "source_quote": "16:00",
+                "source_kind": "validated_model_extraction"
+              },
+              "attendees": {
+                "value": 10,
+                "source_turn": 1,
+                "source_quote": "10人",
+                "source_kind": "validated_model_extraction"
+              },
+              "room_code": {
+                "value": "A101",
+                "source_turn": 1,
+                "source_quote": "A101",
+                "source_kind": "validated_model_extraction"
+              }
+            },
+            "confirmation_state": "consumed",
+            "confirmation_revision": 5,
+            "pending_draft": null,
+            "grant": null,
+            "denials": [],
+            "business_result": {
+              "status": "ok",
+              "code": "booking_confirmed",
+              "summary": "已查到原预约事实。",
+              "data": {
+                "booking_id": "eac40999-b341-46bc-a55e-c5e46427d740",
+                "draft_id": "95759652-12ab-4d3a-864e-28975a24aebe",
+                "idempotency_key": "95759652-12ab-4d3a-864e-28975a24aebe",
+                "room_code": "A101",
+                "start_at": "2026-10-27T07:00:00Z",
+                "end_at": "2026-10-27T08:00:00Z",
+                "attendees": 10,
+                "status": "confirmed",
+                "created_at": "2026-10-25T14:45:37.935715Z"
+              },
+              "request_key": "95759652-12ab-4d3a-864e-28975a24aebe",
+              "retryable": false,
+              "commit_state": "committed",
+              "evidence_refs": [
+                "booking:eac40999-b341-46bc-a55e-c5e46427d740"
+              ]
+            },
+            "unknown_submission": null,
+            "candidate_rooms": [
+              {
+                "room_code": "A101",
+                "capacity": 20
+              }
+            ],
+            "retrieval_result": {
+              "status": "supported",
+              "query": "实验室场地预约规则 容量 时段 预约",
+              "query_tokens": [
+                "实验室",
+                "容量",
+                "时段"
+              ],
+              "index_hash": "4fbf686cec03f3a21c9faa36aec2c0d61e00d23610e973ee83924ef68cecdce0",
+              "chunks": [
+                {
+                  "chunk_id": "booking-rules:r1:245245278a2b83a9",
+                  "text": "时间与人数\n有效预约不能重叠；时段为左闭右开，相邻时段可以相接。",
+                  "document_id": 1,
+                  "source_ref": "knowledge/booking-rules-v1.md",
+                  "document_revision": 1,
+                  "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                  "chunk_hash": "245245278a2b83a94c7b1892d08353aff39898a9c11e81ce13b66380bd7b2fdb",
+                  "score": 2.419374
+                },
+                {
+                  "chunk_id": "booking-rules:r1:d90836b0c00ba2ef",
+                  "text": "澄清与确认\n缺日期、起止时间或人数时追问；“下午”不直接等同具体时段。",
+                  "document_id": 1,
+                  "source_ref": "knowledge/booking-rules-v1.md",
+                  "document_revision": 1,
+                  "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                  "chunk_hash": "d90836b0c00ba2ef329e89ea4a72b6666007de0e0cc87720a203075621f7d3d4",
+                  "score": 1.601078
+                },
+                {
+                  "chunk_id": "booking-rules:r1:6244fec99261083b",
+                  "text": "时间与人数\n人数为正整数，不超过所选场地容量。",
+                  "document_id": 1,
+                  "source_ref": "knowledge/booking-rules-v1.md",
+                  "document_revision": 1,
+                  "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                  "chunk_hash": "6244fec99261083b40684bed190abf59920594aa1a6af687e4ea17ab0fd69e35",
+                  "score": 1.071503
+                }
+              ]
+            },
+            "original_history": {
+              "message_count": 21,
+              "first_id": "8f2cdebc-e232-42b9-b096-a571986cfe81",
+              "last_id": "a5f0a7b4-de09-4660-af05-bb2bac29c191"
+            },
+            "current_turn": 3,
+            "executed_tools_this_turn": [
+              {
+                "name": "confirm_booking",
+                "status": "ok",
+                "code": "booking_confirmed",
+                "commit_state": "committed",
+                "booking_id": "eac40999-b341-46bc-a55e-c5e46427d740"
+              }
+            ]
+          },
+          "selected_message_ids": [
+            "605acd51-b118-4c1f-8d3f-a7b79eae48b1",
+            "lc_run--01a17386-30b1-77a5-8546-d8dad1018a87",
+            "a5f0a7b4-de09-4660-af05-bb2bac29c191"
+          ]
+        }
+      }
+    ],
+    "last_error": null,
+    "next_nodes": []
+  },
+  "state": {
+    "messages": [
+      {
+        "type": "human",
+        "data": {
+          "content": "请预约明天A101，14:00到15:00，10人。",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "human",
+          "name": null,
+          "id": "8f2cdebc-e232-42b9-b096-a571986cfe81"
+        }
+      },
+      {
+        "type": "ai",
+        "data": {
+          "content": "",
+          "additional_kwargs": {},
+          "response_metadata": {
+            "model_provider": "deepseek",
+            "finish_reason": "tool_calls",
+            "model_name": "deepseek-flash",
+            "system_fingerprint": "e72d3c7f663d3e1383b00b3884cb4501"
+          },
+          "type": "ai",
+          "name": null,
+          "id": "lc_run--01a17385-fcee-7193-84d7-1ba448d08f5c",
+          "tool_calls": [
+            {
+              "name": "update_booking_request",
+              "args": {
+                "date": "2026-10-26",
+                "start_time": "14:00",
+                "end_time": "15:00",
+                "attendees": 10,
+                "room_code": "A101",
+                "source_quotes": {
+                  "date": "明天",
+                  "start_time": "14:00",
+                  "end_time": "15:00",
+                  "attendees": "10人",
+                  "room_code": "A101"
+                }
+              },
+              "id": "call_00_ovXhRhj9qR5oxyDt9H663880",
+              "type": "tool_call"
+            }
+          ],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 2585,
+            "output_tokens": 175,
+            "total_tokens": 2760,
+            "input_token_details": {
+              "cache_read": 768
+            },
+            "output_token_details": {}
+          }
+        }
+      },
+      {
+        "type": "tool",
+        "data": {
+          "content": "{\"status\": \"ok\", \"fields\": {\"date\": {\"value\": \"2026-10-26\", \"source_turn\": 1, \"source_quote\": \"明天\", \"source_kind\": \"validated_model_extraction\"}, \"start_time\": {\"value\": \"14:00\", \"source_turn\": 1, \"source_quote\": \"14:00\", \"source_kind\": \"validated_model_extraction\"}, \"end_time\": {\"value\": \"15:00\", \"source_turn\": 1, \"source_quote\": \"15:00\", \"source_kind\": \"validated_model_extraction\"}, \"attendees\": {\"value\": 10, \"source_turn\": 1, \"source_quote\": \"10人\", \"source_kind\": \"validated_model_extraction\"}, \"room_code\": {\"value\": \"A101\", \"source_turn\": 1, \"source_quote\": \"A101\", \"source_kind\": \"validated_model_extraction\"}}, \"changed\": true}",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "tool",
+          "name": null,
+          "id": "258619b5-8a88-4045-8288-36e0fd0b0c8f",
+          "tool_call_id": "call_00_ovXhRhj9qR5oxyDt9H663880",
+          "artifact": null,
+          "status": "success"
+        }
+      },
+      {
+        "type": "ai",
+        "data": {
+          "content": "",
+          "additional_kwargs": {},
+          "response_metadata": {
+            "model_provider": "deepseek",
+            "finish_reason": "tool_calls",
+            "model_name": "deepseek-flash",
+            "system_fingerprint": "e72d3c7f663d3e1383b00b3884cb4501"
+          },
+          "type": "ai",
+          "name": null,
+          "id": "lc_run--01a17386-01e9-73c4-b56a-d9654d232626",
+          "tool_calls": [
+            {
+              "name": "retrieve_rules",
+              "args": {
+                "query": "实验室场地预约规则 容量 时段 预约"
+              },
+              "id": "call_00_LqlTnFR4DYWH5A1zmcnr9445",
+              "type": "tool_call"
+            }
+          ],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 3233,
+            "output_tokens": 48,
+            "total_tokens": 3281,
+            "input_token_details": {
+              "cache_read": 896
+            },
+            "output_token_details": {}
+          }
+        }
+      },
+      {
+        "type": "tool",
+        "data": {
+          "content": "{\"status\": \"supported\", \"query\": \"实验室场地预约规则 容量 时段 预约\", \"query_tokens\": [\"实验室\", \"容量\", \"时段\"], \"index_hash\": \"4fbf686cec03f3a21c9faa36aec2c0d61e00d23610e973ee83924ef68cecdce0\", \"chunks\": [{\"chunk_id\": \"booking-rules:r1:245245278a2b83a9\", \"text\": \"时间与人数\\n有效预约不能重叠；时段为左闭右开，相邻时段可以相接。\", \"document_id\": 1, \"source_ref\": \"knowledge/booking-rules-v1.md\", \"document_revision\": 1, \"document_hash\": \"43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3\", \"chunk_hash\": \"245245278a2b83a94c7b1892d08353aff39898a9c11e81ce13b66380bd7b2fdb\", \"score\": 2.419374}, {\"chunk_id\": \"booking-rules:r1:d90836b0c00ba2ef\", \"text\": \"澄清与确认\\n缺日期、起止时间或人数时追问；“下午”不直接等同具体时段。\", \"document_id\": 1, \"source_ref\": \"knowledge/booking-rules-v1.md\", \"document_revision\": 1, \"document_hash\": \"43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3\", \"chunk_hash\": \"d90836b0c00ba2ef329e89ea4a72b6666007de0e0cc87720a203075621f7d3d4\", \"score\": 1.601078}, {\"chunk_id\": \"booking-rules:r1:6244fec99261083b\", \"text\": \"时间与人数\\n人数为正整数，不超过所选场地容量。\", \"document_id\": 1, \"source_ref\": \"knowledge/booking-rules-v1.md\", \"document_revision\": 1, \"document_hash\": \"43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3\", \"chunk_hash\": \"6244fec99261083b40684bed190abf59920594aa1a6af687e4ea17ab0fd69e35\", \"score\": 1.071503}]}",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "tool",
+          "name": null,
+          "id": "5c8a2eae-e843-4431-9078-3756d6ece826",
+          "tool_call_id": "call_00_LqlTnFR4DYWH5A1zmcnr9445",
+          "artifact": null,
+          "status": "success"
+        }
+      },
+      {
+        "type": "ai",
+        "data": {
+          "content": "",
+          "additional_kwargs": {},
+          "response_metadata": {
+            "model_provider": "deepseek",
+            "finish_reason": "tool_calls",
+            "model_name": "deepseek-flash",
+            "system_fingerprint": "e72d3c7f663d3e1383b00b3884cb4501"
+          },
+          "type": "ai",
+          "name": null,
+          "id": "lc_run--01a17386-0612-73ef-9164-820f92591597",
+          "tool_calls": [
+            {
+              "name": "query_availability",
+              "args": {
+                "start_at": "2026-10-26T14:00:00+08:00",
+                "end_at": "2026-10-26T15:00:00+08:00",
+                "attendees": 10,
+                "room_code": "A101"
+              },
+              "id": "call_00_NMHvvtPPELbDFOXWNf6S4013",
+              "type": "tool_call"
+            }
+          ],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 4521,
+            "output_tokens": 121,
+            "total_tokens": 4642,
+            "input_token_details": {
+              "cache_read": 896
+            },
+            "output_token_details": {}
+          }
+        }
+      },
+      {
+        "type": "tool",
+        "data": {
+          "content": "{\"status\": \"ok\", \"code\": \"availability_checked\", \"summary\": \"已查询当前空闲；提交时仍会重新校验。\", \"data\": {\"rooms\": [{\"room_code\": \"A101\", \"capacity\": 20}], \"start_at\": \"2026-10-26T14:00:00+08:00\", \"end_at\": \"2026-10-26T15:00:00+08:00\", \"attendees\": 10, \"truncated\": false}, \"request_key\": null, \"retryable\": false, \"commit_state\": \"not_applicable\", \"evidence_refs\": []}",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "tool",
+          "name": null,
+          "id": "9d885693-b6ce-47fb-b0e7-c62b840368eb",
+          "tool_call_id": "call_00_NMHvvtPPELbDFOXWNf6S4013",
+          "artifact": null,
+          "status": "success"
+        }
+      },
+      {
+        "type": "ai",
+        "data": {
+          "content": "",
+          "additional_kwargs": {},
+          "response_metadata": {
+            "model_provider": "deepseek",
+            "finish_reason": "tool_calls",
+            "model_name": "deepseek-flash",
+            "system_fingerprint": "e72d3c7f663d3e1383b00b3884cb4501"
+          },
+          "type": "ai",
+          "name": null,
+          "id": "lc_run--01a17386-0ad8-715d-b00b-357843acf57d",
+          "tool_calls": [
+            {
+              "name": "preview_booking",
+              "args": {
+                "start_at": "2026-10-26T14:00:00+08:00",
+                "end_at": "2026-10-26T15:00:00+08:00",
+                "attendees": 10,
+                "room_code": "A101"
+              },
+              "id": "call_00_R1H6gyELTCor2wBMIlGn2920",
+              "type": "tool_call"
+            }
+          ],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 4845,
+            "output_tokens": 122,
+            "total_tokens": 4967,
+            "input_token_details": {
+              "cache_read": 1024
+            },
+            "output_token_details": {}
+          }
+        }
+      },
+      {
+        "type": "tool",
+        "data": {
+          "content": "{\"status\": \"ok\", \"code\": \"confirmation_required\", \"summary\": \"请展示完整草稿并等待用户明确确认。\", \"data\": {\"draft_id\": \"ba347f54-b901-4242-8af4-04a482a197a2\", \"draft_hash\": \"517a7ec47f018887b4cbe3fd21af3f64b847390c0a8a7e489658cfa7bdab666f\", \"suggested_idempotency_key\": \"ba347f54-b901-4242-8af4-04a482a197a2\", \"room_code\": \"A101\", \"start_at\": \"2026-10-26T14:00:00+08:00\", \"end_at\": \"2026-10-26T15:00:00+08:00\", \"attendees\": 10, \"status\": \"pending\", \"expires_at\": \"2026-10-25T01:05:00Z\"}, \"request_key\": \"ba347f54-b901-4242-8af4-04a482a197a2\", \"retryable\": false, \"commit_state\": \"not_committed\", \"evidence_refs\": [\"draft:ba347f54-b901-4242-8af4-04a482a197a2\"]}",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "tool",
+          "name": null,
+          "id": "c733469d-43d2-4ec3-8dae-260ddbfc382b",
+          "tool_call_id": "call_00_R1H6gyELTCor2wBMIlGn2920",
+          "artifact": null,
+          "status": "success"
+        }
+      },
+      {
+        "type": "ai",
+        "data": {
+          "content": "待确认草稿（尚未提交，非预约成功）：\n\n- 场地：A101（容量20）\n- 日期：2026-10-26（明天）\n- 时间：14:00–15:00（Asia/Shanghai）\n- 人数：10人\n- 状态：待确认，草稿有效期至北京时间 2026-10-25 09:05\n\n该时段已查询为空闲，但提交时会重新校验。请通过确认入口完成确认后我才会提交。\n\n规则依据：人数不超过场地容量、时段左闭右开且不与有效预约重叠（booking-rules:r1:6244fec99261083b、booking-rules:r1:245245278a2b83a9，document_revision 1）。",
+          "additional_kwargs": {},
+          "response_metadata": {
+            "model_provider": "deepseek",
+            "finish_reason": "stop",
+            "model_name": "deepseek-flash",
+            "system_fingerprint": "e72d3c7f663d3e1383b00b3884cb4501"
+          },
+          "type": "ai",
+          "name": null,
+          "id": "lc_run--01a17386-0edc-7173-a61b-5abd9e8da89d",
+          "tool_calls": [],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 5510,
+            "output_tokens": 165,
+            "total_tokens": 5675,
+            "input_token_details": {
+              "cache_read": 896
+            },
+            "output_token_details": {}
+          }
+        }
+      },
+      {
+        "type": "human",
+        "data": {
+          "content": "改成后天15:00到16:00，其他保持。",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "human",
+          "name": null,
+          "id": "285206fa-d33d-42ed-9878-75bf2fb11f01"
+        }
+      },
+      {
+        "type": "ai",
+        "data": {
+          "content": "",
+          "additional_kwargs": {},
+          "response_metadata": {
+            "model_provider": "deepseek",
+            "finish_reason": "tool_calls",
+            "model_name": "deepseek-flash",
+            "system_fingerprint": "e72d3c7f663d3e1383b00b3884cb4501"
+          },
+          "type": "ai",
+          "name": null,
+          "id": "lc_run--01a17386-16f4-717b-8c51-95bf07a436f5",
+          "tool_calls": [
+            {
+              "name": "update_booking_request",
+              "args": {
+                "date": "2026-10-27",
+                "start_time": "15:00",
+                "end_time": "16:00",
+                "source_quotes": {
+                  "date": "后天",
+                  "start_time": "15:00",
+                  "end_time": "16:00"
+                }
+              },
+              "id": "call_00_qaEDd3EmIalodX60vtTO9868",
+              "type": "tool_call"
+            }
+          ],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 3385,
+            "output_tokens": 124,
+            "total_tokens": 3509,
+            "input_token_details": {
+              "cache_read": 896
+            },
+            "output_token_details": {}
+          }
+        }
+      },
+      {
+        "type": "tool",
+        "data": {
+          "content": "{\"status\": \"ok\", \"fields\": {\"date\": {\"value\": \"2026-10-27\", \"source_turn\": 2, \"source_quote\": \"后天\", \"source_kind\": \"validated_model_extraction\"}, \"start_time\": {\"value\": \"15:00\", \"source_turn\": 2, \"source_quote\": \"15:00\", \"source_kind\": \"validated_model_extraction\"}, \"end_time\": {\"value\": \"16:00\", \"source_turn\": 2, \"source_quote\": \"16:00\", \"source_kind\": \"validated_model_extraction\"}, \"attendees\": {\"value\": 10, \"source_turn\": 1, \"source_quote\": \"10人\", \"source_kind\": \"validated_model_extraction\"}, \"room_code\": {\"value\": \"A101\", \"source_turn\": 1, \"source_quote\": \"A101\", \"source_kind\": \"validated_model_extraction\"}}, \"changed\": true}",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "tool",
+          "name": null,
+          "id": "e2d01d96-b2fb-4606-80df-57613f67e523",
+          "tool_call_id": "call_00_qaEDd3EmIalodX60vtTO9868",
+          "artifact": null,
+          "status": "success"
+        }
+      },
+      {
+        "type": "ai",
+        "data": {
+          "content": "",
+          "additional_kwargs": {},
+          "response_metadata": {
+            "model_provider": "deepseek",
+            "finish_reason": "tool_calls",
+            "model_name": "deepseek-flash",
+            "system_fingerprint": "e72d3c7f663d3e1383b00b3884cb4501"
+          },
+          "type": "ai",
+          "name": null,
+          "id": "lc_run--01a17386-1bed-7714-8446-7c3890e73333",
+          "tool_calls": [
+            {
+              "name": "query_availability",
+              "args": {
+                "start_at": "2026-10-27T15:00:00+08:00",
+                "end_at": "2026-10-27T16:00:00+08:00",
+                "attendees": 10,
+                "room_code": "A101"
+              },
+              "id": "call_00_MRIMTVulfPmOS3wXlL9D0521",
+              "type": "tool_call"
+            }
+          ],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 3774,
+            "output_tokens": 121,
+            "total_tokens": 3895,
+            "input_token_details": {
+              "cache_read": 640
+            },
+            "output_token_details": {}
+          }
+        }
+      },
+      {
+        "type": "tool",
+        "data": {
+          "content": "{\"status\": \"ok\", \"code\": \"availability_checked\", \"summary\": \"已查询当前空闲；提交时仍会重新校验。\", \"data\": {\"rooms\": [{\"room_code\": \"A101\", \"capacity\": 20}], \"start_at\": \"2026-10-27T15:00:00+08:00\", \"end_at\": \"2026-10-27T16:00:00+08:00\", \"attendees\": 10, \"truncated\": false}, \"request_key\": null, \"retryable\": false, \"commit_state\": \"not_applicable\", \"evidence_refs\": []}",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "tool",
+          "name": null,
+          "id": "03235dd0-9776-47cc-8464-d4845f5c8b40",
+          "tool_call_id": "call_00_MRIMTVulfPmOS3wXlL9D0521",
+          "artifact": null,
+          "status": "success"
+        }
+      },
+      {
+        "type": "ai",
+        "data": {
+          "content": "",
+          "additional_kwargs": {},
+          "response_metadata": {
+            "model_provider": "deepseek",
+            "finish_reason": "tool_calls",
+            "model_name": "deepseek-flash",
+            "system_fingerprint": "e72d3c7f663d3e1383b00b3884cb4501"
+          },
+          "type": "ai",
+          "name": null,
+          "id": "lc_run--01a17386-2042-7131-9393-a5936f176b28",
+          "tool_calls": [
+            {
+              "name": "preview_booking",
+              "args": {
+                "start_at": "2026-10-27T15:00:00+08:00",
+                "end_at": "2026-10-27T16:00:00+08:00",
+                "attendees": 10,
+                "room_code": "A101"
+              },
+              "id": "call_00_rGFYfeL8WlHxwXeBQax84424",
+              "type": "tool_call"
+            }
+          ],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 4100,
+            "output_tokens": 122,
+            "total_tokens": 4222,
+            "input_token_details": {
+              "cache_read": 896
+            },
+            "output_token_details": {}
+          }
+        }
+      },
+      {
+        "type": "tool",
+        "data": {
+          "content": "{\"status\": \"ok\", \"code\": \"confirmation_required\", \"summary\": \"请展示完整草稿并等待用户明确确认。\", \"data\": {\"draft_id\": \"95759652-12ab-4d3a-864e-28975a24aebe\", \"draft_hash\": \"c859f193da72643f0a8817363c5ea21093e6a7a78809e8cd2ff7e1e7f074e315\", \"suggested_idempotency_key\": \"95759652-12ab-4d3a-864e-28975a24aebe\", \"room_code\": \"A101\", \"start_at\": \"2026-10-27T15:00:00+08:00\", \"end_at\": \"2026-10-27T16:00:00+08:00\", \"attendees\": 10, \"status\": \"pending\", \"expires_at\": \"2026-10-25T01:05:00Z\"}, \"request_key\": \"95759652-12ab-4d3a-864e-28975a24aebe\", \"retryable\": false, \"commit_state\": \"not_committed\", \"evidence_refs\": [\"draft:95759652-12ab-4d3a-864e-28975a24aebe\"]}",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "tool",
+          "name": null,
+          "id": "9539c14d-9529-470a-9037-5110a02a81f5",
+          "tool_call_id": "call_00_rGFYfeL8WlHxwXeBQax84424",
+          "artifact": null,
+          "status": "success"
+        }
+      },
+      {
+        "type": "ai",
+        "data": {
+          "content": "已按新时间生成待确认草稿（**尚未提交，未预约成功**）：\n\n- 场地：A101（容量 20 人）\n- 日期：2026-10-27（后天）\n- 时间：15:00–16:00（Asia/Shanghai）\n- 人数：10 人\n- 状态：待确认（草稿有效期至 2026-10-25 09:05 当地时间）\n\n依据：人数不超过容量、时段左闭右开——`booking-rules:r1:6244fec99261083b`、`booking-rules:r1:245245278a2b83a9`（document_revision 1）。\n\n请通过确认入口操作确认；确认后我才会提交并返回真实预约号。",
+          "additional_kwargs": {},
+          "response_metadata": {
+            "model_provider": "deepseek",
+            "finish_reason": "stop",
+            "model_name": "deepseek-flash",
+            "system_fingerprint": "e72d3c7f663d3e1383b00b3884cb4501"
+          },
+          "type": "ai",
+          "name": null,
+          "id": "lc_run--01a17386-24b3-7004-ad68-ee01127d6a66",
+          "tool_calls": [],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 4765,
+            "output_tokens": 168,
+            "total_tokens": 4933,
+            "input_token_details": {
+              "cache_read": 896
+            },
+            "output_token_details": {}
+          }
+        }
+      },
+      {
+        "type": "human",
+        "data": {
+          "content": "确认当前完整草稿，请提交。",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "human",
+          "name": null,
+          "id": "605acd51-b118-4c1f-8d3f-a7b79eae48b1"
+        }
+      },
+      {
+        "type": "ai",
+        "data": {
+          "content": "",
+          "additional_kwargs": {},
+          "response_metadata": {
+            "model_provider": "deepseek",
+            "finish_reason": "tool_calls",
+            "model_name": "deepseek-flash",
+            "system_fingerprint": "e72d3c7f663d3e1383b00b3884cb4501"
+          },
+          "type": "ai",
+          "name": null,
+          "id": "lc_run--01a17386-30b1-77a5-8546-d8dad1018a87",
+          "tool_calls": [
+            {
+              "name": "confirm_booking",
+              "args": {
+                "draft_id": "95759652-12ab-4d3a-864e-28975a24aebe",
+                "draft_hash": "c859f193da72643f0a8817363c5ea21093e6a7a78809e8cd2ff7e1e7f074e315",
+                "idempotency_key": "95759652-12ab-4d3a-864e-28975a24aebe"
+              },
+              "id": "call_00_VkgwXYOIkuOE9qdhkf5W4648",
+              "type": "tool_call"
+            }
+          ],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 3702,
+            "output_tokens": 156,
+            "total_tokens": 3858,
+            "input_token_details": {
+              "cache_read": 896
+            },
+            "output_token_details": {}
+          }
+        }
+      },
+      {
+        "type": "tool",
+        "data": {
+          "content": "{\"status\": \"ok\", \"code\": \"booking_confirmed\", \"summary\": \"已查到原预约事实。\", \"data\": {\"booking_id\": \"eac40999-b341-46bc-a55e-c5e46427d740\", \"draft_id\": \"95759652-12ab-4d3a-864e-28975a24aebe\", \"idempotency_key\": \"95759652-12ab-4d3a-864e-28975a24aebe\", \"room_code\": \"A101\", \"start_at\": \"2026-10-27T07:00:00Z\", \"end_at\": \"2026-10-27T08:00:00Z\", \"attendees\": 10, \"status\": \"confirmed\", \"created_at\": \"2026-10-25T14:45:37.935715Z\"}, \"request_key\": \"95759652-12ab-4d3a-864e-28975a24aebe\", \"retryable\": false, \"commit_state\": \"committed\", \"evidence_refs\": [\"booking:eac40999-b341-46bc-a55e-c5e46427d740\"]}",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "tool",
+          "name": null,
+          "id": "a5f0a7b4-de09-4660-af05-bb2bac29c191",
+          "tool_call_id": "call_00_VkgwXYOIkuOE9qdhkf5W4648",
+          "artifact": null,
+          "status": "success"
+        }
+      },
+      {
+        "type": "ai",
+        "data": {
+          "content": "预约已提交成功。\n\n- 场地：A101\n- 日期：2026-10-27（Asia/Shanghai）\n- 时间：15:00 – 16:00\n- 人数：10 人\n- 状态：confirmed（已确认）\n- 预约号：eac40999-b341-46bc-a55e-c5e46427d740\n\n依据：人数不超过所选场地容量、时段为左闭右开（booking-rules:r1:6244fec99261083b、booking-rules:r1:245245278a2b83a9，document_revision 1）。",
+          "additional_kwargs": {},
+          "response_metadata": {
+            "model_provider": "deepseek",
+            "finish_reason": "stop",
+            "model_name": "deepseek-flash",
+            "system_fingerprint": "e72d3c7f663d3e1383b00b3884cb4501"
+          },
+          "type": "ai",
+          "name": null,
+          "id": "lc_run--01a17386-3629-7145-810c-d1ee07b8483a",
+          "tool_calls": [],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 4144,
+            "output_tokens": 137,
+            "total_tokens": 4281,
+            "input_token_details": {
+              "cache_read": 896
+            },
+            "output_token_details": {}
+          }
+        }
+      }
+    ],
+    "session_id": "9302e9fc-df7b-40b4-b124-df10a11c024f",
+    "actor_key": "user:1",
+    "scope_id": "test:t04:live:a3dd5f46a9ce4ff7a650523c652bfe46",
+    "reference_clock": "2026-10-25T01:00:00+00:00",
+    "version_id": 1,
+    "fields": {
+      "date": {
+        "value": "2026-10-27",
+        "source_turn": 2,
+        "source_quote": "后天",
+        "source_kind": "validated_model_extraction"
+      },
+      "start_time": {
+        "value": "15:00",
+        "source_turn": 2,
+        "source_quote": "15:00",
+        "source_kind": "validated_model_extraction"
+      },
+      "end_time": {
+        "value": "16:00",
+        "source_turn": 2,
+        "source_quote": "16:00",
+        "source_kind": "validated_model_extraction"
+      },
+      "attendees": {
+        "value": 10,
+        "source_turn": 1,
+        "source_quote": "10人",
+        "source_kind": "validated_model_extraction"
+      },
+      "room_code": {
+        "value": "A101",
+        "source_turn": 1,
+        "source_quote": "A101",
+        "source_kind": "validated_model_extraction"
+      }
+    },
+    "turn_index": 3,
+    "last_user_text": "确认当前完整草稿，请提交。",
+    "pending_draft": null,
+    "confirmation_state": "consumed",
+    "confirmation_revision": 5,
+    "grant": null,
+    "denials": [],
+    "business_result": {
+      "status": "ok",
+      "code": "booking_confirmed",
+      "summary": "已查到原预约事实。",
+      "data": {
+        "booking_id": "eac40999-b341-46bc-a55e-c5e46427d740",
+        "draft_id": "95759652-12ab-4d3a-864e-28975a24aebe",
+        "idempotency_key": "95759652-12ab-4d3a-864e-28975a24aebe",
+        "room_code": "A101",
+        "start_at": "2026-10-27T07:00:00Z",
+        "end_at": "2026-10-27T08:00:00Z",
+        "attendees": 10,
+        "status": "confirmed",
+        "created_at": "2026-10-25T14:45:37.935715Z"
+      },
+      "request_key": "95759652-12ab-4d3a-864e-28975a24aebe",
+      "retryable": false,
+      "commit_state": "committed",
+      "evidence_refs": [
+        "booking:eac40999-b341-46bc-a55e-c5e46427d740"
+      ]
+    },
+    "unknown_submission": null,
+    "candidate_rooms": [
+      {
+        "room_code": "A101",
+        "capacity": 20
+      }
+    ],
+    "retrieval_result": {
+      "status": "supported",
+      "query": "实验室场地预约规则 容量 时段 预约",
+      "query_tokens": [
+        "实验室",
+        "容量",
+        "时段"
+      ],
+      "index_hash": "4fbf686cec03f3a21c9faa36aec2c0d61e00d23610e973ee83924ef68cecdce0",
+      "chunks": [
+        {
+          "chunk_id": "booking-rules:r1:245245278a2b83a9",
+          "text": "时间与人数\n有效预约不能重叠；时段为左闭右开，相邻时段可以相接。",
+          "document_id": 1,
+          "source_ref": "knowledge/booking-rules-v1.md",
+          "document_revision": 1,
+          "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+          "chunk_hash": "245245278a2b83a94c7b1892d08353aff39898a9c11e81ce13b66380bd7b2fdb",
+          "score": 2.419374
+        },
+        {
+          "chunk_id": "booking-rules:r1:d90836b0c00ba2ef",
+          "text": "澄清与确认\n缺日期、起止时间或人数时追问；“下午”不直接等同具体时段。",
+          "document_id": 1,
+          "source_ref": "knowledge/booking-rules-v1.md",
+          "document_revision": 1,
+          "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+          "chunk_hash": "d90836b0c00ba2ef329e89ea4a72b6666007de0e0cc87720a203075621f7d3d4",
+          "score": 1.601078
+        },
+        {
+          "chunk_id": "booking-rules:r1:6244fec99261083b",
+          "text": "时间与人数\n人数为正整数，不超过所选场地容量。",
+          "document_id": 1,
+          "source_ref": "knowledge/booking-rules-v1.md",
+          "document_revision": 1,
+          "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+          "chunk_hash": "6244fec99261083b40684bed190abf59920594aa1a6af687e4ea17ab0fd69e35",
+          "score": 1.071503
+        }
+      ]
+    },
+    "evidence_refs": [
+      "booking-rules:r1:245245278a2b83a9",
+      "booking-rules:r1:d90836b0c00ba2ef",
+      "booking-rules:r1:6244fec99261083b"
+    ],
+    "audit": [
+      {
+        "type": "model",
+        "call_id": "af208b25-2486-46be-b15e-08a95ada1dc7",
+        "source_turn": 1,
+        "usage": {
+          "input_tokens": 2585,
+          "output_tokens": 175,
+          "total_tokens": 2760,
+          "input_token_details": {
+            "cache_read": 768
+          },
+          "output_token_details": {}
+        },
+        "estimated_peak_microusd": 986,
+        "model_returned": "deepseek-flash",
+        "streamed": true,
+        "model_requests": 1
+      },
+      {
+        "type": "tool",
+        "name": "update_booking_request",
+        "arguments": {
+          "date": "2026-10-26",
+          "start_time": "14:00",
+          "end_time": "15:00",
+          "attendees": 10,
+          "room_code": "A101",
+          "source_quotes": {
+            "date": "明天",
+            "start_time": "14:00",
+            "end_time": "15:00",
+            "attendees": "10人",
+            "room_code": "A101"
+          }
+        },
+        "result": {
+          "status": "ok",
+          "fields": {
+            "date": {
+              "value": "2026-10-26",
+              "source_turn": 1,
+              "source_quote": "明天",
+              "source_kind": "validated_model_extraction"
+            },
+            "start_time": {
+              "value": "14:00",
+              "source_turn": 1,
+              "source_quote": "14:00",
+              "source_kind": "validated_model_extraction"
+            },
+            "end_time": {
+              "value": "15:00",
+              "source_turn": 1,
+              "source_quote": "15:00",
+              "source_kind": "validated_model_extraction"
+            },
+            "attendees": {
+              "value": 10,
+              "source_turn": 1,
+              "source_quote": "10人",
+              "source_kind": "validated_model_extraction"
+            },
+            "room_code": {
+              "value": "A101",
+              "source_turn": 1,
+              "source_quote": "A101",
+              "source_kind": "validated_model_extraction"
+            }
+          },
+          "changed": true
+        },
+        "evidence_id": "0a96fbed-e385-478d-88c6-5dbfb18e5a8e",
+        "source_turn": 1
+      },
+      {
+        "type": "model",
+        "call_id": "fb4480bb-ac87-4fb9-ae16-8605df2fe462",
+        "source_turn": 1,
+        "usage": {
+          "input_tokens": 3233,
+          "output_tokens": 48,
+          "total_tokens": 3281,
+          "input_token_details": {
+            "cache_read": 896
+          },
+          "output_token_details": {}
+        },
+        "estimated_peak_microusd": 1028,
+        "model_returned": "deepseek-flash",
+        "streamed": true,
+        "model_requests": 1
+      },
+      {
+        "type": "retrieval",
+        "result": {
+          "status": "supported",
+          "query": "实验室场地预约规则 容量 时段 预约",
+          "query_tokens": [
+            "实验室",
+            "容量",
+            "时段"
+          ],
+          "index_hash": "4fbf686cec03f3a21c9faa36aec2c0d61e00d23610e973ee83924ef68cecdce0",
+          "chunks": [
+            {
+              "chunk_id": "booking-rules:r1:245245278a2b83a9",
+              "text": "时间与人数\n有效预约不能重叠；时段为左闭右开，相邻时段可以相接。",
+              "document_id": 1,
+              "source_ref": "knowledge/booking-rules-v1.md",
+              "document_revision": 1,
+              "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+              "chunk_hash": "245245278a2b83a94c7b1892d08353aff39898a9c11e81ce13b66380bd7b2fdb",
+              "score": 2.419374
+            },
+            {
+              "chunk_id": "booking-rules:r1:d90836b0c00ba2ef",
+              "text": "澄清与确认\n缺日期、起止时间或人数时追问；“下午”不直接等同具体时段。",
+              "document_id": 1,
+              "source_ref": "knowledge/booking-rules-v1.md",
+              "document_revision": 1,
+              "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+              "chunk_hash": "d90836b0c00ba2ef329e89ea4a72b6666007de0e0cc87720a203075621f7d3d4",
+              "score": 1.601078
+            },
+            {
+              "chunk_id": "booking-rules:r1:6244fec99261083b",
+              "text": "时间与人数\n人数为正整数，不超过所选场地容量。",
+              "document_id": 1,
+              "source_ref": "knowledge/booking-rules-v1.md",
+              "document_revision": 1,
+              "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+              "chunk_hash": "6244fec99261083b40684bed190abf59920594aa1a6af687e4ea17ab0fd69e35",
+              "score": 1.071503
+            }
+          ]
+        },
+        "source_turn": 1
+      },
+      {
+        "type": "tool",
+        "name": "retrieve_rules",
+        "arguments": {
+          "query": "实验室场地预约规则 容量 时段 预约"
+        },
+        "result": {
+          "status": "supported",
+          "query": "实验室场地预约规则 容量 时段 预约",
+          "query_tokens": [
+            "实验室",
+            "容量",
+            "时段"
+          ],
+          "index_hash": "4fbf686cec03f3a21c9faa36aec2c0d61e00d23610e973ee83924ef68cecdce0",
+          "chunks": [
+            {
+              "chunk_id": "booking-rules:r1:245245278a2b83a9",
+              "text": "时间与人数\n有效预约不能重叠；时段为左闭右开，相邻时段可以相接。",
+              "document_id": 1,
+              "source_ref": "knowledge/booking-rules-v1.md",
+              "document_revision": 1,
+              "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+              "chunk_hash": "245245278a2b83a94c7b1892d08353aff39898a9c11e81ce13b66380bd7b2fdb",
+              "score": 2.419374
+            },
+            {
+              "chunk_id": "booking-rules:r1:d90836b0c00ba2ef",
+              "text": "澄清与确认\n缺日期、起止时间或人数时追问；“下午”不直接等同具体时段。",
+              "document_id": 1,
+              "source_ref": "knowledge/booking-rules-v1.md",
+              "document_revision": 1,
+              "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+              "chunk_hash": "d90836b0c00ba2ef329e89ea4a72b6666007de0e0cc87720a203075621f7d3d4",
+              "score": 1.601078
+            },
+            {
+              "chunk_id": "booking-rules:r1:6244fec99261083b",
+              "text": "时间与人数\n人数为正整数，不超过所选场地容量。",
+              "document_id": 1,
+              "source_ref": "knowledge/booking-rules-v1.md",
+              "document_revision": 1,
+              "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+              "chunk_hash": "6244fec99261083b40684bed190abf59920594aa1a6af687e4ea17ab0fd69e35",
+              "score": 1.071503
+            }
+          ]
+        },
+        "evidence_id": "c4c4952c-2cda-45d7-a91d-fd8e4c8a74ff",
+        "source_turn": 1
+      },
+      {
+        "type": "model",
+        "call_id": "4c00c080-aee0-4035-804c-45ed3dcb7f7b",
+        "source_turn": 1,
+        "usage": {
+          "input_tokens": 4521,
+          "output_tokens": 121,
+          "total_tokens": 4642,
+          "input_token_details": {
+            "cache_read": 896
+          },
+          "output_token_details": {}
+        },
+        "estimated_peak_microusd": 1502,
+        "model_returned": "deepseek-flash",
+        "streamed": true,
+        "model_requests": 1
+      },
+      {
+        "type": "tool",
+        "name": "query_availability",
+        "arguments": {
+          "start_at": "2026-10-26T14:00:00+08:00",
+          "end_at": "2026-10-26T15:00:00+08:00",
+          "attendees": 10,
+          "room_code": "A101"
+        },
+        "result": {
+          "status": "ok",
+          "code": "availability_checked",
+          "summary": "已查询当前空闲；提交时仍会重新校验。",
+          "data": {
+            "rooms": [
+              {
+                "room_code": "A101",
+                "capacity": 20
+              }
+            ],
+            "start_at": "2026-10-26T14:00:00+08:00",
+            "end_at": "2026-10-26T15:00:00+08:00",
+            "attendees": 10,
+            "truncated": false
+          },
+          "request_key": null,
+          "retryable": false,
+          "commit_state": "not_applicable",
+          "evidence_refs": []
+        },
+        "evidence_id": "ebe273ee-51c0-4efe-8280-8335cc3acf28",
+        "source_turn": 1
+      },
+      {
+        "type": "model",
+        "call_id": "0cbece5c-896a-4c99-a892-5abd5fddef4c",
+        "source_turn": 1,
+        "usage": {
+          "input_tokens": 4845,
+          "output_tokens": 122,
+          "total_tokens": 4967,
+          "input_token_details": {
+            "cache_read": 1024
+          },
+          "output_token_details": {}
+        },
+        "estimated_peak_microusd": 1600,
+        "model_returned": "deepseek-flash",
+        "streamed": true,
+        "model_requests": 1
+      },
+      {
+        "type": "tool",
+        "name": "preview_booking",
+        "arguments": {
+          "start_at": "2026-10-26T14:00:00+08:00",
+          "end_at": "2026-10-26T15:00:00+08:00",
+          "attendees": 10,
+          "room_code": "A101"
+        },
+        "result": {
+          "status": "ok",
+          "code": "confirmation_required",
+          "summary": "请展示完整草稿并等待用户明确确认。",
+          "data": {
+            "draft_id": "ba347f54-b901-4242-8af4-04a482a197a2",
+            "draft_hash": "517a7ec47f018887b4cbe3fd21af3f64b847390c0a8a7e489658cfa7bdab666f",
+            "suggested_idempotency_key": "ba347f54-b901-4242-8af4-04a482a197a2",
+            "room_code": "A101",
+            "start_at": "2026-10-26T14:00:00+08:00",
+            "end_at": "2026-10-26T15:00:00+08:00",
+            "attendees": 10,
+            "status": "pending",
+            "expires_at": "2026-10-25T01:05:00Z"
+          },
+          "request_key": "ba347f54-b901-4242-8af4-04a482a197a2",
+          "retryable": false,
+          "commit_state": "not_committed",
+          "evidence_refs": [
+            "draft:ba347f54-b901-4242-8af4-04a482a197a2"
+          ]
+        },
+        "evidence_id": "1d6a58ce-127f-4aa4-becc-80862b93d241",
+        "source_turn": 1
+      },
+      {
+        "type": "model",
+        "call_id": "cbc64161-2b51-4b21-82b1-f8b960f55913",
+        "source_turn": 1,
+        "usage": {
+          "input_tokens": 5510,
+          "output_tokens": 165,
+          "total_tokens": 5675,
+          "input_token_details": {
+            "cache_read": 896
+          },
+          "output_token_details": {}
+        },
+        "estimated_peak_microusd": 1851,
+        "model_returned": "deepseek-flash",
+        "streamed": true,
+        "model_requests": 1
+      },
+      {
+        "type": "confirmation_decision",
+        "kind": "message",
+        "source_turn": 2,
+        "revision": 3
+      },
+      {
+        "type": "model",
+        "call_id": "477f2e00-3ee6-43c8-a10e-2c4e33f92482",
+        "source_turn": 2,
+        "usage": {
+          "input_tokens": 3385,
+          "output_tokens": 124,
+          "total_tokens": 3509,
+          "input_token_details": {
+            "cache_read": 896
+          },
+          "output_token_details": {}
+        },
+        "estimated_peak_microusd": 1165,
+        "model_returned": "deepseek-flash",
+        "streamed": true,
+        "model_requests": 1
+      },
+      {
+        "type": "context_compacted",
+        "source_turn": 2,
+        "summary": {
+          "version": "structured-facts-v1",
+          "method": "conservative UTF-8 byte token upper estimate",
+          "estimated_upper_tokens": 12352,
+          "budget": 18000,
+          "dropped_from_model_context": 10,
+          "original_messages_retained": true,
+          "preserved_facts": {
+            "reference_clock": "2026-10-25T01:00:00+00:00",
+            "fields": {
+              "date": {
+                "value": "2026-10-26",
+                "source_turn": 1,
+                "source_quote": "明天",
+                "source_kind": "validated_model_extraction"
+              },
+              "start_time": {
+                "value": "14:00",
+                "source_turn": 1,
+                "source_quote": "14:00",
+                "source_kind": "validated_model_extraction"
+              },
+              "end_time": {
+                "value": "15:00",
+                "source_turn": 1,
+                "source_quote": "15:00",
+                "source_kind": "validated_model_extraction"
+              },
+              "attendees": {
+                "value": 10,
+                "source_turn": 1,
+                "source_quote": "10人",
+                "source_kind": "validated_model_extraction"
+              },
+              "room_code": {
+                "value": "A101",
+                "source_turn": 1,
+                "source_quote": "A101",
+                "source_kind": "validated_model_extraction"
+              }
+            },
+            "confirmation_state": "idle",
+            "confirmation_revision": 3,
+            "pending_draft": null,
+            "grant": null,
+            "denials": [],
+            "business_result": null,
+            "unknown_submission": null,
+            "candidate_rooms": [],
+            "retrieval_result": {
+              "status": "supported",
+              "query": "实验室场地预约规则 容量 时段 预约",
+              "query_tokens": [
+                "实验室",
+                "容量",
+                "时段"
+              ],
+              "index_hash": "4fbf686cec03f3a21c9faa36aec2c0d61e00d23610e973ee83924ef68cecdce0",
+              "chunks": [
+                {
+                  "chunk_id": "booking-rules:r1:245245278a2b83a9",
+                  "text": "时间与人数\n有效预约不能重叠；时段为左闭右开，相邻时段可以相接。",
+                  "document_id": 1,
+                  "source_ref": "knowledge/booking-rules-v1.md",
+                  "document_revision": 1,
+                  "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                  "chunk_hash": "245245278a2b83a94c7b1892d08353aff39898a9c11e81ce13b66380bd7b2fdb",
+                  "score": 2.419374
+                },
+                {
+                  "chunk_id": "booking-rules:r1:d90836b0c00ba2ef",
+                  "text": "澄清与确认\n缺日期、起止时间或人数时追问；“下午”不直接等同具体时段。",
+                  "document_id": 1,
+                  "source_ref": "knowledge/booking-rules-v1.md",
+                  "document_revision": 1,
+                  "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                  "chunk_hash": "d90836b0c00ba2ef329e89ea4a72b6666007de0e0cc87720a203075621f7d3d4",
+                  "score": 1.601078
+                },
+                {
+                  "chunk_id": "booking-rules:r1:6244fec99261083b",
+                  "text": "时间与人数\n人数为正整数，不超过所选场地容量。",
+                  "document_id": 1,
+                  "source_ref": "knowledge/booking-rules-v1.md",
+                  "document_revision": 1,
+                  "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                  "chunk_hash": "6244fec99261083b40684bed190abf59920594aa1a6af687e4ea17ab0fd69e35",
+                  "score": 1.071503
+                }
+              ]
+            },
+            "original_history": {
+              "message_count": 11,
+              "first_id": "8f2cdebc-e232-42b9-b096-a571986cfe81",
+              "last_id": "285206fa-d33d-42ed-9878-75bf2fb11f01"
+            },
+            "current_turn": 2,
+            "executed_tools_this_turn": []
+          },
+          "selected_message_ids": [
+            "285206fa-d33d-42ed-9878-75bf2fb11f01"
+          ]
+        }
+      },
+      {
+        "type": "tool",
+        "name": "update_booking_request",
+        "arguments": {
+          "date": "2026-10-27",
+          "start_time": "15:00",
+          "end_time": "16:00",
+          "source_quotes": {
+            "date": "后天",
+            "start_time": "15:00",
+            "end_time": "16:00"
+          }
+        },
+        "result": {
+          "status": "ok",
+          "fields": {
+            "date": {
+              "value": "2026-10-27",
+              "source_turn": 2,
+              "source_quote": "后天",
+              "source_kind": "validated_model_extraction"
+            },
+            "start_time": {
+              "value": "15:00",
+              "source_turn": 2,
+              "source_quote": "15:00",
+              "source_kind": "validated_model_extraction"
+            },
+            "end_time": {
+              "value": "16:00",
+              "source_turn": 2,
+              "source_quote": "16:00",
+              "source_kind": "validated_model_extraction"
+            },
+            "attendees": {
+              "value": 10,
+              "source_turn": 1,
+              "source_quote": "10人",
+              "source_kind": "validated_model_extraction"
+            },
+            "room_code": {
+              "value": "A101",
+              "source_turn": 1,
+              "source_quote": "A101",
+              "source_kind": "validated_model_extraction"
+            }
+          },
+          "changed": true
+        },
+        "evidence_id": "aba44d22-0cf5-4099-9e2b-ee0fd26f68fa",
+        "source_turn": 2
+      },
+      {
+        "type": "model",
+        "call_id": "41b69cf3-42b9-4e41-bd6c-902144b2d892",
+        "source_turn": 2,
+        "usage": {
+          "input_tokens": 3774,
+          "output_tokens": 121,
+          "total_tokens": 3895,
+          "input_token_details": {
+            "cache_read": 640
+          },
+          "output_token_details": {}
+        },
+        "estimated_peak_microusd": 1278,
+        "model_returned": "deepseek-flash",
+        "streamed": true,
+        "model_requests": 1
+      },
+      {
+        "type": "context_compacted",
+        "source_turn": 2,
+        "summary": {
+          "version": "structured-facts-v1",
+          "method": "conservative UTF-8 byte token upper estimate",
+          "estimated_upper_tokens": 14226,
+          "budget": 18000,
+          "dropped_from_model_context": 10,
+          "original_messages_retained": true,
+          "preserved_facts": {
+            "reference_clock": "2026-10-25T01:00:00+00:00",
+            "fields": {
+              "date": {
+                "value": "2026-10-27",
+                "source_turn": 2,
+                "source_quote": "后天",
+                "source_kind": "validated_model_extraction"
+              },
+              "start_time": {
+                "value": "15:00",
+                "source_turn": 2,
+                "source_quote": "15:00",
+                "source_kind": "validated_model_extraction"
+              },
+              "end_time": {
+                "value": "16:00",
+                "source_turn": 2,
+                "source_quote": "16:00",
+                "source_kind": "validated_model_extraction"
+              },
+              "attendees": {
+                "value": 10,
+                "source_turn": 1,
+                "source_quote": "10人",
+                "source_kind": "validated_model_extraction"
+              },
+              "room_code": {
+                "value": "A101",
+                "source_turn": 1,
+                "source_quote": "A101",
+                "source_kind": "validated_model_extraction"
+              }
+            },
+            "confirmation_state": "idle",
+            "confirmation_revision": 4,
+            "pending_draft": null,
+            "grant": null,
+            "denials": [],
+            "business_result": null,
+            "unknown_submission": null,
+            "candidate_rooms": [],
+            "retrieval_result": {
+              "status": "supported",
+              "query": "实验室场地预约规则 容量 时段 预约",
+              "query_tokens": [
+                "实验室",
+                "容量",
+                "时段"
+              ],
+              "index_hash": "4fbf686cec03f3a21c9faa36aec2c0d61e00d23610e973ee83924ef68cecdce0",
+              "chunks": [
+                {
+                  "chunk_id": "booking-rules:r1:245245278a2b83a9",
+                  "text": "时间与人数\n有效预约不能重叠；时段为左闭右开，相邻时段可以相接。",
+                  "document_id": 1,
+                  "source_ref": "knowledge/booking-rules-v1.md",
+                  "document_revision": 1,
+                  "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                  "chunk_hash": "245245278a2b83a94c7b1892d08353aff39898a9c11e81ce13b66380bd7b2fdb",
+                  "score": 2.419374
+                },
+                {
+                  "chunk_id": "booking-rules:r1:d90836b0c00ba2ef",
+                  "text": "澄清与确认\n缺日期、起止时间或人数时追问；“下午”不直接等同具体时段。",
+                  "document_id": 1,
+                  "source_ref": "knowledge/booking-rules-v1.md",
+                  "document_revision": 1,
+                  "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                  "chunk_hash": "d90836b0c00ba2ef329e89ea4a72b6666007de0e0cc87720a203075621f7d3d4",
+                  "score": 1.601078
+                },
+                {
+                  "chunk_id": "booking-rules:r1:6244fec99261083b",
+                  "text": "时间与人数\n人数为正整数，不超过所选场地容量。",
+                  "document_id": 1,
+                  "source_ref": "knowledge/booking-rules-v1.md",
+                  "document_revision": 1,
+                  "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                  "chunk_hash": "6244fec99261083b40684bed190abf59920594aa1a6af687e4ea17ab0fd69e35",
+                  "score": 1.071503
+                }
+              ]
+            },
+            "original_history": {
+              "message_count": 13,
+              "first_id": "8f2cdebc-e232-42b9-b096-a571986cfe81",
+              "last_id": "e2d01d96-b2fb-4606-80df-57613f67e523"
+            },
+            "current_turn": 2,
+            "executed_tools_this_turn": [
+              {
+                "name": "update_booking_request",
+                "status": "ok",
+                "code": null,
+                "commit_state": null,
+                "booking_id": null
+              }
+            ]
+          },
+          "selected_message_ids": [
+            "285206fa-d33d-42ed-9878-75bf2fb11f01",
+            "lc_run--01a17386-16f4-717b-8c51-95bf07a436f5",
+            "e2d01d96-b2fb-4606-80df-57613f67e523"
+          ]
+        }
+      },
+      {
+        "type": "tool",
+        "name": "query_availability",
+        "arguments": {
+          "start_at": "2026-10-27T15:00:00+08:00",
+          "end_at": "2026-10-27T16:00:00+08:00",
+          "attendees": 10,
+          "room_code": "A101"
+        },
+        "result": {
+          "status": "ok",
+          "code": "availability_checked",
+          "summary": "已查询当前空闲；提交时仍会重新校验。",
+          "data": {
+            "rooms": [
+              {
+                "room_code": "A101",
+                "capacity": 20
+              }
+            ],
+            "start_at": "2026-10-27T15:00:00+08:00",
+            "end_at": "2026-10-27T16:00:00+08:00",
+            "attendees": 10,
+            "truncated": false
+          },
+          "request_key": null,
+          "retryable": false,
+          "commit_state": "not_applicable",
+          "evidence_refs": []
+        },
+        "evidence_id": "2be51472-112e-40a2-947e-011098d66c1a",
+        "source_turn": 2
+      },
+      {
+        "type": "model",
+        "call_id": "62087afc-ace8-427c-ab41-8f1fa907722d",
+        "source_turn": 2,
+        "usage": {
+          "input_tokens": 4100,
+          "output_tokens": 122,
+          "total_tokens": 4222,
+          "input_token_details": {
+            "cache_read": 896
+          },
+          "output_token_details": {}
+        },
+        "estimated_peak_microusd": 1377,
+        "model_returned": "deepseek-flash",
+        "streamed": true,
+        "model_requests": 1
+      },
+      {
+        "type": "context_compacted",
+        "source_turn": 2,
+        "summary": {
+          "version": "structured-facts-v1",
+          "method": "conservative UTF-8 byte token upper estimate",
+          "estimated_upper_tokens": 15836,
+          "budget": 18000,
+          "dropped_from_model_context": 10,
+          "original_messages_retained": true,
+          "preserved_facts": {
+            "reference_clock": "2026-10-25T01:00:00+00:00",
+            "fields": {
+              "date": {
+                "value": "2026-10-27",
+                "source_turn": 2,
+                "source_quote": "后天",
+                "source_kind": "validated_model_extraction"
+              },
+              "start_time": {
+                "value": "15:00",
+                "source_turn": 2,
+                "source_quote": "15:00",
+                "source_kind": "validated_model_extraction"
+              },
+              "end_time": {
+                "value": "16:00",
+                "source_turn": 2,
+                "source_quote": "16:00",
+                "source_kind": "validated_model_extraction"
+              },
+              "attendees": {
+                "value": 10,
+                "source_turn": 1,
+                "source_quote": "10人",
+                "source_kind": "validated_model_extraction"
+              },
+              "room_code": {
+                "value": "A101",
+                "source_turn": 1,
+                "source_quote": "A101",
+                "source_kind": "validated_model_extraction"
+              }
+            },
+            "confirmation_state": "idle",
+            "confirmation_revision": 4,
+            "pending_draft": null,
+            "grant": null,
+            "denials": [],
+            "business_result": null,
+            "unknown_submission": null,
+            "candidate_rooms": [
+              {
+                "room_code": "A101",
+                "capacity": 20
+              }
+            ],
+            "retrieval_result": {
+              "status": "supported",
+              "query": "实验室场地预约规则 容量 时段 预约",
+              "query_tokens": [
+                "实验室",
+                "容量",
+                "时段"
+              ],
+              "index_hash": "4fbf686cec03f3a21c9faa36aec2c0d61e00d23610e973ee83924ef68cecdce0",
+              "chunks": [
+                {
+                  "chunk_id": "booking-rules:r1:245245278a2b83a9",
+                  "text": "时间与人数\n有效预约不能重叠；时段为左闭右开，相邻时段可以相接。",
+                  "document_id": 1,
+                  "source_ref": "knowledge/booking-rules-v1.md",
+                  "document_revision": 1,
+                  "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                  "chunk_hash": "245245278a2b83a94c7b1892d08353aff39898a9c11e81ce13b66380bd7b2fdb",
+                  "score": 2.419374
+                },
+                {
+                  "chunk_id": "booking-rules:r1:d90836b0c00ba2ef",
+                  "text": "澄清与确认\n缺日期、起止时间或人数时追问；“下午”不直接等同具体时段。",
+                  "document_id": 1,
+                  "source_ref": "knowledge/booking-rules-v1.md",
+                  "document_revision": 1,
+                  "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                  "chunk_hash": "d90836b0c00ba2ef329e89ea4a72b6666007de0e0cc87720a203075621f7d3d4",
+                  "score": 1.601078
+                },
+                {
+                  "chunk_id": "booking-rules:r1:6244fec99261083b",
+                  "text": "时间与人数\n人数为正整数，不超过所选场地容量。",
+                  "document_id": 1,
+                  "source_ref": "knowledge/booking-rules-v1.md",
+                  "document_revision": 1,
+                  "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                  "chunk_hash": "6244fec99261083b40684bed190abf59920594aa1a6af687e4ea17ab0fd69e35",
+                  "score": 1.071503
+                }
+              ]
+            },
+            "original_history": {
+              "message_count": 15,
+              "first_id": "8f2cdebc-e232-42b9-b096-a571986cfe81",
+              "last_id": "03235dd0-9776-47cc-8464-d4845f5c8b40"
+            },
+            "current_turn": 2,
+            "executed_tools_this_turn": [
+              {
+                "name": "update_booking_request",
+                "status": "ok",
+                "code": null,
+                "commit_state": null,
+                "booking_id": null
+              },
+              {
+                "name": "query_availability",
+                "status": "ok",
+                "code": "availability_checked",
+                "commit_state": "not_applicable",
+                "booking_id": null
+              }
+            ]
+          },
+          "selected_message_ids": [
+            "285206fa-d33d-42ed-9878-75bf2fb11f01",
+            "lc_run--01a17386-16f4-717b-8c51-95bf07a436f5",
+            "e2d01d96-b2fb-4606-80df-57613f67e523",
+            "lc_run--01a17386-1bed-7714-8446-7c3890e73333",
+            "03235dd0-9776-47cc-8464-d4845f5c8b40"
+          ]
+        }
+      },
+      {
+        "type": "tool",
+        "name": "preview_booking",
+        "arguments": {
+          "start_at": "2026-10-27T15:00:00+08:00",
+          "end_at": "2026-10-27T16:00:00+08:00",
+          "attendees": 10,
+          "room_code": "A101"
+        },
+        "result": {
+          "status": "ok",
+          "code": "confirmation_required",
+          "summary": "请展示完整草稿并等待用户明确确认。",
+          "data": {
+            "draft_id": "95759652-12ab-4d3a-864e-28975a24aebe",
+            "draft_hash": "c859f193da72643f0a8817363c5ea21093e6a7a78809e8cd2ff7e1e7f074e315",
+            "suggested_idempotency_key": "95759652-12ab-4d3a-864e-28975a24aebe",
+            "room_code": "A101",
+            "start_at": "2026-10-27T15:00:00+08:00",
+            "end_at": "2026-10-27T16:00:00+08:00",
+            "attendees": 10,
+            "status": "pending",
+            "expires_at": "2026-10-25T01:05:00Z"
+          },
+          "request_key": "95759652-12ab-4d3a-864e-28975a24aebe",
+          "retryable": false,
+          "commit_state": "not_committed",
+          "evidence_refs": [
+            "draft:95759652-12ab-4d3a-864e-28975a24aebe"
+          ]
+        },
+        "evidence_id": "4324317f-452e-4c55-bd32-16716f8ccf6a",
+        "source_turn": 2
+      },
+      {
+        "type": "model",
+        "call_id": "8295eb61-0ef5-4fcf-b353-149a14ec8662",
+        "source_turn": 2,
+        "usage": {
+          "input_tokens": 4765,
+          "output_tokens": 168,
+          "total_tokens": 4933,
+          "input_token_details": {
+            "cache_read": 896
+          },
+          "output_token_details": {}
+        },
+        "estimated_peak_microusd": 1632,
+        "model_returned": "deepseek-flash",
+        "streamed": true,
+        "model_requests": 1
+      },
+      {
+        "type": "context_compacted",
+        "source_turn": 2,
+        "summary": {
+          "version": "structured-facts-v1",
+          "method": "conservative UTF-8 byte token upper estimate",
+          "estimated_upper_tokens": 18088,
+          "budget": 18000,
+          "dropped_from_model_context": 10,
+          "original_messages_retained": true,
+          "preserved_facts": {
+            "reference_clock": "2026-10-25T01:00:00+00:00",
+            "fields": {
+              "date": {
+                "value": "2026-10-27",
+                "source_turn": 2,
+                "source_quote": "后天",
+                "source_kind": "validated_model_extraction"
+              },
+              "start_time": {
+                "value": "15:00",
+                "source_turn": 2,
+                "source_quote": "15:00",
+                "source_kind": "validated_model_extraction"
+              },
+              "end_time": {
+                "value": "16:00",
+                "source_turn": 2,
+                "source_quote": "16:00",
+                "source_kind": "validated_model_extraction"
+              },
+              "attendees": {
+                "value": 10,
+                "source_turn": 1,
+                "source_quote": "10人",
+                "source_kind": "validated_model_extraction"
+              },
+              "room_code": {
+                "value": "A101",
+                "source_turn": 1,
+                "source_quote": "A101",
+                "source_kind": "validated_model_extraction"
+              }
+            },
+            "confirmation_state": "pending",
+            "confirmation_revision": 5,
+            "pending_draft": {
+              "draft_id": "95759652-12ab-4d3a-864e-28975a24aebe",
+              "draft_hash": "c859f193da72643f0a8817363c5ea21093e6a7a78809e8cd2ff7e1e7f074e315",
+              "suggested_idempotency_key": "95759652-12ab-4d3a-864e-28975a24aebe",
+              "room_code": "A101",
+              "start_at": "2026-10-27T15:00:00+08:00",
+              "end_at": "2026-10-27T16:00:00+08:00",
+              "attendees": 10,
+              "status": "pending",
+              "expires_at": "2026-10-25T01:05:00Z"
+            },
+            "grant": null,
+            "denials": [],
+            "business_result": null,
+            "unknown_submission": null,
+            "candidate_rooms": [
+              {
+                "room_code": "A101",
+                "capacity": 20
+              }
+            ],
+            "retrieval_result": {
+              "status": "supported",
+              "query": "实验室场地预约规则 容量 时段 预约",
+              "query_tokens": [
+                "实验室",
+                "容量",
+                "时段"
+              ],
+              "index_hash": "4fbf686cec03f3a21c9faa36aec2c0d61e00d23610e973ee83924ef68cecdce0",
+              "chunks": [
+                {
+                  "chunk_id": "booking-rules:r1:245245278a2b83a9",
+                  "text": "时间与人数\n有效预约不能重叠；时段为左闭右开，相邻时段可以相接。",
+                  "document_id": 1,
+                  "source_ref": "knowledge/booking-rules-v1.md",
+                  "document_revision": 1,
+                  "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                  "chunk_hash": "245245278a2b83a94c7b1892d08353aff39898a9c11e81ce13b66380bd7b2fdb",
+                  "score": 2.419374
+                },
+                {
+                  "chunk_id": "booking-rules:r1:d90836b0c00ba2ef",
+                  "text": "澄清与确认\n缺日期、起止时间或人数时追问；“下午”不直接等同具体时段。",
+                  "document_id": 1,
+                  "source_ref": "knowledge/booking-rules-v1.md",
+                  "document_revision": 1,
+                  "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                  "chunk_hash": "d90836b0c00ba2ef329e89ea4a72b6666007de0e0cc87720a203075621f7d3d4",
+                  "score": 1.601078
+                },
+                {
+                  "chunk_id": "booking-rules:r1:6244fec99261083b",
+                  "text": "时间与人数\n人数为正整数，不超过所选场地容量。",
+                  "document_id": 1,
+                  "source_ref": "knowledge/booking-rules-v1.md",
+                  "document_revision": 1,
+                  "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                  "chunk_hash": "6244fec99261083b40684bed190abf59920594aa1a6af687e4ea17ab0fd69e35",
+                  "score": 1.071503
+                }
+              ]
+            },
+            "original_history": {
+              "message_count": 17,
+              "first_id": "8f2cdebc-e232-42b9-b096-a571986cfe81",
+              "last_id": "9539c14d-9529-470a-9037-5110a02a81f5"
+            },
+            "current_turn": 2,
+            "executed_tools_this_turn": [
+              {
+                "name": "update_booking_request",
+                "status": "ok",
+                "code": null,
+                "commit_state": null,
+                "booking_id": null
+              },
+              {
+                "name": "query_availability",
+                "status": "ok",
+                "code": "availability_checked",
+                "commit_state": "not_applicable",
+                "booking_id": null
+              },
+              {
+                "name": "preview_booking",
+                "status": "ok",
+                "code": "confirmation_required",
+                "commit_state": "not_committed",
+                "booking_id": null
+              }
+            ]
+          },
+          "selected_message_ids": [
+            "285206fa-d33d-42ed-9878-75bf2fb11f01",
+            "lc_run--01a17386-16f4-717b-8c51-95bf07a436f5",
+            "e2d01d96-b2fb-4606-80df-57613f67e523",
+            "lc_run--01a17386-1bed-7714-8446-7c3890e73333",
+            "03235dd0-9776-47cc-8464-d4845f5c8b40",
+            "lc_run--01a17386-2042-7131-9393-a5936f176b28",
+            "9539c14d-9529-470a-9037-5110a02a81f5"
+          ]
+        }
+      },
+      {
+        "type": "confirmation_decision",
+        "kind": "confirm",
+        "source_turn": 3,
+        "revision": 5
+      },
+      {
+        "type": "model",
+        "call_id": "36e878dc-d706-4e2c-a5c6-ed5ff0e03442",
+        "source_turn": 3,
+        "usage": {
+          "input_tokens": 3702,
+          "output_tokens": 156,
+          "total_tokens": 3858,
+          "input_token_details": {
+            "cache_read": 896
+          },
+          "output_token_details": {}
+        },
+        "estimated_peak_microusd": 1298,
+        "model_returned": "deepseek-flash",
+        "streamed": true,
+        "model_requests": 1
+      },
+      {
+        "type": "context_compacted",
+        "source_turn": 3,
+        "summary": {
+          "version": "structured-facts-v1",
+          "method": "conservative UTF-8 byte token upper estimate",
+          "estimated_upper_tokens": 12971,
+          "budget": 18000,
+          "dropped_from_model_context": 18,
+          "original_messages_retained": true,
+          "preserved_facts": {
+            "reference_clock": "2026-10-25T01:00:00+00:00",
+            "fields": {
+              "date": {
+                "value": "2026-10-27",
+                "source_turn": 2,
+                "source_quote": "后天",
+                "source_kind": "validated_model_extraction"
+              },
+              "start_time": {
+                "value": "15:00",
+                "source_turn": 2,
+                "source_quote": "15:00",
+                "source_kind": "validated_model_extraction"
+              },
+              "end_time": {
+                "value": "16:00",
+                "source_turn": 2,
+                "source_quote": "16:00",
+                "source_kind": "validated_model_extraction"
+              },
+              "attendees": {
+                "value": 10,
+                "source_turn": 1,
+                "source_quote": "10人",
+                "source_kind": "validated_model_extraction"
+              },
+              "room_code": {
+                "value": "A101",
+                "source_turn": 1,
+                "source_quote": "A101",
+                "source_kind": "validated_model_extraction"
+              }
+            },
+            "confirmation_state": "authorized",
+            "confirmation_revision": 5,
+            "pending_draft": {
+              "draft_id": "95759652-12ab-4d3a-864e-28975a24aebe",
+              "draft_hash": "c859f193da72643f0a8817363c5ea21093e6a7a78809e8cd2ff7e1e7f074e315",
+              "suggested_idempotency_key": "95759652-12ab-4d3a-864e-28975a24aebe",
+              "room_code": "A101",
+              "start_at": "2026-10-27T15:00:00+08:00",
+              "end_at": "2026-10-27T16:00:00+08:00",
+              "attendees": 10,
+              "status": "pending",
+              "expires_at": "2026-10-25T01:05:00Z"
+            },
+            "grant": {
+              "draft_id": "95759652-12ab-4d3a-864e-28975a24aebe",
+              "draft_hash": "c859f193da72643f0a8817363c5ea21093e6a7a78809e8cd2ff7e1e7f074e315",
+              "revision": 5,
+              "user_request_id": "605acd51-b118-4c1f-8d3f-a7b79eae48b1"
+            },
+            "denials": [],
+            "business_result": null,
+            "unknown_submission": null,
+            "candidate_rooms": [
+              {
+                "room_code": "A101",
+                "capacity": 20
+              }
+            ],
+            "retrieval_result": {
+              "status": "supported",
+              "query": "实验室场地预约规则 容量 时段 预约",
+              "query_tokens": [
+                "实验室",
+                "容量",
+                "时段"
+              ],
+              "index_hash": "4fbf686cec03f3a21c9faa36aec2c0d61e00d23610e973ee83924ef68cecdce0",
+              "chunks": [
+                {
+                  "chunk_id": "booking-rules:r1:245245278a2b83a9",
+                  "text": "时间与人数\n有效预约不能重叠；时段为左闭右开，相邻时段可以相接。",
+                  "document_id": 1,
+                  "source_ref": "knowledge/booking-rules-v1.md",
+                  "document_revision": 1,
+                  "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                  "chunk_hash": "245245278a2b83a94c7b1892d08353aff39898a9c11e81ce13b66380bd7b2fdb",
+                  "score": 2.419374
+                },
+                {
+                  "chunk_id": "booking-rules:r1:d90836b0c00ba2ef",
+                  "text": "澄清与确认\n缺日期、起止时间或人数时追问；“下午”不直接等同具体时段。",
+                  "document_id": 1,
+                  "source_ref": "knowledge/booking-rules-v1.md",
+                  "document_revision": 1,
+                  "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                  "chunk_hash": "d90836b0c00ba2ef329e89ea4a72b6666007de0e0cc87720a203075621f7d3d4",
+                  "score": 1.601078
+                },
+                {
+                  "chunk_id": "booking-rules:r1:6244fec99261083b",
+                  "text": "时间与人数\n人数为正整数，不超过所选场地容量。",
+                  "document_id": 1,
+                  "source_ref": "knowledge/booking-rules-v1.md",
+                  "document_revision": 1,
+                  "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                  "chunk_hash": "6244fec99261083b40684bed190abf59920594aa1a6af687e4ea17ab0fd69e35",
+                  "score": 1.071503
+                }
+              ]
+            },
+            "original_history": {
+              "message_count": 19,
+              "first_id": "8f2cdebc-e232-42b9-b096-a571986cfe81",
+              "last_id": "605acd51-b118-4c1f-8d3f-a7b79eae48b1"
+            },
+            "current_turn": 3,
+            "executed_tools_this_turn": []
+          },
+          "selected_message_ids": [
+            "605acd51-b118-4c1f-8d3f-a7b79eae48b1"
+          ]
+        }
+      },
+      {
+        "type": "tool",
+        "name": "confirm_booking",
+        "arguments": {
+          "draft_id": "95759652-12ab-4d3a-864e-28975a24aebe",
+          "draft_hash": "c859f193da72643f0a8817363c5ea21093e6a7a78809e8cd2ff7e1e7f074e315",
+          "idempotency_key": "95759652-12ab-4d3a-864e-28975a24aebe"
+        },
+        "result": {
+          "status": "ok",
+          "code": "booking_confirmed",
+          "summary": "已查到原预约事实。",
+          "data": {
+            "booking_id": "eac40999-b341-46bc-a55e-c5e46427d740",
+            "draft_id": "95759652-12ab-4d3a-864e-28975a24aebe",
+            "idempotency_key": "95759652-12ab-4d3a-864e-28975a24aebe",
+            "room_code": "A101",
+            "start_at": "2026-10-27T07:00:00Z",
+            "end_at": "2026-10-27T08:00:00Z",
+            "attendees": 10,
+            "status": "confirmed",
+            "created_at": "2026-10-25T14:45:37.935715Z"
+          },
+          "request_key": "95759652-12ab-4d3a-864e-28975a24aebe",
+          "retryable": false,
+          "commit_state": "committed",
+          "evidence_refs": [
+            "booking:eac40999-b341-46bc-a55e-c5e46427d740"
+          ]
+        },
+        "evidence_id": "0a73639b-2fed-4751-b642-4afc69c03238",
+        "source_turn": 3
+      },
+      {
+        "type": "model",
+        "call_id": "ce1a8124-93fb-46b4-99d0-19de08216358",
+        "source_turn": 3,
+        "usage": {
+          "input_tokens": 4144,
+          "output_tokens": 137,
+          "total_tokens": 4281,
+          "input_token_details": {
+            "cache_read": 896
+          },
+          "output_token_details": {}
+        },
+        "estimated_peak_microusd": 1408,
+        "model_returned": "deepseek-flash",
+        "streamed": true,
+        "model_requests": 1
+      },
+      {
+        "type": "context_compacted",
+        "source_turn": 3,
+        "summary": {
+          "version": "structured-facts-v1",
+          "method": "conservative UTF-8 byte token upper estimate",
+          "estimated_upper_tokens": 14897,
+          "budget": 18000,
+          "dropped_from_model_context": 18,
+          "original_messages_retained": true,
+          "preserved_facts": {
+            "reference_clock": "2026-10-25T01:00:00+00:00",
+            "fields": {
+              "date": {
+                "value": "2026-10-27",
+                "source_turn": 2,
+                "source_quote": "后天",
+                "source_kind": "validated_model_extraction"
+              },
+              "start_time": {
+                "value": "15:00",
+                "source_turn": 2,
+                "source_quote": "15:00",
+                "source_kind": "validated_model_extraction"
+              },
+              "end_time": {
+                "value": "16:00",
+                "source_turn": 2,
+                "source_quote": "16:00",
+                "source_kind": "validated_model_extraction"
+              },
+              "attendees": {
+                "value": 10,
+                "source_turn": 1,
+                "source_quote": "10人",
+                "source_kind": "validated_model_extraction"
+              },
+              "room_code": {
+                "value": "A101",
+                "source_turn": 1,
+                "source_quote": "A101",
+                "source_kind": "validated_model_extraction"
+              }
+            },
+            "confirmation_state": "consumed",
+            "confirmation_revision": 5,
+            "pending_draft": null,
+            "grant": null,
+            "denials": [],
+            "business_result": {
+              "status": "ok",
+              "code": "booking_confirmed",
+              "summary": "已查到原预约事实。",
+              "data": {
+                "booking_id": "eac40999-b341-46bc-a55e-c5e46427d740",
+                "draft_id": "95759652-12ab-4d3a-864e-28975a24aebe",
+                "idempotency_key": "95759652-12ab-4d3a-864e-28975a24aebe",
+                "room_code": "A101",
+                "start_at": "2026-10-27T07:00:00Z",
+                "end_at": "2026-10-27T08:00:00Z",
+                "attendees": 10,
+                "status": "confirmed",
+                "created_at": "2026-10-25T14:45:37.935715Z"
+              },
+              "request_key": "95759652-12ab-4d3a-864e-28975a24aebe",
+              "retryable": false,
+              "commit_state": "committed",
+              "evidence_refs": [
+                "booking:eac40999-b341-46bc-a55e-c5e46427d740"
+              ]
+            },
+            "unknown_submission": null,
+            "candidate_rooms": [
+              {
+                "room_code": "A101",
+                "capacity": 20
+              }
+            ],
+            "retrieval_result": {
+              "status": "supported",
+              "query": "实验室场地预约规则 容量 时段 预约",
+              "query_tokens": [
+                "实验室",
+                "容量",
+                "时段"
+              ],
+              "index_hash": "4fbf686cec03f3a21c9faa36aec2c0d61e00d23610e973ee83924ef68cecdce0",
+              "chunks": [
+                {
+                  "chunk_id": "booking-rules:r1:245245278a2b83a9",
+                  "text": "时间与人数\n有效预约不能重叠；时段为左闭右开，相邻时段可以相接。",
+                  "document_id": 1,
+                  "source_ref": "knowledge/booking-rules-v1.md",
+                  "document_revision": 1,
+                  "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                  "chunk_hash": "245245278a2b83a94c7b1892d08353aff39898a9c11e81ce13b66380bd7b2fdb",
+                  "score": 2.419374
+                },
+                {
+                  "chunk_id": "booking-rules:r1:d90836b0c00ba2ef",
+                  "text": "澄清与确认\n缺日期、起止时间或人数时追问；“下午”不直接等同具体时段。",
+                  "document_id": 1,
+                  "source_ref": "knowledge/booking-rules-v1.md",
+                  "document_revision": 1,
+                  "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                  "chunk_hash": "d90836b0c00ba2ef329e89ea4a72b6666007de0e0cc87720a203075621f7d3d4",
+                  "score": 1.601078
+                },
+                {
+                  "chunk_id": "booking-rules:r1:6244fec99261083b",
+                  "text": "时间与人数\n人数为正整数，不超过所选场地容量。",
+                  "document_id": 1,
+                  "source_ref": "knowledge/booking-rules-v1.md",
+                  "document_revision": 1,
+                  "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                  "chunk_hash": "6244fec99261083b40684bed190abf59920594aa1a6af687e4ea17ab0fd69e35",
+                  "score": 1.071503
+                }
+              ]
+            },
+            "original_history": {
+              "message_count": 21,
+              "first_id": "8f2cdebc-e232-42b9-b096-a571986cfe81",
+              "last_id": "a5f0a7b4-de09-4660-af05-bb2bac29c191"
+            },
+            "current_turn": 3,
+            "executed_tools_this_turn": [
+              {
+                "name": "confirm_booking",
+                "status": "ok",
+                "code": "booking_confirmed",
+                "commit_state": "committed",
+                "booking_id": "eac40999-b341-46bc-a55e-c5e46427d740"
+              }
+            ]
+          },
+          "selected_message_ids": [
+            "605acd51-b118-4c1f-8d3f-a7b79eae48b1",
+            "lc_run--01a17386-30b1-77a5-8546-d8dad1018a87",
+            "a5f0a7b4-de09-4660-af05-bb2bac29c191"
+          ]
+        }
+      }
+    ],
+    "model_calls_this_turn": 2,
+    "resume_action": null,
+    "last_error": null,
+    "compactions": 6,
+    "last_tool_result": {
+      "status": "ok",
+      "code": "booking_confirmed",
+      "summary": "已查到原预约事实。",
+      "data": {
+        "booking_id": "eac40999-b341-46bc-a55e-c5e46427d740",
+        "draft_id": "95759652-12ab-4d3a-864e-28975a24aebe",
+        "idempotency_key": "95759652-12ab-4d3a-864e-28975a24aebe",
+        "room_code": "A101",
+        "start_at": "2026-10-27T07:00:00Z",
+        "end_at": "2026-10-27T08:00:00Z",
+        "attendees": 10,
+        "status": "confirmed",
+        "created_at": "2026-10-25T14:45:37.935715Z"
+      },
+      "request_key": "95759652-12ab-4d3a-864e-28975a24aebe",
+      "retryable": false,
+      "commit_state": "committed",
+      "evidence_refs": [
+        "booking:eac40999-b341-46bc-a55e-c5e46427d740"
+      ]
+    },
+    "write_attempted_this_turn": true,
+    "business_history": []
+  },
+  "next": []
+}

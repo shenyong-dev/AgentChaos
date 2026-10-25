@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     mysql_database: str = "agentchaos"
     mysql_user: str = "agentchaos"
     mysql_password: SecretStr = SecretStr("")
+    demo_seed_password: SecretStr = SecretStr("")
     redis_host: str = "127.0.0.1"
     redis_port: int = Field(default=16379, ge=1, le=65535)
     redis_db: int = Field(default=0, ge=0, le=15)
@@ -40,6 +41,7 @@ class Settings(BaseSettings):
     casegen_max_output_tokens: int = Field(default=2048, ge=1)
     judge_max_output_tokens: int = Field(default=1024, ge=1)
     allow_paid_model_calls: bool = False
+    model_budget_authorization_id: str = ""
     agent_budget_usd: float = Field(default=0, ge=0, allow_inf_nan=False)
     casegen_budget_usd: float = Field(default=0, ge=0, allow_inf_nan=False)
     judge_budget_usd: float = Field(default=0, ge=0, allow_inf_nan=False)

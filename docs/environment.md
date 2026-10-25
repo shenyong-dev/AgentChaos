@@ -1,4 +1,4 @@
-# T01 环境与复现说明
+# T01—T03 环境与复现说明
 
 环境验证日期：2026-10-24—2026-10-25，Asia/Shanghai。新增程序、虚拟环境、下载及缓存放在 D 盘。未创建 WSL 发行版；未运行 Docker 安装或容器。下方外部价格与文档快照的核对日期为2026-10-24。
 
@@ -11,7 +11,7 @@
 | Node / npm | 24.11.0 / 11.6.1；npm 缓存在项目 `.cache/npm` |
 | uv | 0.12.21；缓存指定为项目 `.cache/uv` |
 | 前端 | Vue 3.5.44、Vite 8.3.5、Vue Router 5.4.0、Pinia 4.1.0、Element Plus 2.14.7 |
-| MySQL | 已有 MySQL80 服务，8.0.39，`127.0.0.1:3306`；应用数据库 agentchaos，当前无业务表 |
+| MySQL | 已有 MySQL80 服务，8.0.39，`127.0.0.1:3306`；T02已迁移16张业务表及Alembic版本表，种子数据已装入 |
 | JSON/Search 端点 | 原生 Windows Memurai 8.2.0，Redis 协议版本自报 8.2.10，`127.0.0.1:16380` |
 | 模块 | JSON：ReJSON，ver=80001；Search：ver=80213；真实 JSON 索引查询通过 |
 | 检查点 | 真实 RedisSaver 写入、关闭重开读取、服务端重启后读取均通过 |
@@ -19,6 +19,14 @@
 | 模型 | 已读取本地 API Key；2026-10-25 鉴权请求 `GET /models` 返回 200，三个角色的 deepseek-flash 均可用；文本生成请求为 0，付费调用仍关闭 |
 
 Python 完整依赖由 `backend/uv.lock` 锁定，前端由 `frontend/package-lock.json` 锁定。主要后端版本：FastAPI 0.162.0、Pydantic 2.14.1、SQLAlchemy 2.1.6、PyMySQL 1.2.3、Redis Python 6.4.0、Celery 5.6.3、LangGraph 1.2.17、langchain-deepseek 1.1.1、langgraph-checkpoint-redis 0.5.2。
+
+T03补充：Windows时区包tzdata作为直接依赖显式声明，仍使用原锁中的2026.5；离线lock/sync未升级其他依赖、未新增下载，90个已安装包声明兼容。数据库连接保持UTC/REPEATABLE READ，新增InnoDB锁等待5秒；预约服务命名锁等待3秒。已有MySQL/Redis地址及密码仅在本地配置。
+
+## T03确定性预约入口
+
+API文档 `http://127.0.0.1:8000/docs` 已提供5个预约接口：查询、草稿、确认、按请求查证和取消。Authorize使用已有demo_operator及本地DEMO_SEED_PASSWORD，后端绑定身份与demo scope；前端环境页面仍在5173，不把它当作预约或Agent界面。详见[接口与请求示例](architecture/booking.md)。
+
+T03最终后端74项通过；8并发相同请求仅1预约、4身份竞争仅1成功、事务回滚及提交回执丢失后查证均已验证。主库网络烟测只做认证/查询/查证，预约相关行数未变；写入测试在临时库内完成并删除临时库，证据见[T03验收](acceptance/T03.md)。本项未发起模型请求或运行Worker。
 
 ## Windows Redis 模块与启动
 
@@ -66,7 +74,7 @@ Set-Location ..
 
 填写根目录 `.env` 的已有 MySQL 地址/端口/账号/密码与应用库名、原生 Redis 端点 `127.0.0.1:16380` 及认证。本机已完成填写；仓库 `.env.example` 只保留占位。不要把后端密钥放入 VITE 环境变量。
 
-MySQL T01 只创建空的 agentchaos 数据库并查询连通性，未执行 16 表迁移。其他机器需先创建空库并授予本地应用账号访问权限，T02 才落实正式迁移和角色。
+T01只创建空的agentchaos库并查询连通性；T02现已完成16表迁移、演示账号及规则种子。其他机器先创建空库并填写连接和 `DEMO_SEED_PASSWORD`，再依次运行 `scripts/manage_db.py migrate`、`seed`、`check`（在backend目录）。账号尚无登录接口；完整步骤、scope清理和回退限制见 [数据库操作](database-operations.md)。
 
 启动原生 Redis 后执行 `powershell -File scripts/start-dev.ps1`；前端 `http://127.0.0.1:5173`，API `http://127.0.0.1:8000/docs`。停止前后端使用 `powershell -File scripts/stop-dev.ps1`；该脚本不会停止 MySQL 或 Redis。
 
@@ -87,9 +95,17 @@ npx playwright install chromium
 npx playwright test
 ```
 
-AC_INTEGRATION=1 才执行真实 MySQL/Redis 集成检查。浏览器前两项使用真实服务，第三项故意阻断健康请求以验证错误态；不把模拟错误测试当作真实故障实验。`docs/evidence/T01` 保存健康响应、检查点验证及桌面/手机截图。
+AC_INTEGRATION=1才执行真实MySQL/Redis集成检查；T02新增数据库用例会在随机命名的临时库中执行写入及回退，结束后删除临时库，需相应权限。T02全量后端38项通过；首次因Redis未启动出现1项失败，按既有D盘配置启动后补跑及全量复跑通过，详见 [T02验收](acceptance/T02.md)。浏览器前两项使用真实服务，第三项故意阻断健康请求以验证错误态；不把模拟错误测试当作真实故障实验。`docs/evidence/T01`保留原T01证据，T02结构与隔离证据另在`docs/evidence/T02`。
 
-## 模型方案与尚未验证事项
+## T04当前状态，2026-10-25
+
+用户已批准T03并授权T04，agent本轮累计上限1美元，生成器/裁判仍0。本地付费开关启用并由跨进程账本限制；不是每次重启获得新额度。真实DeepSeek非思考生成、工具调用/回传、流式及usage已验证，10类真实开发对话和96项后端回归通过，见[T04验收](acceptance/T04.md)。累计占用保守估算0.468625美元，含未知超时预留，不是实际账单。
+
+健康页展示与当前本地凭据/模型配置匹配的成功调用历史，明确显示时间；刷新不调用模型，也不保证此刻服务商可用。六个会话接口在/api/v1/demo/sessions下，Swagger可操作；未新增聊天工作台，批量执行仍未开放。主库迁移20261025_0002，仍16表/22触发器、无测试预约，V0版本2已登记。T05未获准，Linux Worker条件尚待落实。
+
+以下模型列表与T01叙述保留为历史探测背景，当前能力/授权以上述T04记录为准。
+
+## 模型方案与历史未验证事项
 
 官方端点为 `https://api.deepseek.com`，三角色分别读取 AGENT_MODEL、CASEGEN_MODEL、JUDGE_MODEL，候选均为 deepseek-flash；独立输出上限与预算。ALLOW_PAID_MODEL_CALLS 默认为 false，预算 0 表示没有授权，不表示不限额；T01 未实现执行模型请求的接口。
 
@@ -113,4 +129,4 @@ Worker 在 worker profile 中，T01 仅完成配置及导入验证，没有业�
 
 ## 团队待补登记
 
-实际学校/组别、队员姓名与分工、校赛更早截止、官方群对赛程矛盾的确认、DeepSeek 角色预算均待团队补充。DeepSeek 凭据已由用户写入本地并通过鉴权检查；未知项没有虚构填写，当前仍关闭付费调用。预算等记录在真实模型任务与正式实验前必须落实。
+学校/组别、队员姓名与分工、校赛更早截止、官方群对赛程矛盾的确认仍待团队补充。T04已落实agent本轮1美元，生成器/裁判0，未获后续任务新预算；密钥仅在本地。正式实验前按对应任务重新确认适用授权和余额。

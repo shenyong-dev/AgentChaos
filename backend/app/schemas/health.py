@@ -31,12 +31,13 @@ class ModelRoleConfig(BaseModel):
 class PublicConfig(BaseModel):
     app_version: str
     environment: str
-    task: Literal["T01"] = "T01"
+    task: Literal["T04"] = "T04"
     api_prefix: str = "/api/v1"
     model_provider: str = "DeepSeek 官方 API"
     model_key_configured: bool
-    model_connectivity: Literal["not_probed"] = "not_probed"
+    model_connectivity: Literal["not_probed", "historically_verified"] = "not_probed"
     paid_calls_enabled: bool
     run_concurrency: int
     roles: list[ModelRoleConfig]
     test_execution_available: bool = False
+    agent_demo_available: bool = True

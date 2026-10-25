@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, Request, Response
 
 from app import __version__
 from app.core.config import Settings, get_settings
+from app.core.model_probe import historical_observation
 from app.schemas.common import Envelope
 from app.schemas.health import HealthReport, ModelRoleConfig, PublicConfig
 from app.services.health import collect_health
@@ -41,6 +42,9 @@ def public_config(request: Request, settings: SettingsDependency) -> Envelope[Pu
             app_version=__version__,
             environment=settings.app_env,
             model_key_configured=bool(settings.deepseek_api_key.get_secret_value()),
+            model_connectivity="historically_verified"
+            if historical_observation(settings)
+            else "not_probed",
             paid_calls_enabled=settings.allow_paid_model_calls,
             run_concurrency=settings.run_concurrency,
             roles=[

@@ -1,0 +1,252 @@
+{
+  "checked_at": "2026-10-25T14:51:10.118899+00:00",
+  "budget_before": {
+    "limit": 1000000,
+    "held_upper": 3800,
+    "calls_started": 228,
+    "charged_estimate": 302827,
+    "calls_completed": 227,
+    "calls_unknown": 1
+  },
+  "unauthenticated_create": 401,
+  "scope_injection": 400,
+  "created": {
+    "session_id": "16b3ea45-2edc-49a7-a99a-30fe3abfb2df",
+    "revision": 0,
+    "version_id": 1,
+    "config_hash": "9c30becde73e116fb2dca3ebfd3014cffab0dc2f6f9973b4f2d4b1b0a196d778",
+    "reference_clock": "2026-10-25T14:51:17.876494+00:00",
+    "status": "ready",
+    "assistant_text": "",
+    "fields": {},
+    "confirmation_state": "idle",
+    "confirmation_revision": 0,
+    "pending_draft": null,
+    "business_result": null,
+    "unknown_submission": null,
+    "denials": [],
+    "evidence_refs": [],
+    "last_retrieval": null,
+    "compactions": 0,
+    "history_messages": 0,
+    "trace": [],
+    "last_error": null,
+    "next_nodes": []
+  },
+  "real_message_response": {
+    "session_id": "16b3ea45-2edc-49a7-a99a-30fe3abfb2df",
+    "revision": 1,
+    "version_id": 1,
+    "config_hash": "9c30becde73e116fb2dca3ebfd3014cffab0dc2f6f9973b4f2d4b1b0a196d778",
+    "reference_clock": "2026-10-25T14:51:17.876494+00:00",
+    "status": "ready",
+    "assistant_text": "未找到证据：检索“押金 收费金额”返回 no_lexical_match，没有匹配条款（索引 hash 4fbf686c…cdce0），因此无法提供押金或收费金额。本次未进行任何预约操作。",
+    "fields": {},
+    "confirmation_state": "idle",
+    "confirmation_revision": 0,
+    "pending_draft": null,
+    "business_result": null,
+    "unknown_submission": null,
+    "denials": [],
+    "evidence_refs": [],
+    "last_retrieval": {
+      "status": "no_lexical_match",
+      "query": "押金 收费金额",
+      "query_tokens": [
+        "押金",
+        "收费",
+        "金额"
+      ],
+      "index_hash": "4fbf686cec03f3a21c9faa36aec2c0d61e00d23610e973ee83924ef68cecdce0",
+      "chunks": []
+    },
+    "compactions": 0,
+    "history_messages": 4,
+    "trace": [
+      {
+        "type": "model",
+        "call_id": "c589de27-1796-4fbd-af3e-09be059fdf6f",
+        "source_turn": 1,
+        "usage": {
+          "input_tokens": 2601,
+          "output_tokens": 43,
+          "total_tokens": 2644,
+          "input_token_details": {
+            "cache_read": 640
+          },
+          "output_token_details": {}
+        },
+        "estimated_peak_microusd": 832,
+        "model_returned": "deepseek-flash",
+        "streamed": true,
+        "model_requests": 1
+      },
+      {
+        "type": "retrieval",
+        "result": {
+          "status": "no_lexical_match",
+          "query": "押金 收费金额",
+          "query_tokens": [
+            "押金",
+            "收费",
+            "金额"
+          ],
+          "index_hash": "4fbf686cec03f3a21c9faa36aec2c0d61e00d23610e973ee83924ef68cecdce0",
+          "chunks": []
+        },
+        "source_turn": 1
+      },
+      {
+        "type": "tool",
+        "name": "retrieve_rules",
+        "arguments": {
+          "query": "押金 收费金额"
+        },
+        "result": {
+          "status": "no_lexical_match",
+          "query": "押金 收费金额",
+          "query_tokens": [
+            "押金",
+            "收费",
+            "金额"
+          ],
+          "index_hash": "4fbf686cec03f3a21c9faa36aec2c0d61e00d23610e973ee83924ef68cecdce0",
+          "chunks": []
+        },
+        "evidence_id": "f3a0f5a1-2be8-4ef1-8769-176e820abc56",
+        "source_turn": 1
+      },
+      {
+        "type": "model",
+        "call_id": "98ff611a-d216-4197-aa5c-eaea6d90b2d1",
+        "source_turn": 1,
+        "usage": {
+          "input_tokens": 2858,
+          "output_tokens": 52,
+          "total_tokens": 2910,
+          "input_token_details": {
+            "cache_read": 768
+          },
+          "output_token_details": {}
+        },
+        "estimated_peak_microusd": 920,
+        "model_returned": "deepseek-flash",
+        "streamed": true,
+        "model_requests": 1
+      }
+    ],
+    "last_error": null,
+    "next_nodes": []
+  },
+  "history": {
+    "items": [
+      {
+        "message_id": "f36cd5c0-5952-49d2-95e0-f6062a8061f4",
+        "role": "human",
+        "content": "请查实验规则中的押金收费金额，只回答有证据的信息，不进行预约。"
+      },
+      {
+        "message_id": "lc_run--01a1738b-68fa-7182-ad8d-1153910509fc",
+        "role": "ai",
+        "content": ""
+      },
+      {
+        "message_id": "lc_run--01a1738b-6d32-742c-a5d4-e095cbcbf67e",
+        "role": "ai",
+        "content": "未找到证据：检索“押金 收费金额”返回 no_lexical_match，没有匹配条款（索引 hash 4fbf686c…cdce0），因此无法提供押金或收费金额。本次未进行任何预约操作。"
+      }
+    ],
+    "next_cursor": null
+  },
+  "health": {
+    "status": "infrastructure_ready",
+    "checked_at": "2026-10-25T14:51:21.106008Z",
+    "checks": [
+      {
+        "name": "api",
+        "status": "ok",
+        "code": "api_running",
+        "message": "API 进程正常响应。",
+        "latency_ms": null,
+        "version": "0.1.0",
+        "capabilities": {}
+      },
+      {
+        "name": "mysql",
+        "status": "ok",
+        "code": "mysql_connected",
+        "message": "已连接应用数据库。",
+        "latency_ms": 24.69,
+        "version": "8.0.39",
+        "capabilities": {}
+      },
+      {
+        "name": "redis",
+        "status": "ok",
+        "code": "redis_connected",
+        "message": "PING、JSON 与 Search 已验证。",
+        "latency_ms": 5.03,
+        "version": "8.2.10",
+        "capabilities": {
+          "json": true,
+          "search": true
+        }
+      },
+      {
+        "name": "model",
+        "status": "ok",
+        "code": "model_historically_verified",
+        "message": "agent非思考模式于2026-10-25T14:51:19.727467+00:00真实调用成功；此页显示历史结果，刷新不调用模型。",
+        "latency_ms": null,
+        "version": null,
+        "capabilities": {
+          "historical_agent_probe": true
+        }
+      }
+    ]
+  },
+  "public_config": {
+    "app_version": "0.1.0",
+    "environment": "development",
+    "task": "T04",
+    "api_prefix": "/api/v1",
+    "model_provider": "DeepSeek 官方 API",
+    "model_key_configured": true,
+    "model_connectivity": "historically_verified",
+    "paid_calls_enabled": true,
+    "run_concurrency": 1,
+    "roles": [
+      {
+        "role": "agent",
+        "model": "deepseek-flash",
+        "thinking": "disabled",
+        "max_output_tokens": 1024,
+        "budget_usd": 1.0
+      },
+      {
+        "role": "case_generator",
+        "model": "deepseek-flash",
+        "thinking": "disabled",
+        "max_output_tokens": 2048,
+        "budget_usd": 0.0
+      },
+      {
+        "role": "judge",
+        "model": "deepseek-flash",
+        "thinking": "disabled",
+        "max_output_tokens": 1024,
+        "budget_usd": 0.0
+      }
+    ],
+    "test_execution_available": false,
+    "agent_demo_available": true
+  },
+  "budget_after": {
+    "limit": 1000000,
+    "held_upper": 3800,
+    "calls_started": 230,
+    "charged_estimate": 304579,
+    "calls_completed": 229,
+    "calls_unknown": 1
+  }
+}

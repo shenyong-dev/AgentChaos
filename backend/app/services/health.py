@@ -10,6 +10,7 @@ from sqlalchemy.pool import NullPool
 
 from app import __version__
 from app.core.config import Settings
+from app.core.model_probe import historical_observation
 from app.schemas.health import ComponentCheck, HealthReport
 
 
@@ -32,7 +33,7 @@ def probe_mysql(settings: Settings) -> ComponentCheck:
             name="mysql",
             status="ok",
             code="mysql_connected",
-            message="已连接应用数据库；未创建业务表。",
+            message="已连接应用数据库。",
             version=str(version),
             latency_ms=round((perf_counter() - started) * 1000, 2),
         )
@@ -99,6 +100,7 @@ async def collect_health(settings: Settings) -> HealthReport:
         asyncio.to_thread(probe_mysql, settings), asyncio.to_thread(probe_redis, settings)
     )
     has_key = bool(settings.deepseek_api_key.get_secret_value())
+    observation = historical_observation(settings) if has_key else None
     return HealthReport(
         status=(
             "infrastructure_ready" if mysql.status == "ok" and redis.status == "ok" else "degraded"
@@ -116,11 +118,18 @@ async def collect_health(settings: Settings) -> HealthReport:
             redis,
             ComponentCheck(
                 name="model",
-                status="not_probed" if has_key else "not_configured",
-                code="model_not_probed" if has_key else "model_key_missing",
-                message="已配置凭据；T01 未发起模型请求。"
-                if has_key
-                else "尚未配置凭据，未调用模型。",
+                status="ok" if observation else ("not_probed" if has_key else "not_configured"),
+                code="model_historically_verified"
+                if observation
+                else ("model_not_probed" if has_key else "model_key_missing"),
+                message=f"agent非思考模式于{observation['checked_at']}真实调用成功；此页显示历史结果，刷新不调用模型。"
+                if observation
+                else (
+                    "已配置凭据；当前配置尚无本地成功调用记录。"
+                    if has_key
+                    else "尚未配置凭据，未调用模型。"
+                ),
+                capabilities={"historical_agent_probe": True} if observation else {},
             ),
         ],
     )

@@ -7,7 +7,11 @@ from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException
 
 from app import __version__
+from app.agents.errors import AgentError
+from app.api.agent import router as agent_router
+from app.api.booking import router as booking_router
 from app.api.routes import router
+from app.services.booking import BookingError
 
 logger = logging.getLogger("agentchaos")
 
@@ -16,7 +20,7 @@ def create_app() -> FastAPI:
     app = FastAPI(
         title="AgentChaos API",
         version=__version__,
-        description="T01 工程基础；评测、预约与模型执行接口尚未实现。",
+        description="T04 真实预约Agent与确定性服务；正式批量评测和SSE在后续实现。",
     )
 
     @app.middleware("http")
@@ -76,7 +80,34 @@ def create_app() -> FastAPI:
             },
         )
 
+    @app.exception_handler(BookingError)
+    async def booking_error(request: Request, exc: BookingError):
+        detail = {"retryable": exc.retryable, "commit_state": exc.commit_state}
+        if exc.request_key is not None:
+            detail["request_key"] = str(exc.request_key)
+        return JSONResponse(
+            status_code=exc.status_code,
+            content={
+                "error": {"code": exc.code, "message": exc.message, "details": [detail]},
+                "request_id": request.state.request_id,
+            },
+            headers={"WWW-Authenticate": "Basic"} if exc.status_code == 401 else None,
+        )
+
     app.include_router(router)
+    app.include_router(booking_router)
+    app.include_router(agent_router)
+
+    @app.exception_handler(AgentError)
+    async def agent_error(request: Request, exc: AgentError):
+        return JSONResponse(
+            status_code=exc.status_code,
+            content={
+                "error": {"code": exc.code, "message": exc.message, "details": []},
+                "request_id": request.state.request_id,
+            },
+        )
+
     return app
 
 
