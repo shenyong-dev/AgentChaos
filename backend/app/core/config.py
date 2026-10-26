@@ -46,6 +46,16 @@ class Settings(BaseSettings):
     casegen_budget_usd: float = Field(default=0, ge=0, allow_inf_nan=False)
     judge_budget_usd: float = Field(default=0, ge=0, allow_inf_nan=False)
     run_concurrency: int = Field(default=1, ge=1, le=5)
+    executor_allow_paid_model_calls: bool = False
+    executor_budget_authorization_id: str = ""
+    executor_agent_budget_usd: float = Field(default=0, ge=0, le=1, allow_inf_nan=False)
+    executor_agent_budget_unlimited: bool = False
+    executor_queue: str = "agentchaos"
+    executor_namespace: str = "ac:t05"
+    executor_lease_seconds: int = Field(default=45, ge=10, le=120)
+    sse_max_seconds: int = Field(default=30, ge=5, le=60)
+    sse_send_timeout_seconds: float = Field(default=5, ge=0.01, le=30)
+    sse_max_backlog: int = Field(default=1000, ge=100, le=10000)
 
     @property
     def mysql_url(self) -> URL:

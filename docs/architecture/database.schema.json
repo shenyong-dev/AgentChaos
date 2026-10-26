@@ -1,5 +1,5 @@
 {
-  "revision": "20261025_0002",
+  "revision": "20261026_0003",
   "tables": [
     {
       "name": "ac_fault_profiles",
@@ -1238,6 +1238,14 @@
           "application_default": null
         },
         {
+          "name": "event_seq",
+          "type": "BIGINT UNSIGNED",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": "0",
+          "application_default": "0"
+        },
+        {
           "name": "id",
           "type": "BIGINT UNSIGNED",
           "nullable": false,
@@ -1406,7 +1414,7 @@
     },
     {
       "name": "ac_artifacts",
-      "purpose": "不可变证据/报告清单，文件下载在后续实现",
+      "purpose": "不可变证据/报告清单；T06按运行归属校验哈希后下载证据",
       "columns": [
         {
           "name": "run_id",
@@ -2096,7 +2104,7 @@
     },
     {
       "name": "ac_trace_events",
-      "purpose": "追加式可观察事件与证据；T06实现记录器",
+      "purpose": "T06追加式类型化事件、真实run归属与事务提交序列",
       "columns": [
         {
           "name": "event_uuid",
@@ -2107,9 +2115,25 @@
           "application_default": null
         },
         {
-          "name": "execution_id",
+          "name": "run_id",
           "type": "BIGINT UNSIGNED",
           "nullable": false,
+          "primary_key": false,
+          "server_default": null,
+          "application_default": null
+        },
+        {
+          "name": "run_seq_no",
+          "type": "BIGINT UNSIGNED",
+          "nullable": false,
+          "primary_key": false,
+          "server_default": "0",
+          "application_default": "0"
+        },
+        {
+          "name": "execution_id",
+          "type": "BIGINT UNSIGNED",
+          "nullable": true,
           "primary_key": false,
           "server_default": null,
           "application_default": null
@@ -2247,6 +2271,16 @@
           ]
         },
         {
+          "kind": "foreign_key",
+          "name": "fk_trace_run",
+          "columns": [
+            "run_id"
+          ],
+          "references": [
+            "ac_test_runs.id"
+          ]
+        },
+        {
           "kind": "unique",
           "name": "uq_ac_trace_events_event_uuid",
           "columns": [
@@ -2270,6 +2304,14 @@
             "attempt_no",
             "seq_no"
           ]
+        },
+        {
+          "kind": "unique",
+          "name": "uq_run_event_sequence",
+          "columns": [
+            "run_id",
+            "run_seq_no"
+          ]
         }
       ],
       "indexes": [
@@ -2278,6 +2320,29 @@
           "columns": [
             "execution_id",
             "id"
+          ],
+          "unique": false
+        },
+        {
+          "name": "ix_event_parent",
+          "columns": [
+            "parent_event_uuid"
+          ],
+          "unique": false
+        },
+        {
+          "name": "ix_run_event_cursor",
+          "columns": [
+            "run_id",
+            "run_seq_no"
+          ],
+          "unique": false
+        },
+        {
+          "name": "ix_run_event_type",
+          "columns": [
+            "run_id",
+            "event_type"
           ],
           "unique": false
         }

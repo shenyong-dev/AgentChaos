@@ -66,7 +66,7 @@ def save_evidence(name, data, *, task="T02"):
 @contextmanager
 def disposable_database(task="T02"):
     settings = Settings()
-    assert task in ("T02", "T03", "T04")
+    assert task in ("T02", "T03", "T04", "T05", "T06")
     prefix = f"agentchaos_{task.lower()}_verify_"
     database = prefix + uuid4().hex[:12]
     assert database.startswith(prefix) and database != settings.mysql_database
@@ -257,7 +257,7 @@ def test_upgrade_downgrade_upgrade_and_metadata_drift():
                         "WHERE trigger_schema=DATABASE()"
                     )
                 )
-                == 22
+                == 23
             )
             config = Config(str(PROJECT_ROOT / "backend" / "alembic.ini"))
             config.attributes["connection"] = connection
@@ -275,7 +275,7 @@ def test_upgrade_downgrade_upgrade_and_metadata_drift():
                 "database": engine.url.database,
                 "initial_domain_tables": 0,
                 "after_upgrade": sorted(tables),
-                "trigger_count": 22,
+                "trigger_count": 23,
                 "after_downgrade": ["alembic_version"],
                 "after_reupgrade": sorted(inspect(engine).get_table_names()),
                 "metadata_check_after_upgrade_and_reupgrade": "passed",

@@ -22,10 +22,16 @@ from app.core.model_probe import remember_success
 
 class ModelGateway:
     def __init__(
-        self, settings: Settings, budget: AgentBudget, *, audit_directory: Path | None = None
+        self,
+        settings: Settings,
+        budget: AgentBudget,
+        *,
+        audit_directory: Path | None = None,
+        control=None,
     ):
         self.settings, self.budget = settings, budget
         self.audit_directory = audit_directory or PROJECT_ROOT / ".local/t04/model-calls"
+        self.control = control
 
     def invoke(
         self,
@@ -62,6 +68,8 @@ class ModelGateway:
         }
         started = time.monotonic()
         try:
+            if self.control:
+                self.control.check()
             model = ChatDeepSeek(
                 model=s.agent_model,
                 api_key=s.deepseek_api_key.get_secret_value(),
@@ -79,8 +87,12 @@ class ModelGateway:
             )
             combined = None
             stream = bound.stream(messages, stream_usage=True)
+            last_checked = 0.0
             try:
                 for chunk in stream:
+                    if self.control and time.monotonic() - last_checked >= 0.25:
+                        self.control.check()
+                        last_checked = time.monotonic()
                     if deadline is not None and time.monotonic() > deadline:
                         raise AgentError("agent_deadline", "本轮对话达到总时限。", 504)
                     record["chunks"].append(
@@ -135,6 +147,7 @@ class ModelGateway:
             )
             if isinstance(exc, AgentError):
                 record["error_code"] = exc.code
+                exc.agent_record = record
                 raise
             code = "model_service_error"
             status = 503
@@ -143,7 +156,9 @@ class ModelGateway:
             elif getattr(exc, "status_code", None) == 429:
                 code = "model_rate_limited"
             record["error_code"] = code
-            raise AgentError(code, "DeepSeek请求未完成；未知用量保留预留。", status) from None
+            error = AgentError(code, "DeepSeek请求未完成；未知用量保留预留。", status)
+            error.agent_record = record
+            raise error from None
         finally:
             record["elapsed_ms"] = round((time.monotonic() - started) * 1000, 2)
             self.audit_directory.mkdir(parents=True, exist_ok=True)

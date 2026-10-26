@@ -1,0 +1,42 @@
+.E
+=================================== ERRORS ====================================
+_____ ERROR at teardown of test_run_events_order_rollback_and_idempotency _____
+
+infra = (<app.executors.service.RunService object at 0x0000025D517CC800>, <app.evidence.reader.TraceReader object at 0x0000025...e39821d4aff', executor_lease_seconds=45, sse_max_seconds=5, sse_send_timeout_seconds=5.0, sse_max_backlog=1000), 1, [])
+
+    @pytest.fixture
+    def trace(infra):
+        service, reader, redis, settings, version, paths = infra
+    
+        def make(turns=None):
+            identifier = service.create(
+                1,
+                CreateRun(
+                    request_id=uuid4(),
+                    target_version_id=version,
+                    case_revision_ids=[add_case(service.engine, turns)],
+                ),
+            )
+            return identifier, service.read(1, identifier)["executions"][0]["execution_id"]
+    
+        yield service, reader, redis, settings, make, paths
+        with Session(service.engine) as session:
+            pending = list(
+                session.scalars(
+>                   select(TestRun.run_uuid).where(TestRun.status.in_(("queued", "running")))
+                           ^^^^^^^
+                )
+            )
+E           NameError: name 'TestRun' is not defined
+
+backend\tests\test_evidence.py:98: NameError
+---------------------------- Captured stderr setup ----------------------------
+INFO  [alembic.runtime.migration] Context impl MySQLImpl.
+INFO  [alembic.runtime.migration] Will assume non-transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 20261025_0001, T02 initial sixteen-table schema
+INFO  [alembic.runtime.migration] Running upgrade 20261025_0001 -> 20261025_0002, T04 bind pending drafts to a trusted conversation without adding tables.
+INFO  [alembic.runtime.migration] Running upgrade 20261025_0002 -> 20261026_0003, T06 real run-level events and transactionally allocated per-run order.
+=========================== short test summary info ===========================
+ERROR backend\tests\test_evidence.py::test_run_events_order_rollback_and_idempotency
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!
+1 passed, 1 error in 5.55s

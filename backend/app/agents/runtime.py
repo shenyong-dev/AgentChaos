@@ -6,6 +6,7 @@ This bounded synchronous prototype is not the T05 persistent Worker executor.
 import json
 import re
 import time
+from contextlib import nullcontext
 from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
@@ -16,7 +17,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.agents.budget import AgentBudget
-from app.agents.checkpoints import SessionRedisSaver
+from app.agents.checkpoints import FencedRedisSaver, SessionRedisSaver
 from app.agents.errors import AgentError
 from app.agents.gateway import ModelGateway
 from app.agents.graph import build_agent_graph, looks_like_decline
@@ -39,21 +40,31 @@ class AgentRuntime:
         clock=utc_now,
         auto_register=False,
         document_ids=None,
+        control=None,
+        budget=None,
+        recorder=None,
     ):
         self.engine, self.redis, self.settings = engine, redis, settings
         self.prefix, self.clock = prefix, clock
+        self.control = control
         self.booking = BookingService(engine, clock=clock)
         self.retriever = KnowledgeRetriever(engine, document_ids)
-        self.registry = ToolRegistry(self.booking, self.retriever)
-        self.budget = AgentBudget(redis, settings)
-        self.gateway = gateway or ModelGateway(settings, self.budget)
-        self.saver = SessionRedisSaver(
+        self.registry = ToolRegistry(
+            self.booking, self.retriever, control=control, settings=settings
+        )
+        self.budget = budget or AgentBudget(redis, settings)
+        self.gateway = gateway or ModelGateway(settings, self.budget, control=control)
+        saver_class = FencedRedisSaver if control else SessionRedisSaver
+        self.saver = saver_class(
+            **({"control": control} if control else {}),
             redis_client=redis,
             checkpoint_prefix="ac_t04_checkpoints",
             checkpoint_write_prefix="ac_t04_checkpoint_writes",
         )
         self.saver.setup()
-        self.graph = build_agent_graph(self.gateway, self.registry, self.saver)
+        self.graph = build_agent_graph(
+            self.gateway, self.registry, self.saver, control=control, recorder=recorder
+        )
         self.manifest = build_manifest(settings, self.retriever, self.registry)
         if auto_register:
             self.version_id = register_version(engine, self.manifest)
@@ -84,10 +95,10 @@ class AgentRuntime:
             raise AgentError("session_version_mismatch", "会话绑定的不可变版本与当前代码不符。")
         return metadata
 
-    def create(self, user_id: int, *, scope_id="demo", reference_clock=None):
+    def create(self, user_id: int, *, scope_id="demo", reference_clock=None, session_id=None):
         if self.version_id is None:
             raise AgentError("agent_version_not_registered", "当前V0代码尚未登记不可变版本。", 503)
-        session_id = str(uuid4())
+        session_id = session_id or str(uuid4())
         metadata = {
             "session_id": session_id,
             "owner_id": user_id,
@@ -100,7 +111,11 @@ class AgentRuntime:
             "created_at": datetime.now(UTC).isoformat(),
             "last_error": None,
         }
-        self.redis.set(self._key(session_id), json.dumps(metadata, ensure_ascii=False), nx=True)
+        with self.control.transaction() if self.control else nullcontext():
+            self.redis.set(self._key(session_id), json.dumps(metadata, ensure_ascii=False), nx=True)
+            actual = self._metadata(user_id, session_id)
+            if actual["scope_id"] != scope_id:
+                raise AgentError("session_scope_mismatch", "会话与执行数据范围不一致。")
         return self.view(user_id, session_id)
 
     @staticmethod
@@ -206,7 +221,9 @@ class AgentRuntime:
         key = self._key(session_id)
         self._metadata(user_id, session_id)
         lock = self.redis.lock(key + ":lock", timeout=300, blocking_timeout=0, thread_local=False)
-        if not lock.acquire(blocking=False):
+        if not lock.acquire(
+            blocking=False, **({"token": self.control.token} if self.control else {})
+        ):
             raise AgentError("session_busy", "该会话正在处理另一输入，请等待并重新读取版本。")
         try:
             metadata, state, snapshot = self.snapshot(user_id, session_id)
@@ -298,12 +315,20 @@ class AgentRuntime:
                 if not lock.owned():
                     raise AgentError("session_lock_lost", "会话锁已失效，请重新读取状态。", 503)
                 metadata.update({"revision": metadata["revision"] + 1, "last_error": None})
-                self.redis.set(key, json.dumps(metadata, ensure_ascii=False))
                 response = self.view(user_id, session_id)
-                self.redis.set(
-                    cache_key,
-                    json.dumps({"hash": payload_hash, "response": response}, ensure_ascii=False),
-                )
+                response["revision"] = metadata["revision"]
+                response["last_error"] = None
+                response["status"] = "waiting_confirmation" if response["next_nodes"] else "ready"
+                with self.control.transaction() if self.control else nullcontext():
+                    with self.redis.pipeline() as pipeline:
+                        pipeline.set(key, json.dumps(metadata, ensure_ascii=False))
+                        pipeline.set(
+                            cache_key,
+                            json.dumps(
+                                {"hash": payload_hash, "response": response}, ensure_ascii=False
+                            ),
+                        )
+                        pipeline.execute()
                 return response
             except AgentError as exc:
                 metadata.update(
@@ -312,20 +337,23 @@ class AgentRuntime:
                         "last_error": {"code": exc.code, "message": exc.message},
                     }
                 )
-                self.redis.set(key, json.dumps(metadata, ensure_ascii=False))
-                self.redis.set(
-                    cache_key,
-                    json.dumps(
-                        {
-                            "hash": payload_hash,
-                            "error": {
-                                "code": exc.code,
-                                "message": exc.message,
-                                "status_code": exc.status_code,
-                            },
-                        }
-                    ),
-                )
+                with self.control.transaction() if self.control else nullcontext():
+                    with self.redis.pipeline() as pipeline:
+                        pipeline.set(key, json.dumps(metadata, ensure_ascii=False))
+                        pipeline.set(
+                            cache_key,
+                            json.dumps(
+                                {
+                                    "hash": payload_hash,
+                                    "error": {
+                                        "code": exc.code,
+                                        "message": exc.message,
+                                        "status_code": exc.status_code,
+                                    },
+                                }
+                            ),
+                        )
+                        pipeline.execute()
                 raise
         except RedisError:
             raise AgentError(

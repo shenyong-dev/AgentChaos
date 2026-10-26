@@ -1,0 +1,296 @@
+{
+  "config": {
+    "argv": [
+      "D:\\node.js\\node.exe",
+      "D:\\AgentChaos\\frontend\\node_modules\\@playwright\\test\\cli.js",
+      "test",
+      "--reporter=json"
+    ],
+    "configFile": "D:\\AgentChaos\\frontend\\playwright.config.ts",
+    "rootDir": "D:/AgentChaos/frontend/tests",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "D:/AgentChaos/.local/playwright-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "D:/AgentChaos/frontend/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "filteredProjects": [
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "D:\\AgentChaos\\.local\\playwright-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "",
+        "testDir": "D:\\AgentChaos\\frontend\\tests",
+        "snapshotDir": "D:\\AgentChaos\\frontend\\tests",
+        "testIgnore": [],
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 30000,
+        "use": {
+          "baseURL": "http://127.0.0.1:5173",
+          "headless": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": ""
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "default",
+    "updateSourceMethod": "patch",
+    "version": "1.64.1",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "environment.spec.ts",
+      "file": "environment.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "real services show infrastructure and the configured model observation status",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 11551,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('heading', { name: '基础服务已连通' })\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" getByRole('heading', { name: '基础服务已连通' }) with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('heading', { name: '基础服务已连通' })\u001b[22m\n",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('heading', { name: '基础服务已连通' })\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" getByRole('heading', { name: '基础服务已连通' }) with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('heading', { name: '基础服务已连通' })\u001b[22m\n\n    at D:\\AgentChaos\\frontend\\tests\\environment.spec.ts:20:64",
+                    "location": {
+                      "file": "D:\\AgentChaos\\frontend\\tests\\environment.spec.ts",
+                      "column": 64,
+                      "line": 20
+                    },
+                    "snippet": "  18 |   await page.setViewportSize({ width: 1366, height: 900 })\n  19 |   await page.goto('/environment')\n> 20 |   await expect(page.getByRole('heading', { name: '基础服务已连通' })).toBeVisible()\n     |                                                                ^\n  21 |   await expect(page.getByText('JSON ✓', { exact: true })).toBeVisible()\n  22 |   await expect(page.getByText('SEARCH ✓', { exact: true })).toBeVisible()\n  23 |   await expect(page.getByText(config.paid_calls_enabled"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "D:\\AgentChaos\\frontend\\tests\\environment.spec.ts",
+                        "column": 64,
+                        "line": 20
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('heading', { name: '基础服务已连通' })\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" getByRole('heading', { name: '基础服务已连通' }) with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('heading', { name: '基础服务已连通' })\u001b[22m\n\n\n  18 |   await page.setViewportSize({ width: 1366, height: 900 })\n  19 |   await page.goto('/environment')\n> 20 |   await expect(page.getByRole('heading', { name: '基础服务已连通' })).toBeVisible()\n     |                                                                ^\n  21 |   await expect(page.getByText('JSON ✓', { exact: true })).toBeVisible()\n  22 |   await expect(page.getByText('SEARCH ✓', { exact: true })).toBeVisible()\n  23 |   await expect(page.getByText(config.paid_calls_enabled\n    at D:\\AgentChaos\\frontend\\tests\\environment.spec.ts:20:64"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-26T13:06:42.266Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "D:\\AgentChaos\\.local\\playwright-results\\environment-real-services--80bd1-ed-model-observation-status\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "D:\\AgentChaos\\frontend\\tests\\environment.spec.ts",
+                    "column": 64,
+                    "line": 20
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "2a84b67ca6571daf27b7-e8eda5c5a4052daac795",
+          "file": "environment.spec.ts",
+          "line": 7,
+          "column": 1
+        },
+        {
+          "title": "mobile view fits and refresh makes another real health request",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 5184,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('heading', { name: '基础服务已连通' })\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" getByRole('heading', { name: '基础服务已连通' }) with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('heading', { name: '基础服务已连通' })\u001b[22m\n",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('heading', { name: '基础服务已连通' })\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" getByRole('heading', { name: '基础服务已连通' }) with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('heading', { name: '基础服务已连通' })\u001b[22m\n\n    at D:\\AgentChaos\\frontend\\tests\\environment.spec.ts:41:64",
+                    "location": {
+                      "file": "D:\\AgentChaos\\frontend\\tests\\environment.spec.ts",
+                      "column": 64,
+                      "line": 41
+                    },
+                    "snippet": "  39 |   await page.goto('/environment')\n  40 |   const refresh = page.getByRole('button', { name: '重新检测' })\n> 41 |   await expect(page.getByRole('heading', { name: '基础服务已连通' })).toBeVisible()\n     |                                                                ^\n  42 |   await expect(refresh).toBeEnabled()\n  43 |   const response = page.waitForResponse((r) => r.url().endsWith('/api/v1/health') && r.status() === 200)\n  44 |   await refresh.click()"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "D:\\AgentChaos\\frontend\\tests\\environment.spec.ts",
+                        "column": 64,
+                        "line": 41
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('heading', { name: '基础服务已连通' })\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" getByRole('heading', { name: '基础服务已连通' }) with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('heading', { name: '基础服务已连通' })\u001b[22m\n\n\n  39 |   await page.goto('/environment')\n  40 |   const refresh = page.getByRole('button', { name: '重新检测' })\n> 41 |   await expect(page.getByRole('heading', { name: '基础服务已连通' })).toBeVisible()\n     |                                                                ^\n  42 |   await expect(refresh).toBeEnabled()\n  43 |   const response = page.waitForResponse((r) => r.url().endsWith('/api/v1/health') && r.status() === 200)\n  44 |   await refresh.click()\n    at D:\\AgentChaos\\frontend\\tests\\environment.spec.ts:41:64"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-26T13:06:54.628Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "D:\\AgentChaos\\.local\\playwright-results\\environment-mobile-view-fi-c2ab8-another-real-health-request\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "D:\\AgentChaos\\frontend\\tests\\environment.spec.ts",
+                    "column": 64,
+                    "line": 41
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "2a84b67ca6571daf27b7-6c5fb52004c9f0943fa9",
+          "file": "environment.spec.ts",
+          "line": 37,
+          "column": 1
+        },
+        {
+          "title": "a simulated network failure shows an error and no fake health result",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 5269,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByText('无法读取最新健康状态，请检查 API 服务后重新检测。')\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" getByText('无法读取最新健康状态，请检查 API 服务后重新检测。') with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByText('无法读取最新健康状态，请检查 API 服务后重新检测。')\u001b[22m\n",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByText('无法读取最新健康状态，请检查 API 服务后重新检测。')\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" getByText('无法读取最新健康状态，请检查 API 服务后重新检测。') with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByText('无法读取最新健康状态，请检查 API 服务后重新检测。')\u001b[22m\n\n    at D:\\AgentChaos\\frontend\\tests\\environment.spec.ts:54:63",
+                    "location": {
+                      "file": "D:\\AgentChaos\\frontend\\tests\\environment.spec.ts",
+                      "column": 63,
+                      "line": 54
+                    },
+                    "snippet": "  52 |   await page.route('**/api/v1/health', (route) => route.abort('failed'))\n  53 |   await page.goto('/environment')\n> 54 |   await expect(page.getByText('无法读取最新健康状态，请检查 API 服务后重新检测。')).toBeVisible()\n     |                                                               ^\n  55 |   await expect(page.getByRole('heading', { name: '暂无健康检查结果' })).toBeVisible()\n  56 |   await expect(page.getByRole('heading', { name: '基础服务已连通' })).not.toBeVisible()\n  57 | })"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "D:\\AgentChaos\\frontend\\tests\\environment.spec.ts",
+                        "column": 63,
+                        "line": 54
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByText('无法读取最新健康状态，请检查 API 服务后重新检测。')\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" getByText('无法读取最新健康状态，请检查 API 服务后重新检测。') with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByText('无法读取最新健康状态，请检查 API 服务后重新检测。')\u001b[22m\n\n\n  52 |   await page.route('**/api/v1/health', (route) => route.abort('failed'))\n  53 |   await page.goto('/environment')\n> 54 |   await expect(page.getByText('无法读取最新健康状态，请检查 API 服务后重新检测。')).toBeVisible()\n     |                                                               ^\n  55 |   await expect(page.getByRole('heading', { name: '暂无健康检查结果' })).toBeVisible()\n  56 |   await expect(page.getByRole('heading', { name: '基础服务已连通' })).not.toBeVisible()\n  57 | })\n    at D:\\AgentChaos\\frontend\\tests\\environment.spec.ts:54:63"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-26T13:07:00.630Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "D:\\AgentChaos\\.local\\playwright-results\\environment-a-simulated-ne-ca993-r-and-no-fake-health-result\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "D:\\AgentChaos\\frontend\\tests\\environment.spec.ts",
+                    "column": 63,
+                    "line": 54
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "2a84b67ca6571daf27b7-ac4723890ed6e3e187da",
+          "file": "environment.spec.ts",
+          "line": 51,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-10-26T13:06:41.682Z",
+    "duration": 24475.293,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 3,
+    "flaky": 0
+  }
+}

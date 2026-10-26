@@ -1,0 +1,22 @@
+.......F
+================================== FAILURES ===================================
+_______ test_model_error_is_observed_and_readonly_replay_does_not_retry _______
+
+trace = (<app.executors.service.RunService object at 0x000001DB6B299730>, <app.evidence.reader.TraceReader object at 0x000001D...sPath('D:/AgentChaos/.local/evidence/2c444409-435f-42e9-9257-c00149d6fc7d/d82af878-7c7b-419f-9d19-4cc23c9b48ce.json')])
+
+    def test_model_error_is_observed_and_readonly_replay_does_not_retry(trace):
+        service, reader, redis, settings, make, _ = trace
+        identifier, execution = make()
+        gateway = OfflineGateway()
+        gateway.queue.append(AgentError("model_timeout", "explicit offline timeout", 504))
+        run_execution(service.engine, redis, settings, execution, gateway_factory=lambda *_: gateway)
+        events = all_events(reader, identifier)
+>       model_error = next(i for i in events if i["event"]["type"] == "model.error")
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       StopIteration
+
+backend\tests\test_evidence.py:415: StopIteration
+=========================== short test summary info ===========================
+FAILED backend\tests\test_evidence.py::test_model_error_is_observed_and_readonly_replay_does_not_retry
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 7 passed in 27.44s

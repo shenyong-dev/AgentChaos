@@ -70,7 +70,7 @@ def collect_state():
                     )
                 ).mappings()
             ]
-            assert len(triggers) == 22
+            assert len(triggers) == 23
             for trigger in triggers:
                 body = trigger.pop("body")
                 trigger["definition_sha256"] = hashlib.sha256(body.encode()).hexdigest()

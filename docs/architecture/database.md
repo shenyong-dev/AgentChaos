@@ -1,12 +1,12 @@
-# T02—T04 数据库字段字典与关系
+# T02—T06 数据库字段字典与关系
 
-迁移：`20261025_0002`。12张平台表+4张实验业务表；另有Alembic自身的版本表。
+迁移：`20261026_0003`。12张平台表+4张实验业务表；另有Alembic自身的版本表。
 
-由 backend/scripts/export_database_docs.py 生成；约束/索引为应用显式声明。MySQL可能自动建立外键支持索引；初始结构见T02，当前session字段及实际结构见T04验收记录。
+由 backend/scripts/export_database_docs.py 生成；约束/索引为应用显式声明。MySQL可能自动建立外键支持索引；session见T04，run事件序列及可空execution见T06验收记录。
 
 所有表为InnoDB/utf8mb4；符号标识使用区分大小写的utf8mb4_bin。UTCDateTime要求带时区输入，转UTC存DATETIME(6)，读取时补UTC。JSON赋值复制并拒绝NaN；修改可变JSON字段应赋新值。
 
-固定版本/审核后用例/运行清单及证据由迁移中的22个触发器保护；规则见 docs/database-operations.md。Pydantic冻结或ORM字段本身不能代替数据库保护。
+固定版本/审核后用例/运行清单及证据由迁移中的23个触发器保护；规则见 docs/database-operations.md。Pydantic冻结或ORM字段本身不能代替数据库保护。
 
 ## ER图
 
@@ -78,8 +78,9 @@ erDiagram
     AC_USERS o|--o{ AC_DEFECTS : fk_ac_defects_reviewer_id_ac_users
     AC_TARGETS ||--o{ AC_DEFECTS : fk_ac_defects_target_id_ac_targets
     AC_TARGET_VERSIONS o|--o{ AC_DEFECTS : fk_defect_fixed_target
-    AC_TEST_EXECUTIONS ||--o{ AC_TRACE_EVENTS : fk_ac_trace_events_execution_id_ac_test_executions
+    AC_TEST_EXECUTIONS o|--o{ AC_TRACE_EVENTS : fk_ac_trace_events_execution_id_ac_test_executions
     AC_TRACE_EVENTS o|--o{ AC_TRACE_EVENTS : fk_event_parent_scope
+    AC_TEST_RUNS ||--o{ AC_TRACE_EVENTS : fk_trace_run
 ```
 
 复合外键作为一组表达同scope/actor/room的关联；图不替代字段与约束清单。
@@ -327,6 +328,7 @@ erDiagram
 | `started_at` | `DATETIME(6)` | 是 | `—` |
 | `finished_at` | `DATETIME(6)` | 是 | `—` |
 | `summary_json` | `JSON` | 是 | `—` |
+| `event_seq` | `BIGINT UNSIGNED` | 否 | `0` |
 | `id` PK | `BIGINT UNSIGNED` | 否 | `—` |
 | `created_at` | `DATETIME(6)` | 否 | `CURRENT_TIMESTAMP(6)` |
 
@@ -361,7 +363,7 @@ erDiagram
 
 ## ac_artifacts
 
-不可变证据/报告清单，文件下载在后续实现
+不可变证据/报告清单；T06按运行归属校验哈希后下载证据
 
 | 字段 | MySQL类型 | NULL | 默认值 |
 |---|---|---|---|
@@ -483,12 +485,14 @@ erDiagram
 
 ## ac_trace_events
 
-追加式可观察事件与证据；T06实现记录器
+T06追加式类型化事件、真实run归属与事务提交序列
 
 | 字段 | MySQL类型 | NULL | 默认值 |
 |---|---|---|---|
 | `event_uuid` | `VARCHAR(36) COLLATE utf8mb4_bin` | 否 | `—` |
-| `execution_id` | `BIGINT UNSIGNED` | 否 | `—` |
+| `run_id` | `BIGINT UNSIGNED` | 否 | `—` |
+| `run_seq_no` | `BIGINT UNSIGNED` | 否 | `0` |
+| `execution_id` | `BIGINT UNSIGNED` | 是 | `—` |
 | `attempt_no` | `INTEGER` | 否 | `—` |
 | `seq_no` | `INTEGER` | 否 | `—` |
 | `event_type` | `VARCHAR(64) COLLATE utf8mb4_bin` | 否 | `—` |
@@ -508,7 +512,12 @@ erDiagram
 - `ck_event_visit`（check）：node_visit_no IS NULL OR node_visit_no >= 1
 - `fk_ac_trace_events_execution_id_ac_test_executions`（foreign_key）：execution_id → ac_test_executions.id
 - `fk_event_parent_scope`（foreign_key）：execution_id, attempt_no, parent_event_uuid → ac_trace_events.execution_id, ac_trace_events.attempt_no, ac_trace_events.event_uuid
+- `fk_trace_run`（foreign_key）：run_id → ac_test_runs.id
 - `uq_ac_trace_events_event_uuid`（unique）：event_uuid
 - `uq_event_parent_scope`（unique）：execution_id, attempt_no, event_uuid
 - `uq_event_sequence`（unique）：execution_id, attempt_no, seq_no
+- `uq_run_event_sequence`（unique）：run_id, run_seq_no
 - 索引 `ix_event_cursor`：execution_id, id
+- 索引 `ix_event_parent`：parent_event_uuid
+- 索引 `ix_run_event_cursor`：run_id, run_seq_no
+- 索引 `ix_run_event_type`：run_id, event_type

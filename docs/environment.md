@@ -1,6 +1,8 @@
-# T01—T03 环境与复现说明
+# T01—T06 环境与复现说明
 
-环境验证日期：2026-10-24—2026-10-25，Asia/Shanghai。新增程序、虚拟环境、下载及缓存放在 D 盘。未创建 WSL 发行版；未运行 Docker 安装或容器。下方外部价格与文档快照的核对日期为2026-10-24。
+最新环境复检：2026-10-26，Asia/Shanghai。新增程序、虚拟环境、下载及缓存放D盘；复用现有D盘Docker Desktop Linux引擎，未建立独立WSL。T05已验证真实Linux Worker，T06已验证事件/快照/SSE及证据页；主库迁移0003、16张业务表/23触发器。主库没有验收测试数据和常驻Worker，完整Compose服务尚未整体演练。当前结果以[T06验收](acceptance/T06.md)和[今日提交说明](releases/2026-10-26.md)为准。
+
+下文T01—T04环境表及价格核对日期保留当时实测快照；“尚未运行Docker/Worker”等旧边界已由文末T05及最新T06记录覆盖。Compose的API与Worker现已共享本地证据目录，发布复检用两个非root Linux容器验证文件可互读。
 
 ## 已验证的本机环境
 
@@ -97,7 +99,15 @@ npx playwright test
 
 AC_INTEGRATION=1才执行真实MySQL/Redis集成检查；T02新增数据库用例会在随机命名的临时库中执行写入及回退，结束后删除临时库，需相应权限。T02全量后端38项通过；首次因Redis未启动出现1项失败，按既有D盘配置启动后补跑及全量复跑通过，详见 [T02验收](acceptance/T02.md)。浏览器前两项使用真实服务，第三项故意阻断健康请求以验证错误态；不把模拟错误测试当作真实故障实验。`docs/evidence/T01`保留原T01证据，T02结构与隔离证据另在`docs/evidence/T02`。
 
-## T04当前状态，2026-10-25
+## T05当前状态，2026-10-26
+
+用户已确认T04并授权T05，agent使用独立累计1美元授权，T04旧账本不变。现有Docker Desktop 4.90.0 / Linux Engine 29.7.2已实测，D盘既有docker-desktop数据盘复用，不建立独立WSL。Celery 5.6.3真实prefork Worker、两个Worker的重复投递和暂停恢复、补投、取消及10条API批次已验证；118项后端、3项页面检查通过，见[T05验收](acceptance/T05.md)及[执行器启动/接口](architecture/executor.md)。
+
+Docker原AppData挂载点失效，直接桌面入口仍可能失败。本轮使用项目D盘子进程配置及空auths公共镜像CLI配置，未修改全局用户目录；`scripts/start-linux-engine.ps1`检查/复用既有引擎，不安装或重建发行版。最终非root镜像源码已与冻结版本逐文件核对。验收容器/临时库/用户已移除；Worker当前存活不由健康页推断，常驻部署需按契约启动独立dispatcher和Worker。
+
+T05累计225次真实请求，217次已知usage，高峰估算0.293284美元，8次未知保留0.087680美元，占用0.380964美元；不是实际账单。T05本地开关受独立持久账本限制，case_generator/judge仍0。主库V0版本4，迁移仍20261025_0002，16表/22触发器，无测试运行/预约。当前T05待团队验收，T06未获准。
+
+## T04历史状态，2026-10-25
 
 用户已批准T03并授权T04，agent本轮累计上限1美元，生成器/裁判仍0。本地付费开关启用并由跨进程账本限制；不是每次重启获得新额度。真实DeepSeek非思考生成、工具调用/回传、流式及usage已验证，10类真实开发对话和96项后端回归通过，见[T04验收](acceptance/T04.md)。累计占用保守估算0.468625美元，含未知超时预留，不是实际账单。
 
@@ -121,12 +131,12 @@ Flash 每百万 token 的美元价格快照：输入命中缓存高峰 0.006/低
 
 ## Compose 与 Worker 边界
 
-compose.yaml 是五服务部署草案，镜像按 2026-10-24 官方仓库 digest 固定；已验证 YAML 结构，未执行镜像构建或启动。当前本机部署采用用户授权的原生 Windows 方式，不以草案替代实测。
+compose.yaml 当前包含mysql、redis、api、worker、dispatcher和frontend六项服务；依赖镜像沿用记录的digest。已通过worker profile配置校验，API与Worker共享证据目录；T05/T06已构建应用镜像并运行独立Linux验收容器，尚未整套Compose启动。当前仍使用本机既有MySQL/Redis，不自动切换主库。
 
 MySQL/Redis 的 Compose 数据绑定到项目 `.local/compose`，使本机数据位置明确位于 D 盘；不得用删除目录代替受控停机。容器方案只用于具备 Docker 的后续环境，不会在当前主机自动建立 WSL。
 
-Worker 在 worker profile 中，T01 仅完成配置及导入验证，没有业务任务。Celery 官方不支持 Windows，T05 前需落实团队同意的 Linux Worker 运行主机或容器；本轮未在 Windows 运行 Worker，也未声称恢复或队列可靠性通过。[Celery 官方说明](https://docs.celeryq.dev/en/stable/faq.html#does-celery-support-windows)
+Worker和dispatcher位于worker profile中。T01仅配置/导入的边界为历史；T05已在既有D盘Linux引擎验证任务认领、恢复和队列行为，T06补充持久事件链路。未在Windows运行Celery Worker，主库常驻Worker尚未部署。[Celery 官方说明](https://docs.celeryq.dev/en/stable/faq.html#does-celery-support-windows)
 
 ## 团队待补登记
 
-学校/组别、队员姓名与分工、校赛更早截止、官方群对赛程矛盾的确认仍待团队补充。T04已落实agent本轮1美元，生成器/裁判0，未获后续任务新预算；密钥仅在本地。正式实验前按对应任务重新确认适用授权和余额。
+学校/组别、队员姓名与分工、校赛更早截止、官方群对赛程矛盾的确认仍待团队补充。T04/T05各自独立1美元、T06 agent明确开放金额授权，均保留原账本及逐运行限制；生成器/裁判0。密钥仅在本地，正式实验遵守当时已获准任务与适用授权。

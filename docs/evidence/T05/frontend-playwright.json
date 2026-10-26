@@ -1,0 +1,296 @@
+{
+  "config": {
+    "argv": [
+      "D:\\node.js\\node.exe",
+      "D:\\AgentChaos\\frontend\\node_modules\\@playwright\\test\\cli.js",
+      "test",
+      "--reporter=json"
+    ],
+    "configFile": "D:\\AgentChaos\\frontend\\playwright.config.ts",
+    "rootDir": "D:/AgentChaos/frontend/tests",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "D:/AgentChaos/.local/playwright-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "D:/AgentChaos/frontend/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "filteredProjects": [
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "D:\\AgentChaos\\.local\\playwright-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "",
+        "testDir": "D:\\AgentChaos\\frontend\\tests",
+        "snapshotDir": "D:\\AgentChaos\\frontend\\tests",
+        "testIgnore": [],
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 30000,
+        "use": {
+          "baseURL": "http://127.0.0.1:5173",
+          "headless": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": ""
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "default",
+    "updateSourceMethod": "patch",
+    "version": "1.64.1",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "environment.spec.ts",
+      "file": "environment.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "real services show infrastructure and the configured model observation status",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 191,
+                  "error": {
+                    "message": "Error: apiRequestContext.get: connect ECONNREFUSED 127.0.0.1:5173\nCall log:\n\u001b[2m  - → GET http://127.0.0.1:5173/api/v1/health\u001b[22m\n\u001b[2m    - user-agent: Playwright/1.64.1 (x64; windows 10.0) node/24.11\u001b[22m\n\u001b[2m    - accept: */*\u001b[22m\n\u001b[2m    - accept-encoding: gzip,deflate,br\u001b[22m\n",
+                    "stack": "Error: apiRequestContext.get: connect ECONNREFUSED 127.0.0.1:5173\nCall log:\n\u001b[2m  - → GET http://127.0.0.1:5173/api/v1/health\u001b[22m\n\u001b[2m    - user-agent: Playwright/1.64.1 (x64; windows 10.0) node/24.11\u001b[22m\n\u001b[2m    - accept: */*\u001b[22m\n\u001b[2m    - accept-encoding: gzip,deflate,br\u001b[22m\n\n    at D:\\AgentChaos\\frontend\\tests\\environment.spec.ts:10:34",
+                    "location": {
+                      "file": "D:\\AgentChaos\\frontend\\tests\\environment.spec.ts",
+                      "column": 34,
+                      "line": 10
+                    },
+                    "snippet": "   8 |   const failures: string[] = []\n   9 |   page.on('pageerror', (error) => failures.push(error.message))\n> 10 |   const response = await request.get('/api/v1/health')\n     |                                  ^\n  11 |   expect(response.status()).toBe(200)\n  12 |   const body = await response.json()\n  13 |   const config = (await (await request.get('/api/v1/system/config')).json()).data"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "D:\\AgentChaos\\frontend\\tests\\environment.spec.ts",
+                        "column": 34,
+                        "line": 10
+                      },
+                      "message": "Error: apiRequestContext.get: connect ECONNREFUSED 127.0.0.1:5173\nCall log:\n\u001b[2m  - → GET http://127.0.0.1:5173/api/v1/health\u001b[22m\n\u001b[2m    - user-agent: Playwright/1.64.1 (x64; windows 10.0) node/24.11\u001b[22m\n\u001b[2m    - accept: */*\u001b[22m\n\u001b[2m    - accept-encoding: gzip,deflate,br\u001b[22m\n\n\n   8 |   const failures: string[] = []\n   9 |   page.on('pageerror', (error) => failures.push(error.message))\n> 10 |   const response = await request.get('/api/v1/health')\n     |                                  ^\n  11 |   expect(response.status()).toBe(200)\n  12 |   const body = await response.json()\n  13 |   const config = (await (await request.get('/api/v1/system/config')).json()).data\n    at D:\\AgentChaos\\frontend\\tests\\environment.spec.ts:10:34"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-26T13:02:43.033Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "D:\\AgentChaos\\.local\\playwright-results\\environment-real-services--80bd1-ed-model-observation-status\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "D:\\AgentChaos\\frontend\\tests\\environment.spec.ts",
+                    "column": 34,
+                    "line": 10
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "2a84b67ca6571daf27b7-e8eda5c5a4052daac795",
+          "file": "environment.spec.ts",
+          "line": 7,
+          "column": 1
+        },
+        {
+          "title": "mobile view fits and refresh makes another real health request",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 1175,
+                  "error": {
+                    "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:5173/environment\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:5173/environment\", waiting until \"load\"\u001b[22m\n",
+                    "stack": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:5173/environment\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:5173/environment\", waiting until \"load\"\u001b[22m\n\n    at D:\\AgentChaos\\frontend\\tests\\environment.spec.ts:39:14",
+                    "location": {
+                      "file": "D:\\AgentChaos\\frontend\\tests\\environment.spec.ts",
+                      "column": 14,
+                      "line": 39
+                    },
+                    "snippet": "  37 | test('mobile view fits and refresh makes another real health request', async ({ page }) => {\n  38 |   await page.setViewportSize({ width: 390, height: 844 })\n> 39 |   await page.goto('/environment')\n     |              ^\n  40 |   const refresh = page.getByRole('button', { name: '重新检测' })\n  41 |   await expect(page.getByRole('heading', { name: '基础服务已连通' })).toBeVisible()\n  42 |   await expect(refresh).toBeEnabled()"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "D:\\AgentChaos\\frontend\\tests\\environment.spec.ts",
+                        "column": 14,
+                        "line": 39
+                      },
+                      "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:5173/environment\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:5173/environment\", waiting until \"load\"\u001b[22m\n\n\n  37 | test('mobile view fits and refresh makes another real health request', async ({ page }) => {\n  38 |   await page.setViewportSize({ width: 390, height: 844 })\n> 39 |   await page.goto('/environment')\n     |              ^\n  40 |   const refresh = page.getByRole('button', { name: '重新检测' })\n  41 |   await expect(page.getByRole('heading', { name: '基础服务已连通' })).toBeVisible()\n  42 |   await expect(refresh).toBeEnabled()\n    at D:\\AgentChaos\\frontend\\tests\\environment.spec.ts:39:14"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-26T13:02:44.072Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "D:\\AgentChaos\\.local\\playwright-results\\environment-mobile-view-fi-c2ab8-another-real-health-request\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "D:\\AgentChaos\\frontend\\tests\\environment.spec.ts",
+                    "column": 14,
+                    "line": 39
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "2a84b67ca6571daf27b7-6c5fb52004c9f0943fa9",
+          "file": "environment.spec.ts",
+          "line": 37,
+          "column": 1
+        },
+        {
+          "title": "a simulated network failure shows an error and no fake health result",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 1181,
+                  "error": {
+                    "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:5173/environment\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:5173/environment\", waiting until \"load\"\u001b[22m\n",
+                    "stack": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:5173/environment\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:5173/environment\", waiting until \"load\"\u001b[22m\n\n    at D:\\AgentChaos\\frontend\\tests\\environment.spec.ts:53:14",
+                    "location": {
+                      "file": "D:\\AgentChaos\\frontend\\tests\\environment.spec.ts",
+                      "column": 14,
+                      "line": 53
+                    },
+                    "snippet": "  51 | test('a simulated network failure shows an error and no fake health result', async ({ page }) => {\n  52 |   await page.route('**/api/v1/health', (route) => route.abort('failed'))\n> 53 |   await page.goto('/environment')\n     |              ^\n  54 |   await expect(page.getByText('无法读取最新健康状态，请检查 API 服务后重新检测。')).toBeVisible()\n  55 |   await expect(page.getByRole('heading', { name: '暂无健康检查结果' })).toBeVisible()\n  56 |   await expect(page.getByRole('heading', { name: '基础服务已连通' })).not.toBeVisible()"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "D:\\AgentChaos\\frontend\\tests\\environment.spec.ts",
+                        "column": 14,
+                        "line": 53
+                      },
+                      "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:5173/environment\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:5173/environment\", waiting until \"load\"\u001b[22m\n\n\n  51 | test('a simulated network failure shows an error and no fake health result', async ({ page }) => {\n  52 |   await page.route('**/api/v1/health', (route) => route.abort('failed'))\n> 53 |   await page.goto('/environment')\n     |              ^\n  54 |   await expect(page.getByText('无法读取最新健康状态，请检查 API 服务后重新检测。')).toBeVisible()\n  55 |   await expect(page.getByRole('heading', { name: '暂无健康检查结果' })).toBeVisible()\n  56 |   await expect(page.getByRole('heading', { name: '基础服务已连通' })).not.toBeVisible()\n    at D:\\AgentChaos\\frontend\\tests\\environment.spec.ts:53:14"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-26T13:02:45.981Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "D:\\AgentChaos\\.local\\playwright-results\\environment-a-simulated-ne-ca993-r-and-no-fake-health-result\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "D:\\AgentChaos\\frontend\\tests\\environment.spec.ts",
+                    "column": 14,
+                    "line": 53
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "2a84b67ca6571daf27b7-ac4723890ed6e3e187da",
+          "file": "environment.spec.ts",
+          "line": 51,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-10-26T13:02:42.513Z",
+    "duration": 4805.141,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 3,
+    "flaky": 0
+  }
+}

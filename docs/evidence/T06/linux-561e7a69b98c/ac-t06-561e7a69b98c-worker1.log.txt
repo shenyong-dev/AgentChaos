@@ -1,0 +1,58 @@
+ 
+ -------------- t06-worker1@d995768df5cf v5.6.3 (recovery)
+--- ***** ----- 
+-- ******* ---- Linux-6.18.40.1-microsoft-standard-WSL2-x86_64-with-glibc2.41 2026-10-26 15:26:17
+- *** --- * --- 
+- ** ---------- [config]
+- ** ---------- .> app:         agentchaos:0x7468a9753e60
+- ** ---------- .> transport:   redis://:**@host.docker.internal:16380/0
+- ** ---------- .> results:     disabled://
+- *** --- * --- .> concurrency: 1 (prefork)
+-- ******* ---- .> task events: OFF (enable -E to monitor tasks in this worker)
+--- ***** ----- 
+ -------------- [queues]
+                .> t06-561e7a69b98c exchange=t06-561e7a69b98c(direct) key=t06-561e7a69b98c
+                
+
+[tasks]
+  . agentchaos.execute
+
+/workspace/AgentChaos/backend/.venv/lib/python3.12/site-packages/celery/platforms.py:811: SecurityWarning: An entry for the specified gid or egid was not found.
+We're assuming this is a potential security issue.
+
+  warnings.warn(SecurityWarning(ASSUMING_ROOT))
+/workspace/AgentChaos/backend/.venv/lib/python3.12/site-packages/celery/platforms.py:841: SecurityWarning: You're running the worker with superuser privileges: this is
+absolutely not recommended!
+
+Please specify a different user using the --uid option.
+
+User information: uid=10001 euid=10001 gid=10001 egid=10001
+
+  warnings.warn(SecurityWarning(ROOT_DISCOURAGED.format(
+[2026-10-26 15:26:17,296: INFO/MainProcess] Connected to redis://:**@host.docker.internal:16380/0
+[2026-10-26 15:26:17,304: INFO/MainProcess] mingle: searching for neighbors
+[2026-10-26 15:26:18,324: INFO/MainProcess] mingle: all alone
+[2026-10-26 15:26:18,349: INFO/MainProcess] t06-worker1@d995768df5cf ready.
+[2026-10-26 15:26:18,352: INFO/MainProcess] Task agentchaos.execute[d6b11253-db70-4ab0-86ba-ed84dee9a33e] received
+[2026-10-26 15:26:20,842: WARNING/ForkPoolWorker-1] /workspace/AgentChaos/backend/.venv/lib/python3.12/site-packages/jieba/__init__.py:44: SyntaxWarning: invalid escape sequence '\.'
+  re_han_default = re.compile("([\u4E00-\u9FD5a-zA-Z0-9+#&\._%\-]+)", re.U)
+
+[2026-10-26 15:26:20,842: WARNING/ForkPoolWorker-1] /workspace/AgentChaos/backend/.venv/lib/python3.12/site-packages/jieba/__init__.py:46: SyntaxWarning: invalid escape sequence '\s'
+  re_skip_default = re.compile("(\r\n|\s)", re.U)
+
+[2026-10-26 15:26:20,846: WARNING/ForkPoolWorker-1] /workspace/AgentChaos/backend/.venv/lib/python3.12/site-packages/jieba/finalseg/__init__.py:78: SyntaxWarning: invalid escape sequence '\.'
+  re_skip = re.compile("([a-zA-Z0-9]+(?:\.\d+)?%?)")
+
+[2026-10-26 15:26:22,836: INFO/ForkPoolWorker-1] Redis client is a standalone client
+[2026-10-26 15:26:22,838: INFO/ForkPoolWorker-1] Index already exists, not overwriting.
+[2026-10-26 15:26:22,840: INFO/ForkPoolWorker-1] Index already exists, not overwriting.
+[2026-10-26 15:26:24,216: INFO/ForkPoolWorker-1] HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+[2026-10-26 15:26:25,373: INFO/ForkPoolWorker-1] HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+[2026-10-26 15:26:27,729: INFO/ForkPoolWorker-1] Task agentchaos.execute[d6b11253-db70-4ab0-86ba-ed84dee9a33e] succeeded in 9.376421146000041s: {'claimed': True, 'status': 'inconclusive'}
+[2026-10-26 15:26:42,007: INFO/MainProcess] Task agentchaos.execute[c7648a0a-c4c8-47fd-9e73-4e18b2520f06] received
+[2026-10-26 15:26:43,634: INFO/ForkPoolWorker-1] Redis client is a standalone client
+[2026-10-26 15:26:43,635: INFO/ForkPoolWorker-1] Index already exists, not overwriting.
+[2026-10-26 15:26:43,636: INFO/ForkPoolWorker-1] Index already exists, not overwriting.
+[2026-10-26 15:26:44,801: INFO/ForkPoolWorker-1] HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+[2026-10-26 15:26:46,837: INFO/ForkPoolWorker-1] HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+[2026-10-26 15:26:48,464: INFO/ForkPoolWorker-1] Task agentchaos.execute[c7648a0a-c4c8-47fd-9e73-4e18b2520f06] succeeded in 6.4573103080000465s: {'claimed': True, 'status': 'inconclusive'}

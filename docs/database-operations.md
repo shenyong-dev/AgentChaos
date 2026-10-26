@@ -1,6 +1,8 @@
-# T02—T04 数据库迁移、种子与隔离操作
+# T02—T06 数据库迁移、种子与隔离操作
 
-日期：2026-10-25，Asia/Shanghai。MySQL 8.0.39已实测。数据库包含12张平台表、4张实验业务表，另有 `alembic_version`；具体字段、约束及ER图见[数据库字典](architecture/database.md)。T03已实现[确定性预约服务](architecture/booking.md)，T04已实现[Agent交互](architecture/agent.md)，使用Basic演示认证；通用登录接口未实现。本页保留初始化/恢复操作，当前迁移20261025_0002增加可空草稿session_id与索引。
+日期：2026-10-26，Asia/Shanghai。MySQL 8.0.39已实测。数据库包含12张平台表、4张实验业务表，另有 `alembic_version`；字段/约束见[数据库字典](architecture/database.md)。当前迁移20261026_0003在原0002上增加真实run事件归属、提交序列及索引，execution_id可空、共23个触发器。旧事件回填提交前的既有顺序且仍标1.0，不声称补齐历史采集。
+
+0003在存在run级事件时拒绝降级，避免丢失证据；升级应停写、备份并核对真实DDL，迁移中断不直接stamp。T06实现过程中主库先应用0003、补齐两项索引后，已用alembic check核对metadata；全新临时库按最终迁移完整升降级复验。详情见[T06验收](acceptance/T06.md)与[事件契约](architecture/evidence.md)。下文T02/T04内容为历史操作边界，当前以本段及各任务记录为准。
 
 ## 首次初始化与检查
 

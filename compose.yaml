@@ -45,6 +45,9 @@ services:
     depends_on:
       mysql: {condition: service_healthy}
       redis: {condition: service_healthy}
+    volumes:
+      - ./.local:/workspace/AgentChaos/.local
+      - ./.cache/jieba:/workspace/AgentChaos/.cache/jieba
     restart: unless-stopped
   worker:
     build: {context: ., dockerfile: backend/Dockerfile}
@@ -52,6 +55,20 @@ services:
     env_file: .env
     environment: *app_environment
     command: ["celery", "-A", "app.workers.celery_app:celery_app", "worker", "--loglevel=INFO", "--concurrency=1"]
+    depends_on:
+      mysql: {condition: service_healthy}
+      redis: {condition: service_healthy}
+    volumes:
+      - ./.local:/workspace/AgentChaos/.local
+      - ./.cache/jieba:/workspace/AgentChaos/.cache/jieba
+  dispatcher:
+    build: {context: ., dockerfile: backend/Dockerfile}
+    profiles: [worker]
+    env_file: .env
+    environment: *app_environment
+    command: ["python", "-m", "app.executors.dispatch"]
+    volumes:
+      - ./.cache/jieba:/workspace/AgentChaos/.cache/jieba
     depends_on:
       mysql: {condition: service_healthy}
       redis: {condition: service_healthy}

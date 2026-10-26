@@ -1,0 +1,40 @@
+
+Running 3 tests using 1 worker
+
+  ok 1 tests\evidence.spec.ts:5:1 › SSE parser keeps chunk boundaries, multiline data and ignores partial frames (6ms)
+  ok 2 tests\evidence.spec.ts:14:1 › empty evidence page has no invented run and handles invalid identifiers (472ms)
+  x  3 tests\evidence.spec.ts:24:1 › real authenticated evidence replay, filtering, mobile and reconnect (6.3s)
+
+
+  1) tests\evidence.spec.ts:24:1 › real authenticated evidence replay, filtering, mobile and reconnect 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: getByRole('status')
+    Expected pattern: /等待重连|断线重连中/
+    Received string:  "实时连接"
+    Timeout: 5000ms
+
+    Call log:
+      - Expect "toContainText" getByRole('status') with timeout 5000ms
+      - waiting for getByRole('status')
+        14 × locator resolved to <span role="status" class="el-tag el-tag--success el-tag--light">…</span>
+           - unexpected value "实时连接"
+
+
+      48 |   if (!(await page.getByRole('status').textContent())?.includes('事件已同步')) {
+      49 |     await page.context().setOffline(true)
+    > 50 |     await expect(page.getByRole('status')).toContainText(/等待重连|断线重连中/)
+         |                                            ^
+      51 |     await page.context().setOffline(false)
+      52 |     await expect(page.getByRole('status')).toContainText(/实时连接|事件已同步/)
+      53 |   }
+        at D:\AgentChaos\frontend\tests\evidence.spec.ts:50:44
+
+    Error Context: ..\.local\playwright-results\evidence-real-authenticate-44d06-tering-mobile-and-reconnect\error-context.md
+
+  1 failed
+    tests\evidence.spec.ts:24:1 › real authenticated evidence replay, filtering, mobile and reconnect 
+  2 passed (7.6s)
+(node:20172) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)

@@ -10,7 +10,11 @@ from app import __version__
 from app.agents.errors import AgentError
 from app.api.agent import router as agent_router
 from app.api.booking import router as booking_router
+from app.api.evidence import router as evidence_router
 from app.api.routes import router
+from app.api.runs import router as runs_router
+from app.core.config import get_settings
+from app.evidence.streaming import SSESendDeadlineMiddleware
 from app.services.booking import BookingError
 
 logger = logging.getLogger("agentchaos")
@@ -20,7 +24,7 @@ def create_app() -> FastAPI:
     app = FastAPI(
         title="AgentChaos API",
         version=__version__,
-        description="T04 真实预约Agent与确定性服务；正式批量评测和SSE在后续实现。",
+        description="真实预约Agent、持久批量执行、事件证据与SSE；断言评价尚未实现。",
     )
 
     @app.middleware("http")
@@ -97,6 +101,8 @@ def create_app() -> FastAPI:
     app.include_router(router)
     app.include_router(booking_router)
     app.include_router(agent_router)
+    app.include_router(runs_router)
+    app.include_router(evidence_router)
 
     @app.exception_handler(AgentError)
     async def agent_error(request: Request, exc: AgentError):
@@ -108,6 +114,7 @@ def create_app() -> FastAPI:
             },
         )
 
+    app.add_middleware(SSESendDeadlineMiddleware, timeout=get_settings().sse_send_timeout_seconds)
     return app
 
 

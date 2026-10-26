@@ -47,6 +47,9 @@ def public_config(request: Request, settings: SettingsDependency) -> Envelope[Pu
             else "not_probed",
             paid_calls_enabled=settings.allow_paid_model_calls,
             run_concurrency=settings.run_concurrency,
+            executor_paid_calls_enabled=settings.executor_allow_paid_model_calls,
+            executor_agent_budget_usd=settings.executor_agent_budget_usd,
+            executor_agent_budget_unlimited=settings.executor_agent_budget_unlimited,
             roles=[
                 ModelRoleConfig(
                     role="agent",

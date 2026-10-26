@@ -1,0 +1,21 @@
+export interface TraceFact {
+  cursor: string
+  event: {
+    schema_version: '1.1' | '1.0'; event_id: string; run_id: string
+    execution_id: string | null; scope: 'run' | 'execution'; attempt: number | null
+    seq: number; run_seq: number; type: string; node: string | null
+    node_visit: number | null; tool_call_id: string | null; parent_event_id: string | null
+    timestamp: string; payload: Record<string, unknown>; evidence_refs: string[]
+  }
+}
+export interface EventPage {
+  items: TraceFact[]; next_cursor: string; has_more: boolean; high_watermark: number
+  run_status: string; pending_model_observations: number
+}
+export interface RunSnapshot {
+  run_id: string; status: string; cursor: string; tail_cursor: string; event_count: number
+  pending_model_observations: number; manifest_hash: string
+  budget: Record<string, unknown>; summary: Record<string, unknown>
+  executions: { execution_id: string; status: string; attempt: number; after: unknown;
+    usage: Record<string, unknown>; error: unknown }[]
+}

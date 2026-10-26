@@ -31,7 +31,7 @@ class ModelRoleConfig(BaseModel):
 class PublicConfig(BaseModel):
     app_version: str
     environment: str
-    task: Literal["T04"] = "T04"
+    task: Literal["T06"] = "T06"
     api_prefix: str = "/api/v1"
     model_provider: str = "DeepSeek 官方 API"
     model_key_configured: bool
@@ -39,5 +39,11 @@ class PublicConfig(BaseModel):
     paid_calls_enabled: bool
     run_concurrency: int
     roles: list[ModelRoleConfig]
-    test_execution_available: bool = False
+    test_execution_available: bool = True
+    assertion_evaluation_available: bool = False
+    executor_paid_calls_enabled: bool = False
+    executor_agent_budget_usd: float = 0
+    executor_agent_budget_unlimited: bool = False
+    event_replay_available: bool = True
+    executor_liveness: Literal["not_probed"] = "not_probed"
     agent_demo_available: bool = True

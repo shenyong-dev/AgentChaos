@@ -30,8 +30,10 @@ class RequestLookup(BaseModel):
 
 
 class ToolRegistry:
-    def __init__(self, booking, retriever):
+    def __init__(self, booking, retriever, *, control=None, settings=None):
         self.booking, self.retriever = booking, retriever
+        self.control = control
+        self.settings = settings
         self.inputs = {
             "update_booking_request": FieldPatch,
             "retrieve_rules": RuleQuery,
@@ -69,16 +71,17 @@ class ToolRegistry:
             "automatic_write_retries": 0,
         }
 
-    @staticmethod
-    def context(state):
+    def context(self, state):
         return BookingContext(
             state["scope_id"],
             state["actor_key"],
             datetime.fromisoformat(state["reference_clock"]),
             state["session_id"],
+            self.control.execution_id if self.control else None,
+            self.control.token if self.control else None,
         )
 
-    def dispatch(self, state, name: str, args: dict):
+    def dispatch(self, state, name: str, args: dict, *, capture=None):
         evidence_id = str(uuid4())
         before = {
             "confirmation_state": state.get("confirmation_state"),
@@ -132,6 +135,12 @@ class ToolRegistry:
                 "confirmation_revision": state.get("confirmation_revision", 0),
             },
         }
+        if capture is not None:
+            capture["raw_result"] = result
+        if self.settings:
+            from app.evidence.recorder import redact
+
+            raw = redact(raw, self.settings)
         serialized = json.dumps(raw, ensure_ascii=False, indent=2, default=str)
         (directory / f"{evidence_id}.json").write_text(serialized + "\n", encoding="utf-8")
         visible = json.dumps(result, ensure_ascii=False, default=str)

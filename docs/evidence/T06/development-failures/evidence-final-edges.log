@@ -1,0 +1,38 @@
+.........F
+================================== FAILURES ===================================
+____________ test_legacy_backfill_and_run_evidence_downgrade_guard ____________
+
+        assert [i["type"] for i in sent] == ["http.response.start"]
+    
+    
+    def test_legacy_backfill_and_run_evidence_downgrade_guard():
+        with disposable_database("T06") as engine:
+            migrate(engine)
+            seed_database(engine, TEST_PASSWORD)
+            with Session(engine) as session, session.begin():
+                e = schema_execution(session)
+                run_id = e.run_id
+                row = TraceEvent(
+                    event_uuid=str(uuid4()),
+                    execution_id=e.id,
+>                   attempt_no=1,
+                                ^^
+                    seq_no=1,
+                    event_type="schema.test",
+                    occurred_at=datetime.now(UTC),
+                    payload_json={"old": True},
+                    payload_hash="0" * 64,
+                )
+E               NameError: name 'datetime' is not defined. Did you forget to import 'datetime'
+
+backend\tests\test_evidence.py:487: NameError
+---------------------------- Captured stderr call -----------------------------
+INFO  [alembic.runtime.migration] Context impl MySQLImpl.
+INFO  [alembic.runtime.migration] Will assume non-transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 20261025_0001, T02 initial sixteen-table schema
+INFO  [alembic.runtime.migration] Running upgrade 20261025_0001 -> 20261025_0002, T04 bind pending drafts to a trusted conversation without adding tables.
+INFO  [alembic.runtime.migration] Running upgrade 20261025_0002 -> 20261026_0003, T06 real run-level events and transactionally allocated per-run order.
+=========================== short test summary info ===========================
+FAILED backend\tests\test_evidence.py::test_legacy_backfill_and_run_evidence_downgrade_guard
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 9 passed in 35.62s

@@ -46,6 +46,8 @@ class BookingContext:
     actor_key: str
     reference_clock: datetime
     session_id: str | None = None
+    execution_id: int | None = None
+    lease_token: str | None = None
 
     def __post_init__(self):
         if not re.fullmatch(r"demo|test:[A-Za-z0-9][A-Za-z0-9:_-]{0,58}", self.scope_id):
@@ -56,6 +58,8 @@ class BookingContext:
             raise ValueError("Trusted reference clock must be aware")
         if self.session_id is not None:
             UUID(self.session_id)
+        if (self.execution_id is None) != (self.lease_token is None):
+            raise ValueError("Execution fencing requires both id and token")
 
 
 class BookingError(Exception):
@@ -168,7 +172,25 @@ class BookingService:
                             request_key=request_key,
                         )
                     with Session(connection) as session, session.begin():
+                        if context.execution_id is not None:
+                            from app.executors.control import fence
+
+                            fence(
+                                session,
+                                context.execution_id,
+                                context.lease_token,
+                                scope_id=context.scope_id,
+                                session_id=context.session_id,
+                            )
                         result = operation(session)
+                        if context.execution_id is not None:
+                            fence(
+                                session,
+                                context.execution_id,
+                                context.lease_token,
+                                scope_id=context.scope_id,
+                                session_id=context.session_id,
+                            )
                     return result
                 finally:
                     if acquired:

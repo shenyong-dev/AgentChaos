@@ -59,17 +59,19 @@ def test_public_config_never_exposes_credentials_or_claims_connectivity(client):
     body = response.json()["data"]
     assert body["model_key_configured"] is True
     assert body["model_connectivity"] == "not_probed"
-    assert body["test_execution_available"] is False
+    assert body["test_execution_available"] is True
+    assert body["assertion_evaluation_available"] is False
+    assert body["executor_liveness"] == "not_probed"
     assert {r["role"] for r in body["roles"]} == {"agent", "case_generator", "judge"}
     for secret in ("test-db-secret", "test-redis-secret", "test-model-secret"):
         assert secret not in response.text
 
 
-def test_unimplemented_endpoint_has_uniform_error_and_request_id(client):
+def test_run_endpoint_requires_authentication_and_has_uniform_error(client):
     response = client.post("/api/v1/runs")
-    assert response.status_code == 404
+    assert response.status_code == 401
     body = response.json()
-    assert body["error"]["code"] == "http_404"
+    assert body["error"]["code"] == "authentication_required"
     assert body["request_id"] == response.headers["x-request-id"]
 
 

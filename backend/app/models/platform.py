@@ -164,6 +164,7 @@ class TestRun(Row, Base):
     started_at: Mapped[datetime | None] = mapped_column(UTCDateTime())
     finished_at: Mapped[datetime | None] = mapped_column(UTCDateTime())
     summary_json: Mapped[dict[str, Any] | None] = mapped_column(SnapshotJSON)
+    event_seq: Mapped[int] = mapped_column(BIGINT(unsigned=True), default=0, server_default="0")
 
 
 class TestExecution(Row, Base):
@@ -230,9 +231,17 @@ class TraceEvent(Row, Base):
         CheckConstraint("attempt_no >= 1 AND seq_no >= 1", name="ck_event_sequence"),
         CheckConstraint("node_visit_no IS NULL OR node_visit_no >= 1", name="ck_event_visit"),
         Index("ix_event_cursor", "execution_id", "id"),
+        UniqueConstraint("run_id", "run_seq_no", name="uq_run_event_sequence"),
+        Index("ix_run_event_cursor", "run_id", "run_seq_no"),
+        Index("ix_run_event_type", "run_id", "event_type"),
+        Index("ix_event_parent", "parent_event_uuid"),
     )
     event_uuid: Mapped[str] = mapped_column(key_string(36))
-    execution_id: Mapped[int] = mapped_column(
+    run_id: Mapped[int] = mapped_column(
+        BIGINT(unsigned=True), ForeignKey("ac_test_runs.id", name="fk_trace_run"), nullable=False
+    )
+    run_seq_no: Mapped[int] = mapped_column(BIGINT(unsigned=True), default=0, server_default="0")
+    execution_id: Mapped[int | None] = mapped_column(
         BIGINT(unsigned=True), ForeignKey("ac_test_executions.id")
     )
     attempt_no: Mapped[int] = mapped_column(Integer)

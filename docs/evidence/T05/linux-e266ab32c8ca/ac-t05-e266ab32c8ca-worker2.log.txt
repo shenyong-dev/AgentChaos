@@ -1,0 +1,60 @@
+ 
+ -------------- t05-control2@210e140e1a5c v5.6.3 (recovery)
+--- ***** ----- 
+-- ******* ---- Linux-6.18.40.1-microsoft-standard-WSL2-x86_64-with-glibc2.41 2026-10-26 12:59:00
+- *** --- * --- 
+- ** ---------- [config]
+- ** ---------- .> app:         agentchaos:0x72bb97b3d490
+- ** ---------- .> transport:   redis://:**@host.docker.internal:16380/0
+- ** ---------- .> results:     disabled://
+- *** --- * --- .> concurrency: 1 (prefork)
+-- ******* ---- .> task events: OFF (enable -E to monitor tasks in this worker)
+--- ***** ----- 
+ -------------- [queues]
+                .> t05-e266ab32c8ca exchange=t05-e266ab32c8ca(direct) key=t05-e266ab32c8ca
+                
+
+[tasks]
+  . agentchaos.execute
+
+/workspace/AgentChaos/backend/.venv/lib/python3.12/site-packages/celery/platforms.py:811: SecurityWarning: An entry for the specified gid or egid was not found.
+We're assuming this is a potential security issue.
+
+  warnings.warn(SecurityWarning(ASSUMING_ROOT))
+/workspace/AgentChaos/backend/.venv/lib/python3.12/site-packages/celery/platforms.py:841: SecurityWarning: You're running the worker with superuser privileges: this is
+absolutely not recommended!
+
+Please specify a different user using the --uid option.
+
+User information: uid=10001 euid=10001 gid=10001 egid=10001
+
+  warnings.warn(SecurityWarning(ROOT_DISCOURAGED.format(
+[2026-10-26 12:59:00,512: INFO/MainProcess] Connected to redis://:**@host.docker.internal:16380/0
+[2026-10-26 12:59:00,542: INFO/MainProcess] mingle: searching for neighbors
+[2026-10-26 12:59:01,578: INFO/MainProcess] mingle: all alone
+[2026-10-26 12:59:01,605: INFO/MainProcess] t05-control2@210e140e1a5c ready.
+[2026-10-26 12:59:13,238: INFO/MainProcess] Task agentchaos.execute[ccb1c496-a16b-49eb-8c3c-01cc89c6f8e8] received
+[2026-10-26 12:59:15,825: WARNING/ForkPoolWorker-1] /workspace/AgentChaos/backend/.venv/lib/python3.12/site-packages/jieba/__init__.py:44: SyntaxWarning: invalid escape sequence '\.'
+  re_han_default = re.compile("([\u4E00-\u9FD5a-zA-Z0-9+#&\._%\-]+)", re.U)
+
+[2026-10-26 12:59:15,825: WARNING/ForkPoolWorker-1] /workspace/AgentChaos/backend/.venv/lib/python3.12/site-packages/jieba/__init__.py:46: SyntaxWarning: invalid escape sequence '\s'
+  re_skip_default = re.compile("(\r\n|\s)", re.U)
+
+[2026-10-26 12:59:15,829: WARNING/ForkPoolWorker-1] /workspace/AgentChaos/backend/.venv/lib/python3.12/site-packages/jieba/finalseg/__init__.py:78: SyntaxWarning: invalid escape sequence '\.'
+  re_skip = re.compile("([a-zA-Z0-9]+(?:\.\d+)?%?)")
+
+[2026-10-26 12:59:18,089: INFO/ForkPoolWorker-1] Redis client is a standalone client
+[2026-10-26 12:59:18,097: INFO/ForkPoolWorker-1] Index already exists, not overwriting.
+[2026-10-26 12:59:18,098: INFO/ForkPoolWorker-1] Index already exists, not overwriting.
+[2026-10-26 12:59:18,389: INFO/ForkPoolWorker-1] Task agentchaos.execute[ccb1c496-a16b-49eb-8c3c-01cc89c6f8e8] succeeded in 5.1505726460000005s: {'claimed': True, 'status': 'error', 'code': 'recovery_uncertain'}
+[2026-10-26 12:59:22,323: INFO/MainProcess] Task agentchaos.execute[22dcbc03-b594-4ae2-9f44-3adb03639d7d] received
+[2026-10-26 12:59:24,661: INFO/ForkPoolWorker-1] Redis client is a standalone client
+[2026-10-26 12:59:24,663: INFO/ForkPoolWorker-1] Index already exists, not overwriting.
+[2026-10-26 12:59:24,664: INFO/ForkPoolWorker-1] Index already exists, not overwriting.
+[2026-10-26 12:59:25,730: INFO/ForkPoolWorker-1] HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+[2026-10-26 12:59:30,707: INFO/ForkPoolWorker-1] Task agentchaos.execute[22dcbc03-b594-4ae2-9f44-3adb03639d7d] succeeded in 8.383548517000008s: {'claimed': True, 'status': 'inconclusive'}
+[2026-10-26 12:59:58,561: INFO/MainProcess] Task agentchaos.execute[0720efcb-ce9b-45aa-a9c7-3b55fa6754eb] received
+[2026-10-26 13:00:00,354: INFO/ForkPoolWorker-1] Redis client is a standalone client
+[2026-10-26 13:00:00,355: INFO/ForkPoolWorker-1] Index already exists, not overwriting.
+[2026-10-26 13:00:00,356: INFO/ForkPoolWorker-1] Index already exists, not overwriting.
+[2026-10-26 13:00:00,903: INFO/ForkPoolWorker-1] Task agentchaos.execute[0720efcb-ce9b-45aa-a9c7-3b55fa6754eb] succeeded in 2.3413073680000025s: {'claimed': True, 'status': 'error', 'code': 'model_budget_exhausted'}

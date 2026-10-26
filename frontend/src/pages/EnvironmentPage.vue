@@ -42,7 +42,7 @@ onMounted(store.refresh)
 
 <template>
   <div class="page-heading">
-    <div><div class="eyebrow">AGENT BASELINE / {{ config?.task ?? 'T04' }}</div><h1>工程环境</h1><p>检查服务连接，确认这次实验从哪里开始。</p></div>
+    <div><div class="eyebrow">AGENT BASELINE / {{ config?.task ?? 'T06' }}</div><h1>工程环境</h1><p>检查服务连接，确认这次实验从哪里开始。</p></div>
     <ElButton type="primary" :loading="loading" @click="store.refresh">重新检测</ElButton>
   </div>
 
@@ -75,5 +75,6 @@ onMounted(store.refresh)
     <div v-else class="role-grid"><article v-for="role in config.roles" :key="role.role"><span class="role-code">{{ role.role }}</span><h3>{{ roleNames[role.role] }}</h3><p>{{ role.model }}</p><dl><div><dt>思考模式</dt><dd>{{ role.thinking === 'disabled' ? '关闭' : '开启' }}</dd></div><div><dt>输出上限</dt><dd>{{ role.max_output_tokens.toLocaleString() }} tokens</dd></div><div><dt>授权预算</dt><dd>{{ role.budget_usd === 0 ? '未设置' : `$${role.budget_usd}` }}</dd></div></dl></article></div>
   </section>
 
-  <footer class="page-footer"><span>预约 Agent 交互接口已开放；批量测试执行尚未开放。</span><a href="/docs" target="_blank" rel="noopener">查看 API 契约 ↗</a><small v-if="requestId">请求 {{ requestId }}</small></footer>
+  <p v-if="config" class="card-description">批量调用：{{ config.executor_paid_calls_enabled ? (config.executor_agent_budget_unlimited ? '本项 agent 授权金额无总上限；逐次记账，运行限制继续生效' : `agent 授权上限 $${config.executor_agent_budget_usd}，剩余额度以持久账本为准`) : '付费调用关闭' }}。Worker 当前存活状态未探测。</p>
+  <footer class="page-footer"><span>预约、批量执行与事件证据已接入；断言评价尚未实现，脚本结束不代表通过。</span><a href="/docs" target="_blank" rel="noopener">查看 API 契约 ↗</a><small v-if="requestId">请求 {{ requestId }}</small></footer>
 </template>

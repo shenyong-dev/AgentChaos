@@ -1,0 +1,56 @@
+ 
+ -------------- t05-control1@f15a42466b83 v5.6.3 (recovery)
+--- ***** ----- 
+-- ******* ---- Linux-6.18.40.1-microsoft-standard-WSL2-x86_64-with-glibc2.41 2026-10-26 13:12:52
+- *** --- * --- 
+- ** ---------- [config]
+- ** ---------- .> app:         agentchaos:0x7d46173cd040
+- ** ---------- .> transport:   redis://:**@host.docker.internal:16380/0
+- ** ---------- .> results:     disabled://
+- *** --- * --- .> concurrency: 1 (prefork)
+-- ******* ---- .> task events: OFF (enable -E to monitor tasks in this worker)
+--- ***** ----- 
+ -------------- [queues]
+                .> t05-db7874c3f67d exchange=t05-db7874c3f67d(direct) key=t05-db7874c3f67d
+                
+
+[tasks]
+  . agentchaos.execute
+
+/workspace/AgentChaos/backend/.venv/lib/python3.12/site-packages/celery/platforms.py:811: SecurityWarning: An entry for the specified gid or egid was not found.
+We're assuming this is a potential security issue.
+
+  warnings.warn(SecurityWarning(ASSUMING_ROOT))
+/workspace/AgentChaos/backend/.venv/lib/python3.12/site-packages/celery/platforms.py:841: SecurityWarning: You're running the worker with superuser privileges: this is
+absolutely not recommended!
+
+Please specify a different user using the --uid option.
+
+User information: uid=10001 euid=10001 gid=10001 egid=10001
+
+  warnings.warn(SecurityWarning(ROOT_DISCOURAGED.format(
+[2026-10-26 13:12:52,890: INFO/MainProcess] Connected to redis://:**@host.docker.internal:16380/0
+[2026-10-26 13:12:52,898: INFO/MainProcess] mingle: searching for neighbors
+[2026-10-26 13:12:53,922: INFO/MainProcess] mingle: all alone
+[2026-10-26 13:12:53,952: INFO/MainProcess] t05-control1@f15a42466b83 ready.
+[2026-10-26 13:12:53,956: INFO/MainProcess] Task agentchaos.execute[3ac7f862-19e7-449a-9518-1772f99feb6c] received
+[2026-10-26 13:12:56,346: WARNING/ForkPoolWorker-1] /workspace/AgentChaos/backend/.venv/lib/python3.12/site-packages/jieba/__init__.py:44: SyntaxWarning: invalid escape sequence '\.'
+  re_han_default = re.compile("([\u4E00-\u9FD5a-zA-Z0-9+#&\._%\-]+)", re.U)
+
+[2026-10-26 13:12:56,346: WARNING/ForkPoolWorker-1] /workspace/AgentChaos/backend/.venv/lib/python3.12/site-packages/jieba/__init__.py:46: SyntaxWarning: invalid escape sequence '\s'
+  re_skip_default = re.compile("(\r\n|\s)", re.U)
+
+[2026-10-26 13:12:56,350: WARNING/ForkPoolWorker-1] /workspace/AgentChaos/backend/.venv/lib/python3.12/site-packages/jieba/finalseg/__init__.py:78: SyntaxWarning: invalid escape sequence '\.'
+  re_skip = re.compile("([a-zA-Z0-9]+(?:\.\d+)?%?)")
+
+[2026-10-26 13:12:58,302: INFO/ForkPoolWorker-1] Redis client is a standalone client
+[2026-10-26 13:12:58,303: INFO/ForkPoolWorker-1] Index already exists, not overwriting.
+[2026-10-26 13:12:58,304: INFO/ForkPoolWorker-1] Index already exists, not overwriting.
+[2026-10-26 13:13:18,527: INFO/MainProcess] sync with t05-control2@a59fe44f2bf9
+[2026-10-26 13:13:19,247: INFO/ForkPoolWorker-1] HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+[2026-10-26 13:13:19,323: INFO/ForkPoolWorker-1] Task agentchaos.execute[3ac7f862-19e7-449a-9518-1772f99feb6c] succeeded in 25.367500617999895s: {'claimed': True, 'status': 'error', 'code': 'lease_lost'}
+[2026-10-26 13:13:58,919: INFO/MainProcess] Task agentchaos.execute[6078e85b-e92b-4f38-b124-bfdb6f9395db] received
+[2026-10-26 13:14:01,374: INFO/ForkPoolWorker-1] Redis client is a standalone client
+[2026-10-26 13:14:01,377: INFO/ForkPoolWorker-1] Index already exists, not overwriting.
+[2026-10-26 13:14:01,379: INFO/ForkPoolWorker-1] Index already exists, not overwriting.
+[2026-10-26 13:14:02,104: INFO/ForkPoolWorker-1] Task agentchaos.execute[6078e85b-e92b-4f38-b124-bfdb6f9395db] succeeded in 3.1840149940001083s: {'claimed': True, 'status': 'error', 'code': 'model_budget_exhausted'}

@@ -1,0 +1,60 @@
+.....F
+================================== FAILURES ===================================
+______________ test_publish_failure_is_durable_and_scan_retries _______________
+
+run = (<app.executors.service.RunService object at 0x000001F178F38860>, <function run.<locals>.make at 0x000001F178F9ACA0>, ...fa34a43ef9799c1eb', executor_lease_seconds=45, sse_max_seconds=30, sse_send_timeout_seconds=5.0, sse_max_backlog=1000))
+
+    def test_publish_failure_is_durable_and_scan_retries(run):
+        service, make, _, settings = run
+>       identifier, execution, _ = make()
+                                   ^^^^^^
+
+backend\tests\test_executor.py:154: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\tests\test_executor.py:108: in make
+    identifier = service.create(1, values)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <app.executors.service.RunService object at 0x000001F178F38860>
+user_id = 1
+values = CreateRun(request_id=UUID('e29a9cc1-38d7-480e-864e-bd6bcc45ec25'), target_version_id=1, case_revision_ids=[10], repeti..._calls=20, max_tokens=500000), budgets=RoleBudgets(agent_microusd=100000, case_generator_microusd=0, judge_microusd=0))
+
+    def create(self, user_id, values):
+        request = values.model_dump(mode="json")
+        request_hash = canonical_hash(request)
+        with advisory(self.engine, "create:" + str(values.request_id)) as connection:
+            with Session(connection) as session, session.begin():
+                existing = session.scalar(
+                    select(TestRun).where(TestRun.run_uuid == str(values.request_id))
+                )
+                if existing:
+                    if existing.created_by != user_id:
+                        raise AgentError("run_not_found", "找不到运行。", 404)
+                    if existing.manifest_json["request_hash"] != request_hash:
+                        raise AgentError(
+                            "run_request_conflict", "相同请求标识的运行配置不同。", 409
+                        )
+                    return existing.run_uuid
+                version = session.get(TargetVersion, values.target_version_id)
+                target = session.get(Target, version.target_id) if version else None
+                if (
+                    not target
+                    or target.owner_id != user_id
+                    or target.adapter_type != "langgraph_booking"
+                ):
+                    raise AgentError(
+                        "target_version_not_found", "当前身份下找不到预约对象版本。", 404
+                    )
+                current = self.current_manifest()
+                if version.config_hash != current["config_hash"]:
+>                   raise AgentError(
+                        "target_version_unavailable", "当前Worker代码不能执行该历史版本。", 409
+                    )
+E                   app.agents.errors.AgentError: 当前Worker代码不能执行该历史版本。
+
+backend\app\executors\service.py:176: AgentError
+=========================== short test summary info ===========================
+FAILED backend\tests\test_executor.py::test_publish_failure_is_durable_and_scan_retries
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 5 passed in 9.83s

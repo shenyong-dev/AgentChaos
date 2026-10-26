@@ -17,3 +17,19 @@ class SessionRedisSaver(RedisSaver):
             checkpoint_has_writes=True,
             registry_has_writes=registry_has_writes,
         )
+
+
+class FencedRedisSaver(SessionRedisSaver):
+    """A stale task cannot overwrite a newer attempt's checkpoint/pending writes."""
+
+    def __init__(self, *args, control, **kwargs):
+        self.control = control
+        super().__init__(*args, **kwargs)
+
+    def put(self, *args, **kwargs):
+        with self.control.transaction():
+            return super().put(*args, **kwargs)
+
+    def put_writes(self, *args, **kwargs):
+        with self.control.transaction():
+            return super().put_writes(*args, **kwargs)

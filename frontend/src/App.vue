@@ -10,6 +10,9 @@
         <RouterLink to="/environment" class="nav-link">
           <span class="nav-icon" aria-hidden="true">◫</span>工程环境<span class="nav-key">T01</span>
         </RouterLink>
+        <RouterLink to="/runs" class="nav-link">
+          <span class="nav-icon" aria-hidden="true">≋</span>运行证据<span class="nav-key">T06</span>
+        </RouterLink>
       </nav>
       <div class="scope-note">
         <span class="eyebrow">当前建设范围</span>
@@ -19,7 +22,7 @@
       <div class="sidebar-footer"><span class="small-dot"></span>本地开发环境<small>v0.1.0</small></div>
     </aside>
     <div class="main-shell">
-      <header class="topbar"><span>AgentChaos <i>/</i> 工程环境</span><span class="phase-label">基础建设阶段</span></header>
+      <header class="topbar"><span>AgentChaos <i>/</i> {{ $route.path.startsWith('/runs') ? '运行证据' : '工程环境' }}</span><span class="phase-label">基础建设阶段</span></header>
       <main><RouterView /></main>
     </div>
   </div>
