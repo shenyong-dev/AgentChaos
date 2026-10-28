@@ -1,0 +1,100 @@
+{
+  "$defs": {
+    "FaultParameters": {
+      "additionalProperties": false,
+      "properties": {
+        "trigger_on_nth": {
+          "default": 1,
+          "maximum": 50,
+          "minimum": 1,
+          "title": "Trigger On Nth",
+          "type": "integer"
+        },
+        "trigger_window": {
+          "default": 1,
+          "maximum": 10,
+          "minimum": 1,
+          "title": "Trigger Window",
+          "type": "integer"
+        },
+        "delay_ms": {
+          "default": 0,
+          "maximum": 500,
+          "minimum": 0,
+          "title": "Delay Ms",
+          "type": "integer"
+        }
+      },
+      "title": "FaultParameters",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "profile_key": {
+      "pattern": "^[A-Z][A-Z0-9_-]{2,79}$",
+      "title": "Profile Key",
+      "type": "string"
+    },
+    "revision": {
+      "default": 1,
+      "minimum": 1,
+      "title": "Revision",
+      "type": "integer"
+    },
+    "fault_type": {
+      "enum": [
+        "F01",
+        "F02",
+        "F03",
+        "F04"
+      ],
+      "title": "Fault Type",
+      "type": "string"
+    },
+    "trigger_stage": {
+      "enum": [
+        "PRE_DISPATCH",
+        "PRE_COMMIT",
+        "POST_RESULT",
+        "POST_COMMIT"
+      ],
+      "title": "Trigger Stage",
+      "type": "string"
+    },
+    "target_tool": {
+      "title": "Target Tool",
+      "type": "string"
+    },
+    "parameters": {
+      "$ref": "#/$defs/FaultParameters"
+    },
+    "seed": {
+      "default": 0,
+      "maximum": 2000000000,
+      "minimum": 0,
+      "title": "Seed",
+      "type": "integer"
+    },
+    "max_triggers": {
+      "default": 1,
+      "maximum": 5,
+      "minimum": 1,
+      "title": "Max Triggers",
+      "type": "integer"
+    },
+    "enabled_for_test": {
+      "default": true,
+      "title": "Enabled For Test",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "profile_key",
+    "fault_type",
+    "trigger_stage",
+    "target_tool"
+  ],
+  "title": "FaultSpec",
+  "type": "object"
+}

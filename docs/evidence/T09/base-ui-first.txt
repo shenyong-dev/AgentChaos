@@ -1,0 +1,48 @@
+
+Running 6 tests using 1 worker
+
+  ok 1 tests\environment.spec.ts:7:1 › real services show infrastructure and the configured model observation status (869ms)
+  ok 2 tests\environment.spec.ts:37:1 › mobile view fits and refresh makes another real health request (474ms)
+  ok 3 tests\environment.spec.ts:51:1 › a simulated network failure shows an error and no fake health result (336ms)
+  ok 4 tests\evidence.spec.ts:5:1 › SSE parser keeps chunk boundaries, multiline data and ignores partial frames (3ms)
+  ok 5 tests\evidence.spec.ts:14:1 › empty evidence page has no invented run and handles invalid identifiers (386ms)
+  x  6 tests\evidence.spec.ts:24:1 › real authenticated evidence replay, filtering, mobile and reconnect (30.1s)
+
+
+  1) tests\evidence.spec.ts:24:1 › real authenticated evidence replay, filtering, mobile and reconnect 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for getByRole('button', { name: '下一段', exact: true })
+        - locator resolved to <button disabled type="button" aria-disabled="true" class="el-button is-disabled">…</button>
+      - attempting click action
+        2 × waiting for element to be visible, enabled and stable
+          - element is not enabled
+        - retrying click action
+        - waiting 20ms
+        - waiting for element to be visible, enabled and stable
+        - element is not enabled
+      - retrying click action
+        - waiting 100ms
+        - waiting for element to be visible, enabled and stable
+      - element was detached from the DOM, retrying
+
+
+      42 |   await page.getByRole('textbox', { name: '筛选事件' }).fill('')
+      43 |   while (await page.getByRole('button', { name: '下一段', exact: true }).isVisible()) {
+    > 44 |     await page.getByRole('button', { name: '下一段', exact: true }).click()
+         |                                                                  ^
+      45 |   }
+      46 |   await page.getByRole('button', { name: '继续同步', exact: true }).click()
+      47 |   await expect(page.getByRole('status')).toContainText(/实时连接|事件已同步|等待重连/)
+        at D:\AgentChaos\frontend\tests\evidence.spec.ts:44:66
+
+    Error Context: ..\.local\playwright-results\evidence-real-authenticate-44d06-tering-mobile-and-reconnect\error-context.md
+
+  1 failed
+    tests\evidence.spec.ts:24:1 › real authenticated evidence replay, filtering, mobile and reconnect 
+  5 passed (33.0s)
+(node:26484) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node.EXE --trace-warnings ...` to show where the warning was created)

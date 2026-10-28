@@ -1,0 +1,245 @@
+EEEEE                                                                    [100%]
+=================================== ERRORS ====================================
+_ ERROR at setup of test_auto_evaluation_persists_and_api_is_readonly_paginated_owned _
+backend\.venv\Lib\site-packages\redis\connection.py:389: in connect_check_health
+    sock = self.retry.call_with_retry(
+backend\.venv\Lib\site-packages\redis\retry.py:105: in call_with_retry
+    return do()
+           ^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:390: in <lambda>
+    lambda: self._connect(), lambda error: self.disconnect(error)
+            ^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:803: in _connect
+    raise err
+backend\.venv\Lib\site-packages\redis\connection.py:787: in _connect
+    sock.connect(socket_address)
+E   ConnectionRefusedError: [WinError 10061] 由于目标计算机积极拒绝，无法连接。
+
+During handling of the above exception, another exception occurred:
+backend\tests\test_evaluation.py:54: in lab
+    runtime = AgentRuntime(engine, redis, settings, auto_register=True)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\app\agents\runtime.py:59: in __init__
+    self.saver = saver_class(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:78: in __init__
+    super().__init__(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\base.py:211: in __init__
+    self.configure_client(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:118: in configure_client
+    self._redis.client_setinfo("LIB-NAME", __full_lib_name__)
+backend\.venv\Lib\site-packages\redis\commands\core.py:716: in client_setinfo
+    return self.execute_command("CLIENT SETINFO", attr, value, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:621: in execute_command
+    return self._execute_command(*args, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:627: in _execute_command
+    conn = self.connection or pool.get_connection()
+                              ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\utils.py:195: in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:1533: in get_connection
+    connection.connect()
+backend\.venv\Lib\site-packages\redis\connection.py:380: in connect
+    self.connect_check_health(check_health=True)
+backend\.venv\Lib\site-packages\redis\connection.py:397: in connect_check_health
+    raise ConnectionError(self._error_message(e))
+E   redis.exceptions.ConnectionError: Error 10061 connecting to 127.0.0.1:16380. 由于目标计算机积极拒绝，无法连接。.
+---------------------------- Captured stderr setup ----------------------------
+INFO  [alembic.runtime.migration] Context impl MySQLImpl.
+INFO  [alembic.runtime.migration] Will assume non-transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 20261025_0001, T02 initial sixteen-table schema
+INFO  [alembic.runtime.migration] Running upgrade 20261025_0001 -> 20261025_0002, T04 bind pending drafts to a trusted conversation without adding tables.
+INFO  [alembic.runtime.migration] Running upgrade 20261025_0002 -> 20261026_0003, T06 real run-level events and transactionally allocated per-run order.
+_ ERROR at setup of test_failed_independent_expectation_is_not_a_platform_error _
+backend\.venv\Lib\site-packages\redis\connection.py:389: in connect_check_health
+    sock = self.retry.call_with_retry(
+backend\.venv\Lib\site-packages\redis\retry.py:105: in call_with_retry
+    return do()
+           ^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:390: in <lambda>
+    lambda: self._connect(), lambda error: self.disconnect(error)
+            ^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:803: in _connect
+    raise err
+backend\.venv\Lib\site-packages\redis\connection.py:787: in _connect
+    sock.connect(socket_address)
+E   ConnectionRefusedError: [WinError 10061] 由于目标计算机积极拒绝，无法连接。
+
+During handling of the above exception, another exception occurred:
+backend\tests\test_evaluation.py:54: in lab
+    runtime = AgentRuntime(engine, redis, settings, auto_register=True)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\app\agents\runtime.py:59: in __init__
+    self.saver = saver_class(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:78: in __init__
+    super().__init__(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\base.py:211: in __init__
+    self.configure_client(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:118: in configure_client
+    self._redis.client_setinfo("LIB-NAME", __full_lib_name__)
+backend\.venv\Lib\site-packages\redis\commands\core.py:716: in client_setinfo
+    return self.execute_command("CLIENT SETINFO", attr, value, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:621: in execute_command
+    return self._execute_command(*args, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:627: in _execute_command
+    conn = self.connection or pool.get_connection()
+                              ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\utils.py:195: in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:1533: in get_connection
+    connection.connect()
+backend\.venv\Lib\site-packages\redis\connection.py:380: in connect
+    self.connect_check_health(check_health=True)
+backend\.venv\Lib\site-packages\redis\connection.py:397: in connect_check_health
+    raise ConnectionError(self._error_message(e))
+E   redis.exceptions.ConnectionError: Error 10061 connecting to 127.0.0.1:16380. 由于目标计算机积极拒绝，无法连接。.
+_ ERROR at setup of test_waiting_confirmation_is_not_evaluated_until_actual_submission _
+backend\.venv\Lib\site-packages\redis\connection.py:389: in connect_check_health
+    sock = self.retry.call_with_retry(
+backend\.venv\Lib\site-packages\redis\retry.py:105: in call_with_retry
+    return do()
+           ^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:390: in <lambda>
+    lambda: self._connect(), lambda error: self.disconnect(error)
+            ^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:803: in _connect
+    raise err
+backend\.venv\Lib\site-packages\redis\connection.py:787: in _connect
+    sock.connect(socket_address)
+E   ConnectionRefusedError: [WinError 10061] 由于目标计算机积极拒绝，无法连接。
+
+During handling of the above exception, another exception occurred:
+backend\tests\test_evaluation.py:54: in lab
+    runtime = AgentRuntime(engine, redis, settings, auto_register=True)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\app\agents\runtime.py:59: in __init__
+    self.saver = saver_class(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:78: in __init__
+    super().__init__(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\base.py:211: in __init__
+    self.configure_client(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:118: in configure_client
+    self._redis.client_setinfo("LIB-NAME", __full_lib_name__)
+backend\.venv\Lib\site-packages\redis\commands\core.py:716: in client_setinfo
+    return self.execute_command("CLIENT SETINFO", attr, value, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:621: in execute_command
+    return self._execute_command(*args, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:627: in _execute_command
+    conn = self.connection or pool.get_connection()
+                              ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\utils.py:195: in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:1533: in get_connection
+    connection.connect()
+backend\.venv\Lib\site-packages\redis\connection.py:380: in connect
+    self.connect_check_health(check_health=True)
+backend\.venv\Lib\site-packages\redis\connection.py:397: in connect_check_health
+    raise ConnectionError(self._error_message(e))
+E   redis.exceptions.ConnectionError: Error 10061 connecting to 127.0.0.1:16380. 由于目标计算机积极拒绝，无法连接。.
+_ ERROR at setup of test_large_artifact_is_verified_and_late_damage_appends_error_without_rewriting _
+backend\.venv\Lib\site-packages\redis\connection.py:389: in connect_check_health
+    sock = self.retry.call_with_retry(
+backend\.venv\Lib\site-packages\redis\retry.py:105: in call_with_retry
+    return do()
+           ^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:390: in <lambda>
+    lambda: self._connect(), lambda error: self.disconnect(error)
+            ^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:803: in _connect
+    raise err
+backend\.venv\Lib\site-packages\redis\connection.py:787: in _connect
+    sock.connect(socket_address)
+E   ConnectionRefusedError: [WinError 10061] 由于目标计算机积极拒绝，无法连接。
+
+During handling of the above exception, another exception occurred:
+backend\tests\test_evaluation.py:54: in lab
+    runtime = AgentRuntime(engine, redis, settings, auto_register=True)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\app\agents\runtime.py:59: in __init__
+    self.saver = saver_class(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:78: in __init__
+    super().__init__(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\base.py:211: in __init__
+    self.configure_client(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:118: in configure_client
+    self._redis.client_setinfo("LIB-NAME", __full_lib_name__)
+backend\.venv\Lib\site-packages\redis\commands\core.py:716: in client_setinfo
+    return self.execute_command("CLIENT SETINFO", attr, value, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:621: in execute_command
+    return self._execute_command(*args, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:627: in _execute_command
+    conn = self.connection or pool.get_connection()
+                              ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\utils.py:195: in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:1533: in get_connection
+    connection.connect()
+backend\.venv\Lib\site-packages\redis\connection.py:380: in connect
+    self.connect_check_health(check_health=True)
+backend\.venv\Lib\site-packages\redis\connection.py:397: in connect_check_health
+    raise ConnectionError(self._error_message(e))
+E   redis.exceptions.ConnectionError: Error 10061 connecting to 127.0.0.1:16380. 由于目标计算机积极拒绝，无法连接。.
+_ ERROR at setup of test_legacy_evaluation_appends_results_without_changing_manifest_or_events _
+backend\.venv\Lib\site-packages\redis\connection.py:389: in connect_check_health
+    sock = self.retry.call_with_retry(
+backend\.venv\Lib\site-packages\redis\retry.py:105: in call_with_retry
+    return do()
+           ^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:390: in <lambda>
+    lambda: self._connect(), lambda error: self.disconnect(error)
+            ^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:803: in _connect
+    raise err
+backend\.venv\Lib\site-packages\redis\connection.py:787: in _connect
+    sock.connect(socket_address)
+E   ConnectionRefusedError: [WinError 10061] 由于目标计算机积极拒绝，无法连接。
+
+During handling of the above exception, another exception occurred:
+backend\tests\test_evaluation.py:54: in lab
+    runtime = AgentRuntime(engine, redis, settings, auto_register=True)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\app\agents\runtime.py:59: in __init__
+    self.saver = saver_class(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:78: in __init__
+    super().__init__(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\base.py:211: in __init__
+    self.configure_client(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:118: in configure_client
+    self._redis.client_setinfo("LIB-NAME", __full_lib_name__)
+backend\.venv\Lib\site-packages\redis\commands\core.py:716: in client_setinfo
+    return self.execute_command("CLIENT SETINFO", attr, value, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:621: in execute_command
+    return self._execute_command(*args, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:627: in _execute_command
+    conn = self.connection or pool.get_connection()
+                              ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\utils.py:195: in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:1533: in get_connection
+    connection.connect()
+backend\.venv\Lib\site-packages\redis\connection.py:380: in connect
+    self.connect_check_health(check_health=True)
+backend\.venv\Lib\site-packages\redis\connection.py:397: in connect_check_health
+    raise ConnectionError(self._error_message(e))
+E   redis.exceptions.ConnectionError: Error 10061 connecting to 127.0.0.1:16380. 由于目标计算机积极拒绝，无法连接。.
+=========================== short test summary info ===========================
+ERROR backend\tests\test_evaluation.py::test_auto_evaluation_persists_and_api_is_readonly_paginated_owned
+ERROR backend\tests\test_evaluation.py::test_failed_independent_expectation_is_not_a_platform_error
+ERROR backend\tests\test_evaluation.py::test_waiting_confirmation_is_not_evaluated_until_actual_submission
+ERROR backend\tests\test_evaluation.py::test_large_artifact_is_verified_and_late_damage_appends_error_without_rewriting
+ERROR backend\tests\test_evaluation.py::test_legacy_evaluation_appends_results_without_changing_manifest_or_events
+5 errors in 8.21s

@@ -12,9 +12,11 @@ from app.agents.budget import PRICING
 from app.agents.errors import AgentError
 from app.agents.versions import build_manifest, canonical_hash
 from app.db.fixtures import ensure_rooms
+from app.evaluation.engine import evaluator_manifest
 from app.evidence.recorder import append_event
 from app.executors.control import TERMINAL, advisory, database_now, locked_pair
-from app.models import Booking, Target, TargetVersion, TestCase, TestExecution, TestRun
+from app.faults.service import frozen_profile
+from app.models import Booking, Room, Target, TargetVersion, TestCase, TestExecution, TestRun
 from app.schemas.contracts import TestCaseDraft
 
 
@@ -58,6 +60,8 @@ def frozen_case(row):
     try:
         draft = TestCaseDraft.model_validate(
             {
+                "schema_version": content["expected"].get("schema_version", "1.0"),
+                "task_goal": content["expected"].get("task_goal"),
                 **{
                     k: content[k]
                     for k in (
@@ -95,6 +99,7 @@ def booking_snapshot(session, scope):
             "booking_id": row.booking_uuid,
             "request_key": row.idempotency_key,
             "room_id": row.room_id,
+            "room_code": session.get(Room, row.room_id).room_code,
             "start_at": row.start_at.isoformat(),
             "end_at": row.end_at.isoformat(),
             "attendees": row.attendees,
@@ -132,21 +137,25 @@ def refresh_run(session, run):
 
 
 class RunService:
-    def __init__(self, engine, settings):
+    def __init__(self, engine, settings, *, document_ids=None):
         self.engine, self.settings = engine, settings
+        # Trusted configuration only; HTTP CreateRun cannot choose knowledge revisions.
+        self.document_ids = document_ids
 
     def current_manifest(self):
         from app.agents.registry import ToolRegistry
         from app.agents.retrieval import KnowledgeRetriever
         from app.services.booking import BookingService
 
-        retriever = KnowledgeRetriever(self.engine)
+        retriever = KnowledgeRetriever(self.engine, self.document_ids)
         return build_manifest(
             self.settings, retriever, ToolRegistry(BookingService(self.engine), retriever)
         )
 
     def create(self, user_id, values):
         request = values.model_dump(mode="json")
+        if request.get("fault_profile_id") is None:
+            request.pop("fault_profile_id", None)  # Preserve old control-run idempotency hashes.
         request_hash = canonical_hash(request)
         with advisory(self.engine, "create:" + str(values.request_id)) as connection:
             with Session(connection) as session, session.begin():
@@ -200,7 +209,7 @@ class RunService:
                 manifest = {
                     "schema": "run-v1",
                     "executor": "T05-v1",
-                    "trace_schema": "1.1",
+                    "trace_schema": "1.3",
                     "request_hash": request_hash,
                     "target_version_id": version.id,
                     "target": version.model_config_json,
@@ -208,10 +217,12 @@ class RunService:
                     "limits": limits,
                     "repetitions": values.repetitions,
                     "seed": values.seed,
-                    "fault_profile": None,
+                    "fault_profile": frozen_profile(session, values.fault_profile_id)
+                    if values.fault_profile_id
+                    else None,
                     "roles": role_configs(s),
                     "pricing": {**PRICING, "verified_on": "2026-10-26"},
-                    "evaluation": "T08 not implemented; script completion is inconclusive",
+                    "evaluation": evaluator_manifest(),
                 }
                 budget = {
                     "currency": "USD",
@@ -227,7 +238,7 @@ class RunService:
                     manifest_json=manifest,
                     manifest_hash=canonical_hash(manifest),
                     budget_json=budget,
-                    summary_json={"ledger": {}, "evaluation": "not_implemented"},
+                    summary_json={"ledger": {}, "evaluation": "awaiting_execution"},
                 )
                 session.add(run)
                 session.flush()
@@ -649,6 +660,20 @@ class RunService:
             e.status, e.final_output_json, e.error_json = status, output, error
             e.task_outcome = "unknown" if status != "waiting_input" else None
             e.after_state_json = booking_snapshot(session, e.scope_id)
+            if status == "inconclusive" and isinstance(run.manifest_json.get("evaluation"), dict):
+                from app.evaluation.service import persist_evaluation
+
+                evaluation = persist_evaluation(
+                    session, run, e, self.settings, closing=True, automatic=True
+                )
+                e.status, e.task_outcome = evaluation["verdict"], evaluation["task_outcome"]
+                e.error_json = (
+                    {"category": "evaluation", "code": "evaluation_" + e.status}
+                    if e.status in ("error", "inconclusive")
+                    else None
+                )
+                e.timing_json = {**e.timing_json, "evaluation": evaluation}
+                status, error = e.status, e.error_json
             e.timing_json = {**e.timing_json, "finished_at": database_now(session).isoformat()}
             e.lease_token, e.lease_until = None, None
             kind = (
@@ -679,4 +704,4 @@ class RunService:
                     settings=self.settings,
                 )
             refresh_run(session, run)
-            return True
+            return status

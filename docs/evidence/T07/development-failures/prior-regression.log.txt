@@ -1,0 +1,3880 @@
+EEEE..EEE.EEEEEEEEEEEEEEEEEEEEEE                                         [100%]
+=================================== ERRORS ====================================
+______ ERROR at setup of test_run_events_order_rollback_and_idempotency _______
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+check_health = True, retry_socket_connect = True
+
+    def connect_check_health(
+        self, check_health: bool = True, retry_socket_connect: bool = True
+    ):
+        if self._sock:
+            return
+        try:
+            if retry_socket_connect:
+>               sock = self.retry.call_with_retry(
+                    lambda: self._connect(), lambda error: self.disconnect(error)
+                )
+
+backend\.venv\Lib\site-packages\redis\connection.py:389: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\.venv\Lib\site-packages\redis\retry.py:105: in call_with_retry
+    return do()
+           ^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:390: in <lambda>
+    lambda: self._connect(), lambda error: self.disconnect(error)
+            ^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:803: in _connect
+    raise err
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+
+    def _connect(self):
+        "Create a TCP socket connection"
+        # we want to mimic what socket.create_connection does to support
+        # ipv4/ipv6, but we want to set options prior to calling
+        # socket.connect()
+        err = None
+        for res in socket.getaddrinfo(
+            self.host, self.port, self.socket_type, socket.SOCK_STREAM
+        ):
+            family, socktype, proto, canonname, socket_address = res
+            sock = None
+            try:
+                sock = socket.socket(family, socktype, proto)
+                # TCP_NODELAY
+                sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+    
+                # TCP_KEEPALIVE
+                if self.socket_keepalive:
+                    sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+                    for k, v in self.socket_keepalive_options.items():
+                        sock.setsockopt(socket.IPPROTO_TCP, k, v)
+    
+                # set the socket_connect_timeout before we connect
+                sock.settimeout(self.socket_connect_timeout)
+    
+                # connect
+>               sock.connect(socket_address)
+E               ConnectionRefusedError: [WinError 10061] ����Ŀ�����������ܾ����޷����ӡ�
+
+backend\.venv\Lib\site-packages\redis\connection.py:787: ConnectionRefusedError
+
+During handling of the above exception, another exception occurred:
+
+    @pytest.fixture(scope="module")
+    def infra():
+        settings = Settings().model_copy(
+            update={
+                "executor_allow_paid_model_calls": True,
+                "executor_budget_authorization_id": OPEN_AUTHORIZATION,
+                "executor_agent_budget_unlimited": True,
+                "executor_agent_budget_usd": 0,
+                "executor_namespace": "ac:t06:verify:" + uuid4().hex,
+                "sse_max_seconds": 5,
+            }
+        )
+        redis = Redis.from_url(settings.redis_url, socket_timeout=15)
+        paths = []
+        with disposable_database("T06") as engine:
+            migrate(engine)
+            seed_database(engine, TEST_PASSWORD)
+>           runtime = AgentRuntime(engine, redis, settings, auto_register=True)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend\tests\test_evidence.py:64: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\app\agents\runtime.py:59: in __init__
+    self.saver = saver_class(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:78: in __init__
+    super().__init__(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\base.py:211: in __init__
+    self.configure_client(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:118: in configure_client
+    self._redis.client_setinfo("LIB-NAME", __full_lib_name__)
+backend\.venv\Lib\site-packages\redis\commands\core.py:716: in client_setinfo
+    return self.execute_command("CLIENT SETINFO", attr, value, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:621: in execute_command
+    return self._execute_command(*args, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:627: in _execute_command
+    conn = self.connection or pool.get_connection()
+                              ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\utils.py:195: in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:1533: in get_connection
+    connection.connect()
+backend\.venv\Lib\site-packages\redis\connection.py:380: in connect
+    self.connect_check_health(check_health=True)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+check_health = True, retry_socket_connect = True
+
+    def connect_check_health(
+        self, check_health: bool = True, retry_socket_connect: bool = True
+    ):
+        if self._sock:
+            return
+        try:
+            if retry_socket_connect:
+                sock = self.retry.call_with_retry(
+                    lambda: self._connect(), lambda error: self.disconnect(error)
+                )
+            else:
+                sock = self._connect()
+        except socket.timeout:
+            raise TimeoutError("Timeout connecting to server")
+        except OSError as e:
+>           raise ConnectionError(self._error_message(e))
+E           redis.exceptions.ConnectionError: Error 10061 connecting to 127.0.0.1:16380. ����Ŀ�����������ܾ����޷����ӡ�.
+
+backend\.venv\Lib\site-packages\redis\connection.py:397: ConnectionError
+---------------------------- Captured stderr setup ----------------------------
+INFO  [alembic.runtime.migration] Context impl MySQLImpl.
+INFO  [alembic.runtime.migration] Will assume non-transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 20261025_0001, T02 initial sixteen-table schema
+INFO  [alembic.runtime.migration] Running upgrade 20261025_0001 -> 20261025_0002, T04 bind pending drafts to a trusted conversation without adding tables.
+INFO  [alembic.runtime.migration] Running upgrade 20261025_0002 -> 20261026_0003, T06 real run-level events and transactionally allocated per-run order.
+_ ERROR at setup of test_actual_graph_events_tools_confirmation_and_readonly_replay _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+check_health = True, retry_socket_connect = True
+
+    def connect_check_health(
+        self, check_health: bool = True, retry_socket_connect: bool = True
+    ):
+        if self._sock:
+            return
+        try:
+            if retry_socket_connect:
+>               sock = self.retry.call_with_retry(
+                    lambda: self._connect(), lambda error: self.disconnect(error)
+                )
+
+backend\.venv\Lib\site-packages\redis\connection.py:389: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\.venv\Lib\site-packages\redis\retry.py:105: in call_with_retry
+    return do()
+           ^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:390: in <lambda>
+    lambda: self._connect(), lambda error: self.disconnect(error)
+            ^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:803: in _connect
+    raise err
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+
+    def _connect(self):
+        "Create a TCP socket connection"
+        # we want to mimic what socket.create_connection does to support
+        # ipv4/ipv6, but we want to set options prior to calling
+        # socket.connect()
+        err = None
+        for res in socket.getaddrinfo(
+            self.host, self.port, self.socket_type, socket.SOCK_STREAM
+        ):
+            family, socktype, proto, canonname, socket_address = res
+            sock = None
+            try:
+                sock = socket.socket(family, socktype, proto)
+                # TCP_NODELAY
+                sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+    
+                # TCP_KEEPALIVE
+                if self.socket_keepalive:
+                    sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+                    for k, v in self.socket_keepalive_options.items():
+                        sock.setsockopt(socket.IPPROTO_TCP, k, v)
+    
+                # set the socket_connect_timeout before we connect
+                sock.settimeout(self.socket_connect_timeout)
+    
+                # connect
+>               sock.connect(socket_address)
+E               ConnectionRefusedError: [WinError 10061] ����Ŀ�����������ܾ����޷����ӡ�
+
+backend\.venv\Lib\site-packages\redis\connection.py:787: ConnectionRefusedError
+
+During handling of the above exception, another exception occurred:
+
+    @pytest.fixture(scope="module")
+    def infra():
+        settings = Settings().model_copy(
+            update={
+                "executor_allow_paid_model_calls": True,
+                "executor_budget_authorization_id": OPEN_AUTHORIZATION,
+                "executor_agent_budget_unlimited": True,
+                "executor_agent_budget_usd": 0,
+                "executor_namespace": "ac:t06:verify:" + uuid4().hex,
+                "sse_max_seconds": 5,
+            }
+        )
+        redis = Redis.from_url(settings.redis_url, socket_timeout=15)
+        paths = []
+        with disposable_database("T06") as engine:
+            migrate(engine)
+            seed_database(engine, TEST_PASSWORD)
+>           runtime = AgentRuntime(engine, redis, settings, auto_register=True)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend\tests\test_evidence.py:64: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\app\agents\runtime.py:59: in __init__
+    self.saver = saver_class(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:78: in __init__
+    super().__init__(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\base.py:211: in __init__
+    self.configure_client(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:118: in configure_client
+    self._redis.client_setinfo("LIB-NAME", __full_lib_name__)
+backend\.venv\Lib\site-packages\redis\commands\core.py:716: in client_setinfo
+    return self.execute_command("CLIENT SETINFO", attr, value, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:621: in execute_command
+    return self._execute_command(*args, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:627: in _execute_command
+    conn = self.connection or pool.get_connection()
+                              ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\utils.py:195: in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:1533: in get_connection
+    connection.connect()
+backend\.venv\Lib\site-packages\redis\connection.py:380: in connect
+    self.connect_check_health(check_health=True)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+check_health = True, retry_socket_connect = True
+
+    def connect_check_health(
+        self, check_health: bool = True, retry_socket_connect: bool = True
+    ):
+        if self._sock:
+            return
+        try:
+            if retry_socket_connect:
+                sock = self.retry.call_with_retry(
+                    lambda: self._connect(), lambda error: self.disconnect(error)
+                )
+            else:
+                sock = self._connect()
+        except socket.timeout:
+            raise TimeoutError("Timeout connecting to server")
+        except OSError as e:
+>           raise ConnectionError(self._error_message(e))
+E           redis.exceptions.ConnectionError: Error 10061 connecting to 127.0.0.1:16380. ����Ŀ�����������ܾ����޷����ӡ�.
+
+backend\.venv\Lib\site-packages\redis\connection.py:397: ConnectionError
+_______ ERROR at setup of test_large_artifact_redaction_hash_and_owner ________
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+check_health = True, retry_socket_connect = True
+
+    def connect_check_health(
+        self, check_health: bool = True, retry_socket_connect: bool = True
+    ):
+        if self._sock:
+            return
+        try:
+            if retry_socket_connect:
+>               sock = self.retry.call_with_retry(
+                    lambda: self._connect(), lambda error: self.disconnect(error)
+                )
+
+backend\.venv\Lib\site-packages\redis\connection.py:389: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\.venv\Lib\site-packages\redis\retry.py:105: in call_with_retry
+    return do()
+           ^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:390: in <lambda>
+    lambda: self._connect(), lambda error: self.disconnect(error)
+            ^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:803: in _connect
+    raise err
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+
+    def _connect(self):
+        "Create a TCP socket connection"
+        # we want to mimic what socket.create_connection does to support
+        # ipv4/ipv6, but we want to set options prior to calling
+        # socket.connect()
+        err = None
+        for res in socket.getaddrinfo(
+            self.host, self.port, self.socket_type, socket.SOCK_STREAM
+        ):
+            family, socktype, proto, canonname, socket_address = res
+            sock = None
+            try:
+                sock = socket.socket(family, socktype, proto)
+                # TCP_NODELAY
+                sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+    
+                # TCP_KEEPALIVE
+                if self.socket_keepalive:
+                    sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+                    for k, v in self.socket_keepalive_options.items():
+                        sock.setsockopt(socket.IPPROTO_TCP, k, v)
+    
+                # set the socket_connect_timeout before we connect
+                sock.settimeout(self.socket_connect_timeout)
+    
+                # connect
+>               sock.connect(socket_address)
+E               ConnectionRefusedError: [WinError 10061] ����Ŀ�����������ܾ����޷����ӡ�
+
+backend\.venv\Lib\site-packages\redis\connection.py:787: ConnectionRefusedError
+
+During handling of the above exception, another exception occurred:
+
+    @pytest.fixture(scope="module")
+    def infra():
+        settings = Settings().model_copy(
+            update={
+                "executor_allow_paid_model_calls": True,
+                "executor_budget_authorization_id": OPEN_AUTHORIZATION,
+                "executor_agent_budget_unlimited": True,
+                "executor_agent_budget_usd": 0,
+                "executor_namespace": "ac:t06:verify:" + uuid4().hex,
+                "sse_max_seconds": 5,
+            }
+        )
+        redis = Redis.from_url(settings.redis_url, socket_timeout=15)
+        paths = []
+        with disposable_database("T06") as engine:
+            migrate(engine)
+            seed_database(engine, TEST_PASSWORD)
+>           runtime = AgentRuntime(engine, redis, settings, auto_register=True)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend\tests\test_evidence.py:64: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\app\agents\runtime.py:59: in __init__
+    self.saver = saver_class(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:78: in __init__
+    super().__init__(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\base.py:211: in __init__
+    self.configure_client(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:118: in configure_client
+    self._redis.client_setinfo("LIB-NAME", __full_lib_name__)
+backend\.venv\Lib\site-packages\redis\commands\core.py:716: in client_setinfo
+    return self.execute_command("CLIENT SETINFO", attr, value, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:621: in execute_command
+    return self._execute_command(*args, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:627: in _execute_command
+    conn = self.connection or pool.get_connection()
+                              ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\utils.py:195: in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:1533: in get_connection
+    connection.connect()
+backend\.venv\Lib\site-packages\redis\connection.py:380: in connect
+    self.connect_check_health(check_health=True)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+check_health = True, retry_socket_connect = True
+
+    def connect_check_health(
+        self, check_health: bool = True, retry_socket_connect: bool = True
+    ):
+        if self._sock:
+            return
+        try:
+            if retry_socket_connect:
+                sock = self.retry.call_with_retry(
+                    lambda: self._connect(), lambda error: self.disconnect(error)
+                )
+            else:
+                sock = self._connect()
+        except socket.timeout:
+            raise TimeoutError("Timeout connecting to server")
+        except OSError as e:
+>           raise ConnectionError(self._error_message(e))
+E           redis.exceptions.ConnectionError: Error 10061 connecting to 127.0.0.1:16380. ����Ŀ�����������ܾ����޷����ӡ�.
+
+backend\.venv\Lib\site-packages\redis\connection.py:397: ConnectionError
+____ ERROR at setup of test_cursor_validation_and_authenticated_native_sse ____
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+check_health = True, retry_socket_connect = True
+
+    def connect_check_health(
+        self, check_health: bool = True, retry_socket_connect: bool = True
+    ):
+        if self._sock:
+            return
+        try:
+            if retry_socket_connect:
+>               sock = self.retry.call_with_retry(
+                    lambda: self._connect(), lambda error: self.disconnect(error)
+                )
+
+backend\.venv\Lib\site-packages\redis\connection.py:389: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\.venv\Lib\site-packages\redis\retry.py:105: in call_with_retry
+    return do()
+           ^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:390: in <lambda>
+    lambda: self._connect(), lambda error: self.disconnect(error)
+            ^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:803: in _connect
+    raise err
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+
+    def _connect(self):
+        "Create a TCP socket connection"
+        # we want to mimic what socket.create_connection does to support
+        # ipv4/ipv6, but we want to set options prior to calling
+        # socket.connect()
+        err = None
+        for res in socket.getaddrinfo(
+            self.host, self.port, self.socket_type, socket.SOCK_STREAM
+        ):
+            family, socktype, proto, canonname, socket_address = res
+            sock = None
+            try:
+                sock = socket.socket(family, socktype, proto)
+                # TCP_NODELAY
+                sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+    
+                # TCP_KEEPALIVE
+                if self.socket_keepalive:
+                    sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+                    for k, v in self.socket_keepalive_options.items():
+                        sock.setsockopt(socket.IPPROTO_TCP, k, v)
+    
+                # set the socket_connect_timeout before we connect
+                sock.settimeout(self.socket_connect_timeout)
+    
+                # connect
+>               sock.connect(socket_address)
+E               ConnectionRefusedError: [WinError 10061] ����Ŀ�����������ܾ����޷����ӡ�
+
+backend\.venv\Lib\site-packages\redis\connection.py:787: ConnectionRefusedError
+
+During handling of the above exception, another exception occurred:
+
+    @pytest.fixture(scope="module")
+    def infra():
+        settings = Settings().model_copy(
+            update={
+                "executor_allow_paid_model_calls": True,
+                "executor_budget_authorization_id": OPEN_AUTHORIZATION,
+                "executor_agent_budget_unlimited": True,
+                "executor_agent_budget_usd": 0,
+                "executor_namespace": "ac:t06:verify:" + uuid4().hex,
+                "sse_max_seconds": 5,
+            }
+        )
+        redis = Redis.from_url(settings.redis_url, socket_timeout=15)
+        paths = []
+        with disposable_database("T06") as engine:
+            migrate(engine)
+            seed_database(engine, TEST_PASSWORD)
+>           runtime = AgentRuntime(engine, redis, settings, auto_register=True)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend\tests\test_evidence.py:64: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\app\agents\runtime.py:59: in __init__
+    self.saver = saver_class(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:78: in __init__
+    super().__init__(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\base.py:211: in __init__
+    self.configure_client(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:118: in configure_client
+    self._redis.client_setinfo("LIB-NAME", __full_lib_name__)
+backend\.venv\Lib\site-packages\redis\commands\core.py:716: in client_setinfo
+    return self.execute_command("CLIENT SETINFO", attr, value, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:621: in execute_command
+    return self._execute_command(*args, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:627: in _execute_command
+    conn = self.connection or pool.get_connection()
+                              ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\utils.py:195: in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:1533: in get_connection
+    connection.connect()
+backend\.venv\Lib\site-packages\redis\connection.py:380: in connect
+    self.connect_check_health(check_health=True)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+check_health = True, retry_socket_connect = True
+
+    def connect_check_health(
+        self, check_health: bool = True, retry_socket_connect: bool = True
+    ):
+        if self._sock:
+            return
+        try:
+            if retry_socket_connect:
+                sock = self.retry.call_with_retry(
+                    lambda: self._connect(), lambda error: self.disconnect(error)
+                )
+            else:
+                sock = self._connect()
+        except socket.timeout:
+            raise TimeoutError("Timeout connecting to server")
+        except OSError as e:
+>           raise ConnectionError(self._error_message(e))
+E           redis.exceptions.ConnectionError: Error 10061 connecting to 127.0.0.1:16380. ����Ŀ�����������ܾ����޷����ӡ�.
+
+backend\.venv\Lib\site-packages\redis\connection.py:397: ConnectionError
+__ ERROR at setup of test_open_ledger_keeps_finite_run_limits_and_late_usage __
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+check_health = True, retry_socket_connect = True
+
+    def connect_check_health(
+        self, check_health: bool = True, retry_socket_connect: bool = True
+    ):
+        if self._sock:
+            return
+        try:
+            if retry_socket_connect:
+>               sock = self.retry.call_with_retry(
+                    lambda: self._connect(), lambda error: self.disconnect(error)
+                )
+
+backend\.venv\Lib\site-packages\redis\connection.py:389: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\.venv\Lib\site-packages\redis\retry.py:105: in call_with_retry
+    return do()
+           ^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:390: in <lambda>
+    lambda: self._connect(), lambda error: self.disconnect(error)
+            ^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:803: in _connect
+    raise err
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+
+    def _connect(self):
+        "Create a TCP socket connection"
+        # we want to mimic what socket.create_connection does to support
+        # ipv4/ipv6, but we want to set options prior to calling
+        # socket.connect()
+        err = None
+        for res in socket.getaddrinfo(
+            self.host, self.port, self.socket_type, socket.SOCK_STREAM
+        ):
+            family, socktype, proto, canonname, socket_address = res
+            sock = None
+            try:
+                sock = socket.socket(family, socktype, proto)
+                # TCP_NODELAY
+                sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+    
+                # TCP_KEEPALIVE
+                if self.socket_keepalive:
+                    sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+                    for k, v in self.socket_keepalive_options.items():
+                        sock.setsockopt(socket.IPPROTO_TCP, k, v)
+    
+                # set the socket_connect_timeout before we connect
+                sock.settimeout(self.socket_connect_timeout)
+    
+                # connect
+>               sock.connect(socket_address)
+E               ConnectionRefusedError: [WinError 10061] ����Ŀ�����������ܾ����޷����ӡ�
+
+backend\.venv\Lib\site-packages\redis\connection.py:787: ConnectionRefusedError
+
+During handling of the above exception, another exception occurred:
+
+    @pytest.fixture(scope="module")
+    def infra():
+        settings = Settings().model_copy(
+            update={
+                "executor_allow_paid_model_calls": True,
+                "executor_budget_authorization_id": OPEN_AUTHORIZATION,
+                "executor_agent_budget_unlimited": True,
+                "executor_agent_budget_usd": 0,
+                "executor_namespace": "ac:t06:verify:" + uuid4().hex,
+                "sse_max_seconds": 5,
+            }
+        )
+        redis = Redis.from_url(settings.redis_url, socket_timeout=15)
+        paths = []
+        with disposable_database("T06") as engine:
+            migrate(engine)
+            seed_database(engine, TEST_PASSWORD)
+>           runtime = AgentRuntime(engine, redis, settings, auto_register=True)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend\tests\test_evidence.py:64: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\app\agents\runtime.py:59: in __init__
+    self.saver = saver_class(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:78: in __init__
+    super().__init__(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\base.py:211: in __init__
+    self.configure_client(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:118: in configure_client
+    self._redis.client_setinfo("LIB-NAME", __full_lib_name__)
+backend\.venv\Lib\site-packages\redis\commands\core.py:716: in client_setinfo
+    return self.execute_command("CLIENT SETINFO", attr, value, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:621: in execute_command
+    return self._execute_command(*args, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:627: in _execute_command
+    conn = self.connection or pool.get_connection()
+                              ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\utils.py:195: in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:1533: in get_connection
+    connection.connect()
+backend\.venv\Lib\site-packages\redis\connection.py:380: in connect
+    self.connect_check_health(check_health=True)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+check_health = True, retry_socket_connect = True
+
+    def connect_check_health(
+        self, check_health: bool = True, retry_socket_connect: bool = True
+    ):
+        if self._sock:
+            return
+        try:
+            if retry_socket_connect:
+                sock = self.retry.call_with_retry(
+                    lambda: self._connect(), lambda error: self.disconnect(error)
+                )
+            else:
+                sock = self._connect()
+        except socket.timeout:
+            raise TimeoutError("Timeout connecting to server")
+        except OSError as e:
+>           raise ConnectionError(self._error_message(e))
+E           redis.exceptions.ConnectionError: Error 10061 connecting to 127.0.0.1:16380. ����Ŀ�����������ܾ����޷����ӡ�.
+
+backend\.venv\Lib\site-packages\redis\connection.py:397: ConnectionError
+_ ERROR at setup of test_model_error_is_observed_and_readonly_replay_does_not_retry _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+check_health = True, retry_socket_connect = True
+
+    def connect_check_health(
+        self, check_health: bool = True, retry_socket_connect: bool = True
+    ):
+        if self._sock:
+            return
+        try:
+            if retry_socket_connect:
+>               sock = self.retry.call_with_retry(
+                    lambda: self._connect(), lambda error: self.disconnect(error)
+                )
+
+backend\.venv\Lib\site-packages\redis\connection.py:389: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\.venv\Lib\site-packages\redis\retry.py:105: in call_with_retry
+    return do()
+           ^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:390: in <lambda>
+    lambda: self._connect(), lambda error: self.disconnect(error)
+            ^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:803: in _connect
+    raise err
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+
+    def _connect(self):
+        "Create a TCP socket connection"
+        # we want to mimic what socket.create_connection does to support
+        # ipv4/ipv6, but we want to set options prior to calling
+        # socket.connect()
+        err = None
+        for res in socket.getaddrinfo(
+            self.host, self.port, self.socket_type, socket.SOCK_STREAM
+        ):
+            family, socktype, proto, canonname, socket_address = res
+            sock = None
+            try:
+                sock = socket.socket(family, socktype, proto)
+                # TCP_NODELAY
+                sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+    
+                # TCP_KEEPALIVE
+                if self.socket_keepalive:
+                    sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+                    for k, v in self.socket_keepalive_options.items():
+                        sock.setsockopt(socket.IPPROTO_TCP, k, v)
+    
+                # set the socket_connect_timeout before we connect
+                sock.settimeout(self.socket_connect_timeout)
+    
+                # connect
+>               sock.connect(socket_address)
+E               ConnectionRefusedError: [WinError 10061] ����Ŀ�����������ܾ����޷����ӡ�
+
+backend\.venv\Lib\site-packages\redis\connection.py:787: ConnectionRefusedError
+
+During handling of the above exception, another exception occurred:
+
+    @pytest.fixture(scope="module")
+    def infra():
+        settings = Settings().model_copy(
+            update={
+                "executor_allow_paid_model_calls": True,
+                "executor_budget_authorization_id": OPEN_AUTHORIZATION,
+                "executor_agent_budget_unlimited": True,
+                "executor_agent_budget_usd": 0,
+                "executor_namespace": "ac:t06:verify:" + uuid4().hex,
+                "sse_max_seconds": 5,
+            }
+        )
+        redis = Redis.from_url(settings.redis_url, socket_timeout=15)
+        paths = []
+        with disposable_database("T06") as engine:
+            migrate(engine)
+            seed_database(engine, TEST_PASSWORD)
+>           runtime = AgentRuntime(engine, redis, settings, auto_register=True)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend\tests\test_evidence.py:64: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\app\agents\runtime.py:59: in __init__
+    self.saver = saver_class(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:78: in __init__
+    super().__init__(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\base.py:211: in __init__
+    self.configure_client(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:118: in configure_client
+    self._redis.client_setinfo("LIB-NAME", __full_lib_name__)
+backend\.venv\Lib\site-packages\redis\commands\core.py:716: in client_setinfo
+    return self.execute_command("CLIENT SETINFO", attr, value, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:621: in execute_command
+    return self._execute_command(*args, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:627: in _execute_command
+    conn = self.connection or pool.get_connection()
+                              ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\utils.py:195: in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:1533: in get_connection
+    connection.connect()
+backend\.venv\Lib\site-packages\redis\connection.py:380: in connect
+    self.connect_check_health(check_health=True)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+check_health = True, retry_socket_connect = True
+
+    def connect_check_health(
+        self, check_health: bool = True, retry_socket_connect: bool = True
+    ):
+        if self._sock:
+            return
+        try:
+            if retry_socket_connect:
+                sock = self.retry.call_with_retry(
+                    lambda: self._connect(), lambda error: self.disconnect(error)
+                )
+            else:
+                sock = self._connect()
+        except socket.timeout:
+            raise TimeoutError("Timeout connecting to server")
+        except OSError as e:
+>           raise ConnectionError(self._error_message(e))
+E           redis.exceptions.ConnectionError: Error 10061 connecting to 127.0.0.1:16380. ����Ŀ�����������ܾ����޷����ӡ�.
+
+backend\.venv\Lib\site-packages\redis\connection.py:397: ConnectionError
+__ ERROR at setup of test_native_route_slow_send_cancels_all_response_tasks ___
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+check_health = True, retry_socket_connect = True
+
+    def connect_check_health(
+        self, check_health: bool = True, retry_socket_connect: bool = True
+    ):
+        if self._sock:
+            return
+        try:
+            if retry_socket_connect:
+>               sock = self.retry.call_with_retry(
+                    lambda: self._connect(), lambda error: self.disconnect(error)
+                )
+
+backend\.venv\Lib\site-packages\redis\connection.py:389: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\.venv\Lib\site-packages\redis\retry.py:105: in call_with_retry
+    return do()
+           ^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:390: in <lambda>
+    lambda: self._connect(), lambda error: self.disconnect(error)
+            ^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:803: in _connect
+    raise err
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+
+    def _connect(self):
+        "Create a TCP socket connection"
+        # we want to mimic what socket.create_connection does to support
+        # ipv4/ipv6, but we want to set options prior to calling
+        # socket.connect()
+        err = None
+        for res in socket.getaddrinfo(
+            self.host, self.port, self.socket_type, socket.SOCK_STREAM
+        ):
+            family, socktype, proto, canonname, socket_address = res
+            sock = None
+            try:
+                sock = socket.socket(family, socktype, proto)
+                # TCP_NODELAY
+                sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+    
+                # TCP_KEEPALIVE
+                if self.socket_keepalive:
+                    sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+                    for k, v in self.socket_keepalive_options.items():
+                        sock.setsockopt(socket.IPPROTO_TCP, k, v)
+    
+                # set the socket_connect_timeout before we connect
+                sock.settimeout(self.socket_connect_timeout)
+    
+                # connect
+>               sock.connect(socket_address)
+E               ConnectionRefusedError: [WinError 10061] ����Ŀ�����������ܾ����޷����ӡ�
+
+backend\.venv\Lib\site-packages\redis\connection.py:787: ConnectionRefusedError
+
+During handling of the above exception, another exception occurred:
+
+    @pytest.fixture(scope="module")
+    def infra():
+        settings = Settings().model_copy(
+            update={
+                "executor_allow_paid_model_calls": True,
+                "executor_budget_authorization_id": OPEN_AUTHORIZATION,
+                "executor_agent_budget_unlimited": True,
+                "executor_agent_budget_usd": 0,
+                "executor_namespace": "ac:t06:verify:" + uuid4().hex,
+                "sse_max_seconds": 5,
+            }
+        )
+        redis = Redis.from_url(settings.redis_url, socket_timeout=15)
+        paths = []
+        with disposable_database("T06") as engine:
+            migrate(engine)
+            seed_database(engine, TEST_PASSWORD)
+>           runtime = AgentRuntime(engine, redis, settings, auto_register=True)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend\tests\test_evidence.py:64: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\app\agents\runtime.py:59: in __init__
+    self.saver = saver_class(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:78: in __init__
+    super().__init__(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\base.py:211: in __init__
+    self.configure_client(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:118: in configure_client
+    self._redis.client_setinfo("LIB-NAME", __full_lib_name__)
+backend\.venv\Lib\site-packages\redis\commands\core.py:716: in client_setinfo
+    return self.execute_command("CLIENT SETINFO", attr, value, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:621: in execute_command
+    return self._execute_command(*args, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:627: in _execute_command
+    conn = self.connection or pool.get_connection()
+                              ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\utils.py:195: in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:1533: in get_connection
+    connection.connect()
+backend\.venv\Lib\site-packages\redis\connection.py:380: in connect
+    self.connect_check_health(check_health=True)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+check_health = True, retry_socket_connect = True
+
+    def connect_check_health(
+        self, check_health: bool = True, retry_socket_connect: bool = True
+    ):
+        if self._sock:
+            return
+        try:
+            if retry_socket_connect:
+                sock = self.retry.call_with_retry(
+                    lambda: self._connect(), lambda error: self.disconnect(error)
+                )
+            else:
+                sock = self._connect()
+        except socket.timeout:
+            raise TimeoutError("Timeout connecting to server")
+        except OSError as e:
+>           raise ConnectionError(self._error_message(e))
+E           redis.exceptions.ConnectionError: Error 10061 connecting to 127.0.0.1:16380. ����Ŀ�����������ܾ����޷����ӡ�.
+
+backend\.venv\Lib\site-packages\redis\connection.py:397: ConnectionError
+______ ERROR at setup of test_manifest_idempotency_review_and_isolation _______
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+check_health = True, retry_socket_connect = True
+
+    def connect_check_health(
+        self, check_health: bool = True, retry_socket_connect: bool = True
+    ):
+        if self._sock:
+            return
+        try:
+            if retry_socket_connect:
+>               sock = self.retry.call_with_retry(
+                    lambda: self._connect(), lambda error: self.disconnect(error)
+                )
+
+backend\.venv\Lib\site-packages\redis\connection.py:389: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\.venv\Lib\site-packages\redis\retry.py:105: in call_with_retry
+    return do()
+           ^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:390: in <lambda>
+    lambda: self._connect(), lambda error: self.disconnect(error)
+            ^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:803: in _connect
+    raise err
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+
+    def _connect(self):
+        "Create a TCP socket connection"
+        # we want to mimic what socket.create_connection does to support
+        # ipv4/ipv6, but we want to set options prior to calling
+        # socket.connect()
+        err = None
+        for res in socket.getaddrinfo(
+            self.host, self.port, self.socket_type, socket.SOCK_STREAM
+        ):
+            family, socktype, proto, canonname, socket_address = res
+            sock = None
+            try:
+                sock = socket.socket(family, socktype, proto)
+                # TCP_NODELAY
+                sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+    
+                # TCP_KEEPALIVE
+                if self.socket_keepalive:
+                    sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+                    for k, v in self.socket_keepalive_options.items():
+                        sock.setsockopt(socket.IPPROTO_TCP, k, v)
+    
+                # set the socket_connect_timeout before we connect
+                sock.settimeout(self.socket_connect_timeout)
+    
+                # connect
+>               sock.connect(socket_address)
+E               ConnectionRefusedError: [WinError 10061] ����Ŀ�����������ܾ����޷����ӡ�
+
+backend\.venv\Lib\site-packages\redis\connection.py:787: ConnectionRefusedError
+
+During handling of the above exception, another exception occurred:
+
+    @pytest.fixture(scope="module")
+    def infrastructure():
+        settings = Settings().model_copy(
+            update={
+                "run_concurrency": 2,
+                "executor_allow_paid_model_calls": True,
+                "executor_budget_authorization_id": AUTHORIZATION,
+                "executor_agent_budget_usd": 1.0,
+                "executor_agent_budget_unlimited": False,
+                "executor_namespace": "ac:t05:verify:" + uuid4().hex,
+            }
+        )
+        redis = Redis.from_url(settings.redis_url, socket_timeout=15)
+        with disposable_database("T05") as engine:
+            migrate(engine)
+            seed_database(engine, TEST_PASSWORD)
+>           runtime = AgentRuntime(engine, redis, settings, auto_register=True)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend\tests\test_executor.py:59: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\app\agents\runtime.py:59: in __init__
+    self.saver = saver_class(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:78: in __init__
+    super().__init__(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\base.py:211: in __init__
+    self.configure_client(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:118: in configure_client
+    self._redis.client_setinfo("LIB-NAME", __full_lib_name__)
+backend\.venv\Lib\site-packages\redis\commands\core.py:716: in client_setinfo
+    return self.execute_command("CLIENT SETINFO", attr, value, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:621: in execute_command
+    return self._execute_command(*args, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:627: in _execute_command
+    conn = self.connection or pool.get_connection()
+                              ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\utils.py:195: in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:1533: in get_connection
+    connection.connect()
+backend\.venv\Lib\site-packages\redis\connection.py:380: in connect
+    self.connect_check_health(check_health=True)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+check_health = True, retry_socket_connect = True
+
+    def connect_check_health(
+        self, check_health: bool = True, retry_socket_connect: bool = True
+    ):
+        if self._sock:
+            return
+        try:
+            if retry_socket_connect:
+                sock = self.retry.call_with_retry(
+                    lambda: self._connect(), lambda error: self.disconnect(error)
+                )
+            else:
+                sock = self._connect()
+        except socket.timeout:
+            raise TimeoutError("Timeout connecting to server")
+        except OSError as e:
+>           raise ConnectionError(self._error_message(e))
+E           redis.exceptions.ConnectionError: Error 10061 connecting to 127.0.0.1:16380. ����Ŀ�����������ܾ����޷����ӡ�.
+
+backend\.venv\Lib\site-packages\redis\connection.py:397: ConnectionError
+---------------------------- Captured stderr setup ----------------------------
+INFO  [alembic.runtime.migration] Context impl MySQLImpl.
+INFO  [alembic.runtime.migration] Will assume non-transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 20261025_0001, T02 initial sixteen-table schema
+INFO  [alembic.runtime.migration] Running upgrade 20261025_0001 -> 20261025_0002, T04 bind pending drafts to a trusted conversation without adding tables.
+INFO  [alembic.runtime.migration] Running upgrade 20261025_0002 -> 20261026_0003, T06 real run-level events and transactionally allocated per-run order.
+_________ ERROR at setup of test_invalid_frozen_input_rejected[draft] _________
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+check_health = True, retry_socket_connect = True
+
+    def connect_check_health(
+        self, check_health: bool = True, retry_socket_connect: bool = True
+    ):
+        if self._sock:
+            return
+        try:
+            if retry_socket_connect:
+>               sock = self.retry.call_with_retry(
+                    lambda: self._connect(), lambda error: self.disconnect(error)
+                )
+
+backend\.venv\Lib\site-packages\redis\connection.py:389: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\.venv\Lib\site-packages\redis\retry.py:105: in call_with_retry
+    return do()
+           ^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:390: in <lambda>
+    lambda: self._connect(), lambda error: self.disconnect(error)
+            ^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:803: in _connect
+    raise err
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+
+    def _connect(self):
+        "Create a TCP socket connection"
+        # we want to mimic what socket.create_connection does to support
+        # ipv4/ipv6, but we want to set options prior to calling
+        # socket.connect()
+        err = None
+        for res in socket.getaddrinfo(
+            self.host, self.port, self.socket_type, socket.SOCK_STREAM
+        ):
+            family, socktype, proto, canonname, socket_address = res
+            sock = None
+            try:
+                sock = socket.socket(family, socktype, proto)
+                # TCP_NODELAY
+                sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+    
+                # TCP_KEEPALIVE
+                if self.socket_keepalive:
+                    sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+                    for k, v in self.socket_keepalive_options.items():
+                        sock.setsockopt(socket.IPPROTO_TCP, k, v)
+    
+                # set the socket_connect_timeout before we connect
+                sock.settimeout(self.socket_connect_timeout)
+    
+                # connect
+>               sock.connect(socket_address)
+E               ConnectionRefusedError: [WinError 10061] ����Ŀ�����������ܾ����޷����ӡ�
+
+backend\.venv\Lib\site-packages\redis\connection.py:787: ConnectionRefusedError
+
+During handling of the above exception, another exception occurred:
+
+    @pytest.fixture(scope="module")
+    def infrastructure():
+        settings = Settings().model_copy(
+            update={
+                "run_concurrency": 2,
+                "executor_allow_paid_model_calls": True,
+                "executor_budget_authorization_id": AUTHORIZATION,
+                "executor_agent_budget_usd": 1.0,
+                "executor_agent_budget_unlimited": False,
+                "executor_namespace": "ac:t05:verify:" + uuid4().hex,
+            }
+        )
+        redis = Redis.from_url(settings.redis_url, socket_timeout=15)
+        with disposable_database("T05") as engine:
+            migrate(engine)
+            seed_database(engine, TEST_PASSWORD)
+>           runtime = AgentRuntime(engine, redis, settings, auto_register=True)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend\tests\test_executor.py:59: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\app\agents\runtime.py:59: in __init__
+    self.saver = saver_class(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:78: in __init__
+    super().__init__(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\base.py:211: in __init__
+    self.configure_client(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:118: in configure_client
+    self._redis.client_setinfo("LIB-NAME", __full_lib_name__)
+backend\.venv\Lib\site-packages\redis\commands\core.py:716: in client_setinfo
+    return self.execute_command("CLIENT SETINFO", attr, value, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:621: in execute_command
+    return self._execute_command(*args, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:627: in _execute_command
+    conn = self.connection or pool.get_connection()
+                              ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\utils.py:195: in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:1533: in get_connection
+    connection.connect()
+backend\.venv\Lib\site-packages\redis\connection.py:380: in connect
+    self.connect_check_health(check_health=True)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+check_health = True, retry_socket_connect = True
+
+    def connect_check_health(
+        self, check_health: bool = True, retry_socket_connect: bool = True
+    ):
+        if self._sock:
+            return
+        try:
+            if retry_socket_connect:
+                sock = self.retry.call_with_retry(
+                    lambda: self._connect(), lambda error: self.disconnect(error)
+                )
+            else:
+                sock = self._connect()
+        except socket.timeout:
+            raise TimeoutError("Timeout connecting to server")
+        except OSError as e:
+>           raise ConnectionError(self._error_message(e))
+E           redis.exceptions.ConnectionError: Error 10061 connecting to 127.0.0.1:16380. ����Ŀ�����������ܾ����޷����ӡ�.
+
+backend\.venv\Lib\site-packages\redis\connection.py:397: ConnectionError
+_________ ERROR at setup of test_invalid_frozen_input_rejected[hash] __________
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+check_health = True, retry_socket_connect = True
+
+    def connect_check_health(
+        self, check_health: bool = True, retry_socket_connect: bool = True
+    ):
+        if self._sock:
+            return
+        try:
+            if retry_socket_connect:
+>               sock = self.retry.call_with_retry(
+                    lambda: self._connect(), lambda error: self.disconnect(error)
+                )
+
+backend\.venv\Lib\site-packages\redis\connection.py:389: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\.venv\Lib\site-packages\redis\retry.py:105: in call_with_retry
+    return do()
+           ^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:390: in <lambda>
+    lambda: self._connect(), lambda error: self.disconnect(error)
+            ^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:803: in _connect
+    raise err
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+
+    def _connect(self):
+        "Create a TCP socket connection"
+        # we want to mimic what socket.create_connection does to support
+        # ipv4/ipv6, but we want to set options prior to calling
+        # socket.connect()
+        err = None
+        for res in socket.getaddrinfo(
+            self.host, self.port, self.socket_type, socket.SOCK_STREAM
+        ):
+            family, socktype, proto, canonname, socket_address = res
+            sock = None
+            try:
+                sock = socket.socket(family, socktype, proto)
+                # TCP_NODELAY
+                sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+    
+                # TCP_KEEPALIVE
+                if self.socket_keepalive:
+                    sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+                    for k, v in self.socket_keepalive_options.items():
+                        sock.setsockopt(socket.IPPROTO_TCP, k, v)
+    
+                # set the socket_connect_timeout before we connect
+                sock.settimeout(self.socket_connect_timeout)
+    
+                # connect
+>               sock.connect(socket_address)
+E               ConnectionRefusedError: [WinError 10061] ����Ŀ�����������ܾ����޷����ӡ�
+
+backend\.venv\Lib\site-packages\redis\connection.py:787: ConnectionRefusedError
+
+During handling of the above exception, another exception occurred:
+
+    @pytest.fixture(scope="module")
+    def infrastructure():
+        settings = Settings().model_copy(
+            update={
+                "run_concurrency": 2,
+                "executor_allow_paid_model_calls": True,
+                "executor_budget_authorization_id": AUTHORIZATION,
+                "executor_agent_budget_usd": 1.0,
+                "executor_agent_budget_unlimited": False,
+                "executor_namespace": "ac:t05:verify:" + uuid4().hex,
+            }
+        )
+        redis = Redis.from_url(settings.redis_url, socket_timeout=15)
+        with disposable_database("T05") as engine:
+            migrate(engine)
+            seed_database(engine, TEST_PASSWORD)
+>           runtime = AgentRuntime(engine, redis, settings, auto_register=True)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend\tests\test_executor.py:59: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\app\agents\runtime.py:59: in __init__
+    self.saver = saver_class(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:78: in __init__
+    super().__init__(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\base.py:211: in __init__
+    self.configure_client(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:118: in configure_client
+    self._redis.client_setinfo("LIB-NAME", __full_lib_name__)
+backend\.venv\Lib\site-packages\redis\commands\core.py:716: in client_setinfo
+    return self.execute_command("CLIENT SETINFO", attr, value, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:621: in execute_command
+    return self._execute_command(*args, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:627: in _execute_command
+    conn = self.connection or pool.get_connection()
+                              ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\utils.py:195: in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:1533: in get_connection
+    connection.connect()
+backend\.venv\Lib\site-packages\redis\connection.py:380: in connect
+    self.connect_check_health(check_health=True)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+check_health = True, retry_socket_connect = True
+
+    def connect_check_health(
+        self, check_health: bool = True, retry_socket_connect: bool = True
+    ):
+        if self._sock:
+            return
+        try:
+            if retry_socket_connect:
+                sock = self.retry.call_with_retry(
+                    lambda: self._connect(), lambda error: self.disconnect(error)
+                )
+            else:
+                sock = self._connect()
+        except socket.timeout:
+            raise TimeoutError("Timeout connecting to server")
+        except OSError as e:
+>           raise ConnectionError(self._error_message(e))
+E           redis.exceptions.ConnectionError: Error 10061 connecting to 127.0.0.1:16380. ����Ŀ�����������ܾ����޷����ӡ�.
+
+backend\.venv\Lib\site-packages\redis\connection.py:397: ConnectionError
+________ ERROR at setup of test_invalid_frozen_input_rejected[version] ________
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+check_health = True, retry_socket_connect = True
+
+    def connect_check_health(
+        self, check_health: bool = True, retry_socket_connect: bool = True
+    ):
+        if self._sock:
+            return
+        try:
+            if retry_socket_connect:
+>               sock = self.retry.call_with_retry(
+                    lambda: self._connect(), lambda error: self.disconnect(error)
+                )
+
+backend\.venv\Lib\site-packages\redis\connection.py:389: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\.venv\Lib\site-packages\redis\retry.py:105: in call_with_retry
+    return do()
+           ^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:390: in <lambda>
+    lambda: self._connect(), lambda error: self.disconnect(error)
+            ^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:803: in _connect
+    raise err
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+
+    def _connect(self):
+        "Create a TCP socket connection"
+        # we want to mimic what socket.create_connection does to support
+        # ipv4/ipv6, but we want to set options prior to calling
+        # socket.connect()
+        err = None
+        for res in socket.getaddrinfo(
+            self.host, self.port, self.socket_type, socket.SOCK_STREAM
+        ):
+            family, socktype, proto, canonname, socket_address = res
+            sock = None
+            try:
+                sock = socket.socket(family, socktype, proto)
+                # TCP_NODELAY
+                sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+    
+                # TCP_KEEPALIVE
+                if self.socket_keepalive:
+                    sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+                    for k, v in self.socket_keepalive_options.items():
+                        sock.setsockopt(socket.IPPROTO_TCP, k, v)
+    
+                # set the socket_connect_timeout before we connect
+                sock.settimeout(self.socket_connect_timeout)
+    
+                # connect
+>               sock.connect(socket_address)
+E               ConnectionRefusedError: [WinError 10061] ����Ŀ�����������ܾ����޷����ӡ�
+
+backend\.venv\Lib\site-packages\redis\connection.py:787: ConnectionRefusedError
+
+During handling of the above exception, another exception occurred:
+
+    @pytest.fixture(scope="module")
+    def infrastructure():
+        settings = Settings().model_copy(
+            update={
+                "run_concurrency": 2,
+                "executor_allow_paid_model_calls": True,
+                "executor_budget_authorization_id": AUTHORIZATION,
+                "executor_agent_budget_usd": 1.0,
+                "executor_agent_budget_unlimited": False,
+                "executor_namespace": "ac:t05:verify:" + uuid4().hex,
+            }
+        )
+        redis = Redis.from_url(settings.redis_url, socket_timeout=15)
+        with disposable_database("T05") as engine:
+            migrate(engine)
+            seed_database(engine, TEST_PASSWORD)
+>           runtime = AgentRuntime(engine, redis, settings, auto_register=True)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend\tests\test_executor.py:59: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\app\agents\runtime.py:59: in __init__
+    self.saver = saver_class(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:78: in __init__
+    super().__init__(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\base.py:211: in __init__
+    self.configure_client(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:118: in configure_client
+    self._redis.client_setinfo("LIB-NAME", __full_lib_name__)
+backend\.venv\Lib\site-packages\redis\commands\core.py:716: in client_setinfo
+    return self.execute_command("CLIENT SETINFO", attr, value, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:621: in execute_command
+    return self._execute_command(*args, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:627: in _execute_command
+    conn = self.connection or pool.get_connection()
+                              ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\utils.py:195: in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:1533: in get_connection
+    connection.connect()
+backend\.venv\Lib\site-packages\redis\connection.py:380: in connect
+    self.connect_check_health(check_health=True)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+check_health = True, retry_socket_connect = True
+
+    def connect_check_health(
+        self, check_health: bool = True, retry_socket_connect: bool = True
+    ):
+        if self._sock:
+            return
+        try:
+            if retry_socket_connect:
+                sock = self.retry.call_with_retry(
+                    lambda: self._connect(), lambda error: self.disconnect(error)
+                )
+            else:
+                sock = self._connect()
+        except socket.timeout:
+            raise TimeoutError("Timeout connecting to server")
+        except OSError as e:
+>           raise ConnectionError(self._error_message(e))
+E           redis.exceptions.ConnectionError: Error 10061 connecting to 127.0.0.1:16380. ����Ŀ�����������ܾ����޷����ӡ�.
+
+backend\.venv\Lib\site-packages\redis\connection.py:397: ConnectionError
+________ ERROR at setup of test_invalid_frozen_input_rejected[budget] _________
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+check_health = True, retry_socket_connect = True
+
+    def connect_check_health(
+        self, check_health: bool = True, retry_socket_connect: bool = True
+    ):
+        if self._sock:
+            return
+        try:
+            if retry_socket_connect:
+>               sock = self.retry.call_with_retry(
+                    lambda: self._connect(), lambda error: self.disconnect(error)
+                )
+
+backend\.venv\Lib\site-packages\redis\connection.py:389: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\.venv\Lib\site-packages\redis\retry.py:105: in call_with_retry
+    return do()
+           ^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:390: in <lambda>
+    lambda: self._connect(), lambda error: self.disconnect(error)
+            ^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:803: in _connect
+    raise err
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+
+    def _connect(self):
+        "Create a TCP socket connection"
+        # we want to mimic what socket.create_connection does to support
+        # ipv4/ipv6, but we want to set options prior to calling
+        # socket.connect()
+        err = None
+        for res in socket.getaddrinfo(
+            self.host, self.port, self.socket_type, socket.SOCK_STREAM
+        ):
+            family, socktype, proto, canonname, socket_address = res
+            sock = None
+            try:
+                sock = socket.socket(family, socktype, proto)
+                # TCP_NODELAY
+                sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+    
+                # TCP_KEEPALIVE
+                if self.socket_keepalive:
+                    sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+                    for k, v in self.socket_keepalive_options.items():
+                        sock.setsockopt(socket.IPPROTO_TCP, k, v)
+    
+                # set the socket_connect_timeout before we connect
+                sock.settimeout(self.socket_connect_timeout)
+    
+                # connect
+>               sock.connect(socket_address)
+E               ConnectionRefusedError: [WinError 10061] ����Ŀ�����������ܾ����޷����ӡ�
+
+backend\.venv\Lib\site-packages\redis\connection.py:787: ConnectionRefusedError
+
+During handling of the above exception, another exception occurred:
+
+    @pytest.fixture(scope="module")
+    def infrastructure():
+        settings = Settings().model_copy(
+            update={
+                "run_concurrency": 2,
+                "executor_allow_paid_model_calls": True,
+                "executor_budget_authorization_id": AUTHORIZATION,
+                "executor_agent_budget_usd": 1.0,
+                "executor_agent_budget_unlimited": False,
+                "executor_namespace": "ac:t05:verify:" + uuid4().hex,
+            }
+        )
+        redis = Redis.from_url(settings.redis_url, socket_timeout=15)
+        with disposable_database("T05") as engine:
+            migrate(engine)
+            seed_database(engine, TEST_PASSWORD)
+>           runtime = AgentRuntime(engine, redis, settings, auto_register=True)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend\tests\test_executor.py:59: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\app\agents\runtime.py:59: in __init__
+    self.saver = saver_class(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:78: in __init__
+    super().__init__(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\base.py:211: in __init__
+    self.configure_client(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:118: in configure_client
+    self._redis.client_setinfo("LIB-NAME", __full_lib_name__)
+backend\.venv\Lib\site-packages\redis\commands\core.py:716: in client_setinfo
+    return self.execute_command("CLIENT SETINFO", attr, value, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:621: in execute_command
+    return self._execute_command(*args, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:627: in _execute_command
+    conn = self.connection or pool.get_connection()
+                              ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\utils.py:195: in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:1533: in get_connection
+    connection.connect()
+backend\.venv\Lib\site-packages\redis\connection.py:380: in connect
+    self.connect_check_health(check_health=True)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+check_health = True, retry_socket_connect = True
+
+    def connect_check_health(
+        self, check_health: bool = True, retry_socket_connect: bool = True
+    ):
+        if self._sock:
+            return
+        try:
+            if retry_socket_connect:
+                sock = self.retry.call_with_retry(
+                    lambda: self._connect(), lambda error: self.disconnect(error)
+                )
+            else:
+                sock = self._connect()
+        except socket.timeout:
+            raise TimeoutError("Timeout connecting to server")
+        except OSError as e:
+>           raise ConnectionError(self._error_message(e))
+E           redis.exceptions.ConnectionError: Error 10061 connecting to 127.0.0.1:16380. ����Ŀ�����������ܾ����޷����ӡ�.
+
+backend\.venv\Lib\site-packages\redis\connection.py:397: ConnectionError
+_____ ERROR at setup of test_publish_failure_is_durable_and_scan_retries ______
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+check_health = True, retry_socket_connect = True
+
+    def connect_check_health(
+        self, check_health: bool = True, retry_socket_connect: bool = True
+    ):
+        if self._sock:
+            return
+        try:
+            if retry_socket_connect:
+>               sock = self.retry.call_with_retry(
+                    lambda: self._connect(), lambda error: self.disconnect(error)
+                )
+
+backend\.venv\Lib\site-packages\redis\connection.py:389: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\.venv\Lib\site-packages\redis\retry.py:105: in call_with_retry
+    return do()
+           ^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:390: in <lambda>
+    lambda: self._connect(), lambda error: self.disconnect(error)
+            ^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:803: in _connect
+    raise err
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+
+    def _connect(self):
+        "Create a TCP socket connection"
+        # we want to mimic what socket.create_connection does to support
+        # ipv4/ipv6, but we want to set options prior to calling
+        # socket.connect()
+        err = None
+        for res in socket.getaddrinfo(
+            self.host, self.port, self.socket_type, socket.SOCK_STREAM
+        ):
+            family, socktype, proto, canonname, socket_address = res
+            sock = None
+            try:
+                sock = socket.socket(family, socktype, proto)
+                # TCP_NODELAY
+                sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+    
+                # TCP_KEEPALIVE
+                if self.socket_keepalive:
+                    sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+                    for k, v in self.socket_keepalive_options.items():
+                        sock.setsockopt(socket.IPPROTO_TCP, k, v)
+    
+                # set the socket_connect_timeout before we connect
+                sock.settimeout(self.socket_connect_timeout)
+    
+                # connect
+>               sock.connect(socket_address)
+E               ConnectionRefusedError: [WinError 10061] ����Ŀ�����������ܾ����޷����ӡ�
+
+backend\.venv\Lib\site-packages\redis\connection.py:787: ConnectionRefusedError
+
+During handling of the above exception, another exception occurred:
+
+    @pytest.fixture(scope="module")
+    def infrastructure():
+        settings = Settings().model_copy(
+            update={
+                "run_concurrency": 2,
+                "executor_allow_paid_model_calls": True,
+                "executor_budget_authorization_id": AUTHORIZATION,
+                "executor_agent_budget_usd": 1.0,
+                "executor_agent_budget_unlimited": False,
+                "executor_namespace": "ac:t05:verify:" + uuid4().hex,
+            }
+        )
+        redis = Redis.from_url(settings.redis_url, socket_timeout=15)
+        with disposable_database("T05") as engine:
+            migrate(engine)
+            seed_database(engine, TEST_PASSWORD)
+>           runtime = AgentRuntime(engine, redis, settings, auto_register=True)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend\tests\test_executor.py:59: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\app\agents\runtime.py:59: in __init__
+    self.saver = saver_class(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:78: in __init__
+    super().__init__(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\base.py:211: in __init__
+    self.configure_client(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:118: in configure_client
+    self._redis.client_setinfo("LIB-NAME", __full_lib_name__)
+backend\.venv\Lib\site-packages\redis\commands\core.py:716: in client_setinfo
+    return self.execute_command("CLIENT SETINFO", attr, value, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:621: in execute_command
+    return self._execute_command(*args, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:627: in _execute_command
+    conn = self.connection or pool.get_connection()
+                              ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\utils.py:195: in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:1533: in get_connection
+    connection.connect()
+backend\.venv\Lib\site-packages\redis\connection.py:380: in connect
+    self.connect_check_health(check_health=True)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+check_health = True, retry_socket_connect = True
+
+    def connect_check_health(
+        self, check_health: bool = True, retry_socket_connect: bool = True
+    ):
+        if self._sock:
+            return
+        try:
+            if retry_socket_connect:
+                sock = self.retry.call_with_retry(
+                    lambda: self._connect(), lambda error: self.disconnect(error)
+                )
+            else:
+                sock = self._connect()
+        except socket.timeout:
+            raise TimeoutError("Timeout connecting to server")
+        except OSError as e:
+>           raise ConnectionError(self._error_message(e))
+E           redis.exceptions.ConnectionError: Error 10061 connecting to 127.0.0.1:16380. ����Ŀ�����������ܾ����޷����ӡ�.
+
+backend\.venv\Lib\site-packages\redis\connection.py:397: ConnectionError
+___ ERROR at setup of test_claim_race_and_stale_token_cannot_write_business ___
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+check_health = True, retry_socket_connect = True
+
+    def connect_check_health(
+        self, check_health: bool = True, retry_socket_connect: bool = True
+    ):
+        if self._sock:
+            return
+        try:
+            if retry_socket_connect:
+>               sock = self.retry.call_with_retry(
+                    lambda: self._connect(), lambda error: self.disconnect(error)
+                )
+
+backend\.venv\Lib\site-packages\redis\connection.py:389: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\.venv\Lib\site-packages\redis\retry.py:105: in call_with_retry
+    return do()
+           ^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:390: in <lambda>
+    lambda: self._connect(), lambda error: self.disconnect(error)
+            ^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:803: in _connect
+    raise err
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+
+    def _connect(self):
+        "Create a TCP socket connection"
+        # we want to mimic what socket.create_connection does to support
+        # ipv4/ipv6, but we want to set options prior to calling
+        # socket.connect()
+        err = None
+        for res in socket.getaddrinfo(
+            self.host, self.port, self.socket_type, socket.SOCK_STREAM
+        ):
+            family, socktype, proto, canonname, socket_address = res
+            sock = None
+            try:
+                sock = socket.socket(family, socktype, proto)
+                # TCP_NODELAY
+                sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+    
+                # TCP_KEEPALIVE
+                if self.socket_keepalive:
+                    sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+                    for k, v in self.socket_keepalive_options.items():
+                        sock.setsockopt(socket.IPPROTO_TCP, k, v)
+    
+                # set the socket_connect_timeout before we connect
+                sock.settimeout(self.socket_connect_timeout)
+    
+                # connect
+>               sock.connect(socket_address)
+E               ConnectionRefusedError: [WinError 10061] ����Ŀ�����������ܾ����޷����ӡ�
+
+backend\.venv\Lib\site-packages\redis\connection.py:787: ConnectionRefusedError
+
+During handling of the above exception, another exception occurred:
+
+    @pytest.fixture(scope="module")
+    def infrastructure():
+        settings = Settings().model_copy(
+            update={
+                "run_concurrency": 2,
+                "executor_allow_paid_model_calls": True,
+                "executor_budget_authorization_id": AUTHORIZATION,
+                "executor_agent_budget_usd": 1.0,
+                "executor_agent_budget_unlimited": False,
+                "executor_namespace": "ac:t05:verify:" + uuid4().hex,
+            }
+        )
+        redis = Redis.from_url(settings.redis_url, socket_timeout=15)
+        with disposable_database("T05") as engine:
+            migrate(engine)
+            seed_database(engine, TEST_PASSWORD)
+>           runtime = AgentRuntime(engine, redis, settings, auto_register=True)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend\tests\test_executor.py:59: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\app\agents\runtime.py:59: in __init__
+    self.saver = saver_class(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:78: in __init__
+    super().__init__(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\base.py:211: in __init__
+    self.configure_client(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:118: in configure_client
+    self._redis.client_setinfo("LIB-NAME", __full_lib_name__)
+backend\.venv\Lib\site-packages\redis\commands\core.py:716: in client_setinfo
+    return self.execute_command("CLIENT SETINFO", attr, value, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:621: in execute_command
+    return self._execute_command(*args, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:627: in _execute_command
+    conn = self.connection or pool.get_connection()
+                              ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\utils.py:195: in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:1533: in get_connection
+    connection.connect()
+backend\.venv\Lib\site-packages\redis\connection.py:380: in connect
+    self.connect_check_health(check_health=True)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+check_health = True, retry_socket_connect = True
+
+    def connect_check_health(
+        self, check_health: bool = True, retry_socket_connect: bool = True
+    ):
+        if self._sock:
+            return
+        try:
+            if retry_socket_connect:
+                sock = self.retry.call_with_retry(
+                    lambda: self._connect(), lambda error: self.disconnect(error)
+                )
+            else:
+                sock = self._connect()
+        except socket.timeout:
+            raise TimeoutError("Timeout connecting to server")
+        except OSError as e:
+>           raise ConnectionError(self._error_message(e))
+E           redis.exceptions.ConnectionError: Error 10061 connecting to 127.0.0.1:16380. ����Ŀ�����������ܾ����޷����ӡ�.
+
+backend\.venv\Lib\site-packages\redis\connection.py:397: ConnectionError
+_ ERROR at setup of test_lease_expiring_inside_business_transaction_rolls_back _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+check_health = True, retry_socket_connect = True
+
+    def connect_check_health(
+        self, check_health: bool = True, retry_socket_connect: bool = True
+    ):
+        if self._sock:
+            return
+        try:
+            if retry_socket_connect:
+>               sock = self.retry.call_with_retry(
+                    lambda: self._connect(), lambda error: self.disconnect(error)
+                )
+
+backend\.venv\Lib\site-packages\redis\connection.py:389: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\.venv\Lib\site-packages\redis\retry.py:105: in call_with_retry
+    return do()
+           ^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:390: in <lambda>
+    lambda: self._connect(), lambda error: self.disconnect(error)
+            ^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:803: in _connect
+    raise err
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+
+    def _connect(self):
+        "Create a TCP socket connection"
+        # we want to mimic what socket.create_connection does to support
+        # ipv4/ipv6, but we want to set options prior to calling
+        # socket.connect()
+        err = None
+        for res in socket.getaddrinfo(
+            self.host, self.port, self.socket_type, socket.SOCK_STREAM
+        ):
+            family, socktype, proto, canonname, socket_address = res
+            sock = None
+            try:
+                sock = socket.socket(family, socktype, proto)
+                # TCP_NODELAY
+                sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+    
+                # TCP_KEEPALIVE
+                if self.socket_keepalive:
+                    sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+                    for k, v in self.socket_keepalive_options.items():
+                        sock.setsockopt(socket.IPPROTO_TCP, k, v)
+    
+                # set the socket_connect_timeout before we connect
+                sock.settimeout(self.socket_connect_timeout)
+    
+                # connect
+>               sock.connect(socket_address)
+E               ConnectionRefusedError: [WinError 10061] ����Ŀ�����������ܾ����޷����ӡ�
+
+backend\.venv\Lib\site-packages\redis\connection.py:787: ConnectionRefusedError
+
+During handling of the above exception, another exception occurred:
+
+    @pytest.fixture(scope="module")
+    def infrastructure():
+        settings = Settings().model_copy(
+            update={
+                "run_concurrency": 2,
+                "executor_allow_paid_model_calls": True,
+                "executor_budget_authorization_id": AUTHORIZATION,
+                "executor_agent_budget_usd": 1.0,
+                "executor_agent_budget_unlimited": False,
+                "executor_namespace": "ac:t05:verify:" + uuid4().hex,
+            }
+        )
+        redis = Redis.from_url(settings.redis_url, socket_timeout=15)
+        with disposable_database("T05") as engine:
+            migrate(engine)
+            seed_database(engine, TEST_PASSWORD)
+>           runtime = AgentRuntime(engine, redis, settings, auto_register=True)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend\tests\test_executor.py:59: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\app\agents\runtime.py:59: in __init__
+    self.saver = saver_class(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:78: in __init__
+    super().__init__(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\base.py:211: in __init__
+    self.configure_client(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:118: in configure_client
+    self._redis.client_setinfo("LIB-NAME", __full_lib_name__)
+backend\.venv\Lib\site-packages\redis\commands\core.py:716: in client_setinfo
+    return self.execute_command("CLIENT SETINFO", attr, value, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:621: in execute_command
+    return self._execute_command(*args, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:627: in _execute_command
+    conn = self.connection or pool.get_connection()
+                              ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\utils.py:195: in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:1533: in get_connection
+    connection.connect()
+backend\.venv\Lib\site-packages\redis\connection.py:380: in connect
+    self.connect_check_health(check_health=True)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+check_health = True, retry_socket_connect = True
+
+    def connect_check_health(
+        self, check_health: bool = True, retry_socket_connect: bool = True
+    ):
+        if self._sock:
+            return
+        try:
+            if retry_socket_connect:
+                sock = self.retry.call_with_retry(
+                    lambda: self._connect(), lambda error: self.disconnect(error)
+                )
+            else:
+                sock = self._connect()
+        except socket.timeout:
+            raise TimeoutError("Timeout connecting to server")
+        except OSError as e:
+>           raise ConnectionError(self._error_message(e))
+E           redis.exceptions.ConnectionError: Error 10061 connecting to 127.0.0.1:16380. ����Ŀ�����������ܾ����޷����ӡ�.
+
+backend\.venv\Lib\site-packages\redis\connection.py:397: ConnectionError
+_ ERROR at setup of test_offline_script_completion_never_becomes_passed_and_duplicate_noop _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+check_health = True, retry_socket_connect = True
+
+    def connect_check_health(
+        self, check_health: bool = True, retry_socket_connect: bool = True
+    ):
+        if self._sock:
+            return
+        try:
+            if retry_socket_connect:
+>               sock = self.retry.call_with_retry(
+                    lambda: self._connect(), lambda error: self.disconnect(error)
+                )
+
+backend\.venv\Lib\site-packages\redis\connection.py:389: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\.venv\Lib\site-packages\redis\retry.py:105: in call_with_retry
+    return do()
+           ^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:390: in <lambda>
+    lambda: self._connect(), lambda error: self.disconnect(error)
+            ^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:803: in _connect
+    raise err
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+
+    def _connect(self):
+        "Create a TCP socket connection"
+        # we want to mimic what socket.create_connection does to support
+        # ipv4/ipv6, but we want to set options prior to calling
+        # socket.connect()
+        err = None
+        for res in socket.getaddrinfo(
+            self.host, self.port, self.socket_type, socket.SOCK_STREAM
+        ):
+            family, socktype, proto, canonname, socket_address = res
+            sock = None
+            try:
+                sock = socket.socket(family, socktype, proto)
+                # TCP_NODELAY
+                sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+    
+                # TCP_KEEPALIVE
+                if self.socket_keepalive:
+                    sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+                    for k, v in self.socket_keepalive_options.items():
+                        sock.setsockopt(socket.IPPROTO_TCP, k, v)
+    
+                # set the socket_connect_timeout before we connect
+                sock.settimeout(self.socket_connect_timeout)
+    
+                # connect
+>               sock.connect(socket_address)
+E               ConnectionRefusedError: [WinError 10061] ����Ŀ�����������ܾ����޷����ӡ�
+
+backend\.venv\Lib\site-packages\redis\connection.py:787: ConnectionRefusedError
+
+During handling of the above exception, another exception occurred:
+
+    @pytest.fixture(scope="module")
+    def infrastructure():
+        settings = Settings().model_copy(
+            update={
+                "run_concurrency": 2,
+                "executor_allow_paid_model_calls": True,
+                "executor_budget_authorization_id": AUTHORIZATION,
+                "executor_agent_budget_usd": 1.0,
+                "executor_agent_budget_unlimited": False,
+                "executor_namespace": "ac:t05:verify:" + uuid4().hex,
+            }
+        )
+        redis = Redis.from_url(settings.redis_url, socket_timeout=15)
+        with disposable_database("T05") as engine:
+            migrate(engine)
+            seed_database(engine, TEST_PASSWORD)
+>           runtime = AgentRuntime(engine, redis, settings, auto_register=True)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend\tests\test_executor.py:59: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\app\agents\runtime.py:59: in __init__
+    self.saver = saver_class(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:78: in __init__
+    super().__init__(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\base.py:211: in __init__
+    self.configure_client(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:118: in configure_client
+    self._redis.client_setinfo("LIB-NAME", __full_lib_name__)
+backend\.venv\Lib\site-packages\redis\commands\core.py:716: in client_setinfo
+    return self.execute_command("CLIENT SETINFO", attr, value, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:621: in execute_command
+    return self._execute_command(*args, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:627: in _execute_command
+    conn = self.connection or pool.get_connection()
+                              ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\utils.py:195: in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:1533: in get_connection
+    connection.connect()
+backend\.venv\Lib\site-packages\redis\connection.py:380: in connect
+    self.connect_check_health(check_health=True)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+check_health = True, retry_socket_connect = True
+
+    def connect_check_health(
+        self, check_health: bool = True, retry_socket_connect: bool = True
+    ):
+        if self._sock:
+            return
+        try:
+            if retry_socket_connect:
+                sock = self.retry.call_with_retry(
+                    lambda: self._connect(), lambda error: self.disconnect(error)
+                )
+            else:
+                sock = self._connect()
+        except socket.timeout:
+            raise TimeoutError("Timeout connecting to server")
+        except OSError as e:
+>           raise ConnectionError(self._error_message(e))
+E           redis.exceptions.ConnectionError: Error 10061 connecting to 127.0.0.1:16380. ����Ŀ�����������ܾ����޷����ӡ�.
+
+backend\.venv\Lib\site-packages\redis\connection.py:397: ConnectionError
+_ ERROR at setup of test_wait_releases_worker_and_legitimate_input_resumes_same_session _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+check_health = True, retry_socket_connect = True
+
+    def connect_check_health(
+        self, check_health: bool = True, retry_socket_connect: bool = True
+    ):
+        if self._sock:
+            return
+        try:
+            if retry_socket_connect:
+>               sock = self.retry.call_with_retry(
+                    lambda: self._connect(), lambda error: self.disconnect(error)
+                )
+
+backend\.venv\Lib\site-packages\redis\connection.py:389: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\.venv\Lib\site-packages\redis\retry.py:105: in call_with_retry
+    return do()
+           ^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:390: in <lambda>
+    lambda: self._connect(), lambda error: self.disconnect(error)
+            ^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:803: in _connect
+    raise err
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+
+    def _connect(self):
+        "Create a TCP socket connection"
+        # we want to mimic what socket.create_connection does to support
+        # ipv4/ipv6, but we want to set options prior to calling
+        # socket.connect()
+        err = None
+        for res in socket.getaddrinfo(
+            self.host, self.port, self.socket_type, socket.SOCK_STREAM
+        ):
+            family, socktype, proto, canonname, socket_address = res
+            sock = None
+            try:
+                sock = socket.socket(family, socktype, proto)
+                # TCP_NODELAY
+                sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+    
+                # TCP_KEEPALIVE
+                if self.socket_keepalive:
+                    sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+                    for k, v in self.socket_keepalive_options.items():
+                        sock.setsockopt(socket.IPPROTO_TCP, k, v)
+    
+                # set the socket_connect_timeout before we connect
+                sock.settimeout(self.socket_connect_timeout)
+    
+                # connect
+>               sock.connect(socket_address)
+E               ConnectionRefusedError: [WinError 10061] ����Ŀ�����������ܾ����޷����ӡ�
+
+backend\.venv\Lib\site-packages\redis\connection.py:787: ConnectionRefusedError
+
+During handling of the above exception, another exception occurred:
+
+    @pytest.fixture(scope="module")
+    def infrastructure():
+        settings = Settings().model_copy(
+            update={
+                "run_concurrency": 2,
+                "executor_allow_paid_model_calls": True,
+                "executor_budget_authorization_id": AUTHORIZATION,
+                "executor_agent_budget_usd": 1.0,
+                "executor_agent_budget_unlimited": False,
+                "executor_namespace": "ac:t05:verify:" + uuid4().hex,
+            }
+        )
+        redis = Redis.from_url(settings.redis_url, socket_timeout=15)
+        with disposable_database("T05") as engine:
+            migrate(engine)
+            seed_database(engine, TEST_PASSWORD)
+>           runtime = AgentRuntime(engine, redis, settings, auto_register=True)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend\tests\test_executor.py:59: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\app\agents\runtime.py:59: in __init__
+    self.saver = saver_class(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:78: in __init__
+    super().__init__(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\base.py:211: in __init__
+    self.configure_client(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:118: in configure_client
+    self._redis.client_setinfo("LIB-NAME", __full_lib_name__)
+backend\.venv\Lib\site-packages\redis\commands\core.py:716: in client_setinfo
+    return self.execute_command("CLIENT SETINFO", attr, value, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:621: in execute_command
+    return self._execute_command(*args, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:627: in _execute_command
+    conn = self.connection or pool.get_connection()
+                              ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\utils.py:195: in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:1533: in get_connection
+    connection.connect()
+backend\.venv\Lib\site-packages\redis\connection.py:380: in connect
+    self.connect_check_health(check_health=True)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+check_health = True, retry_socket_connect = True
+
+    def connect_check_health(
+        self, check_health: bool = True, retry_socket_connect: bool = True
+    ):
+        if self._sock:
+            return
+        try:
+            if retry_socket_connect:
+                sock = self.retry.call_with_retry(
+                    lambda: self._connect(), lambda error: self.disconnect(error)
+                )
+            else:
+                sock = self._connect()
+        except socket.timeout:
+            raise TimeoutError("Timeout connecting to server")
+        except OSError as e:
+>           raise ConnectionError(self._error_message(e))
+E           redis.exceptions.ConnectionError: Error 10061 connecting to 127.0.0.1:16380. ����Ŀ�����������ܾ����޷����ӡ�.
+
+backend\.venv\Lib\site-packages\redis\connection.py:397: ConnectionError
+_ ERROR at setup of test_cancellation_revokes_active_lease_and_preserves_booking _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+check_health = True, retry_socket_connect = True
+
+    def connect_check_health(
+        self, check_health: bool = True, retry_socket_connect: bool = True
+    ):
+        if self._sock:
+            return
+        try:
+            if retry_socket_connect:
+>               sock = self.retry.call_with_retry(
+                    lambda: self._connect(), lambda error: self.disconnect(error)
+                )
+
+backend\.venv\Lib\site-packages\redis\connection.py:389: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\.venv\Lib\site-packages\redis\retry.py:105: in call_with_retry
+    return do()
+           ^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:390: in <lambda>
+    lambda: self._connect(), lambda error: self.disconnect(error)
+            ^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:803: in _connect
+    raise err
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+
+    def _connect(self):
+        "Create a TCP socket connection"
+        # we want to mimic what socket.create_connection does to support
+        # ipv4/ipv6, but we want to set options prior to calling
+        # socket.connect()
+        err = None
+        for res in socket.getaddrinfo(
+            self.host, self.port, self.socket_type, socket.SOCK_STREAM
+        ):
+            family, socktype, proto, canonname, socket_address = res
+            sock = None
+            try:
+                sock = socket.socket(family, socktype, proto)
+                # TCP_NODELAY
+                sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+    
+                # TCP_KEEPALIVE
+                if self.socket_keepalive:
+                    sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+                    for k, v in self.socket_keepalive_options.items():
+                        sock.setsockopt(socket.IPPROTO_TCP, k, v)
+    
+                # set the socket_connect_timeout before we connect
+                sock.settimeout(self.socket_connect_timeout)
+    
+                # connect
+>               sock.connect(socket_address)
+E               ConnectionRefusedError: [WinError 10061] ����Ŀ�����������ܾ����޷����ӡ�
+
+backend\.venv\Lib\site-packages\redis\connection.py:787: ConnectionRefusedError
+
+During handling of the above exception, another exception occurred:
+
+    @pytest.fixture(scope="module")
+    def infrastructure():
+        settings = Settings().model_copy(
+            update={
+                "run_concurrency": 2,
+                "executor_allow_paid_model_calls": True,
+                "executor_budget_authorization_id": AUTHORIZATION,
+                "executor_agent_budget_usd": 1.0,
+                "executor_agent_budget_unlimited": False,
+                "executor_namespace": "ac:t05:verify:" + uuid4().hex,
+            }
+        )
+        redis = Redis.from_url(settings.redis_url, socket_timeout=15)
+        with disposable_database("T05") as engine:
+            migrate(engine)
+            seed_database(engine, TEST_PASSWORD)
+>           runtime = AgentRuntime(engine, redis, settings, auto_register=True)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend\tests\test_executor.py:59: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\app\agents\runtime.py:59: in __init__
+    self.saver = saver_class(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:78: in __init__
+    super().__init__(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\base.py:211: in __init__
+    self.configure_client(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:118: in configure_client
+    self._redis.client_setinfo("LIB-NAME", __full_lib_name__)
+backend\.venv\Lib\site-packages\redis\commands\core.py:716: in client_setinfo
+    return self.execute_command("CLIENT SETINFO", attr, value, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:621: in execute_command
+    return self._execute_command(*args, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:627: in _execute_command
+    conn = self.connection or pool.get_connection()
+                              ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\utils.py:195: in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:1533: in get_connection
+    connection.connect()
+backend\.venv\Lib\site-packages\redis\connection.py:380: in connect
+    self.connect_check_health(check_health=True)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+check_health = True, retry_socket_connect = True
+
+    def connect_check_health(
+        self, check_health: bool = True, retry_socket_connect: bool = True
+    ):
+        if self._sock:
+            return
+        try:
+            if retry_socket_connect:
+                sock = self.retry.call_with_retry(
+                    lambda: self._connect(), lambda error: self.disconnect(error)
+                )
+            else:
+                sock = self._connect()
+        except socket.timeout:
+            raise TimeoutError("Timeout connecting to server")
+        except OSError as e:
+>           raise ConnectionError(self._error_message(e))
+E           redis.exceptions.ConnectionError: Error 10061 connecting to 127.0.0.1:16380. ����Ŀ�����������ܾ����޷����ӡ�.
+
+backend\.venv\Lib\site-packages\redis\connection.py:397: ConnectionError
+_ ERROR at setup of test_atomic_budget_reservations_unknown_and_idempotent_settlement _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+check_health = True, retry_socket_connect = True
+
+    def connect_check_health(
+        self, check_health: bool = True, retry_socket_connect: bool = True
+    ):
+        if self._sock:
+            return
+        try:
+            if retry_socket_connect:
+>               sock = self.retry.call_with_retry(
+                    lambda: self._connect(), lambda error: self.disconnect(error)
+                )
+
+backend\.venv\Lib\site-packages\redis\connection.py:389: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\.venv\Lib\site-packages\redis\retry.py:105: in call_with_retry
+    return do()
+           ^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:390: in <lambda>
+    lambda: self._connect(), lambda error: self.disconnect(error)
+            ^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:803: in _connect
+    raise err
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+
+    def _connect(self):
+        "Create a TCP socket connection"
+        # we want to mimic what socket.create_connection does to support
+        # ipv4/ipv6, but we want to set options prior to calling
+        # socket.connect()
+        err = None
+        for res in socket.getaddrinfo(
+            self.host, self.port, self.socket_type, socket.SOCK_STREAM
+        ):
+            family, socktype, proto, canonname, socket_address = res
+            sock = None
+            try:
+                sock = socket.socket(family, socktype, proto)
+                # TCP_NODELAY
+                sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+    
+                # TCP_KEEPALIVE
+                if self.socket_keepalive:
+                    sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+                    for k, v in self.socket_keepalive_options.items():
+                        sock.setsockopt(socket.IPPROTO_TCP, k, v)
+    
+                # set the socket_connect_timeout before we connect
+                sock.settimeout(self.socket_connect_timeout)
+    
+                # connect
+>               sock.connect(socket_address)
+E               ConnectionRefusedError: [WinError 10061] ����Ŀ�����������ܾ����޷����ӡ�
+
+backend\.venv\Lib\site-packages\redis\connection.py:787: ConnectionRefusedError
+
+During handling of the above exception, another exception occurred:
+
+    @pytest.fixture(scope="module")
+    def infrastructure():
+        settings = Settings().model_copy(
+            update={
+                "run_concurrency": 2,
+                "executor_allow_paid_model_calls": True,
+                "executor_budget_authorization_id": AUTHORIZATION,
+                "executor_agent_budget_usd": 1.0,
+                "executor_agent_budget_unlimited": False,
+                "executor_namespace": "ac:t05:verify:" + uuid4().hex,
+            }
+        )
+        redis = Redis.from_url(settings.redis_url, socket_timeout=15)
+        with disposable_database("T05") as engine:
+            migrate(engine)
+            seed_database(engine, TEST_PASSWORD)
+>           runtime = AgentRuntime(engine, redis, settings, auto_register=True)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend\tests\test_executor.py:59: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\app\agents\runtime.py:59: in __init__
+    self.saver = saver_class(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:78: in __init__
+    super().__init__(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\base.py:211: in __init__
+    self.configure_client(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:118: in configure_client
+    self._redis.client_setinfo("LIB-NAME", __full_lib_name__)
+backend\.venv\Lib\site-packages\redis\commands\core.py:716: in client_setinfo
+    return self.execute_command("CLIENT SETINFO", attr, value, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:621: in execute_command
+    return self._execute_command(*args, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:627: in _execute_command
+    conn = self.connection or pool.get_connection()
+                              ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\utils.py:195: in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:1533: in get_connection
+    connection.connect()
+backend\.venv\Lib\site-packages\redis\connection.py:380: in connect
+    self.connect_check_health(check_health=True)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+check_health = True, retry_socket_connect = True
+
+    def connect_check_health(
+        self, check_health: bool = True, retry_socket_connect: bool = True
+    ):
+        if self._sock:
+            return
+        try:
+            if retry_socket_connect:
+                sock = self.retry.call_with_retry(
+                    lambda: self._connect(), lambda error: self.disconnect(error)
+                )
+            else:
+                sock = self._connect()
+        except socket.timeout:
+            raise TimeoutError("Timeout connecting to server")
+        except OSError as e:
+>           raise ConnectionError(self._error_message(e))
+E           redis.exceptions.ConnectionError: Error 10061 connecting to 127.0.0.1:16380. ����Ŀ�����������ܾ����޷����ӡ�.
+
+backend\.venv\Lib\site-packages\redis\connection.py:397: ConnectionError
+_ ERROR at setup of test_api_auth_validation_creation_is_nonblocking_and_owner_scoped _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+check_health = True, retry_socket_connect = True
+
+    def connect_check_health(
+        self, check_health: bool = True, retry_socket_connect: bool = True
+    ):
+        if self._sock:
+            return
+        try:
+            if retry_socket_connect:
+>               sock = self.retry.call_with_retry(
+                    lambda: self._connect(), lambda error: self.disconnect(error)
+                )
+
+backend\.venv\Lib\site-packages\redis\connection.py:389: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\.venv\Lib\site-packages\redis\retry.py:105: in call_with_retry
+    return do()
+           ^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:390: in <lambda>
+    lambda: self._connect(), lambda error: self.disconnect(error)
+            ^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:803: in _connect
+    raise err
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+
+    def _connect(self):
+        "Create a TCP socket connection"
+        # we want to mimic what socket.create_connection does to support
+        # ipv4/ipv6, but we want to set options prior to calling
+        # socket.connect()
+        err = None
+        for res in socket.getaddrinfo(
+            self.host, self.port, self.socket_type, socket.SOCK_STREAM
+        ):
+            family, socktype, proto, canonname, socket_address = res
+            sock = None
+            try:
+                sock = socket.socket(family, socktype, proto)
+                # TCP_NODELAY
+                sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+    
+                # TCP_KEEPALIVE
+                if self.socket_keepalive:
+                    sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+                    for k, v in self.socket_keepalive_options.items():
+                        sock.setsockopt(socket.IPPROTO_TCP, k, v)
+    
+                # set the socket_connect_timeout before we connect
+                sock.settimeout(self.socket_connect_timeout)
+    
+                # connect
+>               sock.connect(socket_address)
+E               ConnectionRefusedError: [WinError 10061] ����Ŀ�����������ܾ����޷����ӡ�
+
+backend\.venv\Lib\site-packages\redis\connection.py:787: ConnectionRefusedError
+
+During handling of the above exception, another exception occurred:
+
+    @pytest.fixture(scope="module")
+    def infrastructure():
+        settings = Settings().model_copy(
+            update={
+                "run_concurrency": 2,
+                "executor_allow_paid_model_calls": True,
+                "executor_budget_authorization_id": AUTHORIZATION,
+                "executor_agent_budget_usd": 1.0,
+                "executor_agent_budget_unlimited": False,
+                "executor_namespace": "ac:t05:verify:" + uuid4().hex,
+            }
+        )
+        redis = Redis.from_url(settings.redis_url, socket_timeout=15)
+        with disposable_database("T05") as engine:
+            migrate(engine)
+            seed_database(engine, TEST_PASSWORD)
+>           runtime = AgentRuntime(engine, redis, settings, auto_register=True)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend\tests\test_executor.py:59: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\app\agents\runtime.py:59: in __init__
+    self.saver = saver_class(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:78: in __init__
+    super().__init__(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\base.py:211: in __init__
+    self.configure_client(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:118: in configure_client
+    self._redis.client_setinfo("LIB-NAME", __full_lib_name__)
+backend\.venv\Lib\site-packages\redis\commands\core.py:716: in client_setinfo
+    return self.execute_command("CLIENT SETINFO", attr, value, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:621: in execute_command
+    return self._execute_command(*args, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:627: in _execute_command
+    conn = self.connection or pool.get_connection()
+                              ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\utils.py:195: in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:1533: in get_connection
+    connection.connect()
+backend\.venv\Lib\site-packages\redis\connection.py:380: in connect
+    self.connect_check_health(check_health=True)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+check_health = True, retry_socket_connect = True
+
+    def connect_check_health(
+        self, check_health: bool = True, retry_socket_connect: bool = True
+    ):
+        if self._sock:
+            return
+        try:
+            if retry_socket_connect:
+                sock = self.retry.call_with_retry(
+                    lambda: self._connect(), lambda error: self.disconnect(error)
+                )
+            else:
+                sock = self._connect()
+        except socket.timeout:
+            raise TimeoutError("Timeout connecting to server")
+        except OSError as e:
+>           raise ConnectionError(self._error_message(e))
+E           redis.exceptions.ConnectionError: Error 10061 connecting to 127.0.0.1:16380. ����Ŀ�����������ܾ����޷����ӡ�.
+
+backend\.venv\Lib\site-packages\redis\connection.py:397: ConnectionError
+_ ERROR at setup of test_explicit_recovery_preserves_cursor_scope_and_attempts _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+check_health = True, retry_socket_connect = True
+
+    def connect_check_health(
+        self, check_health: bool = True, retry_socket_connect: bool = True
+    ):
+        if self._sock:
+            return
+        try:
+            if retry_socket_connect:
+>               sock = self.retry.call_with_retry(
+                    lambda: self._connect(), lambda error: self.disconnect(error)
+                )
+
+backend\.venv\Lib\site-packages\redis\connection.py:389: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\.venv\Lib\site-packages\redis\retry.py:105: in call_with_retry
+    return do()
+           ^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:390: in <lambda>
+    lambda: self._connect(), lambda error: self.disconnect(error)
+            ^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:803: in _connect
+    raise err
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+
+    def _connect(self):
+        "Create a TCP socket connection"
+        # we want to mimic what socket.create_connection does to support
+        # ipv4/ipv6, but we want to set options prior to calling
+        # socket.connect()
+        err = None
+        for res in socket.getaddrinfo(
+            self.host, self.port, self.socket_type, socket.SOCK_STREAM
+        ):
+            family, socktype, proto, canonname, socket_address = res
+            sock = None
+            try:
+                sock = socket.socket(family, socktype, proto)
+                # TCP_NODELAY
+                sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+    
+                # TCP_KEEPALIVE
+                if self.socket_keepalive:
+                    sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+                    for k, v in self.socket_keepalive_options.items():
+                        sock.setsockopt(socket.IPPROTO_TCP, k, v)
+    
+                # set the socket_connect_timeout before we connect
+                sock.settimeout(self.socket_connect_timeout)
+    
+                # connect
+>               sock.connect(socket_address)
+E               ConnectionRefusedError: [WinError 10061] ����Ŀ�����������ܾ����޷����ӡ�
+
+backend\.venv\Lib\site-packages\redis\connection.py:787: ConnectionRefusedError
+
+During handling of the above exception, another exception occurred:
+
+    @pytest.fixture(scope="module")
+    def infrastructure():
+        settings = Settings().model_copy(
+            update={
+                "run_concurrency": 2,
+                "executor_allow_paid_model_calls": True,
+                "executor_budget_authorization_id": AUTHORIZATION,
+                "executor_agent_budget_usd": 1.0,
+                "executor_agent_budget_unlimited": False,
+                "executor_namespace": "ac:t05:verify:" + uuid4().hex,
+            }
+        )
+        redis = Redis.from_url(settings.redis_url, socket_timeout=15)
+        with disposable_database("T05") as engine:
+            migrate(engine)
+            seed_database(engine, TEST_PASSWORD)
+>           runtime = AgentRuntime(engine, redis, settings, auto_register=True)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend\tests\test_executor.py:59: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\app\agents\runtime.py:59: in __init__
+    self.saver = saver_class(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:78: in __init__
+    super().__init__(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\base.py:211: in __init__
+    self.configure_client(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:118: in configure_client
+    self._redis.client_setinfo("LIB-NAME", __full_lib_name__)
+backend\.venv\Lib\site-packages\redis\commands\core.py:716: in client_setinfo
+    return self.execute_command("CLIENT SETINFO", attr, value, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:621: in execute_command
+    return self._execute_command(*args, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:627: in _execute_command
+    conn = self.connection or pool.get_connection()
+                              ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\utils.py:195: in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:1533: in get_connection
+    connection.connect()
+backend\.venv\Lib\site-packages\redis\connection.py:380: in connect
+    self.connect_check_health(check_health=True)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+check_health = True, retry_socket_connect = True
+
+    def connect_check_health(
+        self, check_health: bool = True, retry_socket_connect: bool = True
+    ):
+        if self._sock:
+            return
+        try:
+            if retry_socket_connect:
+                sock = self.retry.call_with_retry(
+                    lambda: self._connect(), lambda error: self.disconnect(error)
+                )
+            else:
+                sock = self._connect()
+        except socket.timeout:
+            raise TimeoutError("Timeout connecting to server")
+        except OSError as e:
+>           raise ConnectionError(self._error_message(e))
+E           redis.exceptions.ConnectionError: Error 10061 connecting to 127.0.0.1:16380. ����Ŀ�����������ܾ����޷����ӡ�.
+
+backend\.venv\Lib\site-packages\redis\connection.py:397: ConnectionError
+____ ERROR at setup of test_hard_execution_limits_are_enforced[max_steps] _____
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+check_health = True, retry_socket_connect = True
+
+    def connect_check_health(
+        self, check_health: bool = True, retry_socket_connect: bool = True
+    ):
+        if self._sock:
+            return
+        try:
+            if retry_socket_connect:
+>               sock = self.retry.call_with_retry(
+                    lambda: self._connect(), lambda error: self.disconnect(error)
+                )
+
+backend\.venv\Lib\site-packages\redis\connection.py:389: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\.venv\Lib\site-packages\redis\retry.py:105: in call_with_retry
+    return do()
+           ^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:390: in <lambda>
+    lambda: self._connect(), lambda error: self.disconnect(error)
+            ^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:803: in _connect
+    raise err
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+
+    def _connect(self):
+        "Create a TCP socket connection"
+        # we want to mimic what socket.create_connection does to support
+        # ipv4/ipv6, but we want to set options prior to calling
+        # socket.connect()
+        err = None
+        for res in socket.getaddrinfo(
+            self.host, self.port, self.socket_type, socket.SOCK_STREAM
+        ):
+            family, socktype, proto, canonname, socket_address = res
+            sock = None
+            try:
+                sock = socket.socket(family, socktype, proto)
+                # TCP_NODELAY
+                sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+    
+                # TCP_KEEPALIVE
+                if self.socket_keepalive:
+                    sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+                    for k, v in self.socket_keepalive_options.items():
+                        sock.setsockopt(socket.IPPROTO_TCP, k, v)
+    
+                # set the socket_connect_timeout before we connect
+                sock.settimeout(self.socket_connect_timeout)
+    
+                # connect
+>               sock.connect(socket_address)
+E               ConnectionRefusedError: [WinError 10061] ����Ŀ�����������ܾ����޷����ӡ�
+
+backend\.venv\Lib\site-packages\redis\connection.py:787: ConnectionRefusedError
+
+During handling of the above exception, another exception occurred:
+
+    @pytest.fixture(scope="module")
+    def infrastructure():
+        settings = Settings().model_copy(
+            update={
+                "run_concurrency": 2,
+                "executor_allow_paid_model_calls": True,
+                "executor_budget_authorization_id": AUTHORIZATION,
+                "executor_agent_budget_usd": 1.0,
+                "executor_agent_budget_unlimited": False,
+                "executor_namespace": "ac:t05:verify:" + uuid4().hex,
+            }
+        )
+        redis = Redis.from_url(settings.redis_url, socket_timeout=15)
+        with disposable_database("T05") as engine:
+            migrate(engine)
+            seed_database(engine, TEST_PASSWORD)
+>           runtime = AgentRuntime(engine, redis, settings, auto_register=True)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend\tests\test_executor.py:59: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\app\agents\runtime.py:59: in __init__
+    self.saver = saver_class(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:78: in __init__
+    super().__init__(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\base.py:211: in __init__
+    self.configure_client(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:118: in configure_client
+    self._redis.client_setinfo("LIB-NAME", __full_lib_name__)
+backend\.venv\Lib\site-packages\redis\commands\core.py:716: in client_setinfo
+    return self.execute_command("CLIENT SETINFO", attr, value, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:621: in execute_command
+    return self._execute_command(*args, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:627: in _execute_command
+    conn = self.connection or pool.get_connection()
+                              ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\utils.py:195: in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:1533: in get_connection
+    connection.connect()
+backend\.venv\Lib\site-packages\redis\connection.py:380: in connect
+    self.connect_check_health(check_health=True)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+check_health = True, retry_socket_connect = True
+
+    def connect_check_health(
+        self, check_health: bool = True, retry_socket_connect: bool = True
+    ):
+        if self._sock:
+            return
+        try:
+            if retry_socket_connect:
+                sock = self.retry.call_with_retry(
+                    lambda: self._connect(), lambda error: self.disconnect(error)
+                )
+            else:
+                sock = self._connect()
+        except socket.timeout:
+            raise TimeoutError("Timeout connecting to server")
+        except OSError as e:
+>           raise ConnectionError(self._error_message(e))
+E           redis.exceptions.ConnectionError: Error 10061 connecting to 127.0.0.1:16380. ����Ŀ�����������ܾ����޷����ӡ�.
+
+backend\.venv\Lib\site-packages\redis\connection.py:397: ConnectionError
+____ ERROR at setup of test_hard_execution_limits_are_enforced[max_tokens] ____
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+check_health = True, retry_socket_connect = True
+
+    def connect_check_health(
+        self, check_health: bool = True, retry_socket_connect: bool = True
+    ):
+        if self._sock:
+            return
+        try:
+            if retry_socket_connect:
+>               sock = self.retry.call_with_retry(
+                    lambda: self._connect(), lambda error: self.disconnect(error)
+                )
+
+backend\.venv\Lib\site-packages\redis\connection.py:389: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\.venv\Lib\site-packages\redis\retry.py:105: in call_with_retry
+    return do()
+           ^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:390: in <lambda>
+    lambda: self._connect(), lambda error: self.disconnect(error)
+            ^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:803: in _connect
+    raise err
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+
+    def _connect(self):
+        "Create a TCP socket connection"
+        # we want to mimic what socket.create_connection does to support
+        # ipv4/ipv6, but we want to set options prior to calling
+        # socket.connect()
+        err = None
+        for res in socket.getaddrinfo(
+            self.host, self.port, self.socket_type, socket.SOCK_STREAM
+        ):
+            family, socktype, proto, canonname, socket_address = res
+            sock = None
+            try:
+                sock = socket.socket(family, socktype, proto)
+                # TCP_NODELAY
+                sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+    
+                # TCP_KEEPALIVE
+                if self.socket_keepalive:
+                    sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+                    for k, v in self.socket_keepalive_options.items():
+                        sock.setsockopt(socket.IPPROTO_TCP, k, v)
+    
+                # set the socket_connect_timeout before we connect
+                sock.settimeout(self.socket_connect_timeout)
+    
+                # connect
+>               sock.connect(socket_address)
+E               ConnectionRefusedError: [WinError 10061] ����Ŀ�����������ܾ����޷����ӡ�
+
+backend\.venv\Lib\site-packages\redis\connection.py:787: ConnectionRefusedError
+
+During handling of the above exception, another exception occurred:
+
+    @pytest.fixture(scope="module")
+    def infrastructure():
+        settings = Settings().model_copy(
+            update={
+                "run_concurrency": 2,
+                "executor_allow_paid_model_calls": True,
+                "executor_budget_authorization_id": AUTHORIZATION,
+                "executor_agent_budget_usd": 1.0,
+                "executor_agent_budget_unlimited": False,
+                "executor_namespace": "ac:t05:verify:" + uuid4().hex,
+            }
+        )
+        redis = Redis.from_url(settings.redis_url, socket_timeout=15)
+        with disposable_database("T05") as engine:
+            migrate(engine)
+            seed_database(engine, TEST_PASSWORD)
+>           runtime = AgentRuntime(engine, redis, settings, auto_register=True)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend\tests\test_executor.py:59: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\app\agents\runtime.py:59: in __init__
+    self.saver = saver_class(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:78: in __init__
+    super().__init__(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\base.py:211: in __init__
+    self.configure_client(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:118: in configure_client
+    self._redis.client_setinfo("LIB-NAME", __full_lib_name__)
+backend\.venv\Lib\site-packages\redis\commands\core.py:716: in client_setinfo
+    return self.execute_command("CLIENT SETINFO", attr, value, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:621: in execute_command
+    return self._execute_command(*args, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:627: in _execute_command
+    conn = self.connection or pool.get_connection()
+                              ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\utils.py:195: in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:1533: in get_connection
+    connection.connect()
+backend\.venv\Lib\site-packages\redis\connection.py:380: in connect
+    self.connect_check_health(check_health=True)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+check_health = True, retry_socket_connect = True
+
+    def connect_check_health(
+        self, check_health: bool = True, retry_socket_connect: bool = True
+    ):
+        if self._sock:
+            return
+        try:
+            if retry_socket_connect:
+                sock = self.retry.call_with_retry(
+                    lambda: self._connect(), lambda error: self.disconnect(error)
+                )
+            else:
+                sock = self._connect()
+        except socket.timeout:
+            raise TimeoutError("Timeout connecting to server")
+        except OSError as e:
+>           raise ConnectionError(self._error_message(e))
+E           redis.exceptions.ConnectionError: Error 10061 connecting to 127.0.0.1:16380. ����Ŀ�����������ܾ����޷����ӡ�.
+
+backend\.venv\Lib\site-packages\redis\connection.py:397: ConnectionError
+_ ERROR at setup of test_hard_execution_limits_are_enforced[max_model_calls] __
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+check_health = True, retry_socket_connect = True
+
+    def connect_check_health(
+        self, check_health: bool = True, retry_socket_connect: bool = True
+    ):
+        if self._sock:
+            return
+        try:
+            if retry_socket_connect:
+>               sock = self.retry.call_with_retry(
+                    lambda: self._connect(), lambda error: self.disconnect(error)
+                )
+
+backend\.venv\Lib\site-packages\redis\connection.py:389: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\.venv\Lib\site-packages\redis\retry.py:105: in call_with_retry
+    return do()
+           ^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:390: in <lambda>
+    lambda: self._connect(), lambda error: self.disconnect(error)
+            ^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:803: in _connect
+    raise err
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+
+    def _connect(self):
+        "Create a TCP socket connection"
+        # we want to mimic what socket.create_connection does to support
+        # ipv4/ipv6, but we want to set options prior to calling
+        # socket.connect()
+        err = None
+        for res in socket.getaddrinfo(
+            self.host, self.port, self.socket_type, socket.SOCK_STREAM
+        ):
+            family, socktype, proto, canonname, socket_address = res
+            sock = None
+            try:
+                sock = socket.socket(family, socktype, proto)
+                # TCP_NODELAY
+                sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+    
+                # TCP_KEEPALIVE
+                if self.socket_keepalive:
+                    sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+                    for k, v in self.socket_keepalive_options.items():
+                        sock.setsockopt(socket.IPPROTO_TCP, k, v)
+    
+                # set the socket_connect_timeout before we connect
+                sock.settimeout(self.socket_connect_timeout)
+    
+                # connect
+>               sock.connect(socket_address)
+E               ConnectionRefusedError: [WinError 10061] ����Ŀ�����������ܾ����޷����ӡ�
+
+backend\.venv\Lib\site-packages\redis\connection.py:787: ConnectionRefusedError
+
+During handling of the above exception, another exception occurred:
+
+    @pytest.fixture(scope="module")
+    def infrastructure():
+        settings = Settings().model_copy(
+            update={
+                "run_concurrency": 2,
+                "executor_allow_paid_model_calls": True,
+                "executor_budget_authorization_id": AUTHORIZATION,
+                "executor_agent_budget_usd": 1.0,
+                "executor_agent_budget_unlimited": False,
+                "executor_namespace": "ac:t05:verify:" + uuid4().hex,
+            }
+        )
+        redis = Redis.from_url(settings.redis_url, socket_timeout=15)
+        with disposable_database("T05") as engine:
+            migrate(engine)
+            seed_database(engine, TEST_PASSWORD)
+>           runtime = AgentRuntime(engine, redis, settings, auto_register=True)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend\tests\test_executor.py:59: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\app\agents\runtime.py:59: in __init__
+    self.saver = saver_class(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:78: in __init__
+    super().__init__(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\base.py:211: in __init__
+    self.configure_client(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:118: in configure_client
+    self._redis.client_setinfo("LIB-NAME", __full_lib_name__)
+backend\.venv\Lib\site-packages\redis\commands\core.py:716: in client_setinfo
+    return self.execute_command("CLIENT SETINFO", attr, value, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:621: in execute_command
+    return self._execute_command(*args, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:627: in _execute_command
+    conn = self.connection or pool.get_connection()
+                              ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\utils.py:195: in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:1533: in get_connection
+    connection.connect()
+backend\.venv\Lib\site-packages\redis\connection.py:380: in connect
+    self.connect_check_health(check_health=True)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+check_health = True, retry_socket_connect = True
+
+    def connect_check_health(
+        self, check_health: bool = True, retry_socket_connect: bool = True
+    ):
+        if self._sock:
+            return
+        try:
+            if retry_socket_connect:
+                sock = self.retry.call_with_retry(
+                    lambda: self._connect(), lambda error: self.disconnect(error)
+                )
+            else:
+                sock = self._connect()
+        except socket.timeout:
+            raise TimeoutError("Timeout connecting to server")
+        except OSError as e:
+>           raise ConnectionError(self._error_message(e))
+E           redis.exceptions.ConnectionError: Error 10061 connecting to 127.0.0.1:16380. ����Ŀ�����������ܾ����޷����ӡ�.
+
+backend\.venv\Lib\site-packages\redis\connection.py:397: ConnectionError
+_ ERROR at setup of test_deadline_does_not_reset_on_recovery_and_heartbeat_cannot_revive_it _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+check_health = True, retry_socket_connect = True
+
+    def connect_check_health(
+        self, check_health: bool = True, retry_socket_connect: bool = True
+    ):
+        if self._sock:
+            return
+        try:
+            if retry_socket_connect:
+>               sock = self.retry.call_with_retry(
+                    lambda: self._connect(), lambda error: self.disconnect(error)
+                )
+
+backend\.venv\Lib\site-packages\redis\connection.py:389: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\.venv\Lib\site-packages\redis\retry.py:105: in call_with_retry
+    return do()
+           ^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:390: in <lambda>
+    lambda: self._connect(), lambda error: self.disconnect(error)
+            ^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:803: in _connect
+    raise err
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+
+    def _connect(self):
+        "Create a TCP socket connection"
+        # we want to mimic what socket.create_connection does to support
+        # ipv4/ipv6, but we want to set options prior to calling
+        # socket.connect()
+        err = None
+        for res in socket.getaddrinfo(
+            self.host, self.port, self.socket_type, socket.SOCK_STREAM
+        ):
+            family, socktype, proto, canonname, socket_address = res
+            sock = None
+            try:
+                sock = socket.socket(family, socktype, proto)
+                # TCP_NODELAY
+                sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+    
+                # TCP_KEEPALIVE
+                if self.socket_keepalive:
+                    sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+                    for k, v in self.socket_keepalive_options.items():
+                        sock.setsockopt(socket.IPPROTO_TCP, k, v)
+    
+                # set the socket_connect_timeout before we connect
+                sock.settimeout(self.socket_connect_timeout)
+    
+                # connect
+>               sock.connect(socket_address)
+E               ConnectionRefusedError: [WinError 10061] ����Ŀ�����������ܾ����޷����ӡ�
+
+backend\.venv\Lib\site-packages\redis\connection.py:787: ConnectionRefusedError
+
+During handling of the above exception, another exception occurred:
+
+    @pytest.fixture(scope="module")
+    def infrastructure():
+        settings = Settings().model_copy(
+            update={
+                "run_concurrency": 2,
+                "executor_allow_paid_model_calls": True,
+                "executor_budget_authorization_id": AUTHORIZATION,
+                "executor_agent_budget_usd": 1.0,
+                "executor_agent_budget_unlimited": False,
+                "executor_namespace": "ac:t05:verify:" + uuid4().hex,
+            }
+        )
+        redis = Redis.from_url(settings.redis_url, socket_timeout=15)
+        with disposable_database("T05") as engine:
+            migrate(engine)
+            seed_database(engine, TEST_PASSWORD)
+>           runtime = AgentRuntime(engine, redis, settings, auto_register=True)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend\tests\test_executor.py:59: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\app\agents\runtime.py:59: in __init__
+    self.saver = saver_class(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:78: in __init__
+    super().__init__(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\base.py:211: in __init__
+    self.configure_client(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:118: in configure_client
+    self._redis.client_setinfo("LIB-NAME", __full_lib_name__)
+backend\.venv\Lib\site-packages\redis\commands\core.py:716: in client_setinfo
+    return self.execute_command("CLIENT SETINFO", attr, value, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:621: in execute_command
+    return self._execute_command(*args, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:627: in _execute_command
+    conn = self.connection or pool.get_connection()
+                              ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\utils.py:195: in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:1533: in get_connection
+    connection.connect()
+backend\.venv\Lib\site-packages\redis\connection.py:380: in connect
+    self.connect_check_health(check_health=True)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+check_health = True, retry_socket_connect = True
+
+    def connect_check_health(
+        self, check_health: bool = True, retry_socket_connect: bool = True
+    ):
+        if self._sock:
+            return
+        try:
+            if retry_socket_connect:
+                sock = self.retry.call_with_retry(
+                    lambda: self._connect(), lambda error: self.disconnect(error)
+                )
+            else:
+                sock = self._connect()
+        except socket.timeout:
+            raise TimeoutError("Timeout connecting to server")
+        except OSError as e:
+>           raise ConnectionError(self._error_message(e))
+E           redis.exceptions.ConnectionError: Error 10061 connecting to 127.0.0.1:16380. ����Ŀ�����������ܾ����޷����ӡ�.
+
+backend\.venv\Lib\site-packages\redis\connection.py:397: ConnectionError
+_ ERROR at setup of test_partial_action_without_receipt_is_not_automatically_replayed _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+check_health = True, retry_socket_connect = True
+
+    def connect_check_health(
+        self, check_health: bool = True, retry_socket_connect: bool = True
+    ):
+        if self._sock:
+            return
+        try:
+            if retry_socket_connect:
+>               sock = self.retry.call_with_retry(
+                    lambda: self._connect(), lambda error: self.disconnect(error)
+                )
+
+backend\.venv\Lib\site-packages\redis\connection.py:389: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\.venv\Lib\site-packages\redis\retry.py:105: in call_with_retry
+    return do()
+           ^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:390: in <lambda>
+    lambda: self._connect(), lambda error: self.disconnect(error)
+            ^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:803: in _connect
+    raise err
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+
+    def _connect(self):
+        "Create a TCP socket connection"
+        # we want to mimic what socket.create_connection does to support
+        # ipv4/ipv6, but we want to set options prior to calling
+        # socket.connect()
+        err = None
+        for res in socket.getaddrinfo(
+            self.host, self.port, self.socket_type, socket.SOCK_STREAM
+        ):
+            family, socktype, proto, canonname, socket_address = res
+            sock = None
+            try:
+                sock = socket.socket(family, socktype, proto)
+                # TCP_NODELAY
+                sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+    
+                # TCP_KEEPALIVE
+                if self.socket_keepalive:
+                    sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+                    for k, v in self.socket_keepalive_options.items():
+                        sock.setsockopt(socket.IPPROTO_TCP, k, v)
+    
+                # set the socket_connect_timeout before we connect
+                sock.settimeout(self.socket_connect_timeout)
+    
+                # connect
+>               sock.connect(socket_address)
+E               ConnectionRefusedError: [WinError 10061] ����Ŀ�����������ܾ����޷����ӡ�
+
+backend\.venv\Lib\site-packages\redis\connection.py:787: ConnectionRefusedError
+
+During handling of the above exception, another exception occurred:
+
+    @pytest.fixture(scope="module")
+    def infrastructure():
+        settings = Settings().model_copy(
+            update={
+                "run_concurrency": 2,
+                "executor_allow_paid_model_calls": True,
+                "executor_budget_authorization_id": AUTHORIZATION,
+                "executor_agent_budget_usd": 1.0,
+                "executor_agent_budget_unlimited": False,
+                "executor_namespace": "ac:t05:verify:" + uuid4().hex,
+            }
+        )
+        redis = Redis.from_url(settings.redis_url, socket_timeout=15)
+        with disposable_database("T05") as engine:
+            migrate(engine)
+            seed_database(engine, TEST_PASSWORD)
+>           runtime = AgentRuntime(engine, redis, settings, auto_register=True)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend\tests\test_executor.py:59: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\app\agents\runtime.py:59: in __init__
+    self.saver = saver_class(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:78: in __init__
+    super().__init__(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\base.py:211: in __init__
+    self.configure_client(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:118: in configure_client
+    self._redis.client_setinfo("LIB-NAME", __full_lib_name__)
+backend\.venv\Lib\site-packages\redis\commands\core.py:716: in client_setinfo
+    return self.execute_command("CLIENT SETINFO", attr, value, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:621: in execute_command
+    return self._execute_command(*args, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:627: in _execute_command
+    conn = self.connection or pool.get_connection()
+                              ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\utils.py:195: in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:1533: in get_connection
+    connection.connect()
+backend\.venv\Lib\site-packages\redis\connection.py:380: in connect
+    self.connect_check_health(check_health=True)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+check_health = True, retry_socket_connect = True
+
+    def connect_check_health(
+        self, check_health: bool = True, retry_socket_connect: bool = True
+    ):
+        if self._sock:
+            return
+        try:
+            if retry_socket_connect:
+                sock = self.retry.call_with_retry(
+                    lambda: self._connect(), lambda error: self.disconnect(error)
+                )
+            else:
+                sock = self._connect()
+        except socket.timeout:
+            raise TimeoutError("Timeout connecting to server")
+        except OSError as e:
+>           raise ConnectionError(self._error_message(e))
+E           redis.exceptions.ConnectionError: Error 10061 connecting to 127.0.0.1:16380. ����Ŀ�����������ܾ����޷����ӡ�.
+
+backend\.venv\Lib\site-packages\redis\connection.py:397: ConnectionError
+_ ERROR at setup of test_authorization_cap_is_shared_across_different_run_locks _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+check_health = True, retry_socket_connect = True
+
+    def connect_check_health(
+        self, check_health: bool = True, retry_socket_connect: bool = True
+    ):
+        if self._sock:
+            return
+        try:
+            if retry_socket_connect:
+>               sock = self.retry.call_with_retry(
+                    lambda: self._connect(), lambda error: self.disconnect(error)
+                )
+
+backend\.venv\Lib\site-packages\redis\connection.py:389: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\.venv\Lib\site-packages\redis\retry.py:105: in call_with_retry
+    return do()
+           ^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:390: in <lambda>
+    lambda: self._connect(), lambda error: self.disconnect(error)
+            ^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:803: in _connect
+    raise err
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+
+    def _connect(self):
+        "Create a TCP socket connection"
+        # we want to mimic what socket.create_connection does to support
+        # ipv4/ipv6, but we want to set options prior to calling
+        # socket.connect()
+        err = None
+        for res in socket.getaddrinfo(
+            self.host, self.port, self.socket_type, socket.SOCK_STREAM
+        ):
+            family, socktype, proto, canonname, socket_address = res
+            sock = None
+            try:
+                sock = socket.socket(family, socktype, proto)
+                # TCP_NODELAY
+                sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+    
+                # TCP_KEEPALIVE
+                if self.socket_keepalive:
+                    sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+                    for k, v in self.socket_keepalive_options.items():
+                        sock.setsockopt(socket.IPPROTO_TCP, k, v)
+    
+                # set the socket_connect_timeout before we connect
+                sock.settimeout(self.socket_connect_timeout)
+    
+                # connect
+>               sock.connect(socket_address)
+E               ConnectionRefusedError: [WinError 10061] ����Ŀ�����������ܾ����޷����ӡ�
+
+backend\.venv\Lib\site-packages\redis\connection.py:787: ConnectionRefusedError
+
+During handling of the above exception, another exception occurred:
+
+    @pytest.fixture(scope="module")
+    def infrastructure():
+        settings = Settings().model_copy(
+            update={
+                "run_concurrency": 2,
+                "executor_allow_paid_model_calls": True,
+                "executor_budget_authorization_id": AUTHORIZATION,
+                "executor_agent_budget_usd": 1.0,
+                "executor_agent_budget_unlimited": False,
+                "executor_namespace": "ac:t05:verify:" + uuid4().hex,
+            }
+        )
+        redis = Redis.from_url(settings.redis_url, socket_timeout=15)
+        with disposable_database("T05") as engine:
+            migrate(engine)
+            seed_database(engine, TEST_PASSWORD)
+>           runtime = AgentRuntime(engine, redis, settings, auto_register=True)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend\tests\test_executor.py:59: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\app\agents\runtime.py:59: in __init__
+    self.saver = saver_class(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:78: in __init__
+    super().__init__(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\base.py:211: in __init__
+    self.configure_client(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:118: in configure_client
+    self._redis.client_setinfo("LIB-NAME", __full_lib_name__)
+backend\.venv\Lib\site-packages\redis\commands\core.py:716: in client_setinfo
+    return self.execute_command("CLIENT SETINFO", attr, value, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:621: in execute_command
+    return self._execute_command(*args, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:627: in _execute_command
+    conn = self.connection or pool.get_connection()
+                              ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\utils.py:195: in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:1533: in get_connection
+    connection.connect()
+backend\.venv\Lib\site-packages\redis\connection.py:380: in connect
+    self.connect_check_health(check_health=True)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+check_health = True, retry_socket_connect = True
+
+    def connect_check_health(
+        self, check_health: bool = True, retry_socket_connect: bool = True
+    ):
+        if self._sock:
+            return
+        try:
+            if retry_socket_connect:
+                sock = self.retry.call_with_retry(
+                    lambda: self._connect(), lambda error: self.disconnect(error)
+                )
+            else:
+                sock = self._connect()
+        except socket.timeout:
+            raise TimeoutError("Timeout connecting to server")
+        except OSError as e:
+>           raise ConnectionError(self._error_message(e))
+E           redis.exceptions.ConnectionError: Error 10061 connecting to 127.0.0.1:16380. ����Ŀ�����������ܾ����޷����ӡ�.
+
+backend\.venv\Lib\site-packages\redis\connection.py:397: ConnectionError
+_ ERROR at setup of test_last_finisher_uses_current_statuses_despite_repeatable_read_snapshot _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+check_health = True, retry_socket_connect = True
+
+    def connect_check_health(
+        self, check_health: bool = True, retry_socket_connect: bool = True
+    ):
+        if self._sock:
+            return
+        try:
+            if retry_socket_connect:
+>               sock = self.retry.call_with_retry(
+                    lambda: self._connect(), lambda error: self.disconnect(error)
+                )
+
+backend\.venv\Lib\site-packages\redis\connection.py:389: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\.venv\Lib\site-packages\redis\retry.py:105: in call_with_retry
+    return do()
+           ^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:390: in <lambda>
+    lambda: self._connect(), lambda error: self.disconnect(error)
+            ^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:803: in _connect
+    raise err
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+
+    def _connect(self):
+        "Create a TCP socket connection"
+        # we want to mimic what socket.create_connection does to support
+        # ipv4/ipv6, but we want to set options prior to calling
+        # socket.connect()
+        err = None
+        for res in socket.getaddrinfo(
+            self.host, self.port, self.socket_type, socket.SOCK_STREAM
+        ):
+            family, socktype, proto, canonname, socket_address = res
+            sock = None
+            try:
+                sock = socket.socket(family, socktype, proto)
+                # TCP_NODELAY
+                sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+    
+                # TCP_KEEPALIVE
+                if self.socket_keepalive:
+                    sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+                    for k, v in self.socket_keepalive_options.items():
+                        sock.setsockopt(socket.IPPROTO_TCP, k, v)
+    
+                # set the socket_connect_timeout before we connect
+                sock.settimeout(self.socket_connect_timeout)
+    
+                # connect
+>               sock.connect(socket_address)
+E               ConnectionRefusedError: [WinError 10061] ����Ŀ�����������ܾ����޷����ӡ�
+
+backend\.venv\Lib\site-packages\redis\connection.py:787: ConnectionRefusedError
+
+During handling of the above exception, another exception occurred:
+
+    @pytest.fixture(scope="module")
+    def infrastructure():
+        settings = Settings().model_copy(
+            update={
+                "run_concurrency": 2,
+                "executor_allow_paid_model_calls": True,
+                "executor_budget_authorization_id": AUTHORIZATION,
+                "executor_agent_budget_usd": 1.0,
+                "executor_agent_budget_unlimited": False,
+                "executor_namespace": "ac:t05:verify:" + uuid4().hex,
+            }
+        )
+        redis = Redis.from_url(settings.redis_url, socket_timeout=15)
+        with disposable_database("T05") as engine:
+            migrate(engine)
+            seed_database(engine, TEST_PASSWORD)
+>           runtime = AgentRuntime(engine, redis, settings, auto_register=True)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend\tests\test_executor.py:59: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\app\agents\runtime.py:59: in __init__
+    self.saver = saver_class(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:78: in __init__
+    super().__init__(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\base.py:211: in __init__
+    self.configure_client(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:118: in configure_client
+    self._redis.client_setinfo("LIB-NAME", __full_lib_name__)
+backend\.venv\Lib\site-packages\redis\commands\core.py:716: in client_setinfo
+    return self.execute_command("CLIENT SETINFO", attr, value, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:621: in execute_command
+    return self._execute_command(*args, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:627: in _execute_command
+    conn = self.connection or pool.get_connection()
+                              ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\utils.py:195: in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:1533: in get_connection
+    connection.connect()
+backend\.venv\Lib\site-packages\redis\connection.py:380: in connect
+    self.connect_check_health(check_health=True)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+check_health = True, retry_socket_connect = True
+
+    def connect_check_health(
+        self, check_health: bool = True, retry_socket_connect: bool = True
+    ):
+        if self._sock:
+            return
+        try:
+            if retry_socket_connect:
+                sock = self.retry.call_with_retry(
+                    lambda: self._connect(), lambda error: self.disconnect(error)
+                )
+            else:
+                sock = self._connect()
+        except socket.timeout:
+            raise TimeoutError("Timeout connecting to server")
+        except OSError as e:
+>           raise ConnectionError(self._error_message(e))
+E           redis.exceptions.ConnectionError: Error 10061 connecting to 127.0.0.1:16380. ����Ŀ�����������ܾ����޷����ӡ�.
+
+backend\.venv\Lib\site-packages\redis\connection.py:397: ConnectionError
+_ ERROR at setup of test_waiting_input_expires_without_new_user_input_or_model_request _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+check_health = True, retry_socket_connect = True
+
+    def connect_check_health(
+        self, check_health: bool = True, retry_socket_connect: bool = True
+    ):
+        if self._sock:
+            return
+        try:
+            if retry_socket_connect:
+>               sock = self.retry.call_with_retry(
+                    lambda: self._connect(), lambda error: self.disconnect(error)
+                )
+
+backend\.venv\Lib\site-packages\redis\connection.py:389: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\.venv\Lib\site-packages\redis\retry.py:105: in call_with_retry
+    return do()
+           ^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:390: in <lambda>
+    lambda: self._connect(), lambda error: self.disconnect(error)
+            ^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:803: in _connect
+    raise err
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+
+    def _connect(self):
+        "Create a TCP socket connection"
+        # we want to mimic what socket.create_connection does to support
+        # ipv4/ipv6, but we want to set options prior to calling
+        # socket.connect()
+        err = None
+        for res in socket.getaddrinfo(
+            self.host, self.port, self.socket_type, socket.SOCK_STREAM
+        ):
+            family, socktype, proto, canonname, socket_address = res
+            sock = None
+            try:
+                sock = socket.socket(family, socktype, proto)
+                # TCP_NODELAY
+                sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+    
+                # TCP_KEEPALIVE
+                if self.socket_keepalive:
+                    sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+                    for k, v in self.socket_keepalive_options.items():
+                        sock.setsockopt(socket.IPPROTO_TCP, k, v)
+    
+                # set the socket_connect_timeout before we connect
+                sock.settimeout(self.socket_connect_timeout)
+    
+                # connect
+>               sock.connect(socket_address)
+E               ConnectionRefusedError: [WinError 10061] ����Ŀ�����������ܾ����޷����ӡ�
+
+backend\.venv\Lib\site-packages\redis\connection.py:787: ConnectionRefusedError
+
+During handling of the above exception, another exception occurred:
+
+    @pytest.fixture(scope="module")
+    def infrastructure():
+        settings = Settings().model_copy(
+            update={
+                "run_concurrency": 2,
+                "executor_allow_paid_model_calls": True,
+                "executor_budget_authorization_id": AUTHORIZATION,
+                "executor_agent_budget_usd": 1.0,
+                "executor_agent_budget_unlimited": False,
+                "executor_namespace": "ac:t05:verify:" + uuid4().hex,
+            }
+        )
+        redis = Redis.from_url(settings.redis_url, socket_timeout=15)
+        with disposable_database("T05") as engine:
+            migrate(engine)
+            seed_database(engine, TEST_PASSWORD)
+>           runtime = AgentRuntime(engine, redis, settings, auto_register=True)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend\tests\test_executor.py:59: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\app\agents\runtime.py:59: in __init__
+    self.saver = saver_class(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:78: in __init__
+    super().__init__(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\base.py:211: in __init__
+    self.configure_client(
+backend\.venv\Lib\site-packages\langgraph\checkpoint\redis\__init__.py:118: in configure_client
+    self._redis.client_setinfo("LIB-NAME", __full_lib_name__)
+backend\.venv\Lib\site-packages\redis\commands\core.py:716: in client_setinfo
+    return self.execute_command("CLIENT SETINFO", attr, value, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:621: in execute_command
+    return self._execute_command(*args, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\client.py:627: in _execute_command
+    conn = self.connection or pool.get_connection()
+                              ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\utils.py:195: in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\redis\connection.py:1533: in get_connection
+    connection.connect()
+backend\.venv\Lib\site-packages\redis\connection.py:380: in connect
+    self.connect_check_health(check_health=True)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <redis.connection.Connection(host=127.0.0.1,port=16380,db=0)>
+check_health = True, retry_socket_connect = True
+
+    def connect_check_health(
+        self, check_health: bool = True, retry_socket_connect: bool = True
+    ):
+        if self._sock:
+            return
+        try:
+            if retry_socket_connect:
+                sock = self.retry.call_with_retry(
+                    lambda: self._connect(), lambda error: self.disconnect(error)
+                )
+            else:
+                sock = self._connect()
+        except socket.timeout:
+            raise TimeoutError("Timeout connecting to server")
+        except OSError as e:
+>           raise ConnectionError(self._error_message(e))
+E           redis.exceptions.ConnectionError: Error 10061 connecting to 127.0.0.1:16380. ����Ŀ�����������ܾ����޷����ӡ�.
+
+backend\.venv\Lib\site-packages\redis\connection.py:397: ConnectionError
+=========================== short test summary info ===========================
+ERROR backend\tests\test_evidence.py::test_run_events_order_rollback_and_idempotency
+ERROR backend\tests\test_evidence.py::test_actual_graph_events_tools_confirmation_and_readonly_replay
+ERROR backend\tests\test_evidence.py::test_large_artifact_redaction_hash_and_owner
+ERROR backend\tests\test_evidence.py::test_cursor_validation_and_authenticated_native_sse
+ERROR backend\tests\test_evidence.py::test_open_ledger_keeps_finite_run_limits_and_late_usage
+ERROR backend\tests\test_evidence.py::test_model_error_is_observed_and_readonly_replay_does_not_retry
+ERROR backend\tests\test_evidence.py::test_native_route_slow_send_cancels_all_response_tasks
+ERROR backend\tests\test_executor.py::test_manifest_idempotency_review_and_isolation
+ERROR backend\tests\test_executor.py::test_invalid_frozen_input_rejected[draft]
+ERROR backend\tests\test_executor.py::test_invalid_frozen_input_rejected[hash]
+ERROR backend\tests\test_executor.py::test_invalid_frozen_input_rejected[version]
+ERROR backend\tests\test_executor.py::test_invalid_frozen_input_rejected[budget]
+ERROR backend\tests\test_executor.py::test_publish_failure_is_durable_and_scan_retries
+ERROR backend\tests\test_executor.py::test_claim_race_and_stale_token_cannot_write_business
+ERROR backend\tests\test_executor.py::test_lease_expiring_inside_business_transaction_rolls_back
+ERROR backend\tests\test_executor.py::test_offline_script_completion_never_becomes_passed_and_duplicate_noop
+ERROR backend\tests\test_executor.py::test_wait_releases_worker_and_legitimate_input_resumes_same_session
+ERROR backend\tests\test_executor.py::test_cancellation_revokes_active_lease_and_preserves_booking
+ERROR backend\tests\test_executor.py::test_atomic_budget_reservations_unknown_and_idempotent_settlement
+ERROR backend\tests\test_executor.py::test_api_auth_validation_creation_is_nonblocking_and_owner_scoped
+ERROR backend\tests\test_executor.py::test_explicit_recovery_preserves_cursor_scope_and_attempts
+ERROR backend\tests\test_executor.py::test_hard_execution_limits_are_enforced[max_steps]
+ERROR backend\tests\test_executor.py::test_hard_execution_limits_are_enforced[max_tokens]
+ERROR backend\tests\test_executor.py::test_hard_execution_limits_are_enforced[max_model_calls]
+ERROR backend\tests\test_executor.py::test_deadline_does_not_reset_on_recovery_and_heartbeat_cannot_revive_it
+ERROR backend\tests\test_executor.py::test_partial_action_without_receipt_is_not_automatically_replayed
+ERROR backend\tests\test_executor.py::test_authorization_cap_is_shared_across_different_run_locks
+ERROR backend\tests\test_executor.py::test_last_finisher_uses_current_statuses_despite_repeatable_read_snapshot
+ERROR backend\tests\test_executor.py::test_waiting_input_expires_without_new_user_input_or_model_request
+3 passed, 29 errors in 22.14s

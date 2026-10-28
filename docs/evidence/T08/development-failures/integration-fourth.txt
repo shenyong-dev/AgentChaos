@@ -1,0 +1,121 @@
+F
+================================== FAILURES ===================================
+______ test_auto_evaluation_persists_and_api_is_readonly_paginated_owned ______
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1958: in _exec_single_context
+    self.dialect.do_execute(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\default.py:1192: in do_execute
+    cursor.execute(statement, parameters)
+backend\.venv\Lib\site-packages\pymysql\cursors.py:170: in execute
+    result = self._query(query)
+             ^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\pymysql\cursors.py:335: in _query
+    conn.query(q)
+backend\.venv\Lib\site-packages\pymysql\connections.py:581: in query
+    self._affected_rows = self._read_query_result(unbuffered=unbuffered)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\pymysql\connections.py:857: in _read_query_result
+    result.read()
+backend\.venv\Lib\site-packages\pymysql\connections.py:1290: in read
+    first_packet = self.connection._read_packet()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\pymysql\connections.py:810: in _read_packet
+    packet.raise_for_error()
+backend\.venv\Lib\site-packages\pymysql\protocol.py:219: in raise_for_error
+    err.raise_mysql_exception(self._data)
+backend\.venv\Lib\site-packages\pymysql\err.py:154: in raise_mysql_exception
+    raise errorclass(errno, errval, sqlstate=sqlstate)
+E   pymysql.err.OperationalError: (1644, 'reviewer_required')
+
+The above exception was the direct cause of the following exception:
+backend\tests\test_evaluation.py:137: in test_auto_evaluation_persists_and_api_is_readonly_paginated_owned
+    identifier, execution, result = run_greeting(lab)
+                                    ^^^^^^^^^^^^^^^^^
+backend\tests\test_evaluation.py:127: in run_greeting
+    identifier, execution = create(lab, **kwargs)
+                            ^^^^^^^^^^^^^^^^^^^^^
+backend\tests\test_evaluation.py:77: in create
+    row.reviewer_id = session.scalar(select(User.id).where(User.role == "reviewer"))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:2534: in scalar
+    return self._execute_internal(
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:2336: in _execute_internal
+    ) = compile_state_cls.orm_pre_session_exec(
+backend\.venv\Lib\site-packages\sqlalchemy\orm\context.py:595: in orm_pre_session_exec
+    session._autoflush()
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:3200: in _autoflush
+    raise e.with_traceback(sys.exc_info()[2])
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:3189: in _autoflush
+    self.flush()
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:4543: in flush
+    self._flush(objects)
+<sqlalchemy generated warned() wrapper for sqlalchemy.orm.session.Session._flush>:2: in _flush
+    return target(fn, self, objects=objects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\util\deprecations.py:281: in warned
+    return fn(*args, **kwargs)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:4686: in _flush
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\util\langhelpers.py:166: in __exit__
+    raise exc_value.with_traceback(exc_tb)
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:4647: in _flush
+    flush_context.execute()
+backend\.venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py:467: in execute
+    rec.execute(self)
+backend\.venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py:643: in execute
+    util.preloaded.orm_persistence._save_obj(
+backend\.venv\Lib\site-packages\sqlalchemy\orm\persistence.py:84: in _save_obj
+    _emit_update_statements(
+backend\.venv\Lib\site-packages\sqlalchemy\orm\persistence.py:916: in _emit_update_statements
+    c = connection.execute(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1463: in execute
+    return meth(
+backend\.venv\Lib\site-packages\sqlalchemy\sql\elements.py:533: in _execute_on_connection
+    return connection._execute_clauseelement(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1683: in _execute_clauseelement
+    ret = self._execute_context(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1837: in _execute_context
+    return self._exec_single_context(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1977: in _exec_single_context
+    self._handle_dbapi_exception(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:2347: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1958: in _exec_single_context
+    self.dialect.do_execute(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\default.py:1192: in do_execute
+    cursor.execute(statement, parameters)
+backend\.venv\Lib\site-packages\pymysql\cursors.py:170: in execute
+    result = self._query(query)
+             ^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\pymysql\cursors.py:335: in _query
+    conn.query(q)
+backend\.venv\Lib\site-packages\pymysql\connections.py:581: in query
+    self._affected_rows = self._read_query_result(unbuffered=unbuffered)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\pymysql\connections.py:857: in _read_query_result
+    result.read()
+backend\.venv\Lib\site-packages\pymysql\connections.py:1290: in read
+    first_packet = self.connection._read_packet()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\pymysql\connections.py:810: in _read_packet
+    packet.raise_for_error()
+backend\.venv\Lib\site-packages\pymysql\protocol.py:219: in raise_for_error
+    err.raise_mysql_exception(self._data)
+backend\.venv\Lib\site-packages\pymysql\err.py:154: in raise_mysql_exception
+    raise errorclass(errno, errval, sqlstate=sqlstate)
+E   sqlalchemy.exc.OperationalError: (raised as a result of Query-invoked autoflush; consider using a session.no_autoflush block if this flush is occurring prematurely)
+E   (pymysql.err.OperationalError) (1644, 'reviewer_required')
+E   [SQL: UPDATE ac_test_cases SET expected_json=%(expected_json)s, review_status=%(review_status)s, content_hash=%(content_hash)s WHERE ac_test_cases.id = %(ac_test_cases_id)s]
+E   [parameters: {'expected_json': '{"assertions": [{"equals": 0, "type": "booking_count"}], "schema_version": "1.1"}', 'review_status': 'approved', 'content_hash': 'd08f59fb6c141900a0d4feeca0434b349b4263216d8234e2895c6212fd0ff1c1', 'ac_test_cases_id': 1}]
+E   (Background on this error at: https://sqlalche.me/e/21/e3q8)
+---------------------------- Captured stderr setup ----------------------------
+INFO  [alembic.runtime.migration] Context impl MySQLImpl.
+INFO  [alembic.runtime.migration] Will assume non-transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 20261025_0001, T02 initial sixteen-table schema
+INFO  [alembic.runtime.migration] Running upgrade 20261025_0001 -> 20261025_0002, T04 bind pending drafts to a trusted conversation without adding tables.
+INFO  [alembic.runtime.migration] Running upgrade 20261025_0002 -> 20261026_0003, T06 real run-level events and transactionally allocated per-run order.
+=========================== short test summary info ===========================
+FAILED backend\tests\test_evaluation.py::test_auto_evaluation_persists_and_api_is_readonly_paginated_owned
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed in 6.14s

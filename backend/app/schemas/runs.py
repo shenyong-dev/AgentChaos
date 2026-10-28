@@ -31,6 +31,7 @@ class CreateRun(BaseModel):
     seed: int = Field(default=0, ge=0, le=2_000_000_000)
     limits: Limits = Field(default_factory=Limits)
     budgets: RoleBudgets = Field(default_factory=RoleBudgets)
+    fault_profile_id: int | None = Field(default=None, ge=1)
 
     @field_validator("case_revision_ids")
     @classmethod

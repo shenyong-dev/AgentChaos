@@ -40,9 +40,23 @@ test('real authenticated evidence replay, filtering, mobile and reconnect', asyn
   await page.getByRole('textbox', { name: '筛选事件' }).fill('not-a-real-event')
   await expect(page.getByText('没有匹配的事件。')).toBeVisible()
   await page.getByRole('textbox', { name: '筛选事件' }).fill('')
-  while (await page.getByRole('button', { name: '下一段', exact: true }).isVisible()) {
-    await page.getByRole('button', { name: '下一段', exact: true }).click()
+  const seen = new Set<number>()
+  const remember = async () => {
+    for (const value of await page.locator('.event-order').allTextContents()) seen.add(Number(value))
   }
+  await remember()
+  while (await page.getByRole('button', { name: /^(下一段|下一窗口)$/ }).isVisible()) {
+    await page.getByRole('button', { name: /^(下一段|下一窗口)$/ }).click()
+    await expect(page.getByRole('button', { name: '从头阅读', exact: true })).toBeEnabled()
+    expect(await page.locator('.event-list li').count()).toBeLessThanOrEqual(500)
+    await remember()
+  }
+  const snapshot = await page.request.get(`/api/v1/runs/${run}/snapshot`, {
+    headers: { Authorization: basicHeader('demo_operator', password) },
+  })
+  expect(snapshot.status()).toBe(200)
+  const total = (await snapshot.json()).data.event_count as number
+  expect([...seen].sort((a, b) => a - b)).toEqual(Array.from({ length: total }, (_, i) => i + 1))
   await page.getByRole('button', { name: '继续同步', exact: true }).click()
   await expect(page.getByRole('status')).toContainText(/实时连接|事件已同步|等待重连/)
   if (!(await page.getByRole('status').textContent())?.includes('事件已同步')) {

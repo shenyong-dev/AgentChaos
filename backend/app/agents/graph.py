@@ -36,7 +36,14 @@ def build_agent_graph(gateway, registry, checkpointer, *, control=None, recorder
             control.step("model")
         if state.get("model_calls_this_turn", 0) >= 12:
             raise AgentError("agent_step_limit", "本轮模型调用达到12步上限。", 429)
-        context, summary = compose_context(state, prompt, tool_schema_bytes=schema_bytes)
+        context, summary = compose_context(
+            state,
+            prompt,
+            tool_schema_bytes=schema_bytes,
+            output_reserve=getattr(
+                getattr(gateway, "settings", None), "agent_max_output_tokens", 1024
+            ),
+        )
         started = None
         if recorder:
             started = recorder.emit(
@@ -123,7 +130,15 @@ def build_agent_graph(gateway, registry, checkpointer, *, control=None, recorder
             capture = {}
             began = time.monotonic()
             try:
-                result = registry.dispatch(current, call["name"], call["args"], capture=capture)
+                result = registry.dispatch(
+                    current,
+                    call["name"],
+                    call["args"],
+                    capture=capture,
+                    tool_call_id=call["id"],
+                    message_id=message.id,
+                    parent=requested,
+                )
             except Exception as exc:
                 if recorder:
                     recorder.emit(
@@ -141,15 +156,19 @@ def build_agent_graph(gateway, registry, checkpointer, *, control=None, recorder
                     )
                 raise
             if recorder:
-                failed = result.get("status") == "error"
+                fields = result if isinstance(result, dict) else {}
+                failed = not isinstance(result, dict) or fields.get("status") == "error"
                 recorder.emit(
                     "tool.error" if failed else "tool.completed",
                     tool=call["name"],
                     arguments=call["args"],
                     raw_result=capture.get("raw_result", result),
                     visible_result=result,
-                    code=result.get("code"),
-                    commit_state=result.get("commit_state"),
+                    code=fields.get("code") if isinstance(result, dict) else "tool_format_invalid",
+                    commit_state=fields.get("commit_state"),
+                    dispatched=capture.get("dispatched"),
+                    fault_event_id=capture.get("fault_event_id"),
+                    receipt_reused=capture.get("receipt_reused", False),
                     before=before,
                     after=recorder.business_snapshot(),
                     tool_call_id=call["id"],
@@ -171,7 +190,9 @@ def build_agent_graph(gateway, registry, checkpointer, *, control=None, recorder
                 control.check()
             results.append(
                 ToolMessage(
-                    content=json.dumps(result, ensure_ascii=False, default=str),
+                    content=result
+                    if isinstance(result, str)
+                    else json.dumps(result, ensure_ascii=False, default=str),
                     tool_call_id=call["id"],
                 )
             )

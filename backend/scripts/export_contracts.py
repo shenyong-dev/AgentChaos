@@ -1,11 +1,15 @@
 import json
 from pathlib import Path
 
+from pydantic import TypeAdapter
+
 from app.agents.registry import ToolRegistry
 from app.main import app
+from app.schemas.assertions import Assertion
 from app.schemas.contracts import TestCaseDraft
 from app.schemas.contracts import TraceEvent as LegacyTraceEvent
 from app.schemas.events import TraceEvent
+from app.schemas.faults import FaultSpec
 from app.tools.booking import booking_tool_contracts
 
 destination = Path(__file__).resolve().parents[2] / "docs" / "architecture"
@@ -15,6 +19,8 @@ for name, schema in (
     ("test-case.schema.json", TestCaseDraft.model_json_schema()),
     ("trace-event.schema.json", TraceEvent.model_json_schema()),
     ("trace-event-v1.0.schema.json", LegacyTraceEvent.model_json_schema()),
+    ("fault-profile.schema.json", FaultSpec.model_json_schema()),
+    ("assertion.schema.json", TypeAdapter(Assertion).json_schema()),
     ("booking-tools.schema.json", booking_tool_contracts()),
     (
         "agent-tools.schema.json",

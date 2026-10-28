@@ -1,0 +1,314 @@
+{
+  "mode": "offline_gateway_real_SQL_Redis_tools",
+  "provider_requests": 0,
+  "notice": "Developer-annotated counterexamples; no human acceptance or production dataset approval",
+  "started_at": "2026-10-27T16:16:29.096874+00:00",
+  "old_ledgers_before": {
+    "ac:t04:budget:T04-20261025-agent-1:agent": {
+      "limit": 1000000,
+      "held_upper": 3800,
+      "calls_started": 347,
+      "charged_estimate": 464825,
+      "calls_completed": 346,
+      "calls_unknown": 1
+    },
+    "ac:t05:budget:T05-20261026-agent-1:agent": {
+      "limit": 1000000,
+      "held_upper": 87680,
+      "calls_started": 225,
+      "token_upper": 1151709,
+      "charged_estimate": 293284,
+      "calls_completed": 217,
+      "calls_unknown": 8
+    },
+    "ac:t05:budget:T06-20261026-agent-open:agent": {
+      "limit": -1,
+      "held_upper": 0,
+      "calls_started": 17,
+      "token_upper": 71536,
+      "charged_estimate": 24008,
+      "calls_completed": 17
+    },
+    "ac:t05:budget:T07-20261027-agent-open:agent": {
+      "limit": -1,
+      "held_upper": 0,
+      "calls_started": 41,
+      "token_upper": 169311,
+      "charged_estimate": 55971,
+      "calls_completed": 41
+    }
+  },
+  "scenarios": {
+    "booking_ok": {
+      "run_id": "01cc50ff-897d-4f8c-914f-d9d89e7970f0",
+      "execution_id": "1f9677f8-a31b-45ec-88ec-38ac8315bae5",
+      "expected_verdict": "passed",
+      "actual": {
+        "verdict": "passed",
+        "counts": {
+          "passed": 8,
+          "failed": 0,
+          "inconclusive": 0,
+          "error": 0,
+          "na": 1
+        },
+        "task_outcome": "fulfilled",
+        "evaluator_version": "T08-v1-502285fe68947b1ba15d-24287bcd9a0f0b01",
+        "code_version": "T08-v1-502285fe68947b1ba15d",
+        "input_hash": "24287bcd9a0f0b01dfe7d04ab122547c450d8d9f9b0d0f1cdf41026f92a19b89"
+      },
+      "booking_count": 1,
+      "review_url": "http://127.0.0.1:5175/runs/01cc50ff-897d-4f8c-914f-d9d89e7970f0?view=assertions"
+    },
+    "wrong_date": {
+      "run_id": "499ff5cc-bd3b-4964-a272-d373537993d9",
+      "execution_id": "fe790230-3142-4841-89ef-525a1fe8b16f",
+      "expected_verdict": "failed",
+      "actual": {
+        "verdict": "failed",
+        "counts": {
+          "passed": 6,
+          "failed": 2,
+          "inconclusive": 0,
+          "error": 0,
+          "na": 1
+        },
+        "task_outcome": "not_fulfilled",
+        "evaluator_version": "T08-v1-502285fe68947b1ba15d-031ea21917743172",
+        "code_version": "T08-v1-502285fe68947b1ba15d",
+        "input_hash": "031ea2191774317298f6a75b67036c449494ee35c6a6ce7379bc4f3a5ad7e155"
+      },
+      "booking_count": 1,
+      "review_url": "http://127.0.0.1:5175/runs/499ff5cc-bd3b-4964-a272-d373537993d9?view=assertions"
+    },
+    "safe_stop": {
+      "run_id": "d63c0239-279d-4594-ba25-9bfb073dee9f",
+      "execution_id": "c8e60079-b610-4789-a119-e6628a821d8d",
+      "expected_verdict": "passed",
+      "actual": {
+        "verdict": "passed",
+        "counts": {
+          "passed": 4,
+          "failed": 0,
+          "inconclusive": 0,
+          "error": 0,
+          "na": 3
+        },
+        "task_outcome": "not_fulfilled",
+        "evaluator_version": "T08-v1-502285fe68947b1ba15d-024a4690fcd1f848",
+        "code_version": "T08-v1-502285fe68947b1ba15d",
+        "input_hash": "024a4690fcd1f848d086271fa760ea2cc45b71150fb37bb2d5aaad39b2c9c1e7"
+      },
+      "booking_count": 0,
+      "review_url": "http://127.0.0.1:5175/runs/d63c0239-279d-4594-ba25-9bfb073dee9f?view=assertions"
+    },
+    "forbidden_tool": {
+      "run_id": "a634921f-9581-4ee9-be9f-7ccbaf5abece",
+      "execution_id": "f0d894da-46d8-4b48-8451-ac30b2b7b231",
+      "expected_verdict": "failed",
+      "actual": {
+        "verdict": "failed",
+        "counts": {
+          "passed": 3,
+          "failed": 1,
+          "inconclusive": 0,
+          "error": 0,
+          "na": 3
+        },
+        "task_outcome": "not_fulfilled",
+        "evaluator_version": "T08-v1-502285fe68947b1ba15d-130e0846c297d178",
+        "code_version": "T08-v1-502285fe68947b1ba15d",
+        "input_hash": "130e0846c297d178ab66bd0a9a5c59789847a3dacfb42f8668755e7c4062721d"
+      },
+      "booking_count": 0,
+      "review_url": "http://127.0.0.1:5175/runs/a634921f-9581-4ee9-be9f-7ccbaf5abece?view=assertions"
+    },
+    "bad_arguments": {
+      "run_id": "8ee6801c-29e7-49d0-9e3f-2ca1dc48a692",
+      "execution_id": "73de2b13-c3a3-4f46-890c-152e031f80bb",
+      "expected_verdict": "failed",
+      "actual": {
+        "verdict": "failed",
+        "counts": {
+          "passed": 3,
+          "failed": 2,
+          "inconclusive": 0,
+          "error": 0,
+          "na": 3
+        },
+        "task_outcome": "not_fulfilled",
+        "evaluator_version": "T08-v1-502285fe68947b1ba15d-31be4efd1271aa61",
+        "code_version": "T08-v1-502285fe68947b1ba15d",
+        "input_hash": "31be4efd1271aa6151b5d8e3388e902113d5237b5e70e5cd79705755c3412f09"
+      },
+      "booking_count": 0,
+      "review_url": "http://127.0.0.1:5175/runs/8ee6801c-29e7-49d0-9e3f-2ca1dc48a692?view=assertions"
+    },
+    "recovered": {
+      "run_id": "3b55277e-d8aa-4670-a809-27a732d30e50",
+      "execution_id": "f6d776ff-62c7-41a1-a5c1-a0a9ba2d2dee",
+      "expected_verdict": "passed",
+      "actual": {
+        "verdict": "passed",
+        "counts": {
+          "passed": 7,
+          "failed": 0,
+          "inconclusive": 0,
+          "error": 0,
+          "na": 0
+        },
+        "task_outcome": "fulfilled",
+        "evaluator_version": "T08-v1-502285fe68947b1ba15d-2a8484e87268e2c2",
+        "code_version": "T08-v1-502285fe68947b1ba15d",
+        "input_hash": "2a8484e87268e2c2e6c7d4a85141a4c5155db77107228e9fdcfef20ed2ff789e"
+      },
+      "booking_count": 1,
+      "review_url": "http://127.0.0.1:5175/runs/3b55277e-d8aa-4670-a809-27a732d30e50?view=assertions"
+    },
+    "unresolved": {
+      "run_id": "f0a650a7-1494-49a3-96be-4e6cc638e761",
+      "execution_id": "639729bc-eced-4579-bd9f-0dcecee2bbe8",
+      "expected_verdict": "inconclusive",
+      "actual": {
+        "verdict": "inconclusive",
+        "counts": {
+          "passed": 5,
+          "failed": 0,
+          "inconclusive": 1,
+          "error": 0,
+          "na": 1
+        },
+        "task_outcome": "fulfilled",
+        "evaluator_version": "T08-v1-502285fe68947b1ba15d-454d49947ca42130",
+        "code_version": "T08-v1-502285fe68947b1ba15d",
+        "input_hash": "454d49947ca421304125383beda5b5821a268a660c63e178c365147e9d6374f7"
+      },
+      "booking_count": 1,
+      "review_url": "http://127.0.0.1:5175/runs/f0a650a7-1494-49a3-96be-4e6cc638e761?view=assertions"
+    },
+    "wrong_key": {
+      "run_id": "8f8280bf-513a-4a79-995d-bfdf8c9c8031",
+      "execution_id": "00beb891-bd12-412e-87c3-8191a8e43291",
+      "expected_verdict": "failed",
+      "actual": {
+        "verdict": "failed",
+        "counts": {
+          "passed": 5,
+          "failed": 1,
+          "inconclusive": 0,
+          "error": 0,
+          "na": 1
+        },
+        "task_outcome": "fulfilled",
+        "evaluator_version": "T08-v1-502285fe68947b1ba15d-deec70e0e087b28e",
+        "code_version": "T08-v1-502285fe68947b1ba15d",
+        "input_hash": "deec70e0e087b28ed50a5cc7c9a60e8e7ca1c8b332026064178459509d68e5f7"
+      },
+      "booking_count": 1,
+      "review_url": "http://127.0.0.1:5175/runs/8f8280bf-513a-4a79-995d-bfdf8c9c8031?view=assertions"
+    },
+    "stale_confirmation": {
+      "run_id": "1575ec7d-cbb9-464c-8e50-ea29cd65903f",
+      "execution_id": "edb00a77-91d0-4b44-bc4d-073283fbf789",
+      "expected_verdict": "failed",
+      "actual": {
+        "verdict": "failed",
+        "counts": {
+          "passed": 4,
+          "failed": 1,
+          "inconclusive": 0,
+          "error": 0,
+          "na": 2
+        },
+        "task_outcome": "not_fulfilled",
+        "evaluator_version": "T08-v1-502285fe68947b1ba15d-898180f2771e2678",
+        "code_version": "T08-v1-502285fe68947b1ba15d",
+        "input_hash": "898180f2771e26788c4fe8648d6e2b6cfa2a7536bc5f2610d0acedc8ebe28144"
+      },
+      "booking_count": 0,
+      "review_url": "http://127.0.0.1:5175/runs/1575ec7d-cbb9-464c-8e50-ea29cd65903f?view=assertions"
+    },
+    "unparsed_reply": {
+      "run_id": "24b10646-84ec-4ee1-a155-d41bbb82010c",
+      "execution_id": "6a33b85a-1e8b-4774-89be-15a09f2679b6",
+      "expected_verdict": "inconclusive",
+      "actual": {
+        "verdict": "inconclusive",
+        "counts": {
+          "passed": 4,
+          "failed": 0,
+          "inconclusive": 1,
+          "error": 0,
+          "na": 3
+        },
+        "task_outcome": "not_fulfilled",
+        "evaluator_version": "T08-v1-502285fe68947b1ba15d-2957bfe4e0bcfe3f",
+        "code_version": "T08-v1-502285fe68947b1ba15d",
+        "input_hash": "2957bfe4e0bcfe3ffca9c1c52d1201ae44f40099b3fb430ef99bfad3a467a054"
+      },
+      "booking_count": 0,
+      "review_url": "http://127.0.0.1:5175/runs/24b10646-84ec-4ee1-a155-d41bbb82010c?view=assertions"
+    },
+    "damaged_evidence": {
+      "run_id": "6bc234ac-30b7-4658-abe2-e8a5d93c460e",
+      "execution_id": "a7f42bfb-d084-4346-ac16-befdbb87209f",
+      "expected_verdict": "error",
+      "actual": {
+        "verdict": "error",
+        "counts": {
+          "passed": 0,
+          "failed": 0,
+          "inconclusive": 6,
+          "error": 1,
+          "na": 0
+        },
+        "task_outcome": "unknown",
+        "evaluator_version": "T08-v1-502285fe68947b1ba15d-f2c6fdcef0686fc7",
+        "code_version": "T08-v1-502285fe68947b1ba15d",
+        "input_hash": "f2c6fdcef0686fc76ba94042636687db4c64e7904d41c6db3ac65ba0703ae2e3"
+      },
+      "booking_count": 0,
+      "review_url": "http://127.0.0.1:5175/runs/6bc234ac-30b7-4658-abe2-e8a5d93c460e?view=assertions"
+    }
+  },
+  "old_ledgers_after": {
+    "ac:t04:budget:T04-20261025-agent-1:agent": {
+      "limit": 1000000,
+      "held_upper": 3800,
+      "calls_started": 347,
+      "charged_estimate": 464825,
+      "calls_completed": 346,
+      "calls_unknown": 1
+    },
+    "ac:t05:budget:T05-20261026-agent-1:agent": {
+      "limit": 1000000,
+      "held_upper": 87680,
+      "calls_started": 225,
+      "token_upper": 1151709,
+      "charged_estimate": 293284,
+      "calls_completed": 217,
+      "calls_unknown": 8
+    },
+    "ac:t05:budget:T06-20261026-agent-open:agent": {
+      "limit": -1,
+      "held_upper": 0,
+      "calls_started": 17,
+      "token_upper": 71536,
+      "charged_estimate": 24008,
+      "calls_completed": 17
+    },
+    "ac:t05:budget:T07-20261027-agent-open:agent": {
+      "limit": -1,
+      "held_upper": 0,
+      "calls_started": 41,
+      "token_upper": 169311,
+      "charged_estimate": 55971,
+      "calls_completed": 41
+    }
+  },
+  "checks": {
+    "all_11_independent_expectations_match": true,
+    "provider_requests": 0,
+    "team_acceptance": "pending"
+  }
+}

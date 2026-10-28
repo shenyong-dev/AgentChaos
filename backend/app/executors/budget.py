@@ -16,11 +16,17 @@ from app.executors.control import locked_pair
 
 AUTHORIZATION = "T05-20261026-agent-1"
 OPEN_AUTHORIZATION = "T06-20261026-agent-open"
+FAULT_AUTHORIZATION = "T07-20261027-agent-open"
+DIALOGUE_AUTHORIZATION = "T09-20261028-agent-open"
 
 
 def authorization_limit(settings):
     """-1 explicitly means the user's open T06 approval; zero never means unlimited."""
-    if settings.executor_budget_authorization_id == OPEN_AUTHORIZATION:
+    if settings.executor_budget_authorization_id in (
+        OPEN_AUTHORIZATION,
+        FAULT_AUTHORIZATION,
+        DIALOGUE_AUTHORIZATION,
+    ):
         return -1 if settings.executor_agent_budget_unlimited else 0
     if (
         settings.executor_budget_authorization_id == AUTHORIZATION

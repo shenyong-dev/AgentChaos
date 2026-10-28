@@ -1,0 +1,89 @@
+ 
+ -------------- t07-worker2@a0665a9053ef v5.6.3 (recovery)
+--- ***** ----- 
+-- ******* ---- Linux-6.18.40.1-microsoft-standard-WSL2-x86_64-with-glibc2.41 2026-10-27 10:41:38
+- *** --- * --- 
+- ** ---------- [config]
+- ** ---------- .> app:         agentchaos:0x7c6c84a4a870
+- ** ---------- .> transport:   redis://:**@host.docker.internal:16380/0
+- ** ---------- .> results:     disabled://
+- *** --- * --- .> concurrency: 1 (prefork)
+-- ******* ---- .> task events: OFF (enable -E to monitor tasks in this worker)
+--- ***** ----- 
+ -------------- [queues]
+                .> t07-ba63c1b83a91 exchange=t07-ba63c1b83a91(direct) key=t07-ba63c1b83a91
+                
+
+[tasks]
+  . agentchaos.execute
+
+/workspace/AgentChaos/backend/.venv/lib/python3.12/site-packages/celery/platforms.py:811: SecurityWarning: An entry for the specified gid or egid was not found.
+We're assuming this is a potential security issue.
+
+  warnings.warn(SecurityWarning(ASSUMING_ROOT))
+/workspace/AgentChaos/backend/.venv/lib/python3.12/site-packages/celery/platforms.py:841: SecurityWarning: You're running the worker with superuser privileges: this is
+absolutely not recommended!
+
+Please specify a different user using the --uid option.
+
+User information: uid=10001 euid=10001 gid=10001 egid=10001
+
+  warnings.warn(SecurityWarning(ROOT_DISCOURAGED.format(
+[2026-10-27 10:41:38,375: INFO/MainProcess] Connected to redis://:**@host.docker.internal:16380/0
+[2026-10-27 10:41:38,381: INFO/MainProcess] mingle: searching for neighbors
+[2026-10-27 10:41:39,399: INFO/MainProcess] mingle: all alone
+[2026-10-27 10:41:39,430: INFO/MainProcess] t07-worker2@a0665a9053ef ready.
+[2026-10-27 10:42:03,676: INFO/MainProcess] Task agentchaos.execute[e7a114e8-8ee4-43bc-a4bd-10fd16d4b117] received
+[2026-10-27 10:42:06,339: WARNING/ForkPoolWorker-1] /workspace/AgentChaos/backend/.venv/lib/python3.12/site-packages/jieba/__init__.py:44: SyntaxWarning: invalid escape sequence '\.'
+  re_han_default = re.compile("([\u4E00-\u9FD5a-zA-Z0-9+#&\._%\-]+)", re.U)
+
+[2026-10-27 10:42:06,339: WARNING/ForkPoolWorker-1] /workspace/AgentChaos/backend/.venv/lib/python3.12/site-packages/jieba/__init__.py:46: SyntaxWarning: invalid escape sequence '\s'
+  re_skip_default = re.compile("(\r\n|\s)", re.U)
+
+[2026-10-27 10:42:06,344: WARNING/ForkPoolWorker-1] /workspace/AgentChaos/backend/.venv/lib/python3.12/site-packages/jieba/finalseg/__init__.py:78: SyntaxWarning: invalid escape sequence '\.'
+  re_skip = re.compile("([a-zA-Z0-9]+(?:\.\d+)?%?)")
+
+[2026-10-27 10:42:09,861: INFO/ForkPoolWorker-1] Redis client is a standalone client
+[2026-10-27 10:42:09,862: INFO/ForkPoolWorker-1] Index already exists, not overwriting.
+[2026-10-27 10:42:09,863: INFO/ForkPoolWorker-1] Index already exists, not overwriting.
+[2026-10-27 10:42:11,225: INFO/ForkPoolWorker-1] HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+[2026-10-27 10:42:12,850: INFO/ForkPoolWorker-1] HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+[2026-10-27 10:42:14,612: INFO/ForkPoolWorker-1] Task agentchaos.execute[e7a114e8-8ee4-43bc-a4bd-10fd16d4b117] succeeded in 10.935878807999984s: {'claimed': True, 'status': 'inconclusive'}
+[2026-10-27 10:42:19,661: INFO/MainProcess] Task agentchaos.execute[3edd30c7-d45e-4a05-91a9-4b2f3f17e715] received
+[2026-10-27 10:42:22,355: INFO/ForkPoolWorker-1] Redis client is a standalone client
+[2026-10-27 10:42:22,356: INFO/ForkPoolWorker-1] Index already exists, not overwriting.
+[2026-10-27 10:42:22,357: INFO/ForkPoolWorker-1] Index already exists, not overwriting.
+[2026-10-27 10:42:23,309: INFO/ForkPoolWorker-1] HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+[2026-10-27 10:42:25,524: INFO/ForkPoolWorker-1] HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+[2026-10-27 10:42:27,464: INFO/ForkPoolWorker-1] HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+[2026-10-27 10:42:29,332: INFO/ForkPoolWorker-1] HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+[2026-10-27 10:42:31,860: INFO/ForkPoolWorker-1] HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+[2026-10-27 10:42:33,896: INFO/ForkPoolWorker-1] HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+[2026-10-27 10:42:35,582: INFO/ForkPoolWorker-1] Task agentchaos.execute[3edd30c7-d45e-4a05-91a9-4b2f3f17e715] succeeded in 15.921213393999977s: {'claimed': True, 'status': 'waiting_input'}
+[2026-10-27 10:42:52,474: INFO/MainProcess] Task agentchaos.execute[910ebdea-b1ca-4fbb-9324-a4fcc66feb70] received
+[2026-10-27 10:42:56,658: INFO/ForkPoolWorker-1] Redis client is a standalone client
+[2026-10-27 10:42:56,660: INFO/ForkPoolWorker-1] Index already exists, not overwriting.
+[2026-10-27 10:42:56,660: INFO/ForkPoolWorker-1] Index already exists, not overwriting.
+[2026-10-27 10:42:57,890: INFO/ForkPoolWorker-1] HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+[2026-10-27 10:43:00,138: INFO/ForkPoolWorker-1] HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+[2026-10-27 10:43:02,768: INFO/ForkPoolWorker-1] HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+[2026-10-27 10:43:04,583: INFO/ForkPoolWorker-1] HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+[2026-10-27 10:43:06,580: INFO/ForkPoolWorker-1] HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+[2026-10-27 10:43:08,434: INFO/ForkPoolWorker-1] Task agentchaos.execute[910ebdea-b1ca-4fbb-9324-a4fcc66feb70] succeeded in 15.959533632000017s: {'claimed': True, 'status': 'waiting_input'}
+[2026-10-27 10:43:10,356: INFO/MainProcess] Task agentchaos.execute[546f89e0-94ba-49fb-be2b-e40b21b620e9] received
+[2026-10-27 10:43:16,316: INFO/ForkPoolWorker-1] Redis client is a standalone client
+[2026-10-27 10:43:16,317: INFO/ForkPoolWorker-1] Index already exists, not overwriting.
+[2026-10-27 10:43:16,318: INFO/ForkPoolWorker-1] Index already exists, not overwriting.
+[2026-10-27 10:43:17,488: INFO/ForkPoolWorker-1] HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+[2026-10-27 10:43:19,561: INFO/ForkPoolWorker-1] HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+[2026-10-27 10:43:21,078: INFO/ForkPoolWorker-1] HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+[2026-10-27 10:43:22,956: INFO/ForkPoolWorker-1] Task agentchaos.execute[546f89e0-94ba-49fb-be2b-e40b21b620e9] succeeded in 12.600995464999983s: {'claimed': True, 'status': 'waiting_input'}
+[2026-10-27 10:43:25,984: INFO/MainProcess] Task agentchaos.execute[ba2d4980-9b67-4f66-b67b-4ef3e327c519] received
+[2026-10-27 10:43:28,585: INFO/ForkPoolWorker-1] Redis client is a standalone client
+[2026-10-27 10:43:28,586: INFO/ForkPoolWorker-1] Index already exists, not overwriting.
+[2026-10-27 10:43:28,588: INFO/ForkPoolWorker-1] Index already exists, not overwriting.
+[2026-10-27 10:43:29,643: INFO/ForkPoolWorker-1] HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+[2026-10-27 10:43:31,285: INFO/ForkPoolWorker-1] HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+[2026-10-27 10:43:33,003: INFO/ForkPoolWorker-1] HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+[2026-10-27 10:43:34,934: INFO/ForkPoolWorker-1] HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+[2026-10-27 10:43:36,542: INFO/ForkPoolWorker-1] Task agentchaos.execute[ba2d4980-9b67-4f66-b67b-4ef3e327c519] succeeded in 10.55722580500003s: {'claimed': True, 'status': 'inconclusive'}

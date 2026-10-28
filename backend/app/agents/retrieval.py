@@ -3,6 +3,7 @@
 import hashlib
 import json
 import logging
+import math
 import re
 from datetime import datetime
 from importlib.metadata import version
@@ -63,6 +64,8 @@ class KnowledgeRetriever:
                 }
                 for row in session.scalars(query)
             ]
+        if document_ids is not None and {d["id"] for d in self.documents} != set(document_ids):
+            raise AgentError("knowledge_not_ready", "冻结规则修订不完整，拒绝替换为其他版本。", 503)
         if not self.documents:
             raise AgentError("knowledge_not_ready", "未找到冻结的实验规则修订。", 503)
         self.chunks = []
@@ -87,16 +90,27 @@ class KnowledgeRetriever:
                             "chunk_hash": digest(text),
                         }
                     )
+        if not self.chunks:
+            raise AgentError("knowledge_not_ready", "规则修订没有可检索条款。", 503)
         corpus = [self.tokens(chunk["text"]) for chunk in self.chunks]
         self.corpus = corpus
         self.bm25 = BM25Okapi(corpus, k1=1.5, b=0.75, epsilon=0.25)
+        # Okapi's epsilon * average_idf can remain negative in a tiny frozen KB.
+        # Common terms must still retrieve a sole applicable clause.
+        for token, value in self.bm25.idf.items():
+            if value <= 0:
+                frequency = sum(token in words for words in corpus)
+                self.bm25.idf[token] = math.log1p(
+                    (len(corpus) - frequency + 0.5) / (frequency + 0.5)
+                )
         base_dictionary = self.tokenizer.get_dict_file()
         try:
             base_hash = hashlib.sha256(base_dictionary.read()).hexdigest()
         finally:
             base_dictionary.close()
         self.manifest = {
-            "version": "rules-bm25-v1",
+            "version": "rules-bm25-v2",
+            "nonpositive_idf": "log1p((N-df+0.5)/(df+0.5)); positive IDF unchanged",
             "jieba": version("jieba"),
             "rank_bm25": version("rank-bm25"),
             "k1": 1.5,
@@ -178,7 +192,11 @@ class KnowledgeRetriever:
             and not re.fullmatch(r"[a-z]\d{3}|\d+", token)
         }
         weak_match = bool(matches)
-        if not meaningful or not any(meaningful & set(words) for words in self.corpus):
+        if not meaningful or not any(
+            meaningful & set(words)
+            for chunk, words in zip(self.chunks, self.corpus, strict=True)
+            if chunk["document_id"] in ids
+        ):
             matches = []
         return {
             "status": "supported"

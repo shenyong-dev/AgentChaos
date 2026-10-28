@@ -1,0 +1,105 @@
+....F
+================================== FAILURES ===================================
+_____________ test_real_tool_matrix_control_vs_four_effects[F04] ______________
+
+infra = (<app.executors.service.RunService object at 0x000002B7FFE98B90>, <app.evidence.reader.TraceReader object at 0x000002B...b818d70d867a8c', executor_lease_seconds=45, sse_max_seconds=30, sse_send_timeout_seconds=5.0, sse_max_backlog=1000), 1)
+make = <function make.<locals>.create at 0x000002B7A4A632E0>, kind = 'F04'
+
+    @pytest.mark.parametrize("kind", [None, "F01", "F02", "F03", "F04"])
+    def test_real_tool_matrix_control_vs_four_effects(infra, make, kind):
+        service, reader, redis, settings, _ = infra
+        profile = FaultService(service.engine).create(spec(kind)) if kind else None
+        gateway = OfflineGateway()
+        text = gateway.preview()
+        if kind == "F03":
+            gateway.queue.insert(2, tool("retrieve_rules", {"query": "人数容量时间确认规则"}))
+        run, execution = make(profile, [{"user": text}])
+        run_execution(service.engine, redis, settings, execution, gateway_factory=lambda *_: gateway)
+        waiting = service.read(1, run)["executions"][0]
+        assert waiting["status"] == "waiting_input", waiting
+        draft = waiting["output"]["pending_draft"]
+        gateway.confirm(waiting["output"])
+        if kind == "F04":
+            gateway.queue.insert(
+                1,
+                tool(
+                    "lookup_booking_by_request", {"idempotency_key": draft["suggested_idempotency_key"]}
+                ),
+            )
+        service.supply_input(
+            1,
+            run,
+            execution,
+            ExecutionInput(
+                request_id=uuid4(), expected_revision=waiting["timing"]["revision"], text="确认"
+            ),
+        )
+        run_execution(service.engine, redis, settings, execution, gateway_factory=lambda *_: gateway)
+        done = service.read(1, run)["executions"][0]
+        facts = events(reader, run)
+        injected = [f for f in facts if f["type"] == "fault.injected"]
+        assert len(injected) == int(kind is not None)
+        assert len(done["after"]) == int(kind not in ("F01", "F02")), done
+        assert done["status"] == ("waiting_input" if kind in ("F01", "F02") else "inconclusive")
+        if kind:
+            fact = injected[0]
+            payload = fact["payload"]
+            assert done["timing"]["faults"]["injected"] == 1
+            requested = next(f for f in facts if f["event_id"] == fact["parent_event_id"])
+            assert (
+                requested["type"] == "tool.requested"
+                and requested["tool_call_id"] == fact["tool_call_id"]
+            )
+            returned = next(
+                f
+                for f in facts
+                if f["type"] in ("tool.completed", "tool.error")
+                and f["payload"].get("fault_event_id") == fact["event_id"]
+            )
+            assert returned["payload"]["visible_result"] == payload["visible_result"]
+            if kind == "F01":
+                assert payload["raw_result"] is None and not payload["dispatched"]
+            if kind == "F02":
+                assert payload["dispatched"] and len(payload["rollback_probe"]) == 1
+                assert payload["after"] == payload["before"] == []
+                assert payload["visible_result"]["http_status"] == 503
+            if kind == "F03":
+                assert isinstance(payload["raw_result"], dict)
+                with pytest.raises(json.JSONDecodeError):
+                    json.loads(payload["visible_result"])
+                assert any(
+                    isinstance(m, ToolMessage) and m.content == payload["visible_result"]
+                    for call in gateway.calls
+                    for m in call
+                )
+            if kind == "F04":
+                assert payload["raw_result"]["commit_state"] == "committed"
+                assert payload["visible_result"]["commit_state"] == "unknown"
+                assert len(payload["after"]) == 1
+                assert any(
+                    f["payload"].get("tool") == "lookup_booking_by_request"
+                    and f["payload"].get("arguments", {}).get("idempotency_key")
+                    == draft["suggested_idempotency_key"]
+                    for f in facts
+                    if f["type"] == "tool.requested"
+                )
+                booking_id = payload["raw_result"]["data"]["booking_id"]
+                for call in gateway.calls:
+                    if any(
+                        isinstance(m, ToolMessage) and '"code": "response_lost"' in m.content
+                        for m in call
+                    ):
+>                       assert booking_id not in call[0].content
+E                       assert 'd964629a-b8...db3d97186305' not in '你是AgentChao...97186305"}]}'
+E                         
+E                         'd964629a-b825-480d-97bc-db3d97186305' is contained here:
+E                         ?           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E                           ing_id": "d964629a-b825-480d-97bc-db3d97186305", "draft_id": "92154e0f-e0a3-4621-b72d-071fd883d6de", "idempotency_key": "92154e0f-e0a3-4621-b72d-071fd883d6de", "room_code": "A101", "start_at": "2026-10-26T06:00:00Z", "end_at": "2026-10-26T07:00:00Z", "attendees": 10, "status": "confirmed", "created_at": "2026-10-27T10:31:12.764134Z"}, "request_key": "92154e0f-e0a3-4621-b72d-071fd883d6de", "retryable": false, "commit_state": "committed", "evidence_...
+E                         
+E                         ...Full output truncated (2 lines hidden), use '-vv' to show
+
+backend\tests\test_faults.py:211: AssertionError
+=========================== short test summary info ===========================
+FAILED backend\tests\test_faults.py::test_real_tool_matrix_control_vs_four_effects[F04]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 4 passed in 21.63s

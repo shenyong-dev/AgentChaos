@@ -1,0 +1,2219 @@
+{
+  "fields": {
+    "date": {
+      "value": "2026-10-29",
+      "source_turn": 1,
+      "source_quote": "明天",
+      "source_kind": "validated_model_extraction"
+    },
+    "start_time": {
+      "value": "14:00",
+      "source_turn": 1,
+      "source_quote": "14:00",
+      "source_kind": "validated_model_extraction"
+    },
+    "end_time": {
+      "value": "15:00",
+      "source_turn": 1,
+      "source_quote": "15:00",
+      "source_kind": "validated_model_extraction"
+    },
+    "attendees": {
+      "value": 10,
+      "source_turn": 1,
+      "source_quote": "10人",
+      "source_kind": "validated_model_extraction"
+    },
+    "room_code": {
+      "value": "A101",
+      "source_turn": 1,
+      "source_quote": "A101",
+      "source_kind": "validated_model_extraction"
+    }
+  },
+  "denials": [],
+  "confirmation_state": "idle",
+  "compactions": 10,
+  "unknown_submission": null,
+  "business_result": {
+    "status": "ok",
+    "code": "booking_confirmed",
+    "summary": "已查到原预约事实。",
+    "data": {
+      "booking_id": "f8e32c15-76cc-43f3-a9cd-3f9e45430f02",
+      "draft_id": "7ca89da4-d794-4da5-945c-aa18c82247a2",
+      "idempotency_key": "7ca89da4-d794-4da5-945c-aa18c82247a2",
+      "room_code": "A101",
+      "start_at": "2026-10-29T06:00:00Z",
+      "end_at": "2026-10-29T07:00:00Z",
+      "attendees": 10,
+      "status": "confirmed",
+      "created_at": "2026-10-28T05:33:39.545067Z"
+    },
+    "request_key": "7ca89da4-d794-4da5-945c-aa18c82247a2",
+    "retryable": false,
+    "commit_state": "committed",
+    "evidence_refs": [
+      "booking:f8e32c15-76cc-43f3-a9cd-3f9e45430f02"
+    ]
+  },
+  "retrieval_result": {
+    "status": "supported",
+    "query": "场地预约 使用规则 人数容量 预约时长 费用 A101",
+    "query_tokens": [
+      "使用",
+      "人数",
+      "容量",
+      "时长",
+      "费用",
+      "a101"
+    ],
+    "index_hash": "01595677995f6362558436aaf76c4b51a94e75ffb146ef99c5b2728c62f1689e",
+    "chunks": [
+      {
+        "chunk_id": "booking-rules:r1:a6a1d61710a23b82",
+        "text": "场地与开放时间\nA101 容量 20 人，09:00—21:00 开放。",
+        "document_id": 1,
+        "source_ref": "knowledge/booking-rules-v1.md",
+        "document_revision": 1,
+        "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+        "chunk_hash": "a6a1d61710a23b8238708459a7e2ec039e1f3c4b37a79582a042301d8a627cb6",
+        "score": 3.536451
+      },
+      {
+        "chunk_id": "booking-rules:r1:33c2956d0aaa6e9f",
+        "text": "时间与人数\n时间按 30 分钟对齐，单次时长为 30—120 分钟。",
+        "document_id": 1,
+        "source_ref": "knowledge/booking-rules-v1.md",
+        "document_revision": 1,
+        "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+        "chunk_hash": "33c2956d0aaa6e9f9a294cd1bc3889a3e6a4f8e2c57c6e825e471f692391cdef",
+        "score": 2.658714
+      },
+      {
+        "chunk_id": "booking-rules:r1:edb26cf7def90d5d",
+        "text": "失败与查证\n写入是否成功不明确时，先按原请求标识查证或使用同一幂等键恢复。",
+        "document_id": 1,
+        "source_ref": "knowledge/booking-rules-v1.md",
+        "document_revision": 1,
+        "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+        "chunk_hash": "edb26cf7def90d5da44defb843dc498da5034751ed707a4f5bb910d205614c47",
+        "score": 1.9317
+      }
+    ]
+  },
+  "audit": [
+    {
+      "type": "model",
+      "call_id": "ce914be4-376a-4170-9b9a-1a65b24da521",
+      "source_turn": 1,
+      "usage": {
+        "input_tokens": 2769,
+        "output_tokens": 181,
+        "total_tokens": 2950,
+        "input_token_details": {
+          "cache_read": 768
+        },
+        "output_token_details": {}
+      },
+      "estimated_peak_microusd": 1048,
+      "model_returned": "deepseek-flash",
+      "streamed": true,
+      "model_requests": 1
+    },
+    {
+      "type": "tool",
+      "name": "update_booking_request",
+      "arguments": {
+        "date": "2026-10-29",
+        "start_time": "14:00",
+        "end_time": "15:00",
+        "attendees": 10,
+        "room_code": "A101",
+        "source_quotes": {
+          "date": "明天",
+          "start_time": "14:00",
+          "end_time": "15:00",
+          "attendees": "10人",
+          "room_code": "A101"
+        }
+      },
+      "result": {
+        "status": "ok",
+        "fields": {
+          "date": {
+            "value": "2026-10-29",
+            "source_turn": 1,
+            "source_quote": "明天",
+            "source_kind": "validated_model_extraction"
+          },
+          "start_time": {
+            "value": "14:00",
+            "source_turn": 1,
+            "source_quote": "14:00",
+            "source_kind": "validated_model_extraction"
+          },
+          "end_time": {
+            "value": "15:00",
+            "source_turn": 1,
+            "source_quote": "15:00",
+            "source_kind": "validated_model_extraction"
+          },
+          "attendees": {
+            "value": 10,
+            "source_turn": 1,
+            "source_quote": "10人",
+            "source_kind": "validated_model_extraction"
+          },
+          "room_code": {
+            "value": "A101",
+            "source_turn": 1,
+            "source_quote": "A101",
+            "source_kind": "validated_model_extraction"
+          }
+        },
+        "changed": true
+      },
+      "evidence_id": "684147e0-2fa4-493e-af63-987057bfc8e3",
+      "source_turn": 1
+    },
+    {
+      "type": "model",
+      "call_id": "092e0ca7-8b38-4830-8292-3dea10229b7a",
+      "source_turn": 1,
+      "usage": {
+        "input_tokens": 3420,
+        "output_tokens": 62,
+        "total_tokens": 3482,
+        "input_token_details": {
+          "cache_read": 896
+        },
+        "output_token_details": {}
+      },
+      "estimated_peak_microusd": 1101,
+      "model_returned": "deepseek-flash",
+      "streamed": true,
+      "model_requests": 1
+    },
+    {
+      "type": "retrieval",
+      "result": {
+        "status": "supported",
+        "query": "场地预约 使用规则 人数容量 预约时长 费用 A101",
+        "query_tokens": [
+          "使用",
+          "人数",
+          "容量",
+          "时长",
+          "费用",
+          "a101"
+        ],
+        "index_hash": "01595677995f6362558436aaf76c4b51a94e75ffb146ef99c5b2728c62f1689e",
+        "chunks": [
+          {
+            "chunk_id": "booking-rules:r1:a6a1d61710a23b82",
+            "text": "场地与开放时间\nA101 容量 20 人，09:00—21:00 开放。",
+            "document_id": 1,
+            "source_ref": "knowledge/booking-rules-v1.md",
+            "document_revision": 1,
+            "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+            "chunk_hash": "a6a1d61710a23b8238708459a7e2ec039e1f3c4b37a79582a042301d8a627cb6",
+            "score": 3.536451
+          },
+          {
+            "chunk_id": "booking-rules:r1:33c2956d0aaa6e9f",
+            "text": "时间与人数\n时间按 30 分钟对齐，单次时长为 30—120 分钟。",
+            "document_id": 1,
+            "source_ref": "knowledge/booking-rules-v1.md",
+            "document_revision": 1,
+            "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+            "chunk_hash": "33c2956d0aaa6e9f9a294cd1bc3889a3e6a4f8e2c57c6e825e471f692391cdef",
+            "score": 2.658714
+          },
+          {
+            "chunk_id": "booking-rules:r1:edb26cf7def90d5d",
+            "text": "失败与查证\n写入是否成功不明确时，先按原请求标识查证或使用同一幂等键恢复。",
+            "document_id": 1,
+            "source_ref": "knowledge/booking-rules-v1.md",
+            "document_revision": 1,
+            "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+            "chunk_hash": "edb26cf7def90d5da44defb843dc498da5034751ed707a4f5bb910d205614c47",
+            "score": 1.9317
+          }
+        ]
+      },
+      "source_turn": 1
+    },
+    {
+      "type": "tool",
+      "name": "retrieve_rules",
+      "arguments": {
+        "query": "场地预约 使用规则 人数容量 预约时长 费用 A101"
+      },
+      "result": {
+        "status": "supported",
+        "query": "场地预约 使用规则 人数容量 预约时长 费用 A101",
+        "query_tokens": [
+          "使用",
+          "人数",
+          "容量",
+          "时长",
+          "费用",
+          "a101"
+        ],
+        "index_hash": "01595677995f6362558436aaf76c4b51a94e75ffb146ef99c5b2728c62f1689e",
+        "chunks": [
+          {
+            "chunk_id": "booking-rules:r1:a6a1d61710a23b82",
+            "text": "场地与开放时间\nA101 容量 20 人，09:00—21:00 开放。",
+            "document_id": 1,
+            "source_ref": "knowledge/booking-rules-v1.md",
+            "document_revision": 1,
+            "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+            "chunk_hash": "a6a1d61710a23b8238708459a7e2ec039e1f3c4b37a79582a042301d8a627cb6",
+            "score": 3.536451
+          },
+          {
+            "chunk_id": "booking-rules:r1:33c2956d0aaa6e9f",
+            "text": "时间与人数\n时间按 30 分钟对齐，单次时长为 30—120 分钟。",
+            "document_id": 1,
+            "source_ref": "knowledge/booking-rules-v1.md",
+            "document_revision": 1,
+            "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+            "chunk_hash": "33c2956d0aaa6e9f9a294cd1bc3889a3e6a4f8e2c57c6e825e471f692391cdef",
+            "score": 2.658714
+          },
+          {
+            "chunk_id": "booking-rules:r1:edb26cf7def90d5d",
+            "text": "失败与查证\n写入是否成功不明确时，先按原请求标识查证或使用同一幂等键恢复。",
+            "document_id": 1,
+            "source_ref": "knowledge/booking-rules-v1.md",
+            "document_revision": 1,
+            "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+            "chunk_hash": "edb26cf7def90d5da44defb843dc498da5034751ed707a4f5bb910d205614c47",
+            "score": 1.9317
+          }
+        ]
+      },
+      "evidence_id": "364f3eec-48c7-4017-b236-ebc90025043f",
+      "source_turn": 1
+    },
+    {
+      "type": "model",
+      "call_id": "fc52f278-c7f3-455c-8a7a-a20afc1f72f0",
+      "source_turn": 1,
+      "usage": {
+        "input_tokens": 4807,
+        "output_tokens": 177,
+        "total_tokens": 4984,
+        "input_token_details": {
+          "cache_read": 1152
+        },
+        "output_token_details": {}
+      },
+      "estimated_peak_microusd": 1655,
+      "model_returned": "deepseek-flash",
+      "streamed": true,
+      "model_requests": 1
+    },
+    {
+      "type": "tool",
+      "name": "query_availability",
+      "arguments": {
+        "start_at": "2026-10-29T14:00:00+08:00",
+        "end_at": "2026-10-29T15:00:00+08:00",
+        "attendees": 10,
+        "room_code": "A101"
+      },
+      "result": {
+        "status": "ok",
+        "code": "availability_checked",
+        "summary": "已查询当前空闲；提交时仍会重新校验。",
+        "data": {
+          "rooms": [
+            {
+              "room_code": "A101",
+              "capacity": 20
+            }
+          ],
+          "start_at": "2026-10-29T14:00:00+08:00",
+          "end_at": "2026-10-29T15:00:00+08:00",
+          "attendees": 10,
+          "truncated": false
+        },
+        "request_key": null,
+        "retryable": false,
+        "commit_state": "not_applicable",
+        "evidence_refs": []
+      },
+      "evidence_id": "4f29307f-fd84-48c7-a519-077f6ede332e",
+      "source_turn": 1
+    },
+    {
+      "type": "model",
+      "call_id": "1b4976b8-d685-41df-b87d-5286dbd1613f",
+      "source_turn": 1,
+      "usage": {
+        "input_tokens": 5192,
+        "output_tokens": 161,
+        "total_tokens": 5353,
+        "input_token_details": {
+          "cache_read": 1152
+        },
+        "output_token_details": {}
+      },
+      "estimated_peak_microusd": 1751,
+      "model_returned": "deepseek-flash",
+      "streamed": true,
+      "model_requests": 1
+    },
+    {
+      "type": "tool",
+      "name": "preview_booking",
+      "arguments": {
+        "start_at": "2026-10-29T14:00:00+08:00",
+        "end_at": "2026-10-29T15:00:00+08:00",
+        "attendees": 10,
+        "room_code": "A101"
+      },
+      "result": {
+        "status": "ok",
+        "code": "confirmation_required",
+        "summary": "请展示完整草稿并等待用户明确确认。",
+        "data": {
+          "draft_id": "7ca89da4-d794-4da5-945c-aa18c82247a2",
+          "draft_hash": "c5aa65a7ec3d719d3cf2c7085faceddd6a011597989b91c879ce7dda3f056ae8",
+          "suggested_idempotency_key": "7ca89da4-d794-4da5-945c-aa18c82247a2",
+          "room_code": "A101",
+          "start_at": "2026-10-29T14:00:00+08:00",
+          "end_at": "2026-10-29T15:00:00+08:00",
+          "attendees": 10,
+          "status": "pending",
+          "expires_at": "2026-10-28T05:38:36.226180Z"
+        },
+        "request_key": "7ca89da4-d794-4da5-945c-aa18c82247a2",
+        "retryable": false,
+        "commit_state": "not_committed",
+        "evidence_refs": [
+          "draft:7ca89da4-d794-4da5-945c-aa18c82247a2"
+        ]
+      },
+      "evidence_id": "05facf36-744f-4ce6-b1a7-c4ea82642c3d",
+      "source_turn": 1
+    },
+    {
+      "type": "model",
+      "call_id": "ea2b805b-c6bd-4f6a-bbc3-1ff501a694de",
+      "source_turn": 1,
+      "usage": {
+        "input_tokens": 5903,
+        "output_tokens": 194,
+        "total_tokens": 6097,
+        "input_token_details": {
+          "cache_read": 1024
+        },
+        "output_token_details": {}
+      },
+      "estimated_peak_microusd": 2004,
+      "model_returned": "deepseek-flash",
+      "streamed": true,
+      "model_requests": 1
+    },
+    {
+      "type": "confirmation_decision",
+      "kind": "confirm",
+      "source_turn": 2,
+      "revision": 2
+    },
+    {
+      "type": "model",
+      "call_id": "1020f6d4-a989-43c3-84a4-c7e3c6406d40",
+      "source_turn": 2,
+      "usage": {
+        "input_tokens": 6070,
+        "output_tokens": 157,
+        "total_tokens": 6227,
+        "input_token_details": {
+          "cache_read": 1024
+        },
+        "output_token_details": {}
+      },
+      "estimated_peak_microusd": 2010,
+      "model_returned": "deepseek-flash",
+      "streamed": true,
+      "model_requests": 1
+    },
+    {
+      "type": "tool",
+      "name": "confirm_booking",
+      "arguments": {
+        "draft_id": "7ca89da4-d794-4da5-945c-aa18c82247a2",
+        "draft_hash": "c5aa65a7ec3d719d3cf2c7085faceddd6a011597989b91c879ce7dda3f056ae8",
+        "idempotency_key": "7ca89da4-d794-4da5-945c-aa18c82247a2"
+      },
+      "result": {
+        "status": "ok",
+        "code": "booking_confirmed",
+        "summary": "已查到原预约事实。",
+        "data": {
+          "booking_id": "f8e32c15-76cc-43f3-a9cd-3f9e45430f02",
+          "draft_id": "7ca89da4-d794-4da5-945c-aa18c82247a2",
+          "idempotency_key": "7ca89da4-d794-4da5-945c-aa18c82247a2",
+          "room_code": "A101",
+          "start_at": "2026-10-29T06:00:00Z",
+          "end_at": "2026-10-29T07:00:00Z",
+          "attendees": 10,
+          "status": "confirmed",
+          "created_at": "2026-10-28T05:33:39.545067Z"
+        },
+        "request_key": "7ca89da4-d794-4da5-945c-aa18c82247a2",
+        "retryable": false,
+        "commit_state": "committed",
+        "evidence_refs": [
+          "booking:f8e32c15-76cc-43f3-a9cd-3f9e45430f02"
+        ]
+      },
+      "evidence_id": "d5caa5c7-0bb8-4a95-957b-24f65a06a595",
+      "source_turn": 2
+    },
+    {
+      "type": "model",
+      "call_id": "eb552f8a-66e4-4341-9f86-d5b93e7c828e",
+      "source_turn": 2,
+      "usage": {
+        "input_tokens": 6547,
+        "output_tokens": 167,
+        "total_tokens": 6714,
+        "input_token_details": {
+          "cache_read": 1024
+        },
+        "output_token_details": {}
+      },
+      "estimated_peak_microusd": 2165,
+      "model_returned": "deepseek-flash",
+      "streamed": true,
+      "model_requests": 1
+    },
+    {
+      "type": "model",
+      "call_id": "b1c44a59-b11f-4e12-b634-ebe9416095c9",
+      "source_turn": 3,
+      "usage": {
+        "input_tokens": 7767,
+        "output_tokens": 2,
+        "total_tokens": 7769,
+        "input_token_details": {
+          "cache_read": 1024
+        },
+        "output_token_details": {}
+      },
+      "estimated_peak_microusd": 2333,
+      "model_returned": "deepseek-flash",
+      "streamed": true,
+      "model_requests": 1
+    },
+    {
+      "type": "model",
+      "call_id": "4754a611-6d82-4124-942c-d7720cb4b972",
+      "source_turn": 4,
+      "usage": {
+        "input_tokens": 8886,
+        "output_tokens": 2,
+        "total_tokens": 8888,
+        "input_token_details": {
+          "cache_read": 2048
+        },
+        "output_token_details": {}
+      },
+      "estimated_peak_microusd": 2669,
+      "model_returned": "deepseek-flash",
+      "streamed": true,
+      "model_requests": 1
+    },
+    {
+      "type": "model",
+      "call_id": "1e78692c-d11c-41c1-bbe2-cdcdfdd2f843",
+      "source_turn": 5,
+      "usage": {
+        "input_tokens": 10006,
+        "output_tokens": 2,
+        "total_tokens": 10008,
+        "input_token_details": {
+          "cache_read": 2048
+        },
+        "output_token_details": {}
+      },
+      "estimated_peak_microusd": 3005,
+      "model_returned": "deepseek-flash",
+      "streamed": true,
+      "model_requests": 1
+    },
+    {
+      "type": "model",
+      "call_id": "2bc22b53-7592-4ece-b012-d2fc0bbb4040",
+      "source_turn": 6,
+      "usage": {
+        "input_tokens": 8973,
+        "output_tokens": 2,
+        "total_tokens": 8975,
+        "input_token_details": {
+          "cache_read": 2048
+        },
+        "output_token_details": {}
+      },
+      "estimated_peak_microusd": 2695,
+      "model_returned": "deepseek-flash",
+      "streamed": true,
+      "model_requests": 1
+    },
+    {
+      "type": "context_compacted",
+      "source_turn": 6,
+      "summary": {
+        "version": "structured-facts-v2",
+        "method": "conservative UTF-8 byte token upper estimate",
+        "estimated_upper_tokens": 42342,
+        "budget": 48000,
+        "dropped_from_model_context": 10,
+        "original_messages_retained": true,
+        "preserved_facts": {
+          "actor_key": "user:1",
+          "scope_id": "test:51f61481-f8cf-4978-b234-a8819dbd63fb",
+          "session_id": "6cd18009-5422-473d-a13e-eafc4fd9b069",
+          "reference_clock": "2026-10-28T09:00:00+08:00",
+          "fields": {
+            "date": {
+              "value": "2026-10-29",
+              "source_turn": 1,
+              "source_quote": "明天",
+              "source_kind": "validated_model_extraction"
+            },
+            "start_time": {
+              "value": "14:00",
+              "source_turn": 1,
+              "source_quote": "14:00",
+              "source_kind": "validated_model_extraction"
+            },
+            "end_time": {
+              "value": "15:00",
+              "source_turn": 1,
+              "source_quote": "15:00",
+              "source_kind": "validated_model_extraction"
+            },
+            "attendees": {
+              "value": 10,
+              "source_turn": 1,
+              "source_quote": "10人",
+              "source_kind": "validated_model_extraction"
+            },
+            "room_code": {
+              "value": "A101",
+              "source_turn": 1,
+              "source_quote": "A101",
+              "source_kind": "validated_model_extraction"
+            }
+          },
+          "confirmation_state": "idle",
+          "confirmation_revision": 2,
+          "pending_draft": null,
+          "grant": null,
+          "denials": [],
+          "business_result": {
+            "status": "ok",
+            "code": "booking_confirmed",
+            "summary": "已查到原预约事实。",
+            "data": {
+              "booking_id": "f8e32c15-76cc-43f3-a9cd-3f9e45430f02",
+              "draft_id": "7ca89da4-d794-4da5-945c-aa18c82247a2",
+              "idempotency_key": "7ca89da4-d794-4da5-945c-aa18c82247a2",
+              "room_code": "A101",
+              "start_at": "2026-10-29T06:00:00Z",
+              "end_at": "2026-10-29T07:00:00Z",
+              "attendees": 10,
+              "status": "confirmed",
+              "created_at": "2026-10-28T05:33:39.545067Z"
+            },
+            "request_key": "7ca89da4-d794-4da5-945c-aa18c82247a2",
+            "retryable": false,
+            "commit_state": "committed",
+            "evidence_refs": [
+              "booking:f8e32c15-76cc-43f3-a9cd-3f9e45430f02"
+            ]
+          },
+          "business_history": [],
+          "unknown_submission": null,
+          "candidate_rooms": [
+            {
+              "room_code": "A101",
+              "capacity": 20
+            }
+          ],
+          "retrieval_result": {
+            "status": "supported",
+            "query": "场地预约 使用规则 人数容量 预约时长 费用 A101",
+            "query_tokens": [
+              "使用",
+              "人数",
+              "容量",
+              "时长",
+              "费用",
+              "a101"
+            ],
+            "index_hash": "01595677995f6362558436aaf76c4b51a94e75ffb146ef99c5b2728c62f1689e",
+            "chunks": [
+              {
+                "chunk_id": "booking-rules:r1:a6a1d61710a23b82",
+                "text": "场地与开放时间\nA101 容量 20 人，09:00—21:00 开放。",
+                "document_id": 1,
+                "source_ref": "knowledge/booking-rules-v1.md",
+                "document_revision": 1,
+                "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                "chunk_hash": "a6a1d61710a23b8238708459a7e2ec039e1f3c4b37a79582a042301d8a627cb6",
+                "score": 3.536451
+              },
+              {
+                "chunk_id": "booking-rules:r1:33c2956d0aaa6e9f",
+                "text": "时间与人数\n时间按 30 分钟对齐，单次时长为 30—120 分钟。",
+                "document_id": 1,
+                "source_ref": "knowledge/booking-rules-v1.md",
+                "document_revision": 1,
+                "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                "chunk_hash": "33c2956d0aaa6e9f9a294cd1bc3889a3e6a4f8e2c57c6e825e471f692391cdef",
+                "score": 2.658714
+              },
+              {
+                "chunk_id": "booking-rules:r1:edb26cf7def90d5d",
+                "text": "失败与查证\n写入是否成功不明确时，先按原请求标识查证或使用同一幂等键恢复。",
+                "document_id": 1,
+                "source_ref": "knowledge/booking-rules-v1.md",
+                "document_revision": 1,
+                "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                "chunk_hash": "edb26cf7def90d5da44defb843dc498da5034751ed707a4f5bb910d205614c47",
+                "score": 1.9317
+              }
+            ]
+          },
+          "original_history": {
+            "message_count": 21,
+            "first_id": "12fc295f-2948-5fc5-afce-db441132b6e5",
+            "last_id": "0653f58c-ec21-5fdb-9a8e-6c419e5327cf"
+          },
+          "current_turn": 6,
+          "executed_tools_this_turn": []
+        },
+        "selected_message_ids": [
+          "b7f7366e-ed7f-5039-bd0d-c28a8fd83ebd",
+          "lc_run--01a180ff-ed50-76a5-9bcd-528d82609b4e",
+          "d6d11cf9-f6fd-415e-94ec-8c26e698291d",
+          "lc_run--01a180ff-f1f3-72f9-a0bf-7b0db4d8c2d2",
+          "54194e05-628e-5ef9-b855-49a2e4efad02",
+          "lc_run--01a180ff-f7f5-70f8-9e92-23fd30ec70ca",
+          "fde5ae5c-bb5d-5af2-b43e-357b406980ca",
+          "lc_run--01a180ff-fc09-771a-9755-5ce0fd942d82",
+          "51a0a3e1-9a3e-5608-986b-44e088ad80ca",
+          "lc_run--01a180ff-ffb5-7295-b004-c7bb93ba7caa",
+          "0653f58c-ec21-5fdb-9a8e-6c419e5327cf"
+        ]
+      }
+    },
+    {
+      "type": "model",
+      "call_id": "5767c5d4-fe99-4b90-8093-21e911393c74",
+      "source_turn": 7,
+      "usage": {
+        "input_tokens": 9469,
+        "output_tokens": 2,
+        "total_tokens": 9471,
+        "input_token_details": {
+          "cache_read": 2048
+        },
+        "output_token_details": {}
+      },
+      "estimated_peak_microusd": 2844,
+      "model_returned": "deepseek-flash",
+      "streamed": true,
+      "model_requests": 1
+    },
+    {
+      "type": "context_compacted",
+      "source_turn": 7,
+      "summary": {
+        "version": "structured-facts-v2",
+        "method": "conservative UTF-8 byte token upper estimate",
+        "estimated_upper_tokens": 45980,
+        "budget": 48000,
+        "dropped_from_model_context": 14,
+        "original_messages_retained": true,
+        "preserved_facts": {
+          "actor_key": "user:1",
+          "scope_id": "test:51f61481-f8cf-4978-b234-a8819dbd63fb",
+          "session_id": "6cd18009-5422-473d-a13e-eafc4fd9b069",
+          "reference_clock": "2026-10-28T09:00:00+08:00",
+          "fields": {
+            "date": {
+              "value": "2026-10-29",
+              "source_turn": 1,
+              "source_quote": "明天",
+              "source_kind": "validated_model_extraction"
+            },
+            "start_time": {
+              "value": "14:00",
+              "source_turn": 1,
+              "source_quote": "14:00",
+              "source_kind": "validated_model_extraction"
+            },
+            "end_time": {
+              "value": "15:00",
+              "source_turn": 1,
+              "source_quote": "15:00",
+              "source_kind": "validated_model_extraction"
+            },
+            "attendees": {
+              "value": 10,
+              "source_turn": 1,
+              "source_quote": "10人",
+              "source_kind": "validated_model_extraction"
+            },
+            "room_code": {
+              "value": "A101",
+              "source_turn": 1,
+              "source_quote": "A101",
+              "source_kind": "validated_model_extraction"
+            }
+          },
+          "confirmation_state": "idle",
+          "confirmation_revision": 2,
+          "pending_draft": null,
+          "grant": null,
+          "denials": [],
+          "business_result": {
+            "status": "ok",
+            "code": "booking_confirmed",
+            "summary": "已查到原预约事实。",
+            "data": {
+              "booking_id": "f8e32c15-76cc-43f3-a9cd-3f9e45430f02",
+              "draft_id": "7ca89da4-d794-4da5-945c-aa18c82247a2",
+              "idempotency_key": "7ca89da4-d794-4da5-945c-aa18c82247a2",
+              "room_code": "A101",
+              "start_at": "2026-10-29T06:00:00Z",
+              "end_at": "2026-10-29T07:00:00Z",
+              "attendees": 10,
+              "status": "confirmed",
+              "created_at": "2026-10-28T05:33:39.545067Z"
+            },
+            "request_key": "7ca89da4-d794-4da5-945c-aa18c82247a2",
+            "retryable": false,
+            "commit_state": "committed",
+            "evidence_refs": [
+              "booking:f8e32c15-76cc-43f3-a9cd-3f9e45430f02"
+            ]
+          },
+          "business_history": [],
+          "unknown_submission": null,
+          "candidate_rooms": [
+            {
+              "room_code": "A101",
+              "capacity": 20
+            }
+          ],
+          "retrieval_result": {
+            "status": "supported",
+            "query": "场地预约 使用规则 人数容量 预约时长 费用 A101",
+            "query_tokens": [
+              "使用",
+              "人数",
+              "容量",
+              "时长",
+              "费用",
+              "a101"
+            ],
+            "index_hash": "01595677995f6362558436aaf76c4b51a94e75ffb146ef99c5b2728c62f1689e",
+            "chunks": [
+              {
+                "chunk_id": "booking-rules:r1:a6a1d61710a23b82",
+                "text": "场地与开放时间\nA101 容量 20 人，09:00—21:00 开放。",
+                "document_id": 1,
+                "source_ref": "knowledge/booking-rules-v1.md",
+                "document_revision": 1,
+                "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                "chunk_hash": "a6a1d61710a23b8238708459a7e2ec039e1f3c4b37a79582a042301d8a627cb6",
+                "score": 3.536451
+              },
+              {
+                "chunk_id": "booking-rules:r1:33c2956d0aaa6e9f",
+                "text": "时间与人数\n时间按 30 分钟对齐，单次时长为 30—120 分钟。",
+                "document_id": 1,
+                "source_ref": "knowledge/booking-rules-v1.md",
+                "document_revision": 1,
+                "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                "chunk_hash": "33c2956d0aaa6e9f9a294cd1bc3889a3e6a4f8e2c57c6e825e471f692391cdef",
+                "score": 2.658714
+              },
+              {
+                "chunk_id": "booking-rules:r1:edb26cf7def90d5d",
+                "text": "失败与查证\n写入是否成功不明确时，先按原请求标识查证或使用同一幂等键恢复。",
+                "document_id": 1,
+                "source_ref": "knowledge/booking-rules-v1.md",
+                "document_revision": 1,
+                "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                "chunk_hash": "edb26cf7def90d5da44defb843dc498da5034751ed707a4f5bb910d205614c47",
+                "score": 1.9317
+              }
+            ]
+          },
+          "original_history": {
+            "message_count": 23,
+            "first_id": "12fc295f-2948-5fc5-afce-db441132b6e5",
+            "last_id": "80bf098d-bb57-5348-936b-da88b9463fb8"
+          },
+          "current_turn": 7,
+          "executed_tools_this_turn": []
+        },
+        "selected_message_ids": [
+          "54194e05-628e-5ef9-b855-49a2e4efad02",
+          "lc_run--01a180ff-f7f5-70f8-9e92-23fd30ec70ca",
+          "fde5ae5c-bb5d-5af2-b43e-357b406980ca",
+          "lc_run--01a180ff-fc09-771a-9755-5ce0fd942d82",
+          "51a0a3e1-9a3e-5608-986b-44e088ad80ca",
+          "lc_run--01a180ff-ffb5-7295-b004-c7bb93ba7caa",
+          "0653f58c-ec21-5fdb-9a8e-6c419e5327cf",
+          "lc_run--01a18100-0385-70ee-86d8-4d6af76d71bd",
+          "80bf098d-bb57-5348-936b-da88b9463fb8"
+        ]
+      }
+    },
+    {
+      "type": "model",
+      "call_id": "f4aa966d-3e51-4f91-9ada-a006c7a74d11",
+      "source_turn": 8,
+      "usage": {
+        "input_tokens": 9472,
+        "output_tokens": 2,
+        "total_tokens": 9474,
+        "input_token_details": {
+          "cache_read": 2048
+        },
+        "output_token_details": {}
+      },
+      "estimated_peak_microusd": 2844,
+      "model_returned": "deepseek-flash",
+      "streamed": true,
+      "model_requests": 1
+    },
+    {
+      "type": "context_compacted",
+      "source_turn": 8,
+      "summary": {
+        "version": "structured-facts-v2",
+        "method": "conservative UTF-8 byte token upper estimate",
+        "estimated_upper_tokens": 45980,
+        "budget": 48000,
+        "dropped_from_model_context": 16,
+        "original_messages_retained": true,
+        "preserved_facts": {
+          "actor_key": "user:1",
+          "scope_id": "test:51f61481-f8cf-4978-b234-a8819dbd63fb",
+          "session_id": "6cd18009-5422-473d-a13e-eafc4fd9b069",
+          "reference_clock": "2026-10-28T09:00:00+08:00",
+          "fields": {
+            "date": {
+              "value": "2026-10-29",
+              "source_turn": 1,
+              "source_quote": "明天",
+              "source_kind": "validated_model_extraction"
+            },
+            "start_time": {
+              "value": "14:00",
+              "source_turn": 1,
+              "source_quote": "14:00",
+              "source_kind": "validated_model_extraction"
+            },
+            "end_time": {
+              "value": "15:00",
+              "source_turn": 1,
+              "source_quote": "15:00",
+              "source_kind": "validated_model_extraction"
+            },
+            "attendees": {
+              "value": 10,
+              "source_turn": 1,
+              "source_quote": "10人",
+              "source_kind": "validated_model_extraction"
+            },
+            "room_code": {
+              "value": "A101",
+              "source_turn": 1,
+              "source_quote": "A101",
+              "source_kind": "validated_model_extraction"
+            }
+          },
+          "confirmation_state": "idle",
+          "confirmation_revision": 2,
+          "pending_draft": null,
+          "grant": null,
+          "denials": [],
+          "business_result": {
+            "status": "ok",
+            "code": "booking_confirmed",
+            "summary": "已查到原预约事实。",
+            "data": {
+              "booking_id": "f8e32c15-76cc-43f3-a9cd-3f9e45430f02",
+              "draft_id": "7ca89da4-d794-4da5-945c-aa18c82247a2",
+              "idempotency_key": "7ca89da4-d794-4da5-945c-aa18c82247a2",
+              "room_code": "A101",
+              "start_at": "2026-10-29T06:00:00Z",
+              "end_at": "2026-10-29T07:00:00Z",
+              "attendees": 10,
+              "status": "confirmed",
+              "created_at": "2026-10-28T05:33:39.545067Z"
+            },
+            "request_key": "7ca89da4-d794-4da5-945c-aa18c82247a2",
+            "retryable": false,
+            "commit_state": "committed",
+            "evidence_refs": [
+              "booking:f8e32c15-76cc-43f3-a9cd-3f9e45430f02"
+            ]
+          },
+          "business_history": [],
+          "unknown_submission": null,
+          "candidate_rooms": [
+            {
+              "room_code": "A101",
+              "capacity": 20
+            }
+          ],
+          "retrieval_result": {
+            "status": "supported",
+            "query": "场地预约 使用规则 人数容量 预约时长 费用 A101",
+            "query_tokens": [
+              "使用",
+              "人数",
+              "容量",
+              "时长",
+              "费用",
+              "a101"
+            ],
+            "index_hash": "01595677995f6362558436aaf76c4b51a94e75ffb146ef99c5b2728c62f1689e",
+            "chunks": [
+              {
+                "chunk_id": "booking-rules:r1:a6a1d61710a23b82",
+                "text": "场地与开放时间\nA101 容量 20 人，09:00—21:00 开放。",
+                "document_id": 1,
+                "source_ref": "knowledge/booking-rules-v1.md",
+                "document_revision": 1,
+                "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                "chunk_hash": "a6a1d61710a23b8238708459a7e2ec039e1f3c4b37a79582a042301d8a627cb6",
+                "score": 3.536451
+              },
+              {
+                "chunk_id": "booking-rules:r1:33c2956d0aaa6e9f",
+                "text": "时间与人数\n时间按 30 分钟对齐，单次时长为 30—120 分钟。",
+                "document_id": 1,
+                "source_ref": "knowledge/booking-rules-v1.md",
+                "document_revision": 1,
+                "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                "chunk_hash": "33c2956d0aaa6e9f9a294cd1bc3889a3e6a4f8e2c57c6e825e471f692391cdef",
+                "score": 2.658714
+              },
+              {
+                "chunk_id": "booking-rules:r1:edb26cf7def90d5d",
+                "text": "失败与查证\n写入是否成功不明确时，先按原请求标识查证或使用同一幂等键恢复。",
+                "document_id": 1,
+                "source_ref": "knowledge/booking-rules-v1.md",
+                "document_revision": 1,
+                "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                "chunk_hash": "edb26cf7def90d5da44defb843dc498da5034751ed707a4f5bb910d205614c47",
+                "score": 1.9317
+              }
+            ]
+          },
+          "original_history": {
+            "message_count": 25,
+            "first_id": "12fc295f-2948-5fc5-afce-db441132b6e5",
+            "last_id": "2161d5ee-47ae-5b2a-abf0-a79a696c289f"
+          },
+          "current_turn": 8,
+          "executed_tools_this_turn": []
+        },
+        "selected_message_ids": [
+          "fde5ae5c-bb5d-5af2-b43e-357b406980ca",
+          "lc_run--01a180ff-fc09-771a-9755-5ce0fd942d82",
+          "51a0a3e1-9a3e-5608-986b-44e088ad80ca",
+          "lc_run--01a180ff-ffb5-7295-b004-c7bb93ba7caa",
+          "0653f58c-ec21-5fdb-9a8e-6c419e5327cf",
+          "lc_run--01a18100-0385-70ee-86d8-4d6af76d71bd",
+          "80bf098d-bb57-5348-936b-da88b9463fb8",
+          "lc_run--01a18100-0833-757c-83c0-7d9b8a789eed",
+          "2161d5ee-47ae-5b2a-abf0-a79a696c289f"
+        ]
+      }
+    },
+    {
+      "type": "model",
+      "call_id": "310da058-fc43-42ae-933d-83fb21ff7855",
+      "source_turn": 9,
+      "usage": {
+        "input_tokens": 9472,
+        "output_tokens": 2,
+        "total_tokens": 9474,
+        "input_token_details": {
+          "cache_read": 2048
+        },
+        "output_token_details": {}
+      },
+      "estimated_peak_microusd": 2844,
+      "model_returned": "deepseek-flash",
+      "streamed": true,
+      "model_requests": 1
+    },
+    {
+      "type": "context_compacted",
+      "source_turn": 9,
+      "summary": {
+        "version": "structured-facts-v2",
+        "method": "conservative UTF-8 byte token upper estimate",
+        "estimated_upper_tokens": 45980,
+        "budget": 48000,
+        "dropped_from_model_context": 18,
+        "original_messages_retained": true,
+        "preserved_facts": {
+          "actor_key": "user:1",
+          "scope_id": "test:51f61481-f8cf-4978-b234-a8819dbd63fb",
+          "session_id": "6cd18009-5422-473d-a13e-eafc4fd9b069",
+          "reference_clock": "2026-10-28T09:00:00+08:00",
+          "fields": {
+            "date": {
+              "value": "2026-10-29",
+              "source_turn": 1,
+              "source_quote": "明天",
+              "source_kind": "validated_model_extraction"
+            },
+            "start_time": {
+              "value": "14:00",
+              "source_turn": 1,
+              "source_quote": "14:00",
+              "source_kind": "validated_model_extraction"
+            },
+            "end_time": {
+              "value": "15:00",
+              "source_turn": 1,
+              "source_quote": "15:00",
+              "source_kind": "validated_model_extraction"
+            },
+            "attendees": {
+              "value": 10,
+              "source_turn": 1,
+              "source_quote": "10人",
+              "source_kind": "validated_model_extraction"
+            },
+            "room_code": {
+              "value": "A101",
+              "source_turn": 1,
+              "source_quote": "A101",
+              "source_kind": "validated_model_extraction"
+            }
+          },
+          "confirmation_state": "idle",
+          "confirmation_revision": 2,
+          "pending_draft": null,
+          "grant": null,
+          "denials": [],
+          "business_result": {
+            "status": "ok",
+            "code": "booking_confirmed",
+            "summary": "已查到原预约事实。",
+            "data": {
+              "booking_id": "f8e32c15-76cc-43f3-a9cd-3f9e45430f02",
+              "draft_id": "7ca89da4-d794-4da5-945c-aa18c82247a2",
+              "idempotency_key": "7ca89da4-d794-4da5-945c-aa18c82247a2",
+              "room_code": "A101",
+              "start_at": "2026-10-29T06:00:00Z",
+              "end_at": "2026-10-29T07:00:00Z",
+              "attendees": 10,
+              "status": "confirmed",
+              "created_at": "2026-10-28T05:33:39.545067Z"
+            },
+            "request_key": "7ca89da4-d794-4da5-945c-aa18c82247a2",
+            "retryable": false,
+            "commit_state": "committed",
+            "evidence_refs": [
+              "booking:f8e32c15-76cc-43f3-a9cd-3f9e45430f02"
+            ]
+          },
+          "business_history": [],
+          "unknown_submission": null,
+          "candidate_rooms": [
+            {
+              "room_code": "A101",
+              "capacity": 20
+            }
+          ],
+          "retrieval_result": {
+            "status": "supported",
+            "query": "场地预约 使用规则 人数容量 预约时长 费用 A101",
+            "query_tokens": [
+              "使用",
+              "人数",
+              "容量",
+              "时长",
+              "费用",
+              "a101"
+            ],
+            "index_hash": "01595677995f6362558436aaf76c4b51a94e75ffb146ef99c5b2728c62f1689e",
+            "chunks": [
+              {
+                "chunk_id": "booking-rules:r1:a6a1d61710a23b82",
+                "text": "场地与开放时间\nA101 容量 20 人，09:00—21:00 开放。",
+                "document_id": 1,
+                "source_ref": "knowledge/booking-rules-v1.md",
+                "document_revision": 1,
+                "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                "chunk_hash": "a6a1d61710a23b8238708459a7e2ec039e1f3c4b37a79582a042301d8a627cb6",
+                "score": 3.536451
+              },
+              {
+                "chunk_id": "booking-rules:r1:33c2956d0aaa6e9f",
+                "text": "时间与人数\n时间按 30 分钟对齐，单次时长为 30—120 分钟。",
+                "document_id": 1,
+                "source_ref": "knowledge/booking-rules-v1.md",
+                "document_revision": 1,
+                "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                "chunk_hash": "33c2956d0aaa6e9f9a294cd1bc3889a3e6a4f8e2c57c6e825e471f692391cdef",
+                "score": 2.658714
+              },
+              {
+                "chunk_id": "booking-rules:r1:edb26cf7def90d5d",
+                "text": "失败与查证\n写入是否成功不明确时，先按原请求标识查证或使用同一幂等键恢复。",
+                "document_id": 1,
+                "source_ref": "knowledge/booking-rules-v1.md",
+                "document_revision": 1,
+                "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                "chunk_hash": "edb26cf7def90d5da44defb843dc498da5034751ed707a4f5bb910d205614c47",
+                "score": 1.9317
+              }
+            ]
+          },
+          "original_history": {
+            "message_count": 27,
+            "first_id": "12fc295f-2948-5fc5-afce-db441132b6e5",
+            "last_id": "99dd9f22-45bc-513b-8f88-8471aa91dd7d"
+          },
+          "current_turn": 9,
+          "executed_tools_this_turn": []
+        },
+        "selected_message_ids": [
+          "51a0a3e1-9a3e-5608-986b-44e088ad80ca",
+          "lc_run--01a180ff-ffb5-7295-b004-c7bb93ba7caa",
+          "0653f58c-ec21-5fdb-9a8e-6c419e5327cf",
+          "lc_run--01a18100-0385-70ee-86d8-4d6af76d71bd",
+          "80bf098d-bb57-5348-936b-da88b9463fb8",
+          "lc_run--01a18100-0833-757c-83c0-7d9b8a789eed",
+          "2161d5ee-47ae-5b2a-abf0-a79a696c289f",
+          "lc_run--01a18100-0cff-7150-9102-8fadad27f456",
+          "99dd9f22-45bc-513b-8f88-8471aa91dd7d"
+        ]
+      }
+    },
+    {
+      "type": "model",
+      "call_id": "38d1d233-815e-4ed6-ae1b-8c4cb2adef7b",
+      "source_turn": 10,
+      "usage": {
+        "input_tokens": 9470,
+        "output_tokens": 2,
+        "total_tokens": 9472,
+        "input_token_details": {
+          "cache_read": 2048
+        },
+        "output_token_details": {}
+      },
+      "estimated_peak_microusd": 2844,
+      "model_returned": "deepseek-flash",
+      "streamed": true,
+      "model_requests": 1
+    },
+    {
+      "type": "context_compacted",
+      "source_turn": 10,
+      "summary": {
+        "version": "structured-facts-v2",
+        "method": "conservative UTF-8 byte token upper estimate",
+        "estimated_upper_tokens": 45979,
+        "budget": 48000,
+        "dropped_from_model_context": 20,
+        "original_messages_retained": true,
+        "preserved_facts": {
+          "actor_key": "user:1",
+          "scope_id": "test:51f61481-f8cf-4978-b234-a8819dbd63fb",
+          "session_id": "6cd18009-5422-473d-a13e-eafc4fd9b069",
+          "reference_clock": "2026-10-28T09:00:00+08:00",
+          "fields": {
+            "date": {
+              "value": "2026-10-29",
+              "source_turn": 1,
+              "source_quote": "明天",
+              "source_kind": "validated_model_extraction"
+            },
+            "start_time": {
+              "value": "14:00",
+              "source_turn": 1,
+              "source_quote": "14:00",
+              "source_kind": "validated_model_extraction"
+            },
+            "end_time": {
+              "value": "15:00",
+              "source_turn": 1,
+              "source_quote": "15:00",
+              "source_kind": "validated_model_extraction"
+            },
+            "attendees": {
+              "value": 10,
+              "source_turn": 1,
+              "source_quote": "10人",
+              "source_kind": "validated_model_extraction"
+            },
+            "room_code": {
+              "value": "A101",
+              "source_turn": 1,
+              "source_quote": "A101",
+              "source_kind": "validated_model_extraction"
+            }
+          },
+          "confirmation_state": "idle",
+          "confirmation_revision": 2,
+          "pending_draft": null,
+          "grant": null,
+          "denials": [],
+          "business_result": {
+            "status": "ok",
+            "code": "booking_confirmed",
+            "summary": "已查到原预约事实。",
+            "data": {
+              "booking_id": "f8e32c15-76cc-43f3-a9cd-3f9e45430f02",
+              "draft_id": "7ca89da4-d794-4da5-945c-aa18c82247a2",
+              "idempotency_key": "7ca89da4-d794-4da5-945c-aa18c82247a2",
+              "room_code": "A101",
+              "start_at": "2026-10-29T06:00:00Z",
+              "end_at": "2026-10-29T07:00:00Z",
+              "attendees": 10,
+              "status": "confirmed",
+              "created_at": "2026-10-28T05:33:39.545067Z"
+            },
+            "request_key": "7ca89da4-d794-4da5-945c-aa18c82247a2",
+            "retryable": false,
+            "commit_state": "committed",
+            "evidence_refs": [
+              "booking:f8e32c15-76cc-43f3-a9cd-3f9e45430f02"
+            ]
+          },
+          "business_history": [],
+          "unknown_submission": null,
+          "candidate_rooms": [
+            {
+              "room_code": "A101",
+              "capacity": 20
+            }
+          ],
+          "retrieval_result": {
+            "status": "supported",
+            "query": "场地预约 使用规则 人数容量 预约时长 费用 A101",
+            "query_tokens": [
+              "使用",
+              "人数",
+              "容量",
+              "时长",
+              "费用",
+              "a101"
+            ],
+            "index_hash": "01595677995f6362558436aaf76c4b51a94e75ffb146ef99c5b2728c62f1689e",
+            "chunks": [
+              {
+                "chunk_id": "booking-rules:r1:a6a1d61710a23b82",
+                "text": "场地与开放时间\nA101 容量 20 人，09:00—21:00 开放。",
+                "document_id": 1,
+                "source_ref": "knowledge/booking-rules-v1.md",
+                "document_revision": 1,
+                "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                "chunk_hash": "a6a1d61710a23b8238708459a7e2ec039e1f3c4b37a79582a042301d8a627cb6",
+                "score": 3.536451
+              },
+              {
+                "chunk_id": "booking-rules:r1:33c2956d0aaa6e9f",
+                "text": "时间与人数\n时间按 30 分钟对齐，单次时长为 30—120 分钟。",
+                "document_id": 1,
+                "source_ref": "knowledge/booking-rules-v1.md",
+                "document_revision": 1,
+                "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                "chunk_hash": "33c2956d0aaa6e9f9a294cd1bc3889a3e6a4f8e2c57c6e825e471f692391cdef",
+                "score": 2.658714
+              },
+              {
+                "chunk_id": "booking-rules:r1:edb26cf7def90d5d",
+                "text": "失败与查证\n写入是否成功不明确时，先按原请求标识查证或使用同一幂等键恢复。",
+                "document_id": 1,
+                "source_ref": "knowledge/booking-rules-v1.md",
+                "document_revision": 1,
+                "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                "chunk_hash": "edb26cf7def90d5da44defb843dc498da5034751ed707a4f5bb910d205614c47",
+                "score": 1.9317
+              }
+            ]
+          },
+          "original_history": {
+            "message_count": 29,
+            "first_id": "12fc295f-2948-5fc5-afce-db441132b6e5",
+            "last_id": "ce59323f-53fe-5291-a377-4d793d46c28b"
+          },
+          "current_turn": 10,
+          "executed_tools_this_turn": []
+        },
+        "selected_message_ids": [
+          "0653f58c-ec21-5fdb-9a8e-6c419e5327cf",
+          "lc_run--01a18100-0385-70ee-86d8-4d6af76d71bd",
+          "80bf098d-bb57-5348-936b-da88b9463fb8",
+          "lc_run--01a18100-0833-757c-83c0-7d9b8a789eed",
+          "2161d5ee-47ae-5b2a-abf0-a79a696c289f",
+          "lc_run--01a18100-0cff-7150-9102-8fadad27f456",
+          "99dd9f22-45bc-513b-8f88-8471aa91dd7d",
+          "lc_run--01a18100-117a-745e-93e8-4df128361da9",
+          "ce59323f-53fe-5291-a377-4d793d46c28b"
+        ]
+      }
+    },
+    {
+      "type": "model",
+      "call_id": "9cd6c82e-0a9f-48e5-9db9-07424af17daa",
+      "source_turn": 11,
+      "usage": {
+        "input_tokens": 9470,
+        "output_tokens": 2,
+        "total_tokens": 9472,
+        "input_token_details": {
+          "cache_read": 2048
+        },
+        "output_token_details": {}
+      },
+      "estimated_peak_microusd": 2844,
+      "model_returned": "deepseek-flash",
+      "streamed": true,
+      "model_requests": 1
+    },
+    {
+      "type": "context_compacted",
+      "source_turn": 11,
+      "summary": {
+        "version": "structured-facts-v2",
+        "method": "conservative UTF-8 byte token upper estimate",
+        "estimated_upper_tokens": 45979,
+        "budget": 48000,
+        "dropped_from_model_context": 22,
+        "original_messages_retained": true,
+        "preserved_facts": {
+          "actor_key": "user:1",
+          "scope_id": "test:51f61481-f8cf-4978-b234-a8819dbd63fb",
+          "session_id": "6cd18009-5422-473d-a13e-eafc4fd9b069",
+          "reference_clock": "2026-10-28T09:00:00+08:00",
+          "fields": {
+            "date": {
+              "value": "2026-10-29",
+              "source_turn": 1,
+              "source_quote": "明天",
+              "source_kind": "validated_model_extraction"
+            },
+            "start_time": {
+              "value": "14:00",
+              "source_turn": 1,
+              "source_quote": "14:00",
+              "source_kind": "validated_model_extraction"
+            },
+            "end_time": {
+              "value": "15:00",
+              "source_turn": 1,
+              "source_quote": "15:00",
+              "source_kind": "validated_model_extraction"
+            },
+            "attendees": {
+              "value": 10,
+              "source_turn": 1,
+              "source_quote": "10人",
+              "source_kind": "validated_model_extraction"
+            },
+            "room_code": {
+              "value": "A101",
+              "source_turn": 1,
+              "source_quote": "A101",
+              "source_kind": "validated_model_extraction"
+            }
+          },
+          "confirmation_state": "idle",
+          "confirmation_revision": 2,
+          "pending_draft": null,
+          "grant": null,
+          "denials": [],
+          "business_result": {
+            "status": "ok",
+            "code": "booking_confirmed",
+            "summary": "已查到原预约事实。",
+            "data": {
+              "booking_id": "f8e32c15-76cc-43f3-a9cd-3f9e45430f02",
+              "draft_id": "7ca89da4-d794-4da5-945c-aa18c82247a2",
+              "idempotency_key": "7ca89da4-d794-4da5-945c-aa18c82247a2",
+              "room_code": "A101",
+              "start_at": "2026-10-29T06:00:00Z",
+              "end_at": "2026-10-29T07:00:00Z",
+              "attendees": 10,
+              "status": "confirmed",
+              "created_at": "2026-10-28T05:33:39.545067Z"
+            },
+            "request_key": "7ca89da4-d794-4da5-945c-aa18c82247a2",
+            "retryable": false,
+            "commit_state": "committed",
+            "evidence_refs": [
+              "booking:f8e32c15-76cc-43f3-a9cd-3f9e45430f02"
+            ]
+          },
+          "business_history": [],
+          "unknown_submission": null,
+          "candidate_rooms": [
+            {
+              "room_code": "A101",
+              "capacity": 20
+            }
+          ],
+          "retrieval_result": {
+            "status": "supported",
+            "query": "场地预约 使用规则 人数容量 预约时长 费用 A101",
+            "query_tokens": [
+              "使用",
+              "人数",
+              "容量",
+              "时长",
+              "费用",
+              "a101"
+            ],
+            "index_hash": "01595677995f6362558436aaf76c4b51a94e75ffb146ef99c5b2728c62f1689e",
+            "chunks": [
+              {
+                "chunk_id": "booking-rules:r1:a6a1d61710a23b82",
+                "text": "场地与开放时间\nA101 容量 20 人，09:00—21:00 开放。",
+                "document_id": 1,
+                "source_ref": "knowledge/booking-rules-v1.md",
+                "document_revision": 1,
+                "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                "chunk_hash": "a6a1d61710a23b8238708459a7e2ec039e1f3c4b37a79582a042301d8a627cb6",
+                "score": 3.536451
+              },
+              {
+                "chunk_id": "booking-rules:r1:33c2956d0aaa6e9f",
+                "text": "时间与人数\n时间按 30 分钟对齐，单次时长为 30—120 分钟。",
+                "document_id": 1,
+                "source_ref": "knowledge/booking-rules-v1.md",
+                "document_revision": 1,
+                "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                "chunk_hash": "33c2956d0aaa6e9f9a294cd1bc3889a3e6a4f8e2c57c6e825e471f692391cdef",
+                "score": 2.658714
+              },
+              {
+                "chunk_id": "booking-rules:r1:edb26cf7def90d5d",
+                "text": "失败与查证\n写入是否成功不明确时，先按原请求标识查证或使用同一幂等键恢复。",
+                "document_id": 1,
+                "source_ref": "knowledge/booking-rules-v1.md",
+                "document_revision": 1,
+                "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                "chunk_hash": "edb26cf7def90d5da44defb843dc498da5034751ed707a4f5bb910d205614c47",
+                "score": 1.9317
+              }
+            ]
+          },
+          "original_history": {
+            "message_count": 31,
+            "first_id": "12fc295f-2948-5fc5-afce-db441132b6e5",
+            "last_id": "82bbfe5b-f870-57db-9c22-eb6be9959350"
+          },
+          "current_turn": 11,
+          "executed_tools_this_turn": []
+        },
+        "selected_message_ids": [
+          "80bf098d-bb57-5348-936b-da88b9463fb8",
+          "lc_run--01a18100-0833-757c-83c0-7d9b8a789eed",
+          "2161d5ee-47ae-5b2a-abf0-a79a696c289f",
+          "lc_run--01a18100-0cff-7150-9102-8fadad27f456",
+          "99dd9f22-45bc-513b-8f88-8471aa91dd7d",
+          "lc_run--01a18100-117a-745e-93e8-4df128361da9",
+          "ce59323f-53fe-5291-a377-4d793d46c28b",
+          "lc_run--01a18100-161c-751b-a551-8d11217ea2b5",
+          "82bbfe5b-f870-57db-9c22-eb6be9959350"
+        ]
+      }
+    },
+    {
+      "type": "model",
+      "call_id": "543abd97-f8b8-4aa2-baa6-35fce331e0db",
+      "source_turn": 12,
+      "usage": {
+        "input_tokens": 9473,
+        "output_tokens": 2,
+        "total_tokens": 9475,
+        "input_token_details": {
+          "cache_read": 2048
+        },
+        "output_token_details": {}
+      },
+      "estimated_peak_microusd": 2845,
+      "model_returned": "deepseek-flash",
+      "streamed": true,
+      "model_requests": 1
+    },
+    {
+      "type": "context_compacted",
+      "source_turn": 12,
+      "summary": {
+        "version": "structured-facts-v2",
+        "method": "conservative UTF-8 byte token upper estimate",
+        "estimated_upper_tokens": 45979,
+        "budget": 48000,
+        "dropped_from_model_context": 24,
+        "original_messages_retained": true,
+        "preserved_facts": {
+          "actor_key": "user:1",
+          "scope_id": "test:51f61481-f8cf-4978-b234-a8819dbd63fb",
+          "session_id": "6cd18009-5422-473d-a13e-eafc4fd9b069",
+          "reference_clock": "2026-10-28T09:00:00+08:00",
+          "fields": {
+            "date": {
+              "value": "2026-10-29",
+              "source_turn": 1,
+              "source_quote": "明天",
+              "source_kind": "validated_model_extraction"
+            },
+            "start_time": {
+              "value": "14:00",
+              "source_turn": 1,
+              "source_quote": "14:00",
+              "source_kind": "validated_model_extraction"
+            },
+            "end_time": {
+              "value": "15:00",
+              "source_turn": 1,
+              "source_quote": "15:00",
+              "source_kind": "validated_model_extraction"
+            },
+            "attendees": {
+              "value": 10,
+              "source_turn": 1,
+              "source_quote": "10人",
+              "source_kind": "validated_model_extraction"
+            },
+            "room_code": {
+              "value": "A101",
+              "source_turn": 1,
+              "source_quote": "A101",
+              "source_kind": "validated_model_extraction"
+            }
+          },
+          "confirmation_state": "idle",
+          "confirmation_revision": 2,
+          "pending_draft": null,
+          "grant": null,
+          "denials": [],
+          "business_result": {
+            "status": "ok",
+            "code": "booking_confirmed",
+            "summary": "已查到原预约事实。",
+            "data": {
+              "booking_id": "f8e32c15-76cc-43f3-a9cd-3f9e45430f02",
+              "draft_id": "7ca89da4-d794-4da5-945c-aa18c82247a2",
+              "idempotency_key": "7ca89da4-d794-4da5-945c-aa18c82247a2",
+              "room_code": "A101",
+              "start_at": "2026-10-29T06:00:00Z",
+              "end_at": "2026-10-29T07:00:00Z",
+              "attendees": 10,
+              "status": "confirmed",
+              "created_at": "2026-10-28T05:33:39.545067Z"
+            },
+            "request_key": "7ca89da4-d794-4da5-945c-aa18c82247a2",
+            "retryable": false,
+            "commit_state": "committed",
+            "evidence_refs": [
+              "booking:f8e32c15-76cc-43f3-a9cd-3f9e45430f02"
+            ]
+          },
+          "business_history": [],
+          "unknown_submission": null,
+          "candidate_rooms": [
+            {
+              "room_code": "A101",
+              "capacity": 20
+            }
+          ],
+          "retrieval_result": {
+            "status": "supported",
+            "query": "场地预约 使用规则 人数容量 预约时长 费用 A101",
+            "query_tokens": [
+              "使用",
+              "人数",
+              "容量",
+              "时长",
+              "费用",
+              "a101"
+            ],
+            "index_hash": "01595677995f6362558436aaf76c4b51a94e75ffb146ef99c5b2728c62f1689e",
+            "chunks": [
+              {
+                "chunk_id": "booking-rules:r1:a6a1d61710a23b82",
+                "text": "场地与开放时间\nA101 容量 20 人，09:00—21:00 开放。",
+                "document_id": 1,
+                "source_ref": "knowledge/booking-rules-v1.md",
+                "document_revision": 1,
+                "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                "chunk_hash": "a6a1d61710a23b8238708459a7e2ec039e1f3c4b37a79582a042301d8a627cb6",
+                "score": 3.536451
+              },
+              {
+                "chunk_id": "booking-rules:r1:33c2956d0aaa6e9f",
+                "text": "时间与人数\n时间按 30 分钟对齐，单次时长为 30—120 分钟。",
+                "document_id": 1,
+                "source_ref": "knowledge/booking-rules-v1.md",
+                "document_revision": 1,
+                "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                "chunk_hash": "33c2956d0aaa6e9f9a294cd1bc3889a3e6a4f8e2c57c6e825e471f692391cdef",
+                "score": 2.658714
+              },
+              {
+                "chunk_id": "booking-rules:r1:edb26cf7def90d5d",
+                "text": "失败与查证\n写入是否成功不明确时，先按原请求标识查证或使用同一幂等键恢复。",
+                "document_id": 1,
+                "source_ref": "knowledge/booking-rules-v1.md",
+                "document_revision": 1,
+                "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                "chunk_hash": "edb26cf7def90d5da44defb843dc498da5034751ed707a4f5bb910d205614c47",
+                "score": 1.9317
+              }
+            ]
+          },
+          "original_history": {
+            "message_count": 33,
+            "first_id": "12fc295f-2948-5fc5-afce-db441132b6e5",
+            "last_id": "418a853e-f20d-5d1e-a7bc-6c2c4391c656"
+          },
+          "current_turn": 12,
+          "executed_tools_this_turn": []
+        },
+        "selected_message_ids": [
+          "2161d5ee-47ae-5b2a-abf0-a79a696c289f",
+          "lc_run--01a18100-0cff-7150-9102-8fadad27f456",
+          "99dd9f22-45bc-513b-8f88-8471aa91dd7d",
+          "lc_run--01a18100-117a-745e-93e8-4df128361da9",
+          "ce59323f-53fe-5291-a377-4d793d46c28b",
+          "lc_run--01a18100-161c-751b-a551-8d11217ea2b5",
+          "82bbfe5b-f870-57db-9c22-eb6be9959350",
+          "lc_run--01a18100-1ba7-750e-9add-6b9f21019e04",
+          "418a853e-f20d-5d1e-a7bc-6c2c4391c656"
+        ]
+      }
+    },
+    {
+      "type": "model",
+      "call_id": "df74c1a5-7c5a-4c35-a3b0-9fad6386b944",
+      "source_turn": 13,
+      "usage": {
+        "input_tokens": 9469,
+        "output_tokens": 2,
+        "total_tokens": 9471,
+        "input_token_details": {
+          "cache_read": 2048
+        },
+        "output_token_details": {}
+      },
+      "estimated_peak_microusd": 2844,
+      "model_returned": "deepseek-flash",
+      "streamed": true,
+      "model_requests": 1
+    },
+    {
+      "type": "context_compacted",
+      "source_turn": 13,
+      "summary": {
+        "version": "structured-facts-v2",
+        "method": "conservative UTF-8 byte token upper estimate",
+        "estimated_upper_tokens": 45980,
+        "budget": 48000,
+        "dropped_from_model_context": 26,
+        "original_messages_retained": true,
+        "preserved_facts": {
+          "actor_key": "user:1",
+          "scope_id": "test:51f61481-f8cf-4978-b234-a8819dbd63fb",
+          "session_id": "6cd18009-5422-473d-a13e-eafc4fd9b069",
+          "reference_clock": "2026-10-28T09:00:00+08:00",
+          "fields": {
+            "date": {
+              "value": "2026-10-29",
+              "source_turn": 1,
+              "source_quote": "明天",
+              "source_kind": "validated_model_extraction"
+            },
+            "start_time": {
+              "value": "14:00",
+              "source_turn": 1,
+              "source_quote": "14:00",
+              "source_kind": "validated_model_extraction"
+            },
+            "end_time": {
+              "value": "15:00",
+              "source_turn": 1,
+              "source_quote": "15:00",
+              "source_kind": "validated_model_extraction"
+            },
+            "attendees": {
+              "value": 10,
+              "source_turn": 1,
+              "source_quote": "10人",
+              "source_kind": "validated_model_extraction"
+            },
+            "room_code": {
+              "value": "A101",
+              "source_turn": 1,
+              "source_quote": "A101",
+              "source_kind": "validated_model_extraction"
+            }
+          },
+          "confirmation_state": "idle",
+          "confirmation_revision": 2,
+          "pending_draft": null,
+          "grant": null,
+          "denials": [],
+          "business_result": {
+            "status": "ok",
+            "code": "booking_confirmed",
+            "summary": "已查到原预约事实。",
+            "data": {
+              "booking_id": "f8e32c15-76cc-43f3-a9cd-3f9e45430f02",
+              "draft_id": "7ca89da4-d794-4da5-945c-aa18c82247a2",
+              "idempotency_key": "7ca89da4-d794-4da5-945c-aa18c82247a2",
+              "room_code": "A101",
+              "start_at": "2026-10-29T06:00:00Z",
+              "end_at": "2026-10-29T07:00:00Z",
+              "attendees": 10,
+              "status": "confirmed",
+              "created_at": "2026-10-28T05:33:39.545067Z"
+            },
+            "request_key": "7ca89da4-d794-4da5-945c-aa18c82247a2",
+            "retryable": false,
+            "commit_state": "committed",
+            "evidence_refs": [
+              "booking:f8e32c15-76cc-43f3-a9cd-3f9e45430f02"
+            ]
+          },
+          "business_history": [],
+          "unknown_submission": null,
+          "candidate_rooms": [
+            {
+              "room_code": "A101",
+              "capacity": 20
+            }
+          ],
+          "retrieval_result": {
+            "status": "supported",
+            "query": "场地预约 使用规则 人数容量 预约时长 费用 A101",
+            "query_tokens": [
+              "使用",
+              "人数",
+              "容量",
+              "时长",
+              "费用",
+              "a101"
+            ],
+            "index_hash": "01595677995f6362558436aaf76c4b51a94e75ffb146ef99c5b2728c62f1689e",
+            "chunks": [
+              {
+                "chunk_id": "booking-rules:r1:a6a1d61710a23b82",
+                "text": "场地与开放时间\nA101 容量 20 人，09:00—21:00 开放。",
+                "document_id": 1,
+                "source_ref": "knowledge/booking-rules-v1.md",
+                "document_revision": 1,
+                "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                "chunk_hash": "a6a1d61710a23b8238708459a7e2ec039e1f3c4b37a79582a042301d8a627cb6",
+                "score": 3.536451
+              },
+              {
+                "chunk_id": "booking-rules:r1:33c2956d0aaa6e9f",
+                "text": "时间与人数\n时间按 30 分钟对齐，单次时长为 30—120 分钟。",
+                "document_id": 1,
+                "source_ref": "knowledge/booking-rules-v1.md",
+                "document_revision": 1,
+                "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                "chunk_hash": "33c2956d0aaa6e9f9a294cd1bc3889a3e6a4f8e2c57c6e825e471f692391cdef",
+                "score": 2.658714
+              },
+              {
+                "chunk_id": "booking-rules:r1:edb26cf7def90d5d",
+                "text": "失败与查证\n写入是否成功不明确时，先按原请求标识查证或使用同一幂等键恢复。",
+                "document_id": 1,
+                "source_ref": "knowledge/booking-rules-v1.md",
+                "document_revision": 1,
+                "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                "chunk_hash": "edb26cf7def90d5da44defb843dc498da5034751ed707a4f5bb910d205614c47",
+                "score": 1.9317
+              }
+            ]
+          },
+          "original_history": {
+            "message_count": 35,
+            "first_id": "12fc295f-2948-5fc5-afce-db441132b6e5",
+            "last_id": "85be106a-db29-5fc8-937d-195c19787614"
+          },
+          "current_turn": 13,
+          "executed_tools_this_turn": []
+        },
+        "selected_message_ids": [
+          "99dd9f22-45bc-513b-8f88-8471aa91dd7d",
+          "lc_run--01a18100-117a-745e-93e8-4df128361da9",
+          "ce59323f-53fe-5291-a377-4d793d46c28b",
+          "lc_run--01a18100-161c-751b-a551-8d11217ea2b5",
+          "82bbfe5b-f870-57db-9c22-eb6be9959350",
+          "lc_run--01a18100-1ba7-750e-9add-6b9f21019e04",
+          "418a853e-f20d-5d1e-a7bc-6c2c4391c656",
+          "lc_run--01a18100-20ac-7017-8076-2afd472cee4e",
+          "85be106a-db29-5fc8-937d-195c19787614"
+        ]
+      }
+    },
+    {
+      "type": "model",
+      "call_id": "533b06be-ac73-4d8f-9811-826ddf4975c2",
+      "source_turn": 14,
+      "usage": {
+        "input_tokens": 9474,
+        "output_tokens": 2,
+        "total_tokens": 9476,
+        "input_token_details": {
+          "cache_read": 2048
+        },
+        "output_token_details": {}
+      },
+      "estimated_peak_microusd": 2845,
+      "model_returned": "deepseek-flash",
+      "streamed": true,
+      "model_requests": 1
+    },
+    {
+      "type": "context_compacted",
+      "source_turn": 14,
+      "summary": {
+        "version": "structured-facts-v2",
+        "method": "conservative UTF-8 byte token upper estimate",
+        "estimated_upper_tokens": 45981,
+        "budget": 48000,
+        "dropped_from_model_context": 28,
+        "original_messages_retained": true,
+        "preserved_facts": {
+          "actor_key": "user:1",
+          "scope_id": "test:51f61481-f8cf-4978-b234-a8819dbd63fb",
+          "session_id": "6cd18009-5422-473d-a13e-eafc4fd9b069",
+          "reference_clock": "2026-10-28T09:00:00+08:00",
+          "fields": {
+            "date": {
+              "value": "2026-10-29",
+              "source_turn": 1,
+              "source_quote": "明天",
+              "source_kind": "validated_model_extraction"
+            },
+            "start_time": {
+              "value": "14:00",
+              "source_turn": 1,
+              "source_quote": "14:00",
+              "source_kind": "validated_model_extraction"
+            },
+            "end_time": {
+              "value": "15:00",
+              "source_turn": 1,
+              "source_quote": "15:00",
+              "source_kind": "validated_model_extraction"
+            },
+            "attendees": {
+              "value": 10,
+              "source_turn": 1,
+              "source_quote": "10人",
+              "source_kind": "validated_model_extraction"
+            },
+            "room_code": {
+              "value": "A101",
+              "source_turn": 1,
+              "source_quote": "A101",
+              "source_kind": "validated_model_extraction"
+            }
+          },
+          "confirmation_state": "idle",
+          "confirmation_revision": 2,
+          "pending_draft": null,
+          "grant": null,
+          "denials": [],
+          "business_result": {
+            "status": "ok",
+            "code": "booking_confirmed",
+            "summary": "已查到原预约事实。",
+            "data": {
+              "booking_id": "f8e32c15-76cc-43f3-a9cd-3f9e45430f02",
+              "draft_id": "7ca89da4-d794-4da5-945c-aa18c82247a2",
+              "idempotency_key": "7ca89da4-d794-4da5-945c-aa18c82247a2",
+              "room_code": "A101",
+              "start_at": "2026-10-29T06:00:00Z",
+              "end_at": "2026-10-29T07:00:00Z",
+              "attendees": 10,
+              "status": "confirmed",
+              "created_at": "2026-10-28T05:33:39.545067Z"
+            },
+            "request_key": "7ca89da4-d794-4da5-945c-aa18c82247a2",
+            "retryable": false,
+            "commit_state": "committed",
+            "evidence_refs": [
+              "booking:f8e32c15-76cc-43f3-a9cd-3f9e45430f02"
+            ]
+          },
+          "business_history": [],
+          "unknown_submission": null,
+          "candidate_rooms": [
+            {
+              "room_code": "A101",
+              "capacity": 20
+            }
+          ],
+          "retrieval_result": {
+            "status": "supported",
+            "query": "场地预约 使用规则 人数容量 预约时长 费用 A101",
+            "query_tokens": [
+              "使用",
+              "人数",
+              "容量",
+              "时长",
+              "费用",
+              "a101"
+            ],
+            "index_hash": "01595677995f6362558436aaf76c4b51a94e75ffb146ef99c5b2728c62f1689e",
+            "chunks": [
+              {
+                "chunk_id": "booking-rules:r1:a6a1d61710a23b82",
+                "text": "场地与开放时间\nA101 容量 20 人，09:00—21:00 开放。",
+                "document_id": 1,
+                "source_ref": "knowledge/booking-rules-v1.md",
+                "document_revision": 1,
+                "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                "chunk_hash": "a6a1d61710a23b8238708459a7e2ec039e1f3c4b37a79582a042301d8a627cb6",
+                "score": 3.536451
+              },
+              {
+                "chunk_id": "booking-rules:r1:33c2956d0aaa6e9f",
+                "text": "时间与人数\n时间按 30 分钟对齐，单次时长为 30—120 分钟。",
+                "document_id": 1,
+                "source_ref": "knowledge/booking-rules-v1.md",
+                "document_revision": 1,
+                "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                "chunk_hash": "33c2956d0aaa6e9f9a294cd1bc3889a3e6a4f8e2c57c6e825e471f692391cdef",
+                "score": 2.658714
+              },
+              {
+                "chunk_id": "booking-rules:r1:edb26cf7def90d5d",
+                "text": "失败与查证\n写入是否成功不明确时，先按原请求标识查证或使用同一幂等键恢复。",
+                "document_id": 1,
+                "source_ref": "knowledge/booking-rules-v1.md",
+                "document_revision": 1,
+                "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                "chunk_hash": "edb26cf7def90d5da44defb843dc498da5034751ed707a4f5bb910d205614c47",
+                "score": 1.9317
+              }
+            ]
+          },
+          "original_history": {
+            "message_count": 37,
+            "first_id": "12fc295f-2948-5fc5-afce-db441132b6e5",
+            "last_id": "8dfc294b-7938-51c6-84c9-2444d2b5d874"
+          },
+          "current_turn": 14,
+          "executed_tools_this_turn": []
+        },
+        "selected_message_ids": [
+          "ce59323f-53fe-5291-a377-4d793d46c28b",
+          "lc_run--01a18100-161c-751b-a551-8d11217ea2b5",
+          "82bbfe5b-f870-57db-9c22-eb6be9959350",
+          "lc_run--01a18100-1ba7-750e-9add-6b9f21019e04",
+          "418a853e-f20d-5d1e-a7bc-6c2c4391c656",
+          "lc_run--01a18100-20ac-7017-8076-2afd472cee4e",
+          "85be106a-db29-5fc8-937d-195c19787614",
+          "lc_run--01a18100-2579-7191-9104-ddfcd68f7e05",
+          "8dfc294b-7938-51c6-84c9-2444d2b5d874"
+        ]
+      }
+    },
+    {
+      "type": "model",
+      "call_id": "13a68a37-6758-4908-a010-a70fcdf4807b",
+      "source_turn": 15,
+      "usage": {
+        "input_tokens": 9492,
+        "output_tokens": 180,
+        "total_tokens": 9672,
+        "input_token_details": {
+          "cache_read": 2048
+        },
+        "output_token_details": {}
+      },
+      "estimated_peak_microusd": 3064,
+      "model_returned": "deepseek-flash",
+      "streamed": true,
+      "model_requests": 1
+    },
+    {
+      "type": "context_compacted",
+      "source_turn": 15,
+      "summary": {
+        "version": "structured-facts-v2",
+        "method": "conservative UTF-8 byte token upper estimate",
+        "estimated_upper_tokens": 46735,
+        "budget": 48000,
+        "dropped_from_model_context": 28,
+        "original_messages_retained": true,
+        "preserved_facts": {
+          "actor_key": "user:1",
+          "scope_id": "test:51f61481-f8cf-4978-b234-a8819dbd63fb",
+          "session_id": "6cd18009-5422-473d-a13e-eafc4fd9b069",
+          "reference_clock": "2026-10-28T09:00:00+08:00",
+          "fields": {
+            "date": {
+              "value": "2026-10-29",
+              "source_turn": 1,
+              "source_quote": "明天",
+              "source_kind": "validated_model_extraction"
+            },
+            "start_time": {
+              "value": "14:00",
+              "source_turn": 1,
+              "source_quote": "14:00",
+              "source_kind": "validated_model_extraction"
+            },
+            "end_time": {
+              "value": "15:00",
+              "source_turn": 1,
+              "source_quote": "15:00",
+              "source_kind": "validated_model_extraction"
+            },
+            "attendees": {
+              "value": 10,
+              "source_turn": 1,
+              "source_quote": "10人",
+              "source_kind": "validated_model_extraction"
+            },
+            "room_code": {
+              "value": "A101",
+              "source_turn": 1,
+              "source_quote": "A101",
+              "source_kind": "validated_model_extraction"
+            }
+          },
+          "confirmation_state": "idle",
+          "confirmation_revision": 2,
+          "pending_draft": null,
+          "grant": null,
+          "denials": [],
+          "business_result": {
+            "status": "ok",
+            "code": "booking_confirmed",
+            "summary": "已查到原预约事实。",
+            "data": {
+              "booking_id": "f8e32c15-76cc-43f3-a9cd-3f9e45430f02",
+              "draft_id": "7ca89da4-d794-4da5-945c-aa18c82247a2",
+              "idempotency_key": "7ca89da4-d794-4da5-945c-aa18c82247a2",
+              "room_code": "A101",
+              "start_at": "2026-10-29T06:00:00Z",
+              "end_at": "2026-10-29T07:00:00Z",
+              "attendees": 10,
+              "status": "confirmed",
+              "created_at": "2026-10-28T05:33:39.545067Z"
+            },
+            "request_key": "7ca89da4-d794-4da5-945c-aa18c82247a2",
+            "retryable": false,
+            "commit_state": "committed",
+            "evidence_refs": [
+              "booking:f8e32c15-76cc-43f3-a9cd-3f9e45430f02"
+            ]
+          },
+          "business_history": [],
+          "unknown_submission": null,
+          "candidate_rooms": [
+            {
+              "room_code": "A101",
+              "capacity": 20
+            }
+          ],
+          "retrieval_result": {
+            "status": "supported",
+            "query": "场地预约 使用规则 人数容量 预约时长 费用 A101",
+            "query_tokens": [
+              "使用",
+              "人数",
+              "容量",
+              "时长",
+              "费用",
+              "a101"
+            ],
+            "index_hash": "01595677995f6362558436aaf76c4b51a94e75ffb146ef99c5b2728c62f1689e",
+            "chunks": [
+              {
+                "chunk_id": "booking-rules:r1:a6a1d61710a23b82",
+                "text": "场地与开放时间\nA101 容量 20 人，09:00—21:00 开放。",
+                "document_id": 1,
+                "source_ref": "knowledge/booking-rules-v1.md",
+                "document_revision": 1,
+                "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                "chunk_hash": "a6a1d61710a23b8238708459a7e2ec039e1f3c4b37a79582a042301d8a627cb6",
+                "score": 3.536451
+              },
+              {
+                "chunk_id": "booking-rules:r1:33c2956d0aaa6e9f",
+                "text": "时间与人数\n时间按 30 分钟对齐，单次时长为 30—120 分钟。",
+                "document_id": 1,
+                "source_ref": "knowledge/booking-rules-v1.md",
+                "document_revision": 1,
+                "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                "chunk_hash": "33c2956d0aaa6e9f9a294cd1bc3889a3e6a4f8e2c57c6e825e471f692391cdef",
+                "score": 2.658714
+              },
+              {
+                "chunk_id": "booking-rules:r1:edb26cf7def90d5d",
+                "text": "失败与查证\n写入是否成功不明确时，先按原请求标识查证或使用同一幂等键恢复。",
+                "document_id": 1,
+                "source_ref": "knowledge/booking-rules-v1.md",
+                "document_revision": 1,
+                "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                "chunk_hash": "edb26cf7def90d5da44defb843dc498da5034751ed707a4f5bb910d205614c47",
+                "score": 1.9317
+              }
+            ]
+          },
+          "original_history": {
+            "message_count": 39,
+            "first_id": "12fc295f-2948-5fc5-afce-db441132b6e5",
+            "last_id": "6b3f5ca4-65f8-5374-ab32-0c6c8795cae9"
+          },
+          "current_turn": 15,
+          "executed_tools_this_turn": []
+        },
+        "selected_message_ids": [
+          "ce59323f-53fe-5291-a377-4d793d46c28b",
+          "lc_run--01a18100-161c-751b-a551-8d11217ea2b5",
+          "82bbfe5b-f870-57db-9c22-eb6be9959350",
+          "lc_run--01a18100-1ba7-750e-9add-6b9f21019e04",
+          "418a853e-f20d-5d1e-a7bc-6c2c4391c656",
+          "lc_run--01a18100-20ac-7017-8076-2afd472cee4e",
+          "85be106a-db29-5fc8-937d-195c19787614",
+          "lc_run--01a18100-2579-7191-9104-ddfcd68f7e05",
+          "8dfc294b-7938-51c6-84c9-2444d2b5d874",
+          "lc_run--01a18100-2b92-7494-b00a-9ccc15bd454c",
+          "6b3f5ca4-65f8-5374-ab32-0c6c8795cae9"
+        ]
+      }
+    }
+  ],
+  "actor_key": "user:1",
+  "scope_id": "test:51f61481-f8cf-4978-b234-a8819dbd63fb",
+  "grant": null
+}

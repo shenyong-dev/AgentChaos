@@ -1,6 +1,8 @@
-# T05 持久批量执行契约
+# T05—T09 持久批量执行契约
 
-2026-10-26。运行/执行状态以MySQL为准，Celery只负责至少一次投递。T06增补后仍16张领域表、23个触发器，迁移20261026_0003；[事件/SSE已接入](evidence.md)，T08断言和T11正式审核尚未实施。T05原1美元授权保持；T06独立开放agent金额授权与逐运行限制见事件契约。
+2026-10-28更新。运行/执行状态以MySQL为准，Celery只负责至少一次投递。仍16张领域表、23个触发器，迁移20261026_0003；[事件/SSE](evidence.md)、[T07故障](faults.md)及[T08独立规则评价](evaluation.md)已接入，T11正式审核尚未实施。T04—T07原授权账本保持；T08无新模型调用且日常付费开关关闭。
+
+T09 Worker按manifest中的确切知识修订列表构建索引并核对哈希，不能缺修订后偷偷回退；可信服务构造参数可选择开发隔离资料，HTTP CreateRun仍不接受客户端知识列表。独立T09 agent授权T09-20261028-agent-open不设金额总上限，每运行仍最多1美元，逐执行100次调用/500步骤/2M token/900秒及单轮限制保留。实际边界、开发样例及结果见[多轮契约](dialogue-boundaries.md)。
 
 ## API
 
@@ -52,6 +54,10 @@ MySQL提交运行和执行后，独立派发器每3秒扫描queued或失联runni
 
 T08之前，脚本完成统一inconclusive/evaluation_not_implemented。run.completed仅表示所有执行已终止，可以包含error或inconclusive，不能解读为智能体通过。工具错误留在实际工具结果/对话轨迹中，模型服务错误、执行限制、控制拒绝和平台错误分开记录。单次模型/工具与整体调用上限共同限制重试，不使用Celery自动重试套娃。
 
+T08新运行冻结评价器代码/Schema指纹、DSL版本和task_goal；事件1.3，SQL前后快照记录实际room_code。正常完成在既有run→execution锁和事务内加载持久证据、保存不可变断言并记录assertion.completed/evaluation.completed，再按passed/failed/inconclusive/error结束；runner返回实际评价状态。等待输入仍不评价，取消/运行错误保留原状态，显式重评结果单列，不篡改旧1.0/1.1/1.2运行。任务达成与可靠性判定分开，na不当成passed。
+
+T05/T06/T07历史验收脚本已兼容当前正常结束的passed/failed状态，未在T08重新执行付费矩阵。T08的真实存储/离线模型验证及旧真实轨迹只读复核不代替新的Linux双Worker实验。
+
 ## 预算与证据
 
 单位为整数microUSD。T05授权T05-20261026-agent-1累计1美元，case_generator/judge为0。与T04账本独立，重启、重新运行验收脚本或换临时数据库都不新增额度。
@@ -79,3 +85,11 @@ MySQL为运行状态和预约事实来源；Redis队列/检查点/预算协调�
 受控开发验收：`backend/.venv/Scripts/python.exe backend/scripts/verify_executor.py --real-model`；`--controls-only`只验证暂停/旧租约/显式恢复、取消和预算终止，不重复10条批次。需要本地已批准开关、账本、现有Linux引擎和已构建agentchaos-t05:dev镜像，仍消耗同一T05授权。脚本创建临时库/仅限该库的临时用户和独立队列，结束后清理自己创建的容器、用户、会话及数据库，保留预算与导出证据。
 
 测试用例批准字段为明确标注的开发夹具，不代表团队人工审核或正式数据集；验收记录不把其模型结果写成通过。Celery预取1、acks_late和worker_lost重投仅提供运输语义，有效执行防重由数据库认领和工具幂等负责。[Celery任务语义](https://docs.celeryq.dev/en/stable/userguide/tasks.html)、[Redis运输与visibility_timeout](https://docs.celeryq.dev/en/stable/getting-started/backends-and-brokers/redis.html)、[MySQL锁定读取](https://dev.mysql.com/doc/refman/8.0/en/innodb-locking-reads.html)
+
+## T07补充，2026-10-27
+
+创建run可选fault_profile_id；服务端冻结不可变配置/哈希，null为控制组。不传新字段的历史幂等请求哈希保持兼容。执行器仅为所选run创建FaultController，使用既有租约控制器/事件记录器；触发计数/回执在execution.timing_json中保留，恢复不重置。新事件版本1.2，原1.0/1.1仍读取，详见[故障契约](faults.md)。
+
+T07另获明确agent无金额总上限授权，独立T07-20261027-agent-open；必须匹配授权ID、unlimited标志及已初始化持久账本。T04/T05/T06账本不修改，0仍表示未授权，case_generator/judge0。全球账本保留旧前缀ac:t05是兼容既有存储，并不随lab namespace变化；初始化标记亦保留，不迁移/删除以制造额度。
+
+verify_faults.py明确要求--offline或--real-model。前者模型替身但SQL/Redis/工具真实，--review可保留临时团队UI且付费开关关闭；后者使用agentchaos-t07:dev、真实Linux双Worker/API/dispatcher及DeepSeek。两种模式分别导出并标注。日常团队检查入口、调用费用、保留失败和清理边界见[T07验收](../acceptance/T07.md)。start-linux-engine.ps1的启动分支在本轮实际验证，已修复Windows PowerShell5.1将探测stderr当终止异常的问题。

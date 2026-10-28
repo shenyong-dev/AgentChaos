@@ -38,7 +38,7 @@ class AgentState(TypedDict, total=False):
     resume_action: dict | None
     last_error: dict | None
     compactions: int
-    last_tool_result: dict | None
+    last_tool_result: dict | str | None
     write_attempted_this_turn: bool
     business_history: list[dict]
 

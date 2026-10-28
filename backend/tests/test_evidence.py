@@ -83,13 +83,13 @@ def infra():
 def trace(infra):
     service, reader, redis, settings, version, paths = infra
 
-    def make(turns=None):
+    def make(turns=None, *, assertions=None):
         identifier = service.create(
             1,
             CreateRun(
                 request_id=uuid4(),
                 target_version_id=version,
-                case_revision_ids=[add_case(service.engine, turns)],
+                case_revision_ids=[add_case(service.engine, turns, assertions=assertions)],
             ),
         )
         return identifier, service.read(1, identifier)["executions"][0]["execution_id"]
@@ -167,7 +167,9 @@ def test_actual_graph_events_tools_confirmation_and_readonly_replay(trace):
     service, reader, redis, settings, make, _ = trace
     gateway = OfflineGateway()
     text = gateway.preview()
-    identifier, execution = make([{"user": text}])
+    identifier, execution = make(
+        [{"user": text}], assertions=[{"type": "booking_count", "equals": 1}]
+    )
     run_execution(service.engine, redis, settings, execution, gateway_factory=lambda *_: gateway)
     waiting = service.read(1, identifier)["executions"][0]
     assert waiting["status"] == "waiting_input", waiting
@@ -182,7 +184,7 @@ def test_actual_graph_events_tools_confirmation_and_readonly_replay(trace):
     )
     run_execution(service.engine, redis, settings, execution, gateway_factory=lambda *_: gateway)
     done = reader.execution(1, execution)
-    assert done["status"] == "inconclusive" and len(done["after"]) == 1, done
+    assert done["status"] == "passed" and len(done["after"]) == 1, done
     found = all_events(reader, identifier)
     events = [i["event"] for i in found]
     kinds = {i["type"] for i in events}

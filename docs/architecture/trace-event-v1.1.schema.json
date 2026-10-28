@@ -1,0 +1,904 @@
+{
+  "$defs": {
+    "ArtifactRef": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_id": {
+          "minimum": 1,
+          "title": "Artifact Id",
+          "type": "integer"
+        },
+        "sha256": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "bytes": {
+          "minimum": 1,
+          "title": "Bytes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "artifact_id",
+        "sha256",
+        "bytes"
+      ],
+      "title": "ArtifactRef",
+      "type": "object"
+    },
+    "BudgetPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ArtifactRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "kind": {
+          "const": "budget.exceeded",
+          "title": "Kind",
+          "type": "string"
+        },
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "usage": {
+          "$ref": "#/$defs/JsonValue"
+        }
+      },
+      "required": [
+        "kind",
+        "code",
+        "usage"
+      ],
+      "title": "BudgetPayload",
+      "type": "object"
+    },
+    "ConfirmationPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ArtifactRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "kind": {
+          "enum": [
+            "confirmation.requested",
+            "confirmation.resumed"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "draft": {
+          "$ref": "#/$defs/JsonValue"
+        },
+        "revision": {
+          "title": "Revision",
+          "type": "integer"
+        },
+        "decision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Decision"
+        },
+        "request_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Request Id"
+        }
+      },
+      "required": [
+        "kind",
+        "draft",
+        "revision"
+      ],
+      "title": "ConfirmationPayload",
+      "type": "object"
+    },
+    "InputPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ArtifactRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "kind": {
+          "const": "input.received",
+          "title": "Kind",
+          "type": "string"
+        },
+        "request_id": {
+          "format": "uuid",
+          "title": "Request Id",
+          "type": "string"
+        },
+        "source": {
+          "enum": [
+            "script",
+            "input",
+            "recovery"
+          ],
+          "title": "Source",
+          "type": "string"
+        },
+        "text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Text"
+        },
+        "expected_revision": {
+          "title": "Expected Revision",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "kind",
+        "request_id",
+        "source",
+        "expected_revision"
+      ],
+      "title": "InputPayload",
+      "type": "object"
+    },
+    "JsonValue": {},
+    "LifecyclePayload": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ArtifactRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "kind": {
+          "enum": [
+            "run.created",
+            "run.started",
+            "run.completed",
+            "run.cancel_requested",
+            "run.resumed",
+            "execution.started",
+            "execution.completed",
+            "execution.cancelled",
+            "execution.error",
+            "execution.waiting_input"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "status": {
+          "title": "Status",
+          "type": "string"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason"
+        },
+        "attempt": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Attempt"
+        },
+        "counts": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "type": "integer"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Counts"
+        },
+        "before": {
+          "$ref": "#/$defs/JsonValue",
+          "default": null
+        },
+        "after": {
+          "$ref": "#/$defs/JsonValue",
+          "default": null
+        },
+        "usage": {
+          "$ref": "#/$defs/JsonValue",
+          "default": null
+        },
+        "output": {
+          "$ref": "#/$defs/JsonValue",
+          "default": null
+        }
+      },
+      "required": [
+        "kind",
+        "status"
+      ],
+      "title": "LifecyclePayload",
+      "type": "object"
+    },
+    "ModelPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ArtifactRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "kind": {
+          "enum": [
+            "model.started",
+            "model.completed",
+            "model.error"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "role": {
+          "default": "agent",
+          "enum": [
+            "agent",
+            "case_generator",
+            "judge"
+          ],
+          "title": "Role",
+          "type": "string"
+        },
+        "call_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Call Id"
+        },
+        "requested_model": {
+          "title": "Requested Model",
+          "type": "string"
+        },
+        "response_model": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Response Model"
+        },
+        "prompt_hash": {
+          "title": "Prompt Hash",
+          "type": "string"
+        },
+        "config_hash": {
+          "title": "Config Hash",
+          "type": "string"
+        },
+        "automatic_retries": {
+          "const": 0,
+          "default": 0,
+          "title": "Automatic Retries",
+          "type": "integer"
+        },
+        "usage": {
+          "$ref": "#/$defs/JsonValue",
+          "default": null
+        },
+        "response": {
+          "$ref": "#/$defs/JsonValue",
+          "default": null
+        },
+        "raw_record": {
+          "$ref": "#/$defs/JsonValue",
+          "default": null
+        },
+        "elapsed_ms": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Elapsed Ms"
+        },
+        "code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Code"
+        },
+        "model_requests": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Requests"
+        },
+        "late_observation": {
+          "default": false,
+          "title": "Late Observation",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "kind",
+        "requested_model",
+        "prompt_hash",
+        "config_hash"
+      ],
+      "title": "ModelPayload",
+      "type": "object"
+    },
+    "NodePayload": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ArtifactRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "kind": {
+          "enum": [
+            "node.started",
+            "node.completed",
+            "node.error"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "started",
+            "completed",
+            "waiting",
+            "error"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "elapsed_ms": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Elapsed Ms"
+        },
+        "code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Code"
+        }
+      },
+      "required": [
+        "kind",
+        "status"
+      ],
+      "title": "NodePayload",
+      "type": "object"
+    },
+    "RetrievalPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ArtifactRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "kind": {
+          "enum": [
+            "retrieval.completed",
+            "retrieval.error"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "query": {
+          "title": "Query",
+          "type": "string"
+        },
+        "result": {
+          "$ref": "#/$defs/JsonValue"
+        }
+      },
+      "required": [
+        "kind",
+        "query",
+        "result"
+      ],
+      "title": "RetrievalPayload",
+      "type": "object"
+    },
+    "StatePayload": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ArtifactRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "kind": {
+          "enum": [
+            "state.changed",
+            "context.compacted",
+            "checkpoint.restored"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "source_turn": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Turn"
+        },
+        "before": {
+          "$ref": "#/$defs/JsonValue",
+          "default": null
+        },
+        "after": {
+          "$ref": "#/$defs/JsonValue",
+          "default": null
+        },
+        "summary": {
+          "$ref": "#/$defs/JsonValue",
+          "default": null
+        },
+        "checkpoint_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Checkpoint Id"
+        },
+        "next_nodes": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Next Nodes"
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "title": "StatePayload",
+      "type": "object"
+    },
+    "ToolPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ArtifactRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "kind": {
+          "enum": [
+            "tool.requested",
+            "tool.completed",
+            "tool.error"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "tool": {
+          "title": "Tool",
+          "type": "string"
+        },
+        "arguments": {
+          "$ref": "#/$defs/JsonValue",
+          "default": null
+        },
+        "raw_result": {
+          "$ref": "#/$defs/JsonValue",
+          "default": null
+        },
+        "visible_result": {
+          "$ref": "#/$defs/JsonValue",
+          "default": null
+        },
+        "elapsed_ms": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Elapsed Ms"
+        },
+        "code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Code"
+        },
+        "commit_state": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Commit State"
+        },
+        "before": {
+          "$ref": "#/$defs/JsonValue",
+          "default": null
+        },
+        "after": {
+          "$ref": "#/$defs/JsonValue",
+          "default": null
+        }
+      },
+      "required": [
+        "kind",
+        "tool"
+      ],
+      "title": "ToolPayload",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.1",
+      "default": "1.1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "event_id": {
+      "format": "uuid",
+      "title": "Event Id",
+      "type": "string"
+    },
+    "run_id": {
+      "format": "uuid",
+      "title": "Run Id",
+      "type": "string"
+    },
+    "execution_id": {
+      "anyOf": [
+        {
+          "format": "uuid",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Execution Id"
+    },
+    "scope": {
+      "enum": [
+        "run",
+        "execution"
+      ],
+      "title": "Scope",
+      "type": "string"
+    },
+    "attempt": {
+      "anyOf": [
+        {
+          "minimum": 1,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Attempt"
+    },
+    "seq": {
+      "minimum": 1,
+      "title": "Seq",
+      "type": "integer"
+    },
+    "run_seq": {
+      "minimum": 1,
+      "title": "Run Seq",
+      "type": "integer"
+    },
+    "type": {
+      "title": "Type",
+      "type": "string"
+    },
+    "node": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Node"
+    },
+    "node_visit": {
+      "anyOf": [
+        {
+          "minimum": 1,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Node Visit"
+    },
+    "tool_call_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Tool Call Id"
+    },
+    "parent_event_id": {
+      "anyOf": [
+        {
+          "format": "uuid",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Parent Event Id"
+    },
+    "timestamp": {
+      "format": "date-time",
+      "title": "Timestamp",
+      "type": "string"
+    },
+    "payload": {
+      "discriminator": {
+        "mapping": {
+          "budget.exceeded": "#/$defs/BudgetPayload",
+          "checkpoint.restored": "#/$defs/StatePayload",
+          "confirmation.requested": "#/$defs/ConfirmationPayload",
+          "confirmation.resumed": "#/$defs/ConfirmationPayload",
+          "context.compacted": "#/$defs/StatePayload",
+          "execution.cancelled": "#/$defs/LifecyclePayload",
+          "execution.completed": "#/$defs/LifecyclePayload",
+          "execution.error": "#/$defs/LifecyclePayload",
+          "execution.started": "#/$defs/LifecyclePayload",
+          "execution.waiting_input": "#/$defs/LifecyclePayload",
+          "input.received": "#/$defs/InputPayload",
+          "model.completed": "#/$defs/ModelPayload",
+          "model.error": "#/$defs/ModelPayload",
+          "model.started": "#/$defs/ModelPayload",
+          "node.completed": "#/$defs/NodePayload",
+          "node.error": "#/$defs/NodePayload",
+          "node.started": "#/$defs/NodePayload",
+          "retrieval.completed": "#/$defs/RetrievalPayload",
+          "retrieval.error": "#/$defs/RetrievalPayload",
+          "run.cancel_requested": "#/$defs/LifecyclePayload",
+          "run.completed": "#/$defs/LifecyclePayload",
+          "run.created": "#/$defs/LifecyclePayload",
+          "run.resumed": "#/$defs/LifecyclePayload",
+          "run.started": "#/$defs/LifecyclePayload",
+          "state.changed": "#/$defs/StatePayload",
+          "tool.completed": "#/$defs/ToolPayload",
+          "tool.error": "#/$defs/ToolPayload",
+          "tool.requested": "#/$defs/ToolPayload"
+        },
+        "propertyName": "kind"
+      },
+      "oneOf": [
+        {
+          "$ref": "#/$defs/LifecyclePayload"
+        },
+        {
+          "$ref": "#/$defs/NodePayload"
+        },
+        {
+          "$ref": "#/$defs/ModelPayload"
+        },
+        {
+          "$ref": "#/$defs/ToolPayload"
+        },
+        {
+          "$ref": "#/$defs/RetrievalPayload"
+        },
+        {
+          "$ref": "#/$defs/StatePayload"
+        },
+        {
+          "$ref": "#/$defs/ConfirmationPayload"
+        },
+        {
+          "$ref": "#/$defs/InputPayload"
+        },
+        {
+          "$ref": "#/$defs/BudgetPayload"
+        }
+      ],
+      "title": "Payload"
+    },
+    "evidence_refs": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Evidence Refs",
+      "type": "array"
+    }
+  },
+  "required": [
+    "event_id",
+    "run_id",
+    "execution_id",
+    "scope",
+    "seq",
+    "run_seq",
+    "type",
+    "timestamp",
+    "payload"
+  ],
+  "title": "TraceEvent",
+  "type": "object"
+}

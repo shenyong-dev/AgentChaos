@@ -42,7 +42,7 @@ onMounted(store.refresh)
 
 <template>
   <div class="page-heading">
-    <div><div class="eyebrow">AGENT BASELINE / {{ config?.task ?? 'T06' }}</div><h1>工程环境</h1><p>检查服务连接，确认这次实验从哪里开始。</p></div>
+    <div><div class="eyebrow">AGENT BASELINE / {{ config?.task ?? 'T09' }}</div><h1>工程环境</h1><p>检查服务连接，确认这次实验从哪里开始。</p></div>
     <ElButton type="primary" :loading="loading" @click="store.refresh">重新检测</ElButton>
   </div>
 
@@ -76,5 +76,5 @@ onMounted(store.refresh)
   </section>
 
   <p v-if="config" class="card-description">批量调用：{{ config.executor_paid_calls_enabled ? (config.executor_agent_budget_unlimited ? '本项 agent 授权金额无总上限；逐次记账，运行限制继续生效' : `agent 授权上限 $${config.executor_agent_budget_usd}，剩余额度以持久账本为准`) : '付费调用关闭' }}。Worker 当前存活状态未探测。</p>
-  <footer class="page-footer"><span>预约、批量执行与事件证据已接入；断言评价尚未实现，脚本结束不代表通过。</span><a href="/docs" target="_blank" rel="noopener">查看 API 契约 ↗</a><small v-if="requestId">请求 {{ requestId }}</small></footer>
+  <footer class="page-footer"><span>预约、批量执行、事件与工具故障已接入；断言评价尚未实现，脚本结束不代表通过。</span><a href="/docs" target="_blank" rel="noopener">查看 API 契约 ↗</a><small v-if="requestId">请求 {{ requestId }}</small></footer>
 </template>

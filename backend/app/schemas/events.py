@@ -79,6 +79,33 @@ class ToolPayload(Payload):
     commit_state: str | None = None
     before: JsonValue = None
     after: JsonValue = None
+    fault_event_id: UUID | None = None
+    dispatched: bool | None = None
+    receipt_reused: bool = False
+
+
+class FaultPayload(Payload):
+    kind: Literal["fault.scheduled", "fault.injected", "fault.not_applied"]
+    fault_type: Literal["F01", "F02", "F03", "F04"]
+    stage: Literal["PRE_DISPATCH", "PRE_COMMIT", "POST_RESULT", "POST_COMMIT"]
+    profile_id: int
+    profile_revision: int
+    profile_hash: str
+    tool: str
+    eligible_call_no: int
+    trigger_no: int
+    max_triggers: int
+    seed: int
+    execution_seed: int
+    decision_hash: str
+    dispatched: bool
+    raw_result: JsonValue = None
+    visible_result: JsonValue = None
+    before: JsonValue = None
+    after: JsonValue = None
+    rollback_probe: JsonValue = None
+    commit_state: str | None = None
+    reason: str | None = None
 
 
 class RetrievalPayload(Payload):
@@ -119,6 +146,29 @@ class BudgetPayload(Payload):
     usage: JsonValue
 
 
+class AssertionPayload(Payload):
+    kind: Literal["assertion.completed"]
+    assertion_key: str
+    assertion_type: str
+    evaluator_version: str
+    code_version: str
+    verdict: Literal["passed", "failed", "inconclusive", "error", "na"]
+    expected: JsonValue
+    actual: JsonValue = None
+    reason: str
+    references: list[str]
+
+
+class EvaluationPayload(Payload):
+    kind: Literal["evaluation.completed"]
+    evaluator_version: str
+    code_version: str
+    input_hash: str
+    verdict: Literal["passed", "failed", "inconclusive", "error"]
+    task_outcome: Literal["fulfilled", "not_fulfilled", "unknown", "safely_degraded"]
+    counts: dict[str, int]
+
+
 EventPayload = Annotated[
     LifecyclePayload
     | NodePayload
@@ -128,13 +178,16 @@ EventPayload = Annotated[
     | StatePayload
     | ConfirmationPayload
     | InputPayload
-    | BudgetPayload,
+    | BudgetPayload
+    | FaultPayload
+    | AssertionPayload
+    | EvaluationPayload,
     Field(discriminator="kind"),
 ]
 
 
 class TraceEvent(Strict):
-    schema_version: Literal["1.1"] = "1.1"
+    schema_version: Literal["1.1", "1.2", "1.3"] = "1.3"
     event_id: UUID
     run_id: UUID
     execution_id: UUID | None

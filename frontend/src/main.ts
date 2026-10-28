@@ -6,6 +6,7 @@ import EnvironmentPage from './pages/EnvironmentPage.vue'
 import EvidencePage from './pages/EvidencePage.vue'
 import './styles.css'
 import './evidence.css'
+import './workbench.css'
 
 const router = createRouter({
   history: createWebHistory(),

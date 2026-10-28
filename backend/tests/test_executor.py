@@ -67,7 +67,7 @@ def infrastructure():
     redis.close()
 
 
-def add_case(engine, turns=None, *, approved=True, broken_hash=False):
+def add_case(engine, turns=None, *, approved=True, broken_hash=False, assertions=None):
     with Session(engine) as session, session.begin():
         reviewer = session.scalar(select(User).where(User.role == "reviewer"))
         row = TestCase(
@@ -82,7 +82,7 @@ def add_case(engine, turns=None, *, approved=True, broken_hash=False):
                 "fixture": "booking-default-v1",
                 "reference_clock": REFERENCE.isoformat(),
             },
-            expected_json={"assertions": [{"type": "booking_count", "equals": 0}]},
+            expected_json={"assertions": assertions or [{"type": "booking_count", "equals": 0}]},
             review_status="approved" if approved else "draft",
             reviewer_id=reviewer.id if approved else None,
             reviewed_at=REFERENCE if approved else None,
@@ -99,11 +99,11 @@ def run(infrastructure):
     engine, redis, settings, version = infrastructure
     service = RunService(engine, settings)
 
-    def make(*, turns=None, cases=None, **kwargs):
+    def make(*, turns=None, cases=None, assertions=None, **kwargs):
         values = CreateRun(
             request_id=uuid4(),
             target_version_id=version,
-            case_revision_ids=cases or [add_case(engine, turns)],
+            case_revision_ids=cases or [add_case(engine, turns, assertions=assertions)],
             **kwargs,
         )
         identifier = service.create(1, values)
@@ -232,7 +232,7 @@ def test_lease_expiring_inside_business_transaction_rolls_back(run):
     ExecutionControl(service.engine, claim["id"], claim["token"]).check()
 
 
-def test_offline_script_completion_never_becomes_passed_and_duplicate_noop(run):
+def test_offline_completion_is_evaluated_from_facts_and_duplicate_noop(run):
     service, make, redis, settings = run
     identifier, execution, _ = make()
     gateway = OfflineGateway()
@@ -240,18 +240,22 @@ def test_offline_script_completion_never_becomes_passed_and_duplicate_noop(run):
     result = run_execution(
         service.engine, redis, settings, execution, gateway_factory=lambda *_: gateway
     )
-    assert result["status"] == "inconclusive"
+    assert result["status"] == "passed"
     assert run_execution(service.engine, redis, settings, execution)["claimed"] is False
     view = service.read(1, identifier)
     assert view["status"] == "completed"
-    assert view["executions"][0]["error"]["code"] == "evaluation_not_implemented"
+    assert view["executions"][0]["error"] is None
+    assert view["executions"][0]["timing"]["gateway_mode"] == "offline_test_double"
+    assert view["executions"][0]["timing"]["evaluation"]["verdict"] == "passed"
 
 
 def test_wait_releases_worker_and_legitimate_input_resumes_same_session(run):
     service, make, redis, settings = run
     gateway = OfflineGateway()
     text = gateway.preview()
-    identifier, execution, _ = make(turns=[{"user": text}])
+    identifier, execution, _ = make(
+        turns=[{"user": text}], assertions=[{"type": "booking_count", "equals": 1}]
+    )
     run_execution(service.engine, redis, settings, execution, gateway_factory=lambda *_: gateway)
     view = service.read(1, identifier)["executions"][0]
     assert view["status"] == "waiting_input"
@@ -266,7 +270,7 @@ def test_wait_releases_worker_and_legitimate_input_resumes_same_session(run):
     service.supply_input(1, identifier, execution, values)
     run_execution(service.engine, redis, settings, execution, gateway_factory=lambda *_: gateway)
     done = service.read(1, identifier)["executions"][0]
-    assert done["status"] == "inconclusive" and done["session_id"] == view["session_id"]
+    assert done["status"] == "passed" and done["session_id"] == view["session_id"]
     assert len(done["after"]) == 1 and done["attempt"] == 1
     service.cancel(1, identifier)
     assert len(service.read(1, identifier)["executions"][0]["after"]) == 1
@@ -384,7 +388,7 @@ def test_explicit_recovery_preserves_cursor_scope_and_attempts(run):
     gateway.queue.append(AIMessage(content="恢复同一检查点，离线测试。"))
     run_execution(service.engine, redis, settings, execution, gateway_factory=lambda *_: gateway)
     after = service.read(1, identifier)["executions"][0]
-    assert after["status"] == "inconclusive" and after["attempt"] == 2
+    assert after["status"] == "passed" and after["attempt"] == 2
     assert after["scope_id"] == before["scope_id"] and after["session_id"] == before["session_id"]
     assert after["timing"]["cursor"] == 1
 

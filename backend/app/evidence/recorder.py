@@ -110,7 +110,7 @@ def append_event(
     attempt=None,
 ):
     """Caller owns the run lock. Trigger allocation commits with this transaction."""
-    if run.manifest_json.get("trace_schema") != "1.1":
+    if run.manifest_json.get("trace_schema") not in ("1.1", "1.2", "1.3"):
         return None
     settings = settings or Settings()
     payload = PAYLOAD.validate_python(redact(payload, settings)).model_dump(mode="json")
@@ -133,7 +133,14 @@ def append_event(
             raise AgentError("event_id_conflict", "事件标识已绑定不同观察内容。", 409)
         return existing
     refs = []
-    if len(json.dumps(payload, ensure_ascii=False).encode()) > ROW_LIMIT:
+    wrapped = {
+        "schema_version": run.manifest_json["trace_schema"],
+        "payload": payload,
+        "evidence_refs": refs,
+        "content_hash": content_hash,
+    }
+    # The stored wrapper, rather than only its payload, consumes the row budget.
+    if len(json.dumps(wrapped, ensure_ascii=False).encode()) > ROW_LIMIT:
         ref = _artifact(session, run, identifier, payload)
         refs.append(f"artifact:{ref['artifact_id']}:{ref['sha256']}")
         # Complete sanitized original is in the immutable artifact; row remains bounded.
@@ -150,6 +157,9 @@ def append_event(
             "result",
             "summary",
             "draft",
+            "rollback_probe",
+            "expected",
+            "actual",
         ):
             if key in payload and payload[key] is not None:
                 payload[key] = {"artifact": ref, "field": key}
@@ -157,12 +167,7 @@ def append_event(
             payload["text"] = None
         payload["artifact"] = ref
         payload = PAYLOAD.validate_python(payload).model_dump(mode="json")
-    wrapped = {
-        "schema_version": "1.1",
-        "payload": payload,
-        "evidence_refs": refs,
-        "content_hash": content_hash,
-    }
+        wrapped["payload"] = payload
     if len(json.dumps(wrapped, ensure_ascii=False).encode()) > ROW_LIMIT:
         raise AgentError("event_payload_limit", "事件摘要超过事实行上限。", 503)
     attempt_no = (attempt or execution.attempt_no) if execution else 1

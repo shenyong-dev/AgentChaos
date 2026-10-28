@@ -16,8 +16,17 @@ $configFile = Join-Path $cliConfig 'config.json'
 if (-not (Test-Path -LiteralPath $configFile)) {
     [IO.File]::WriteAllText($configFile, '{"auths":{}}', [Text.UTF8Encoding]::new($false))
 }
-& $dockerCli --config $cliConfig --host $endpoint info --format '{{.OSType}}' 2>$null
-if ($LASTEXITCODE -eq 0) { Write-Output 'Existing Linux engine is ready.'; exit 0 }
+function Test-LinuxEngine {
+    # Windows PowerShell 5.1 turns native stderr into an error record before the
+    # exit-code check. An unavailable daemon is expected on the startup branch.
+    $probePreference = $ErrorActionPreference
+    try {
+        $ErrorActionPreference = 'SilentlyContinue'
+        $null = & $dockerCli --config $cliConfig --host $endpoint info --format '{{.OSType}}' 2>$null
+        return $LASTEXITCODE -eq 0
+    } finally { $ErrorActionPreference = $probePreference }
+}
+if (Test-LinuxEngine) { Write-Output 'Existing Linux engine is ready.'; exit 0 }
 $existingDisk = 'D:\docker-desktop\data\wsl\disk\docker_data.vhdx'
 if (-not (Test-Path -LiteralPath $existingDisk)) { throw 'Existing D: engine data disk is missing.' }
 $registered = Get-ChildItem 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Lxss' |
@@ -45,8 +54,7 @@ try {
     $env:APPDATA = $previousRoaming
 }
 for ($attempt = 0; $attempt -lt 30; $attempt++) {
-    & $dockerCli --config $cliConfig --host $endpoint info --format '{{.OSType}}' 2>$null
-    if ($LASTEXITCODE -eq 0) { Write-Output 'Existing D: Linux engine is ready.'; exit 0 }
+    if (Test-LinuxEngine) { Write-Output 'Existing D: Linux engine is ready.'; exit 0 }
     Start-Sleep -Seconds 1
 }
 throw 'Engine did not become ready. Inspect the ignored .local\t05 logs; no reinstall is attempted.'

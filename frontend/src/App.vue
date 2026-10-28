@@ -5,24 +5,24 @@
         <span class="brand-symbol" aria-hidden="true">a<span>c</span></span>
         <span>AgentChaos<small>智能体可靠性实验室</small></span>
       </a>
-      <div class="workspace-label">项目空间 <span>01</span></div>
+      <div class="workspace-label">可靠性工作区</div>
       <nav aria-label="主导航">
         <RouterLink to="/environment" class="nav-link">
-          <span class="nav-icon" aria-hidden="true">◫</span>工程环境<span class="nav-key">T01</span>
+          <span class="nav-icon" aria-hidden="true">◫</span>工程环境
         </RouterLink>
         <RouterLink to="/runs" class="nav-link">
-          <span class="nav-icon" aria-hidden="true">≋</span>运行证据<span class="nav-key">T06</span>
+          <span class="nav-icon" aria-hidden="true">≋</span>运行证据
         </RouterLink>
       </nav>
       <div class="scope-note">
-        <span class="eyebrow">当前建设范围</span>
-        <p>先让每一层连接可验证。</p>
-        <small>测试工作台、用例与证据报告将随获准任务逐项接入。</small>
+        <span class="eyebrow">证据与规则</span>
+        <p>看见实际发生的事。</p>
+        <small>对照工具请求、业务事实与独立预期，复核每一条判定。</small>
       </div>
-      <div class="sidebar-footer"><span class="small-dot"></span>本地开发环境<small>v0.1.0</small></div>
+      <div class="sidebar-footer">本地开发环境<small>AgentChaos</small></div>
     </aside>
     <div class="main-shell">
-      <header class="topbar"><span>AgentChaos <i>/</i> {{ $route.path.startsWith('/runs') ? '运行证据' : '工程环境' }}</span><span class="phase-label">基础建设阶段</span></header>
+      <header class="topbar"><span>AgentChaos <i>/</i> {{ $route.path.startsWith('/runs') ? '运行证据' : '工程环境' }}</span><span class="phase-label">可靠性评估</span></header>
       <main><RouterView /></main>
     </div>
   </div>

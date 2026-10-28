@@ -1,0 +1,17 @@
+INFO  [alembic.runtime.migration] Context impl MySQLImpl.
+INFO  [alembic.runtime.migration] Will assume non-transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 20261025_0001, T02 initial sixteen-table schema
+INFO  [alembic.runtime.migration] Running upgrade 20261025_0001 -> 20261025_0002, T04 bind pending drafts to a trusted conversation without adding tables.
+INFO  [alembic.runtime.migration] Running upgrade 20261025_0002 -> 20261026_0003, T06 real run-level events and transactionally allocated per-run order.
+Traceback (most recent call last):
+  File "D:\AgentChaos\backend\scripts\verify_dialogue_boundaries.py", line 546, in <module>
+    main()
+  File "D:\AgentChaos\backend\scripts\verify_dialogue_boundaries.py", line 284, in main
+    run_id = service.create(
+             ^^^^^^^^^^^^^^^
+  File "D:\AgentChaos\backend\app\executors\service.py", line 199, in create
+    cases = [frozen_case(row) for row in rows]
+             ^^^^^^^^^^^^^^^^
+  File "D:\AgentChaos\backend\app\executors\service.py", line 83, in frozen_case
+    raise AgentError("case_invalid", "已审核用例不满足当前DSL契约。", 409) from None
+app.agents.errors.AgentError: 已审核用例不满足当前DSL契约。

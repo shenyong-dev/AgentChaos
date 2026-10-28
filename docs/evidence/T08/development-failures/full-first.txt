@@ -1,0 +1,74 @@
+........................................................................ [ 42%]
+............................................F................FF...F..... [ 84%]
+...F..FF................F..                                              [100%]
+================================== FAILURES ===================================
+_______ test_actual_graph_events_tools_confirmation_and_readonly_replay _______
+backend\tests\test_evidence.py:185: in test_actual_graph_events_tools_confirmation_and_readonly_replay
+    assert done["status"] == "inconclusive" and len(done["after"]) == 1, done
+E   AssertionError: {'execution_id': '7d106726-dbb8-4bd6-a4e2-217e564e196e', 'status': 'failed', 'attempt': 1, 'case_revision_id': 2, ...}
+E   assert ('failed' == 'inconclusive'
+E     
+E     - inconclusive
+E     + failed)
+___ test_offline_script_completion_never_becomes_passed_and_duplicate_noop ____
+backend\tests\test_executor.py:243: in test_offline_script_completion_never_becomes_passed_and_duplicate_noop
+    assert result["status"] == "inconclusive"
+E   AssertionError: assert 'passed' == 'inconclusive'
+E     
+E     - inconclusive
+E     + passed
+_____ test_wait_releases_worker_and_legitimate_input_resumes_same_session _____
+backend\tests\test_executor.py:269: in test_wait_releases_worker_and_legitimate_input_resumes_same_session
+    assert done["status"] == "inconclusive" and done["session_id"] == view["session_id"]
+E   AssertionError: assert ('failed' == 'inconclusive'
+E     
+E     - inconclusive
+E     + failed)
+_________ test_explicit_recovery_preserves_cursor_scope_and_attempts __________
+backend\tests\test_executor.py:387: in test_explicit_recovery_preserves_cursor_scope_and_attempts
+    assert after["status"] == "inconclusive" and after["attempt"] == 2
+E   AssertionError: assert ('passed' == 'inconclusive'
+E     
+E     - inconclusive
+E     + passed)
+_____________ test_real_tool_matrix_control_vs_four_effects[None] _____________
+backend\tests\test_faults.py:163: in test_real_tool_matrix_control_vs_four_effects
+    assert done["status"] == ("waiting_input" if kind in ("F01", "F02") else "inconclusive")
+E   AssertionError: assert 'failed' == 'inconclusive'
+E     
+E     - inconclusive
+E     + failed
+---------------------------- Captured stderr setup ----------------------------
+INFO  [alembic.runtime.migration] Context impl MySQLImpl.
+INFO  [alembic.runtime.migration] Will assume non-transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 20261025_0001, T02 initial sixteen-table schema
+INFO  [alembic.runtime.migration] Running upgrade 20261025_0001 -> 20261025_0002, T04 bind pending drafts to a trusted conversation without adding tables.
+INFO  [alembic.runtime.migration] Running upgrade 20261025_0002 -> 20261026_0003, T06 real run-level events and transactionally allocated per-run order.
+_____________ test_real_tool_matrix_control_vs_four_effects[F03] ______________
+backend\tests\test_faults.py:163: in test_real_tool_matrix_control_vs_four_effects
+    assert done["status"] == ("waiting_input" if kind in ("F01", "F02") else "inconclusive")
+E   AssertionError: assert 'failed' == 'inconclusive'
+E     
+E     - inconclusive
+E     + failed
+_____________ test_real_tool_matrix_control_vs_four_effects[F04] ______________
+backend\tests\test_faults.py:163: in test_real_tool_matrix_control_vs_four_effects
+    assert done["status"] == ("waiting_input" if kind in ("F01", "F02") else "inconclusive")
+E   AssertionError: assert 'failed' == 'inconclusive'
+E     
+E     - inconclusive
+E     + failed
+_____ test_public_config_never_exposes_credentials_or_claims_connectivity _____
+backend\tests\test_health.py:63: in test_public_config_never_exposes_credentials_or_claims_connectivity
+    assert body["assertion_evaluation_available"] is False
+E   assert True is False
+=========================== short test summary info ===========================
+FAILED backend\tests\test_evidence.py::test_actual_graph_events_tools_confirmation_and_readonly_replay
+FAILED backend\tests\test_executor.py::test_offline_script_completion_never_becomes_passed_and_duplicate_noop
+FAILED backend\tests\test_executor.py::test_wait_releases_worker_and_legitimate_input_resumes_same_session
+FAILED backend\tests\test_executor.py::test_explicit_recovery_preserves_cursor_scope_and_attempts
+FAILED backend\tests\test_faults.py::test_real_tool_matrix_control_vs_four_effects[None]
+FAILED backend\tests\test_faults.py::test_real_tool_matrix_control_vs_four_effects[F03]
+FAILED backend\tests\test_faults.py::test_real_tool_matrix_control_vs_four_effects[F04]
+FAILED backend\tests\test_health.py::test_public_config_never_exposes_credentials_or_claims_connectivity
+8 failed, 163 passed in 120.59s (0:02:00)

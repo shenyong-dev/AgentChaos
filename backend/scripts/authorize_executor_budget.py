@@ -7,13 +7,21 @@ from datetime import UTC, datetime
 from redis import Redis
 
 from app.core.config import PROJECT_ROOT, Settings
-from app.executors.budget import AUTHORIZATION, OPEN_AUTHORIZATION, authorization_limit
+from app.executors.budget import (
+    AUTHORIZATION,
+    DIALOGUE_AUTHORIZATION,
+    FAULT_AUTHORIZATION,
+    OPEN_AUTHORIZATION,
+    authorization_limit,
+)
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "--authorization", required=True, choices=[AUTHORIZATION, OPEN_AUTHORIZATION]
+        "--authorization",
+        required=True,
+        choices=[AUTHORIZATION, OPEN_AUTHORIZATION, FAULT_AUTHORIZATION, DIALOGUE_AUTHORIZATION],
     )
     args = parser.parse_args()
     settings = Settings()

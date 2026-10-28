@@ -27,6 +27,85 @@
       "title": "ArtifactRef",
       "type": "object"
     },
+    "AssertionPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ArtifactRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "kind": {
+          "const": "assertion.completed",
+          "title": "Kind",
+          "type": "string"
+        },
+        "assertion_key": {
+          "title": "Assertion Key",
+          "type": "string"
+        },
+        "assertion_type": {
+          "title": "Assertion Type",
+          "type": "string"
+        },
+        "evaluator_version": {
+          "title": "Evaluator Version",
+          "type": "string"
+        },
+        "code_version": {
+          "title": "Code Version",
+          "type": "string"
+        },
+        "verdict": {
+          "enum": [
+            "passed",
+            "failed",
+            "inconclusive",
+            "error",
+            "na"
+          ],
+          "title": "Verdict",
+          "type": "string"
+        },
+        "expected": {
+          "$ref": "#/$defs/JsonValue"
+        },
+        "actual": {
+          "$ref": "#/$defs/JsonValue",
+          "default": null
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        },
+        "references": {
+          "items": {
+            "type": "string"
+          },
+          "title": "References",
+          "type": "array"
+        }
+      },
+      "required": [
+        "kind",
+        "assertion_key",
+        "assertion_type",
+        "evaluator_version",
+        "code_version",
+        "verdict",
+        "expected",
+        "reason",
+        "references"
+      ],
+      "title": "AssertionPayload",
+      "type": "object"
+    },
     "BudgetPayload": {
       "additionalProperties": false,
       "properties": {
@@ -122,6 +201,228 @@
         "revision"
       ],
       "title": "ConfirmationPayload",
+      "type": "object"
+    },
+    "EvaluationPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ArtifactRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "kind": {
+          "const": "evaluation.completed",
+          "title": "Kind",
+          "type": "string"
+        },
+        "evaluator_version": {
+          "title": "Evaluator Version",
+          "type": "string"
+        },
+        "code_version": {
+          "title": "Code Version",
+          "type": "string"
+        },
+        "input_hash": {
+          "title": "Input Hash",
+          "type": "string"
+        },
+        "verdict": {
+          "enum": [
+            "passed",
+            "failed",
+            "inconclusive",
+            "error"
+          ],
+          "title": "Verdict",
+          "type": "string"
+        },
+        "task_outcome": {
+          "enum": [
+            "fulfilled",
+            "not_fulfilled",
+            "unknown",
+            "safely_degraded"
+          ],
+          "title": "Task Outcome",
+          "type": "string"
+        },
+        "counts": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Counts",
+          "type": "object"
+        }
+      },
+      "required": [
+        "kind",
+        "evaluator_version",
+        "code_version",
+        "input_hash",
+        "verdict",
+        "task_outcome",
+        "counts"
+      ],
+      "title": "EvaluationPayload",
+      "type": "object"
+    },
+    "FaultPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ArtifactRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "kind": {
+          "enum": [
+            "fault.scheduled",
+            "fault.injected",
+            "fault.not_applied"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "fault_type": {
+          "enum": [
+            "F01",
+            "F02",
+            "F03",
+            "F04"
+          ],
+          "title": "Fault Type",
+          "type": "string"
+        },
+        "stage": {
+          "enum": [
+            "PRE_DISPATCH",
+            "PRE_COMMIT",
+            "POST_RESULT",
+            "POST_COMMIT"
+          ],
+          "title": "Stage",
+          "type": "string"
+        },
+        "profile_id": {
+          "title": "Profile Id",
+          "type": "integer"
+        },
+        "profile_revision": {
+          "title": "Profile Revision",
+          "type": "integer"
+        },
+        "profile_hash": {
+          "title": "Profile Hash",
+          "type": "string"
+        },
+        "tool": {
+          "title": "Tool",
+          "type": "string"
+        },
+        "eligible_call_no": {
+          "title": "Eligible Call No",
+          "type": "integer"
+        },
+        "trigger_no": {
+          "title": "Trigger No",
+          "type": "integer"
+        },
+        "max_triggers": {
+          "title": "Max Triggers",
+          "type": "integer"
+        },
+        "seed": {
+          "title": "Seed",
+          "type": "integer"
+        },
+        "execution_seed": {
+          "title": "Execution Seed",
+          "type": "integer"
+        },
+        "decision_hash": {
+          "title": "Decision Hash",
+          "type": "string"
+        },
+        "dispatched": {
+          "title": "Dispatched",
+          "type": "boolean"
+        },
+        "raw_result": {
+          "$ref": "#/$defs/JsonValue",
+          "default": null
+        },
+        "visible_result": {
+          "$ref": "#/$defs/JsonValue",
+          "default": null
+        },
+        "before": {
+          "$ref": "#/$defs/JsonValue",
+          "default": null
+        },
+        "after": {
+          "$ref": "#/$defs/JsonValue",
+          "default": null
+        },
+        "rollback_probe": {
+          "$ref": "#/$defs/JsonValue",
+          "default": null
+        },
+        "commit_state": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Commit State"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason"
+        }
+      },
+      "required": [
+        "kind",
+        "fault_type",
+        "stage",
+        "profile_id",
+        "profile_revision",
+        "profile_hash",
+        "tool",
+        "eligible_call_no",
+        "trigger_no",
+        "max_triggers",
+        "seed",
+        "execution_seed",
+        "decision_hash",
+        "dispatched"
+      ],
+      "title": "FaultPayload",
       "type": "object"
     },
     "InputPayload": {
@@ -685,6 +986,36 @@
         "after": {
           "$ref": "#/$defs/JsonValue",
           "default": null
+        },
+        "fault_event_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fault Event Id"
+        },
+        "dispatched": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Dispatched"
+        },
+        "receipt_reused": {
+          "default": false,
+          "title": "Receipt Reused",
+          "type": "boolean"
         }
       },
       "required": [
@@ -698,8 +1029,12 @@
   "additionalProperties": false,
   "properties": {
     "schema_version": {
-      "const": "1.1",
-      "default": "1.1",
+      "default": "1.3",
+      "enum": [
+        "1.1",
+        "1.2",
+        "1.3"
+      ],
       "title": "Schema Version",
       "type": "string"
     },
@@ -818,16 +1153,21 @@
     "payload": {
       "discriminator": {
         "mapping": {
+          "assertion.completed": "#/$defs/AssertionPayload",
           "budget.exceeded": "#/$defs/BudgetPayload",
           "checkpoint.restored": "#/$defs/StatePayload",
           "confirmation.requested": "#/$defs/ConfirmationPayload",
           "confirmation.resumed": "#/$defs/ConfirmationPayload",
           "context.compacted": "#/$defs/StatePayload",
+          "evaluation.completed": "#/$defs/EvaluationPayload",
           "execution.cancelled": "#/$defs/LifecyclePayload",
           "execution.completed": "#/$defs/LifecyclePayload",
           "execution.error": "#/$defs/LifecyclePayload",
           "execution.started": "#/$defs/LifecyclePayload",
           "execution.waiting_input": "#/$defs/LifecyclePayload",
+          "fault.injected": "#/$defs/FaultPayload",
+          "fault.not_applied": "#/$defs/FaultPayload",
+          "fault.scheduled": "#/$defs/FaultPayload",
           "input.received": "#/$defs/InputPayload",
           "model.completed": "#/$defs/ModelPayload",
           "model.error": "#/$defs/ModelPayload",
@@ -876,6 +1216,15 @@
         },
         {
           "$ref": "#/$defs/BudgetPayload"
+        },
+        {
+          "$ref": "#/$defs/FaultPayload"
+        },
+        {
+          "$ref": "#/$defs/AssertionPayload"
+        },
+        {
+          "$ref": "#/$defs/EvaluationPayload"
         }
       ],
       "title": "Payload"

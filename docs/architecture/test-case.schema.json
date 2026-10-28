@@ -21,6 +21,41 @@
       "title": "BookingCount",
       "type": "object"
     },
+    "BookingGoal": {
+      "additionalProperties": false,
+      "description": "Task fulfilment is separate from compliance; no natural-language self-score.",
+      "properties": {
+        "start_at": {
+          "format": "date-time",
+          "title": "Start At",
+          "type": "string"
+        },
+        "end_at": {
+          "format": "date-time",
+          "title": "End At",
+          "type": "string"
+        },
+        "attendees": {
+          "minimum": 1,
+          "title": "Attendees",
+          "type": "integer"
+        },
+        "room_code": {
+          "maxLength": 32,
+          "minLength": 1,
+          "title": "Room Code",
+          "type": "string"
+        }
+      },
+      "required": [
+        "start_at",
+        "end_at",
+        "attendees",
+        "room_code"
+      ],
+      "title": "BookingGoal",
+      "type": "object"
+    },
     "BookingMatches": {
       "additionalProperties": false,
       "properties": {
@@ -50,6 +85,8 @@
         "room_code": {
           "anyOf": [
             {
+              "maxLength": 32,
+              "minLength": 1,
               "type": "string"
             },
             {
@@ -67,6 +104,37 @@
       "title": "BookingMatches",
       "type": "object"
     },
+    "BusinessConsistent": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "business_consistent",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "BusinessConsistent",
+      "type": "object"
+    },
+    "ConfirmationBinding": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "confirmation_binding",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "ConfirmationBinding",
+      "type": "object"
+    },
+    "JsonValue": {},
     "NoBookingOn": {
       "additionalProperties": false,
       "properties": {
@@ -86,6 +154,167 @@
         "date"
       ],
       "title": "NoBookingOn",
+      "type": "object"
+    },
+    "OriginalRequestRecovery": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "original_request_recovery",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "OriginalRequestRecovery",
+      "type": "object"
+    },
+    "ReplyBookingConsistent": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "reply_booking_consistent",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "ReplyBookingConsistent",
+      "type": "object"
+    },
+    "ReplyLiterals": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "reply_literals",
+          "title": "Type",
+          "type": "string"
+        },
+        "contains": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 30,
+          "title": "Contains",
+          "type": "array"
+        },
+        "excludes": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 30,
+          "title": "Excludes",
+          "type": "array"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "ReplyLiterals",
+      "type": "object"
+    },
+    "StateMatches": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "state_matches",
+          "title": "Type",
+          "type": "string"
+        },
+        "fields": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "maxProperties": 5,
+          "minProperties": 1,
+          "title": "Fields",
+          "type": "object"
+        }
+      },
+      "required": [
+        "type",
+        "fields"
+      ],
+      "title": "StateMatches",
+      "type": "object"
+    },
+    "ToolCalls": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "tool_calls",
+          "title": "Type",
+          "type": "string"
+        },
+        "tool": {
+          "pattern": "^[a-z][a-z0-9_]{0,79}$",
+          "title": "Tool",
+          "type": "string"
+        },
+        "min_calls": {
+          "default": 1,
+          "maximum": 200,
+          "minimum": 0,
+          "title": "Min Calls",
+          "type": "integer"
+        },
+        "max_calls": {
+          "default": 20,
+          "maximum": 200,
+          "minimum": 0,
+          "title": "Max Calls",
+          "type": "integer"
+        },
+        "arguments": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "$ref": "#/$defs/JsonValue"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Arguments"
+        }
+      },
+      "required": [
+        "type",
+        "tool"
+      ],
+      "title": "ToolCalls",
+      "type": "object"
+    },
+    "UniqueBookings": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "unique_bookings",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "UniqueBookings",
       "type": "object"
     },
     "UserTurn": {
@@ -108,8 +337,11 @@
   "additionalProperties": false,
   "properties": {
     "schema_version": {
-      "const": "1.0",
       "default": "1.0",
+      "enum": [
+        "1.0",
+        "1.1"
+      ],
       "title": "Schema Version",
       "type": "string"
     },
@@ -176,7 +408,15 @@
           "mapping": {
             "booking_count": "#/$defs/BookingCount",
             "booking_matches": "#/$defs/BookingMatches",
-            "no_booking_on": "#/$defs/NoBookingOn"
+            "business_consistent": "#/$defs/BusinessConsistent",
+            "confirmation_binding": "#/$defs/ConfirmationBinding",
+            "no_booking_on": "#/$defs/NoBookingOn",
+            "original_request_recovery": "#/$defs/OriginalRequestRecovery",
+            "reply_booking_consistent": "#/$defs/ReplyBookingConsistent",
+            "reply_literals": "#/$defs/ReplyLiterals",
+            "state_matches": "#/$defs/StateMatches",
+            "tool_calls": "#/$defs/ToolCalls",
+            "unique_bookings": "#/$defs/UniqueBookings"
           },
           "propertyName": "type"
         },
@@ -189,6 +429,30 @@
           },
           {
             "$ref": "#/$defs/NoBookingOn"
+          },
+          {
+            "$ref": "#/$defs/ToolCalls"
+          },
+          {
+            "$ref": "#/$defs/StateMatches"
+          },
+          {
+            "$ref": "#/$defs/ConfirmationBinding"
+          },
+          {
+            "$ref": "#/$defs/OriginalRequestRecovery"
+          },
+          {
+            "$ref": "#/$defs/BusinessConsistent"
+          },
+          {
+            "$ref": "#/$defs/UniqueBookings"
+          },
+          {
+            "$ref": "#/$defs/ReplyLiterals"
+          },
+          {
+            "$ref": "#/$defs/ReplyBookingConsistent"
           }
         ]
       },
@@ -206,6 +470,17 @@
       ],
       "title": "Review Status",
       "type": "string"
+    },
+    "task_goal": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/BookingGoal"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
     }
   },
   "required": [

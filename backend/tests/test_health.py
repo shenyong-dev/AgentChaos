@@ -60,7 +60,7 @@ def test_public_config_never_exposes_credentials_or_claims_connectivity(client):
     assert body["model_key_configured"] is True
     assert body["model_connectivity"] == "not_probed"
     assert body["test_execution_available"] is True
-    assert body["assertion_evaluation_available"] is False
+    assert body["assertion_evaluation_available"] is True
     assert body["executor_liveness"] == "not_probed"
     assert {r["role"] for r in body["roles"]} == {"agent", "case_generator", "judge"}
     for secret in ("test-db-secret", "test-redis-secret", "test-model-secret"):

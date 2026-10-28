@@ -1,0 +1,2509 @@
+{
+  "run_id": "4222700c-7e8c-4d3f-8654-eadb1ee6f5cb",
+  "status": "running",
+  "manifest_hash": "ba9be924070fb762ce8bb9089a8dcc4ac021c17a3c9caf185074c93a8c09bbfe",
+  "manifest": {
+    "seed": 27,
+    "cases": [
+      {
+        "dsl": {
+          "turns": [
+            {
+              "user": "明天A101，14:00到15:00，10人，请生成完整待确认草稿，等我确认。"
+            }
+          ],
+          "fixture": "booking-default-v1",
+          "case_key": "T07-LAB-BA63C1B83A91",
+          "category": "tool_execution",
+          "revision": 1,
+          "assertions": [
+            {
+              "type": "booking_count",
+              "equals": 1
+            }
+          ],
+          "family_key": "t07-development-booking",
+          "dataset_split": "dev",
+          "review_status": "approved",
+          "schema_version": "1.0",
+          "reference_clock": "2026-10-27T09:00:00+08:00"
+        },
+        "content": {
+          "turns": [
+            {
+              "user": "明天A101，14:00到15:00，10人，请生成完整待确认草稿，等我确认。"
+            }
+          ],
+          "source": "T07-real-model-development-fixture",
+          "fixture": {
+            "fixture": "booking-default-v1",
+            "reference_clock": "2026-10-27T09:00:00+08:00"
+          },
+          "case_key": "T07-LAB-BA63C1B83A91",
+          "category": "tool_execution",
+          "expected": {
+            "assertions": [
+              {
+                "type": "booking_count",
+                "equals": 1
+              }
+            ]
+          },
+          "revision": 1,
+          "family_key": "t07-development-booking",
+          "dataset_split": "dev"
+        },
+        "reviewed_at": "2026-10-27T10:41:40.747277+00:00",
+        "reviewer_id": 2,
+        "content_hash": "c219a69128f8f8e2fb0709cbf5bbd755f5f4454d7df3512a9b38e34778b3e914",
+        "case_revision_id": 1
+      }
+    ],
+    "roles": {
+      "agent": {
+        "model": "deepseek-flash",
+        "base_url": "https://api.deepseek.com",
+        "provider": "DeepSeek",
+        "thinking": "disabled",
+        "timeout_seconds": 30,
+        "automatic_retries": 0,
+        "max_output_tokens": 1024
+      },
+      "judge": {
+        "model": "deepseek-flash",
+        "base_url": "https://api.deepseek.com",
+        "provider": "DeepSeek",
+        "thinking": "disabled",
+        "timeout_seconds": 30,
+        "automatic_retries": 0,
+        "max_output_tokens": 1024
+      },
+      "case_generator": {
+        "model": "deepseek-flash",
+        "base_url": "https://api.deepseek.com",
+        "provider": "DeepSeek",
+        "thinking": "disabled",
+        "timeout_seconds": 30,
+        "automatic_retries": 0,
+        "max_output_tokens": 2048
+      }
+    },
+    "limits": {
+      "max_steps": 200,
+      "max_tokens": 800000,
+      "concurrency": 1,
+      "max_model_calls": 30,
+      "timeout_seconds": 600
+    },
+    "schema": "run-v1",
+    "target": {
+      "role": "agent",
+      "tools": {
+        "tools": {
+          "tools": [
+            {
+              "name": "query_availability",
+              "effect": "read",
+              "version": "1.0",
+              "idempotent": false,
+              "input_schema": {
+                "type": "object",
+                "title": "AvailabilityQuery",
+                "required": [
+                  "start_at",
+                  "end_at",
+                  "attendees"
+                ],
+                "properties": {
+                  "end_at": {
+                    "type": "string",
+                    "title": "End At",
+                    "format": "date-time"
+                  },
+                  "start_at": {
+                    "type": "string",
+                    "title": "Start At",
+                    "format": "date-time"
+                  },
+                  "attendees": {
+                    "type": "integer",
+                    "title": "Attendees",
+                    "maximum": 2147483647,
+                    "minimum": 1
+                  },
+                  "room_code": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,31}$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "title": "Room Code",
+                    "default": null
+                  }
+                },
+                "additionalProperties": false
+              },
+              "output_schema": {
+                "type": "object",
+                "$defs": {
+                  "RoomView": {
+                    "type": "object",
+                    "title": "RoomView",
+                    "required": [
+                      "room_code",
+                      "capacity"
+                    ],
+                    "properties": {
+                      "capacity": {
+                        "type": "integer",
+                        "title": "Capacity"
+                      },
+                      "room_code": {
+                        "type": "string",
+                        "title": "Room Code"
+                      }
+                    },
+                    "additionalProperties": false
+                  },
+                  "AvailabilityView": {
+                    "type": "object",
+                    "title": "AvailabilityView",
+                    "required": [
+                      "rooms",
+                      "start_at",
+                      "end_at",
+                      "attendees"
+                    ],
+                    "properties": {
+                      "rooms": {
+                        "type": "array",
+                        "items": {
+                          "$ref": "#/$defs/RoomView"
+                        },
+                        "title": "Rooms"
+                      },
+                      "end_at": {
+                        "type": "string",
+                        "title": "End At",
+                        "format": "date-time"
+                      },
+                      "start_at": {
+                        "type": "string",
+                        "title": "Start At",
+                        "format": "date-time"
+                      },
+                      "attendees": {
+                        "type": "integer",
+                        "title": "Attendees"
+                      },
+                      "truncated": {
+                        "type": "boolean",
+                        "title": "Truncated",
+                        "default": false
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                },
+                "title": "BookingToolResult[AvailabilityView]",
+                "required": [
+                  "code",
+                  "summary",
+                  "data",
+                  "commit_state"
+                ],
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "title": "Code"
+                  },
+                  "data": {
+                    "$ref": "#/$defs/AvailabilityView"
+                  },
+                  "status": {
+                    "enum": [
+                      "ok",
+                      "not_found"
+                    ],
+                    "type": "string",
+                    "title": "Status",
+                    "default": "ok"
+                  },
+                  "summary": {
+                    "type": "string",
+                    "title": "Summary"
+                  },
+                  "retryable": {
+                    "type": "boolean",
+                    "title": "Retryable",
+                    "default": false
+                  },
+                  "request_key": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "title": "Request Key",
+                    "default": null
+                  },
+                  "commit_state": {
+                    "enum": [
+                      "not_applicable",
+                      "not_committed",
+                      "committed",
+                      "unknown"
+                    ],
+                    "type": "string",
+                    "title": "Commit State"
+                  },
+                  "evidence_refs": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "title": "Evidence Refs"
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            {
+              "name": "preview_booking",
+              "effect": "draft_write",
+              "version": "1.0",
+              "idempotent": false,
+              "input_schema": {
+                "type": "object",
+                "title": "PreviewBooking",
+                "required": [
+                  "start_at",
+                  "end_at",
+                  "attendees",
+                  "room_code"
+                ],
+                "properties": {
+                  "end_at": {
+                    "type": "string",
+                    "title": "End At",
+                    "format": "date-time"
+                  },
+                  "start_at": {
+                    "type": "string",
+                    "title": "Start At",
+                    "format": "date-time"
+                  },
+                  "attendees": {
+                    "type": "integer",
+                    "title": "Attendees",
+                    "maximum": 2147483647,
+                    "minimum": 1
+                  },
+                  "room_code": {
+                    "type": "string",
+                    "title": "Room Code",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,31}$"
+                  }
+                },
+                "additionalProperties": false
+              },
+              "output_schema": {
+                "type": "object",
+                "$defs": {
+                  "DraftView": {
+                    "type": "object",
+                    "title": "DraftView",
+                    "required": [
+                      "draft_id",
+                      "draft_hash",
+                      "suggested_idempotency_key",
+                      "room_code",
+                      "start_at",
+                      "end_at",
+                      "attendees",
+                      "status",
+                      "expires_at"
+                    ],
+                    "properties": {
+                      "end_at": {
+                        "type": "string",
+                        "title": "End At",
+                        "format": "date-time"
+                      },
+                      "status": {
+                        "enum": [
+                          "pending",
+                          "confirmed",
+                          "expired",
+                          "superseded",
+                          "rejected"
+                        ],
+                        "type": "string",
+                        "title": "Status"
+                      },
+                      "draft_id": {
+                        "type": "string",
+                        "title": "Draft Id",
+                        "format": "uuid"
+                      },
+                      "start_at": {
+                        "type": "string",
+                        "title": "Start At",
+                        "format": "date-time"
+                      },
+                      "attendees": {
+                        "type": "integer",
+                        "title": "Attendees"
+                      },
+                      "room_code": {
+                        "type": "string",
+                        "title": "Room Code"
+                      },
+                      "draft_hash": {
+                        "type": "string",
+                        "title": "Draft Hash",
+                        "pattern": "^[0-9a-f]{64}$"
+                      },
+                      "expires_at": {
+                        "type": "string",
+                        "title": "Expires At",
+                        "format": "date-time"
+                      },
+                      "suggested_idempotency_key": {
+                        "type": "string",
+                        "title": "Suggested Idempotency Key",
+                        "format": "uuid"
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                },
+                "title": "BookingToolResult[DraftView]",
+                "required": [
+                  "code",
+                  "summary",
+                  "data",
+                  "commit_state"
+                ],
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "title": "Code"
+                  },
+                  "data": {
+                    "$ref": "#/$defs/DraftView"
+                  },
+                  "status": {
+                    "enum": [
+                      "ok",
+                      "not_found"
+                    ],
+                    "type": "string",
+                    "title": "Status",
+                    "default": "ok"
+                  },
+                  "summary": {
+                    "type": "string",
+                    "title": "Summary"
+                  },
+                  "retryable": {
+                    "type": "boolean",
+                    "title": "Retryable",
+                    "default": false
+                  },
+                  "request_key": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "title": "Request Key",
+                    "default": null
+                  },
+                  "commit_state": {
+                    "enum": [
+                      "not_applicable",
+                      "not_committed",
+                      "committed",
+                      "unknown"
+                    ],
+                    "type": "string",
+                    "title": "Commit State"
+                  },
+                  "evidence_refs": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "title": "Evidence Refs"
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            {
+              "name": "confirm_booking",
+              "effect": "booking_write",
+              "version": "1.0",
+              "idempotent": true,
+              "input_schema": {
+                "type": "object",
+                "title": "ConfirmBookingToolInput",
+                "required": [
+                  "draft_id",
+                  "draft_hash",
+                  "idempotency_key"
+                ],
+                "properties": {
+                  "draft_id": {
+                    "type": "string",
+                    "title": "Draft Id",
+                    "format": "uuid"
+                  },
+                  "draft_hash": {
+                    "type": "string",
+                    "title": "Draft Hash",
+                    "pattern": "^[0-9a-f]{64}$"
+                  },
+                  "idempotency_key": {
+                    "type": "string",
+                    "title": "Idempotency Key",
+                    "format": "uuid"
+                  }
+                },
+                "additionalProperties": false
+              },
+              "output_schema": {
+                "type": "object",
+                "$defs": {
+                  "BookingView": {
+                    "type": "object",
+                    "title": "BookingView",
+                    "required": [
+                      "booking_id",
+                      "draft_id",
+                      "idempotency_key",
+                      "room_code",
+                      "start_at",
+                      "end_at",
+                      "attendees",
+                      "status",
+                      "created_at"
+                    ],
+                    "properties": {
+                      "end_at": {
+                        "type": "string",
+                        "title": "End At",
+                        "format": "date-time"
+                      },
+                      "status": {
+                        "enum": [
+                          "confirmed",
+                          "cancelled"
+                        ],
+                        "type": "string",
+                        "title": "Status"
+                      },
+                      "draft_id": {
+                        "type": "string",
+                        "title": "Draft Id",
+                        "format": "uuid"
+                      },
+                      "start_at": {
+                        "type": "string",
+                        "title": "Start At",
+                        "format": "date-time"
+                      },
+                      "attendees": {
+                        "type": "integer",
+                        "title": "Attendees"
+                      },
+                      "room_code": {
+                        "type": "string",
+                        "title": "Room Code"
+                      },
+                      "booking_id": {
+                        "type": "string",
+                        "title": "Booking Id",
+                        "format": "uuid"
+                      },
+                      "created_at": {
+                        "type": "string",
+                        "title": "Created At",
+                        "format": "date-time"
+                      },
+                      "idempotency_key": {
+                        "type": "string",
+                        "title": "Idempotency Key",
+                        "format": "uuid"
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                },
+                "title": "BookingToolResult[BookingView]",
+                "required": [
+                  "code",
+                  "summary",
+                  "data",
+                  "commit_state"
+                ],
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "title": "Code"
+                  },
+                  "data": {
+                    "$ref": "#/$defs/BookingView"
+                  },
+                  "status": {
+                    "enum": [
+                      "ok",
+                      "not_found"
+                    ],
+                    "type": "string",
+                    "title": "Status",
+                    "default": "ok"
+                  },
+                  "summary": {
+                    "type": "string",
+                    "title": "Summary"
+                  },
+                  "retryable": {
+                    "type": "boolean",
+                    "title": "Retryable",
+                    "default": false
+                  },
+                  "request_key": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "title": "Request Key",
+                    "default": null
+                  },
+                  "commit_state": {
+                    "enum": [
+                      "not_applicable",
+                      "not_committed",
+                      "committed",
+                      "unknown"
+                    ],
+                    "type": "string",
+                    "title": "Commit State"
+                  },
+                  "evidence_refs": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "title": "Evidence Refs"
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            {
+              "name": "lookup_booking_by_request",
+              "effect": "read",
+              "version": "1.0",
+              "idempotent": true,
+              "input_schema": {
+                "type": "object",
+                "required": [
+                  "idempotency_key"
+                ],
+                "properties": {
+                  "idempotency_key": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                },
+                "additionalProperties": false
+              },
+              "output_schema": {
+                "type": "object",
+                "$defs": {
+                  "BookingView": {
+                    "type": "object",
+                    "title": "BookingView",
+                    "required": [
+                      "booking_id",
+                      "draft_id",
+                      "idempotency_key",
+                      "room_code",
+                      "start_at",
+                      "end_at",
+                      "attendees",
+                      "status",
+                      "created_at"
+                    ],
+                    "properties": {
+                      "end_at": {
+                        "type": "string",
+                        "title": "End At",
+                        "format": "date-time"
+                      },
+                      "status": {
+                        "enum": [
+                          "confirmed",
+                          "cancelled"
+                        ],
+                        "type": "string",
+                        "title": "Status"
+                      },
+                      "draft_id": {
+                        "type": "string",
+                        "title": "Draft Id",
+                        "format": "uuid"
+                      },
+                      "start_at": {
+                        "type": "string",
+                        "title": "Start At",
+                        "format": "date-time"
+                      },
+                      "attendees": {
+                        "type": "integer",
+                        "title": "Attendees"
+                      },
+                      "room_code": {
+                        "type": "string",
+                        "title": "Room Code"
+                      },
+                      "booking_id": {
+                        "type": "string",
+                        "title": "Booking Id",
+                        "format": "uuid"
+                      },
+                      "created_at": {
+                        "type": "string",
+                        "title": "Created At",
+                        "format": "date-time"
+                      },
+                      "idempotency_key": {
+                        "type": "string",
+                        "title": "Idempotency Key",
+                        "format": "uuid"
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                },
+                "title": "BookingToolResult[Union[BookingView, NoneType]]",
+                "required": [
+                  "code",
+                  "summary",
+                  "data",
+                  "commit_state"
+                ],
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "title": "Code"
+                  },
+                  "data": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/$defs/BookingView"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "status": {
+                    "enum": [
+                      "ok",
+                      "not_found"
+                    ],
+                    "type": "string",
+                    "title": "Status",
+                    "default": "ok"
+                  },
+                  "summary": {
+                    "type": "string",
+                    "title": "Summary"
+                  },
+                  "retryable": {
+                    "type": "boolean",
+                    "title": "Retryable",
+                    "default": false
+                  },
+                  "request_key": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "title": "Request Key",
+                    "default": null
+                  },
+                  "commit_state": {
+                    "enum": [
+                      "not_applicable",
+                      "not_committed",
+                      "committed",
+                      "unknown"
+                    ],
+                    "type": "string",
+                    "title": "Commit State"
+                  },
+                  "evidence_refs": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "title": "Evidence Refs"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          ],
+          "version": "1.0",
+          "permission": "authenticated operator; confirmation requires explicit user action",
+          "error_schema": {
+            "type": "object",
+            "$defs": {
+              "ErrorBody": {
+                "type": "object",
+                "title": "ErrorBody",
+                "required": [
+                  "code",
+                  "message"
+                ],
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "title": "Code"
+                  },
+                  "details": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": true
+                    },
+                    "title": "Details"
+                  },
+                  "message": {
+                    "type": "string",
+                    "title": "Message"
+                  }
+                }
+              }
+            },
+            "title": "ErrorEnvelope",
+            "required": [
+              "error",
+              "request_id"
+            ],
+            "properties": {
+              "error": {
+                "$ref": "#/$defs/ErrorBody"
+              },
+              "request_id": {
+                "type": "string",
+                "title": "Request Id"
+              }
+            }
+          },
+          "unknown_commit": "lookup original idempotency key; never replace key",
+          "trusted_context": [
+            "actor_key",
+            "scope_id",
+            "reference_clock",
+            "confirmed"
+          ],
+          "automatic_retries": 0,
+          "implemented_limits": {
+            "candidate_rooms": 50,
+            "db_socket_seconds": 15,
+            "actor_lock_wait_seconds": 3,
+            "innodb_lock_wait_seconds": 5
+          },
+          "adapter_limits_for_T04": {
+            "max_response_bytes": 16384,
+            "wall_timeout_and_confirmation_gate": "implemented in T04"
+          }
+        },
+        "version": "booking-registry-v1",
+        "state_tool": {
+          "type": "object",
+          "title": "FieldPatch",
+          "properties": {
+            "date": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Date",
+              "default": null,
+              "description": "当地日期YYYY-MM-DD；相对日期按服务端参考时钟解析。"
+            },
+            "end_time": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "End Time",
+              "default": null,
+              "description": "当地钟表时间HH:MM，例如15:00；不含日期、秒或时区。"
+            },
+            "attendees": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "maximum": 2147483647,
+                  "minimum": 1
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Attendees",
+              "default": null
+            },
+            "room_code": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Room Code",
+              "default": null
+            },
+            "start_time": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Start Time",
+              "default": null,
+              "description": "当地钟表时间HH:MM，例如14:00；不含日期、秒或时区。"
+            },
+            "clear_fields": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "title": "Clear Fields",
+              "maxItems": 6
+            },
+            "source_quotes": {
+              "type": "object",
+              "title": "Source Quotes",
+              "description": "每个本次填写的字段都要有同名键，对应当前用户输入的原文片段；保留的旧字段不要重复填写。",
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            "duration_minutes": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "maximum": 120,
+                  "minimum": 30
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Duration Minutes",
+              "default": null,
+              "description": "仅当用户明确说时长时填写；已给起止时间就分别填写start_time和end_time。"
+            }
+          },
+          "additionalProperties": false
+        },
+        "retrieval_tool": {
+          "type": "object",
+          "title": "RuleQuery",
+          "required": [
+            "query"
+          ],
+          "properties": {
+            "query": {
+              "type": "string",
+              "title": "Query",
+              "maxLength": 1000,
+              "minLength": 1
+            }
+          },
+          "additionalProperties": false
+        },
+        "max_response_bytes": 16384,
+        "automatic_write_retries": 0
+      },
+      "pricing": {
+        "model": "deepseek-flash",
+        "method": "peak-rate upper estimate, all input charged at cache-miss rate; not a bill",
+        "source": "https://api-docs.deepseek.com/quick_start/pricing/",
+        "currency": "USD",
+        "verified_on": "2026-10-25",
+        "documented_version": "DeepSeek-V4.1-Flash-1017",
+        "peak_output_per_million": "1.20",
+        "peak_input_miss_per_million": "0.30"
+      },
+      "sources": {
+        "backend/uv.lock": "1a247f9c27e14143ce9c58f4420e5b26097a7ae478f28b59a4f7c0ef52b8a6d6",
+        "backend/app/main.py": "e07ebad2abdd2caed804f235b01279a0139ed99f3818851532e5cb0ffc214413",
+        "backend/app/__init__.py": "2149991a92002abcc24abd0f94bdae85fcf27fe941295aefa75659a77c7f37c6",
+        "backend/app/api/runs.py": "a78b0d033e8b6e946d3072a5f57bee9e1ec7121dc97e4a8024fba44b5fd79b06",
+        "backend/app/db/seeds.py": "9a3a0029f32aebad4e4b22997cc402681838562d535862603b46e947f73c4d58",
+        "backend/app/api/agent.py": "806131ae95cdc327d7fc411ab01dbb508663e778c8325a31a14dc4be5b8c3086",
+        "backend/app/db/engine.py": "e64288826d29bf59d0d399d261ac7d18e174bd19c61d646fcaf78269f3e1196b",
+        "backend/app/api/faults.py": "cce6f6f0a256dba5dda3553c96bedb47e227bc75e18ea9a9a36213869a085996",
+        "backend/app/api/routes.py": "4b814d6bb2b7accc9dc6194d9c7c9dd8f7bba9d80827da415b2c6ddc7a306787",
+        "backend/app/api/booking.py": "f81d28ebc5f9595d6aea1a8d3c25343ced3ede0a610741ae4e93b16109ac8065",
+        "backend/app/core/config.py": "6f119cf0476edf8f8f68f73185506ebb60c3232b0b59118d2c512355498edcad",
+        "backend/app/db/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "backend/app/db/fixtures.py": "67fffd973591006328271fa0428f0f96f0b888855bdb9c1b5ac3b9bc0f7c7a62",
+        "backend/app/models/base.py": "1b6806e26cd4841dcd459c62837d398cade117a1d45e4fe324bef5a18bd7285d",
+        "backend/app/agents/graph.py": "031b02942ef6b7f64b1880742964cf77b209f1477d7fdc80f3859f468840bb6a",
+        "backend/app/agents/state.py": "bb7ca9b390e2973326fdb6e61afe1eb4a3e2fa2c8a432a9546a3111d75186c51",
+        "backend/app/api/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "backend/app/api/evidence.py": "878ba42053bac448a93bfe7021a3f65320cd5105feada79dc8c94c8fe3965a3a",
+        "backend/app/schemas/runs.py": "87966db2168532fd116af7ee13c12cac32c1b8449493c8e263be26f1049a702c",
+        "backend/app/agents/budget.py": "a429e3ee7e34a07e8ba53f0d9135fde17c8a68fce4508c2faabcecc3670f5336",
+        "backend/app/agents/errors.py": "778fd7e951880cc1fad82dd103ffae8922d7139a2cb77be4dceb5ee2697d87d8",
+        "backend/app/core/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "backend/app/faults/engine.py": "968c61b629e4d60dac5ccb5423761352bab665210b8b06815ba6b37ee6283986",
+        "backend/app/schemas/agent.py": "bc77d331d4dec24e9d2bf08606b2e1f9f572f1ecaff182db44744d32e2a5ee69",
+        "backend/app/tools/booking.py": "5eef8271563c17ac245dbaa798828374f105b412d30ae5065d7caa9e1f4e2eac",
+        "backend/app/agents/context.py": "59db10db7232292fb8134b889536587b424afed8af06e1fd31857a81a7c69114",
+        "backend/app/agents/gateway.py": "45d6e72d316df05959ab2e4ce7f40c4ff17ab52af7709ec740af71cf9d79747f",
+        "backend/app/agents/prompt.txt": "0db5754ab85de312ce138eeb814294e25f8bdc6b2797ba85b80b70aec147b025",
+        "backend/app/agents/runtime.py": "18532b78f6ee12092de229291b8187c1e2cafdebb781d1b05c8aeeb37c2b36ec",
+        "backend/app/core/passwords.py": "fdb2d0b0c29e04e5f79c37fa3c057858f6a8a2e230ddfc846d21f51226c11514",
+        "backend/app/faults/service.py": "f12e2d2b6f1ac0daff93b7452dc77b518304e301caf0a4fdd9e30bc7eb1fce63",
+        "backend/app/models/booking.py": "08f4188c28703b9c2f717a0c1b2eb142b4d58de9136d62e84f5b88c747f31ba6",
+        "backend/app/schemas/common.py": "6b046828032c3c0b7e97d340890c056b7706c93a08478ca61bc7020e7026319f",
+        "backend/app/schemas/events.py": "c7f7896d97a1346ae8a2ab772096c1ecc4ca4d80bd3307e9dd069b6e2dc45444",
+        "backend/app/schemas/faults.py": "9a5a3c721b03c9c7a5dbd2cfbf229379ccda05dcfa7b7bebc5723e281285ef9c",
+        "backend/app/schemas/health.py": "6727915e82265c61d478b3aa41cf6afdd4102bfc59279cd0517feaefc5a41d51",
+        "backend/app/tools/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "backend/app/agents/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "backend/app/agents/registry.py": "c11a4c4c25c2c4d16bcd8601822c8c0c5a80f53fa68e14502efbe764dd035730",
+        "backend/app/agents/versions.py": "21e97cbb207ced9596492d81a3d89ded6dabbd45719beddb7632ae41c2f2388a",
+        "backend/app/evidence/reader.py": "fb6e6acb4ae414a8fd81660a19f63b67cc6b9e2b3002a00845145fd4b626e37c",
+        "backend/app/faults/__init__.py": "cbe16aa62a207bf300faf18360ec211d08c56466e074048ff59cb5999fdeacc5",
+        "backend/app/models/__init__.py": "cbc22b2b4716a7c52caf2fbe5d5eae840acb230f25c4a6aea799e46b4ad777f1",
+        "backend/app/models/platform.py": "269a0aae0934a2516ded7bc2de19a69e278f9da75fabcd5c462e5a255cec550b",
+        "backend/app/schemas/booking.py": "3ef901757ef1cef21182cc67c1df1f701cec68270acdfa02ab463a666e755756",
+        "backend/app/services/health.py": "9656abb3681f4b7a162cbf15e735eb6091024af11950707e9604d37a86f01d28",
+        "backend/app/agents/retrieval.py": "266c431ade36fd974f252be01e0ad835fd1afa1e0b9939c6d9fc4ad56f41bc4c",
+        "backend/app/core/model_probe.py": "6fcd7876562a4b9b02599dc6fe1d073b77a5bf4b5bc035bd53d3af39fab19220",
+        "backend/app/executors/budget.py": "4f26f7fb7ef68a54330d3c8f05765fa6a67a74a055af85d654400f6c86b4d3d6",
+        "backend/app/executors/runner.py": "fb477d331be1c93720bc9af9829261b07a20a1bfb1038dc99237848664596155",
+        "backend/app/schemas/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "backend/app/services/booking.py": "413d6c6c995f660121300b394facef56446ccf7701648d23b14229bf4c120f81",
+        "backend/app/workers/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "backend/app/evidence/__init__.py": "9d43fcc74282d146f25bc6d219cff2cd1e23415b16030910b6be0bf12be8abf5",
+        "backend/app/evidence/recorder.py": "b574350a93669a5ff2f0812d6112149961a38ccfe7f3c470bd96d5b13dbf2e8a",
+        "backend/app/executors/control.py": "593f73240c52640cc4669877c0592fa5d6711e4a5c628c7732ff42a450277e3b",
+        "backend/app/executors/service.py": "8683192225f69f7bb8f52a29c95a4ff981f18ba6c564efecc5ae0e120d9e38f0",
+        "backend/app/schemas/contracts.py": "9267ae7958a7587c8e37ce36000d2bb5151b76772f74f0db5cb3ad0eeb2b5f21",
+        "backend/app/services/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "backend/app/agents/checkpoints.py": "217c4e8037103e21d423fec1a89e81bfc4a028a65688efc5ecff9be1b33fe0d5",
+        "backend/app/evidence/streaming.py": "7852886b68e841449d50d7af4dbbe0597489dd46d8ba4625aa30ef2251674228",
+        "backend/app/executors/__init__.py": "358ec8064bf56aa1242b96a3eeee0340b0778e3d5902eaa1b94f967e5d3651b7",
+        "backend/app/executors/dispatch.py": "8eb12eb626a8ae6423b67614a6705e078a6701b6de18d13ed30cb3348d3f55b1",
+        "backend/app/workers/celery_app.py": "e24e8df902429d3cb5077d68fc13f1feaa5b7f0988e24ae09688edad09b5d9c7",
+        "backend/alembic/versions/20261025_0002_t04_draft_session.py": "4427509597810f4db3519faa7dd6bbddf294365d575a65d26648bcac1b12274c",
+        "backend/alembic/versions/20261026_0003_t06_run_event_order.py": "1ada1734e97a62a3bd8909716577ab9b8c3480426c5398e26665b45efe524fc2",
+        "backend/alembic/versions/20261025_0001_t02_initial_sixteen_table_schema.py": "d1161f0001f5d4ab9660898ff05ef5e632ecc4396aeffe322b1350d67f7c18ea"
+      },
+      "base_url": "https://api.deepseek.com",
+      "baseline": "V0",
+      "provider": "DeepSeek",
+      "sampling": "not asserted; temperature/top_p omitted",
+      "thinking": "disabled",
+      "retrieval": {
+        "b": 0.75,
+        "k1": 1.5,
+        "jieba": "0.42.1",
+        "top_k": 3,
+        "chunks": [
+          {
+            "chunk_id": "booking-rules:r1:a6a1d61710a23b82",
+            "chunk_hash": "a6a1d61710a23b8238708459a7e2ec039e1f3c4b37a79582a042301d8a627cb6",
+            "source_ref": "knowledge/booking-rules-v1.md",
+            "document_id": 1,
+            "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+            "document_revision": 1
+          },
+          {
+            "chunk_id": "booking-rules:r1:b4bf4c09e6c75fb1",
+            "chunk_hash": "b4bf4c09e6c75fb10f5553e650dbf9febe90096086aac9c97e90b9c4b32fc6dd",
+            "source_ref": "knowledge/booking-rules-v1.md",
+            "document_id": 1,
+            "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+            "document_revision": 1
+          },
+          {
+            "chunk_id": "booking-rules:r1:f1ada574c0aaff7c",
+            "chunk_hash": "f1ada574c0aaff7cf3398973c5d0f285cf99b9e319a667252a2ecab9074de3a4",
+            "source_ref": "knowledge/booking-rules-v1.md",
+            "document_id": 1,
+            "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+            "document_revision": 1
+          },
+          {
+            "chunk_id": "booking-rules:r1:082d1805c712d4c3",
+            "chunk_hash": "082d1805c712d4c300059dafc892c0732083b72a970346f087aa3e134f303d2f",
+            "source_ref": "knowledge/booking-rules-v1.md",
+            "document_id": 1,
+            "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+            "document_revision": 1
+          },
+          {
+            "chunk_id": "booking-rules:r1:33c2956d0aaa6e9f",
+            "chunk_hash": "33c2956d0aaa6e9f9a294cd1bc3889a3e6a4f8e2c57c6e825e471f692391cdef",
+            "source_ref": "knowledge/booking-rules-v1.md",
+            "document_id": 1,
+            "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+            "document_revision": 1
+          },
+          {
+            "chunk_id": "booking-rules:r1:3acf254d304fb8d6",
+            "chunk_hash": "3acf254d304fb8d603551f8f83ec6b40730618e1c83dbcf8ca8dfdceaa66cdb2",
+            "source_ref": "knowledge/booking-rules-v1.md",
+            "document_id": 1,
+            "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+            "document_revision": 1
+          },
+          {
+            "chunk_id": "booking-rules:r1:6244fec99261083b",
+            "chunk_hash": "6244fec99261083b40684bed190abf59920594aa1a6af687e4ea17ab0fd69e35",
+            "source_ref": "knowledge/booking-rules-v1.md",
+            "document_id": 1,
+            "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+            "document_revision": 1
+          },
+          {
+            "chunk_id": "booking-rules:r1:245245278a2b83a9",
+            "chunk_hash": "245245278a2b83a94c7b1892d08353aff39898a9c11e81ce13b66380bd7b2fdb",
+            "source_ref": "knowledge/booking-rules-v1.md",
+            "document_id": 1,
+            "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+            "document_revision": 1
+          },
+          {
+            "chunk_id": "booking-rules:r1:d90836b0c00ba2ef",
+            "chunk_hash": "d90836b0c00ba2ef329e89ea4a72b6666007de0e0cc87720a203075621f7d3d4",
+            "source_ref": "knowledge/booking-rules-v1.md",
+            "document_id": 1,
+            "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+            "document_revision": 1
+          },
+          {
+            "chunk_id": "booking-rules:r1:6ccca76417fbd8b9",
+            "chunk_hash": "6ccca76417fbd8b96844119345dce233708a6f56fd84d7817a3995a53f2f74d2",
+            "source_ref": "knowledge/booking-rules-v1.md",
+            "document_id": 1,
+            "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+            "document_revision": 1
+          },
+          {
+            "chunk_id": "booking-rules:r1:d88c2ea7f464bc49",
+            "chunk_hash": "d88c2ea7f464bc493ea1b866e96bafc11e55081b0b776273b65e2f5301a79425",
+            "source_ref": "knowledge/booking-rules-v1.md",
+            "document_id": 1,
+            "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+            "document_revision": 1
+          },
+          {
+            "chunk_id": "booking-rules:r1:6a03011d4e4ba2e8",
+            "chunk_hash": "6a03011d4e4ba2e845d33e64b937b9dba8aade519fc6b3afd7269bfb45838bcf",
+            "source_ref": "knowledge/booking-rules-v1.md",
+            "document_id": 1,
+            "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+            "document_revision": 1
+          },
+          {
+            "chunk_id": "booking-rules:r1:67c5d1fb17190efb",
+            "chunk_hash": "67c5d1fb17190efb520972f2056cc3c25f64f09d2e67e2a05fd4515d6c715e5c",
+            "source_ref": "knowledge/booking-rules-v1.md",
+            "document_id": 1,
+            "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+            "document_revision": 1
+          },
+          {
+            "chunk_id": "booking-rules:r1:edb26cf7def90d5d",
+            "chunk_hash": "edb26cf7def90d5da44defb843dc498da5034751ed707a4f5bb910d205614c47",
+            "source_ref": "knowledge/booking-rules-v1.md",
+            "document_id": 1,
+            "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+            "document_revision": 1
+          },
+          {
+            "chunk_id": "booking-rules:r1:1a47efcce06dd4a6",
+            "chunk_hash": "1a47efcce06dd4a630d2a438400d058270ade759d1378599d29d0aedcaedf426",
+            "source_ref": "knowledge/booking-rules-v1.md",
+            "document_id": 1,
+            "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+            "document_revision": 1
+          }
+        ],
+        "epsilon": 0.25,
+        "version": "rules-bm25-v1",
+        "chunking": "heading-plus-bullet-v1",
+        "documents": [
+          {
+            "id": 1,
+            "title": "场地预约实验规则 v1",
+            "revision": 1,
+            "valid_to": null,
+            "source_ref": "knowledge/booking-rules-v1.md",
+            "valid_from": "2026-01-01T00:00:00+00:00",
+            "source_type": "experiment",
+            "content_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+            "document_key": "booking-rules",
+            "applicability": {
+              "scenario": "experimental_booking",
+              "rule_version": "v1"
+            }
+          }
+        ],
+        "rank_bm25": "0.2.2",
+        "index_hash": "4fbf686cec03f3a21c9faa36aec2c0d61e00d23610e973ee83924ef68cecdce0",
+        "terms_sha256": "b0252b043305ef0e637edeeeb80c743d17546b9119460ca77722ef1ae939f7c1",
+        "minimum_score": 0.01,
+        "dictionary_sha256": "7197c3211ddd98962b036cdf40324d1ea2bfaa12bd028e68faa70111a88e12a8",
+        "user_dictionary_sha256": "a4e9904796f41b87823b27002014ef4e0c01101b84220f7c8809fbf2b98090a1"
+      },
+      "config_hash": "fd1aa62039341adddad220e3c9f4e4a198868557a4af566c9a1437b4e695201d",
+      "prompt_hash": "0db5754ab85de312ce138eeb814294e25f8bdc6b2797ba85b80b70aec147b025",
+      "sdk_versions": {
+        "langgraph": "1.2.17",
+        "langchain-core": "1.7.0",
+        "langchain-deepseek": "1.1.1",
+        "langgraph-checkpoint-redis": "0.5.2"
+      },
+      "protocol_probe": {
+        "checked_at": "2026-10-25T13:58:00.823481+00:00",
+        "tool_arguments": "passed",
+        "usage_returned": "passed",
+        "tool_call_id_roundtrip": "passed",
+        "stream_content_matches_final": "passed"
+      },
+      "response_model": [
+        "deepseek-flash",
+        "deepseek-flash"
+      ],
+      "model_requested": "deepseek-flash",
+      "max_output_tokens": 1024,
+      "underlying_version": "not independently observable; official mapping recorded in pricing",
+      "validation_boundary": "protocol evidence here; dialogue outcomes recorded separately"
+    },
+    "pricing": {
+      "model": "deepseek-flash",
+      "method": "peak-rate upper estimate, all input charged at cache-miss rate; not a bill",
+      "source": "https://api-docs.deepseek.com/quick_start/pricing/",
+      "currency": "USD",
+      "verified_on": "2026-10-26",
+      "documented_version": "DeepSeek-V4.1-Flash-1017",
+      "peak_output_per_million": "1.20",
+      "peak_input_miss_per_million": "0.30"
+    },
+    "executor": "T05-v1",
+    "evaluation": "T08 not implemented; script completion is inconclusive",
+    "repetitions": 1,
+    "request_hash": "2e4c1a5909ae8639c766617b54face58181924ea2cbc50321b8dab1cb526229a",
+    "trace_schema": "1.2",
+    "fault_profile": {
+      "id": 2,
+      "config": {
+        "seed": 27,
+        "revision": 1,
+        "fault_type": "F02",
+        "parameters": {
+          "delay_ms": 0,
+          "trigger_on_nth": 1,
+          "trigger_window": 1
+        },
+        "profile_key": "T07-F02-BA63C1B83A91",
+        "target_tool": "confirm_booking",
+        "max_triggers": 1,
+        "trigger_stage": "PRE_COMMIT",
+        "enabled_for_test": true
+      },
+      "config_hash": "f1f593a69fc44ef987ead0696f8677edd0f61b83fde9a7d42d8c9a977bee8ee3"
+    },
+    "target_version_id": 1
+  },
+  "budget": {
+    "unit": "microUSD",
+    "currency": "USD",
+    "agent_microusd": 250000,
+    "judge_microusd": 0,
+    "authorization_id": "T07-20261027-agent-open",
+    "authorization_unlimited": true,
+    "case_generator_microusd": 0
+  },
+  "summary": {
+    "counts": {
+      "waiting_input": 1
+    },
+    "ledger": {
+      "held_upper": 0,
+      "token_upper": 34187,
+      "calls_started": 8,
+      "calls_completed": 8,
+      "charged_estimate": 11223
+    },
+    "evaluation": "not_implemented",
+    "authorization_ledger": {
+      "limit": -1,
+      "held_upper": 0,
+      "token_upper": 103628,
+      "calls_started": 24,
+      "calls_completed": 24,
+      "charged_estimate": 34214
+    }
+  },
+  "executions": [
+    {
+      "execution_id": "cc8292d9-6ce6-4533-a281-c9d4b05efc1d",
+      "status": "waiting_input",
+      "attempt": 1,
+      "case_revision_id": 1,
+      "repeat_no": 1,
+      "scope_id": "test:cc8292d9-6ce6-4533-a281-c9d4b05efc1d",
+      "session_id": "308cb7a9-76d5-4e05-8a0c-4c54aac96fd5",
+      "attempt_history": [],
+      "timing": {
+        "steps": 14,
+        "cursor": 1,
+        "faults": {
+          "injected": 1,
+          "reserved": 1,
+          "operations": {
+            "7458c61cd53b2496da36f3261850c3005b479f4c86f71622581cebfc99559bd8": {
+              "state": "injected",
+              "before": [],
+              "reused": false,
+              "ordinal": 1,
+              "event_id": "e738d343-7c24-5474-95da-080a647436ac",
+              "selected": true,
+              "dispatched": true,
+              "trigger_no": 1,
+              "decision_hash": "a4927ba73ef557da1d4c965ebe2162bd08df3f089d28443999400ee367ed4f38",
+              "visible_result": {
+                "code": "upstream_unavailable",
+                "status": "error",
+                "message": "业务服务明确返回503，本次事务已回滚。",
+                "retryable": false,
+                "http_status": 503,
+                "request_key": "0998ca12-2306-48e6-851b-ff5ee0159e29",
+                "commit_state": "not_committed"
+              }
+            }
+          },
+          "not_applied": 0,
+          "profile_hash": "f1f593a69fc44ef987ead0696f8677edd0f61b83fde9a7d42d8c9a977bee8ee3",
+          "eligible_calls": 1
+        },
+        "deadline": "2026-10-27T10:52:52.511268+00:00",
+        "revision": 3,
+        "last_step": "model",
+        "claimed_at": "2026-10-27T10:43:10.450800+00:00",
+        "dispatch_at": "2026-10-27T10:43:10.347226+00:00",
+        "finished_at": "2026-10-27T10:43:22.924909+00:00",
+        "worker_host": "a0665a9053ef",
+        "gateway_mode": "real_provider",
+        "heartbeat_at": "2026-10-27T10:43:21.744477+00:00",
+        "trace_visits": {
+          "1": {
+            "model": 8,
+            "tools": 6,
+            "intake": 2,
+            "resolve_confirmation": 1,
+            "wait_for_confirmation": 3
+          }
+        },
+        "dispatch_count": 2,
+        "dispatch_error": null,
+        "dispatch_token": "bbf00fed-9d3f-4e42-abd3-5ce8bb4b9b65",
+        "input_receipts": {
+          "fc983e91-7716-4886-b2e4-a55c76008757": "ed389f6e87887f3e16038f6412623306da8ba2048373cce8c0c04d26b9dc3bf2"
+        },
+        "worker_attempt": 1,
+        "dispatch_result": "published"
+      },
+      "usage": {
+        "roles": {
+          "agent": {
+            "held_upper": 0,
+            "token_upper": 34187,
+            "calls_started": 8,
+            "calls_completed": 8,
+            "charged_estimate": 11223
+          },
+          "judge": {
+            "calls_started": 0
+          },
+          "case_generator": {
+            "calls_started": 0
+          }
+        },
+        "tickets": {
+          "13a0c595-5379-417b-b79e-dbf846997a37": {
+            "key": "ac:t05:budget:T07-20261027-agent-open:agent:run:4222700c-7e8c-4d3f-8654-eadb1ee6f5cb:execution:cc8292d9-6ce6-4533-a281-c9d4b05efc1d:call:13a0c595-5379-417b-b79e-dbf846997a37",
+            "role": "agent",
+            "state": "settled",
+            "usage": {
+              "input_tokens": 3766,
+              "total_tokens": 3920,
+              "output_tokens": 154,
+              "input_token_details": {
+                "cache_read": 896
+              },
+              "output_token_details": {}
+            },
+            "attempt": 1,
+            "call_id": "13a0c595-5379-417b-b79e-dbf846997a37",
+            "upper_microusd": 11288,
+            "estimate_microusd": 1315,
+            "input_token_upper": 33528,
+            "max_output_tokens": 1024
+          },
+          "1584f29d-0dcc-4633-b161-ba6441384636": {
+            "key": "ac:t05:budget:T07-20261027-agent-open:agent:run:4222700c-7e8c-4d3f-8654-eadb1ee6f5cb:execution:cc8292d9-6ce6-4533-a281-c9d4b05efc1d:call:1584f29d-0dcc-4633-b161-ba6441384636",
+            "role": "agent",
+            "state": "settled",
+            "usage": {
+              "input_tokens": 2635,
+              "total_tokens": 2810,
+              "output_tokens": 175,
+              "input_token_details": {
+                "cache_read": 768
+              },
+              "output_token_details": {}
+            },
+            "attempt": 1,
+            "call_id": "1584f29d-0dcc-4633-b161-ba6441384636",
+            "upper_microusd": 9501,
+            "estimate_microusd": 1001,
+            "input_token_upper": 27574,
+            "max_output_tokens": 1024
+          },
+          "3af74378-699e-4060-9e34-c14311e7e4c9": {
+            "key": "ac:t05:budget:T07-20261027-agent-open:agent:run:4222700c-7e8c-4d3f-8654-eadb1ee6f5cb:execution:cc8292d9-6ce6-4533-a281-c9d4b05efc1d:call:3af74378-699e-4060-9e34-c14311e7e4c9",
+            "role": "agent",
+            "state": "settled",
+            "usage": {
+              "input_tokens": 4989,
+              "total_tokens": 5111,
+              "output_tokens": 122,
+              "input_token_details": {
+                "cache_read": 1024
+              },
+              "output_token_details": {}
+            },
+            "attempt": 1,
+            "call_id": "3af74378-699e-4060-9e34-c14311e7e4c9",
+            "upper_microusd": 14763,
+            "estimate_microusd": 1644,
+            "input_token_upper": 45114,
+            "max_output_tokens": 1024
+          },
+          "5e6ee7a3-11c1-4b25-87b1-d61646c8f070": {
+            "key": "ac:t05:budget:T07-20261027-agent-open:agent:run:4222700c-7e8c-4d3f-8654-eadb1ee6f5cb:execution:cc8292d9-6ce6-4533-a281-c9d4b05efc1d:call:5e6ee7a3-11c1-4b25-87b1-d61646c8f070",
+            "role": "agent",
+            "state": "settled",
+            "usage": {
+              "input_tokens": 4665,
+              "total_tokens": 4786,
+              "output_tokens": 121,
+              "input_token_details": {
+                "cache_read": 1024
+              },
+              "output_token_details": {}
+            },
+            "attempt": 1,
+            "call_id": "5e6ee7a3-11c1-4b25-87b1-d61646c8f070",
+            "upper_microusd": 13782,
+            "estimate_microusd": 1545,
+            "input_token_upper": 41844,
+            "max_output_tokens": 1024
+          },
+          "6063f9fc-324b-4cd6-afa5-93fa927b1949": {
+            "key": "ac:t05:budget:T07-20261027-agent-open:agent:run:4222700c-7e8c-4d3f-8654-eadb1ee6f5cb:execution:cc8292d9-6ce6-4533-a281-c9d4b05efc1d:call:6063f9fc-324b-4cd6-afa5-93fa927b1949",
+            "role": "agent",
+            "state": "settled",
+            "usage": {
+              "input_tokens": 5659,
+              "total_tokens": 5845,
+              "output_tokens": 186,
+              "input_token_details": {
+                "cache_read": 896
+              },
+              "output_token_details": {}
+            },
+            "attempt": 1,
+            "call_id": "6063f9fc-324b-4cd6-afa5-93fa927b1949",
+            "upper_microusd": 16155,
+            "estimate_microusd": 1921,
+            "input_token_upper": 49752,
+            "max_output_tokens": 1024
+          },
+          "793d8e23-367e-4757-b787-6182310bcc97": {
+            "key": "ac:t05:budget:T07-20261027-agent-open:agent:run:4222700c-7e8c-4d3f-8654-eadb1ee6f5cb:execution:cc8292d9-6ce6-4533-a281-c9d4b05efc1d:call:793d8e23-367e-4757-b787-6182310bcc97",
+            "role": "agent",
+            "state": "settled",
+            "usage": {
+              "input_tokens": 3957,
+              "total_tokens": 4023,
+              "output_tokens": 66,
+              "input_token_details": {
+                "cache_read": 1792
+              },
+              "output_token_details": {}
+            },
+            "attempt": 1,
+            "call_id": "793d8e23-367e-4757-b787-6182310bcc97",
+            "upper_microusd": 12054,
+            "estimate_microusd": 1267,
+            "input_token_upper": 36082,
+            "max_output_tokens": 1024
+          },
+          "88a9a143-e9af-4f85-b11f-4b5bd9250fe5": {
+            "key": "ac:t05:budget:T07-20261027-agent-open:agent:run:4222700c-7e8c-4d3f-8654-eadb1ee6f5cb:execution:cc8292d9-6ce6-4533-a281-c9d4b05efc1d:call:88a9a143-e9af-4f85-b11f-4b5bd9250fe5",
+            "role": "agent",
+            "state": "settled",
+            "usage": {
+              "input_tokens": 3279,
+              "total_tokens": 3334,
+              "output_tokens": 55,
+              "input_token_details": {
+                "cache_read": 1024
+              },
+              "output_token_details": {}
+            },
+            "attempt": 1,
+            "call_id": "88a9a143-e9af-4f85-b11f-4b5bd9250fe5",
+            "upper_microusd": 11088,
+            "estimate_microusd": 1050,
+            "input_token_upper": 32862,
+            "max_output_tokens": 1024
+          },
+          "aed218fa-b0b0-4d95-a619-2bc3c86dc341": {
+            "key": "ac:t05:budget:T07-20261027-agent-open:agent:run:4222700c-7e8c-4d3f-8654-eadb1ee6f5cb:execution:cc8292d9-6ce6-4533-a281-c9d4b05efc1d:call:aed218fa-b0b0-4d95-a619-2bc3c86dc341",
+            "role": "agent",
+            "state": "settled",
+            "usage": {
+              "input_tokens": 4167,
+              "total_tokens": 4358,
+              "output_tokens": 191,
+              "input_token_details": {
+                "cache_read": 1792
+              },
+              "output_token_details": {}
+            },
+            "attempt": 1,
+            "call_id": "aed218fa-b0b0-4d95-a619-2bc3c86dc341",
+            "upper_microusd": 12913,
+            "estimate_microusd": 1480,
+            "input_token_upper": 38946,
+            "max_output_tokens": 1024
+          }
+        }
+      },
+      "error": null,
+      "output": {
+        "trace": [
+          {
+            "type": "model",
+            "usage": {
+              "input_tokens": 2635,
+              "total_tokens": 2810,
+              "output_tokens": 175,
+              "input_token_details": {
+                "cache_read": 768
+              },
+              "output_token_details": {}
+            },
+            "call_id": "1584f29d-0dcc-4633-b161-ba6441384636",
+            "streamed": true,
+            "source_turn": 1,
+            "model_requests": 1,
+            "model_returned": "deepseek-flash",
+            "estimated_peak_microusd": 1001
+          },
+          {
+            "name": "update_booking_request",
+            "type": "tool",
+            "result": {
+              "fields": {
+                "date": {
+                  "value": "2026-10-28",
+                  "source_kind": "validated_model_extraction",
+                  "source_turn": 1,
+                  "source_quote": "明天"
+                },
+                "end_time": {
+                  "value": "15:00",
+                  "source_kind": "validated_model_extraction",
+                  "source_turn": 1,
+                  "source_quote": "15:00"
+                },
+                "attendees": {
+                  "value": 10,
+                  "source_kind": "validated_model_extraction",
+                  "source_turn": 1,
+                  "source_quote": "10人"
+                },
+                "room_code": {
+                  "value": "A101",
+                  "source_kind": "validated_model_extraction",
+                  "source_turn": 1,
+                  "source_quote": "A101"
+                },
+                "start_time": {
+                  "value": "14:00",
+                  "source_kind": "validated_model_extraction",
+                  "source_turn": 1,
+                  "source_quote": "14:00"
+                }
+              },
+              "status": "ok",
+              "changed": true
+            },
+            "arguments": {
+              "date": "2026-10-28",
+              "end_time": "15:00",
+              "attendees": 10,
+              "room_code": "A101",
+              "start_time": "14:00",
+              "source_quotes": {
+                "date": "明天",
+                "end_time": "15:00",
+                "attendees": "10人",
+                "room_code": "A101",
+                "start_time": "14:00"
+              }
+            },
+            "evidence_id": "30721b10-baf7-4bd6-bac3-ec7d857758be",
+            "source_turn": 1
+          },
+          {
+            "type": "model",
+            "usage": {
+              "input_tokens": 3279,
+              "total_tokens": 3334,
+              "output_tokens": 55,
+              "input_token_details": {
+                "cache_read": 1024
+              },
+              "output_token_details": {}
+            },
+            "call_id": "88a9a143-e9af-4f85-b11f-4b5bd9250fe5",
+            "streamed": true,
+            "source_turn": 1,
+            "model_requests": 1,
+            "model_returned": "deepseek-flash",
+            "estimated_peak_microusd": 1050
+          },
+          {
+            "type": "retrieval",
+            "result": {
+              "query": "场地预约 空闲查询 人数容量 时段限制 A101 实验室预约规则",
+              "chunks": [
+                {
+                  "text": "场地与开放时间\nA101 容量 20 人，09:00—21:00 开放。",
+                  "score": 3.542565,
+                  "chunk_id": "booking-rules:r1:a6a1d61710a23b82",
+                  "chunk_hash": "a6a1d61710a23b8238708459a7e2ec039e1f3c4b37a79582a042301d8a627cb6",
+                  "source_ref": "knowledge/booking-rules-v1.md",
+                  "document_id": 1,
+                  "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                  "document_revision": 1
+                },
+                {
+                  "text": "时间与人数\n有效预约不能重叠；时段为左闭右开，相邻时段可以相接。",
+                  "score": 2.801124,
+                  "chunk_id": "booking-rules:r1:245245278a2b83a9",
+                  "chunk_hash": "245245278a2b83a94c7b1892d08353aff39898a9c11e81ce13b66380bd7b2fdb",
+                  "source_ref": "knowledge/booking-rules-v1.md",
+                  "document_id": 1,
+                  "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                  "document_revision": 1
+                },
+                {
+                  "text": "澄清与确认\n缺日期、起止时间或人数时追问；“下午”不直接等同具体时段。",
+                  "score": 1.961368,
+                  "chunk_id": "booking-rules:r1:d90836b0c00ba2ef",
+                  "chunk_hash": "d90836b0c00ba2ef329e89ea4a72b6666007de0e0cc87720a203075621f7d3d4",
+                  "source_ref": "knowledge/booking-rules-v1.md",
+                  "document_id": 1,
+                  "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                  "document_revision": 1
+                }
+              ],
+              "status": "supported",
+              "index_hash": "4fbf686cec03f3a21c9faa36aec2c0d61e00d23610e973ee83924ef68cecdce0",
+              "query_tokens": [
+                "空闲",
+                "查询",
+                "人数",
+                "容量",
+                "时段",
+                "限制",
+                "a101",
+                "实验室"
+              ]
+            },
+            "source_turn": 1
+          },
+          {
+            "name": "retrieve_rules",
+            "type": "tool",
+            "result": {
+              "query": "场地预约 空闲查询 人数容量 时段限制 A101 实验室预约规则",
+              "chunks": [
+                {
+                  "text": "场地与开放时间\nA101 容量 20 人，09:00—21:00 开放。",
+                  "score": 3.542565,
+                  "chunk_id": "booking-rules:r1:a6a1d61710a23b82",
+                  "chunk_hash": "a6a1d61710a23b8238708459a7e2ec039e1f3c4b37a79582a042301d8a627cb6",
+                  "source_ref": "knowledge/booking-rules-v1.md",
+                  "document_id": 1,
+                  "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                  "document_revision": 1
+                },
+                {
+                  "text": "时间与人数\n有效预约不能重叠；时段为左闭右开，相邻时段可以相接。",
+                  "score": 2.801124,
+                  "chunk_id": "booking-rules:r1:245245278a2b83a9",
+                  "chunk_hash": "245245278a2b83a94c7b1892d08353aff39898a9c11e81ce13b66380bd7b2fdb",
+                  "source_ref": "knowledge/booking-rules-v1.md",
+                  "document_id": 1,
+                  "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                  "document_revision": 1
+                },
+                {
+                  "text": "澄清与确认\n缺日期、起止时间或人数时追问；“下午”不直接等同具体时段。",
+                  "score": 1.961368,
+                  "chunk_id": "booking-rules:r1:d90836b0c00ba2ef",
+                  "chunk_hash": "d90836b0c00ba2ef329e89ea4a72b6666007de0e0cc87720a203075621f7d3d4",
+                  "source_ref": "knowledge/booking-rules-v1.md",
+                  "document_id": 1,
+                  "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                  "document_revision": 1
+                }
+              ],
+              "status": "supported",
+              "index_hash": "4fbf686cec03f3a21c9faa36aec2c0d61e00d23610e973ee83924ef68cecdce0",
+              "query_tokens": [
+                "空闲",
+                "查询",
+                "人数",
+                "容量",
+                "时段",
+                "限制",
+                "a101",
+                "实验室"
+              ]
+            },
+            "arguments": {
+              "query": "场地预约 空闲查询 人数容量 时段限制 A101 实验室预约规则"
+            },
+            "evidence_id": "455ca9bd-c955-40e8-8598-700e7aedd0d7",
+            "source_turn": 1
+          },
+          {
+            "type": "model",
+            "usage": {
+              "input_tokens": 4665,
+              "total_tokens": 4786,
+              "output_tokens": 121,
+              "input_token_details": {
+                "cache_read": 1024
+              },
+              "output_token_details": {}
+            },
+            "call_id": "5e6ee7a3-11c1-4b25-87b1-d61646c8f070",
+            "streamed": true,
+            "source_turn": 1,
+            "model_requests": 1,
+            "model_returned": "deepseek-flash",
+            "estimated_peak_microusd": 1545
+          },
+          {
+            "name": "query_availability",
+            "type": "tool",
+            "result": {
+              "code": "availability_checked",
+              "data": {
+                "rooms": [
+                  {
+                    "capacity": 20,
+                    "room_code": "A101"
+                  }
+                ],
+                "end_at": "2026-10-28T15:00:00+08:00",
+                "start_at": "2026-10-28T14:00:00+08:00",
+                "attendees": 10,
+                "truncated": false
+              },
+              "status": "ok",
+              "summary": "已查询当前空闲；提交时仍会重新校验。",
+              "retryable": false,
+              "request_key": null,
+              "commit_state": "not_applicable",
+              "evidence_refs": []
+            },
+            "arguments": {
+              "end_at": "2026-10-28T15:00:00+08:00",
+              "start_at": "2026-10-28T14:00:00+08:00",
+              "attendees": 10,
+              "room_code": "A101"
+            },
+            "evidence_id": "dc685fa8-7ed0-4c12-9068-bc467b49ec57",
+            "source_turn": 1
+          },
+          {
+            "type": "model",
+            "usage": {
+              "input_tokens": 4989,
+              "total_tokens": 5111,
+              "output_tokens": 122,
+              "input_token_details": {
+                "cache_read": 1024
+              },
+              "output_token_details": {}
+            },
+            "call_id": "3af74378-699e-4060-9e34-c14311e7e4c9",
+            "streamed": true,
+            "source_turn": 1,
+            "model_requests": 1,
+            "model_returned": "deepseek-flash",
+            "estimated_peak_microusd": 1644
+          },
+          {
+            "name": "preview_booking",
+            "type": "tool",
+            "result": {
+              "code": "confirmation_required",
+              "data": {
+                "end_at": "2026-10-28T15:00:00+08:00",
+                "status": "pending",
+                "draft_id": "0998ca12-2306-48e6-851b-ff5ee0159e29",
+                "start_at": "2026-10-28T14:00:00+08:00",
+                "attendees": 10,
+                "room_code": "A101",
+                "draft_hash": "4da433dc61022ac6aa3ccaf9b2cc27bc6fe426017a3ab0ec468931c6876ef29d",
+                "expires_at": "2026-10-27T10:48:05.830944Z",
+                "suggested_idempotency_key": "0998ca12-2306-48e6-851b-ff5ee0159e29"
+              },
+              "status": "ok",
+              "summary": "请展示完整草稿并等待用户明确确认。",
+              "retryable": false,
+              "request_key": "0998ca12-2306-48e6-851b-ff5ee0159e29",
+              "commit_state": "not_committed",
+              "evidence_refs": [
+                "draft:0998ca12-2306-48e6-851b-ff5ee0159e29"
+              ]
+            },
+            "arguments": {
+              "end_at": "2026-10-28T15:00:00+08:00",
+              "start_at": "2026-10-28T14:00:00+08:00",
+              "attendees": 10,
+              "room_code": "A101"
+            },
+            "evidence_id": "3dfeebdb-e9a5-4e2a-8567-6c1655d9c836",
+            "source_turn": 1
+          },
+          {
+            "type": "model",
+            "usage": {
+              "input_tokens": 5659,
+              "total_tokens": 5845,
+              "output_tokens": 186,
+              "input_token_details": {
+                "cache_read": 896
+              },
+              "output_token_details": {}
+            },
+            "call_id": "6063f9fc-324b-4cd6-afa5-93fa927b1949",
+            "streamed": true,
+            "source_turn": 1,
+            "model_requests": 1,
+            "model_returned": "deepseek-flash",
+            "estimated_peak_microusd": 1921
+          },
+          {
+            "kind": "confirm",
+            "type": "confirmation_decision",
+            "revision": 2,
+            "source_turn": 2
+          },
+          {
+            "type": "model",
+            "usage": {
+              "input_tokens": 3766,
+              "total_tokens": 3920,
+              "output_tokens": 154,
+              "input_token_details": {
+                "cache_read": 896
+              },
+              "output_token_details": {}
+            },
+            "call_id": "13a0c595-5379-417b-b79e-dbf846997a37",
+            "streamed": true,
+            "source_turn": 2,
+            "model_requests": 1,
+            "model_returned": "deepseek-flash",
+            "estimated_peak_microusd": 1315
+          },
+          {
+            "type": "context_compacted",
+            "summary": {
+              "budget": 18000,
+              "method": "conservative UTF-8 byte token upper estimate",
+              "version": "structured-facts-v1",
+              "preserved_facts": {
+                "grant": {
+                  "draft_id": "0998ca12-2306-48e6-851b-ff5ee0159e29",
+                  "revision": 2,
+                  "draft_hash": "4da433dc61022ac6aa3ccaf9b2cc27bc6fe426017a3ab0ec468931c6876ef29d",
+                  "user_request_id": "fc983e91-7716-4886-b2e4-a55c76008757"
+                },
+                "fields": {
+                  "date": {
+                    "value": "2026-10-28",
+                    "source_kind": "validated_model_extraction",
+                    "source_turn": 1,
+                    "source_quote": "明天"
+                  },
+                  "end_time": {
+                    "value": "15:00",
+                    "source_kind": "validated_model_extraction",
+                    "source_turn": 1,
+                    "source_quote": "15:00"
+                  },
+                  "attendees": {
+                    "value": 10,
+                    "source_kind": "validated_model_extraction",
+                    "source_turn": 1,
+                    "source_quote": "10人"
+                  },
+                  "room_code": {
+                    "value": "A101",
+                    "source_kind": "validated_model_extraction",
+                    "source_turn": 1,
+                    "source_quote": "A101"
+                  },
+                  "start_time": {
+                    "value": "14:00",
+                    "source_kind": "validated_model_extraction",
+                    "source_turn": 1,
+                    "source_quote": "14:00"
+                  }
+                },
+                "denials": [],
+                "current_turn": 2,
+                "pending_draft": {
+                  "end_at": "2026-10-28T15:00:00+08:00",
+                  "status": "pending",
+                  "draft_id": "0998ca12-2306-48e6-851b-ff5ee0159e29",
+                  "start_at": "2026-10-28T14:00:00+08:00",
+                  "attendees": 10,
+                  "room_code": "A101",
+                  "draft_hash": "4da433dc61022ac6aa3ccaf9b2cc27bc6fe426017a3ab0ec468931c6876ef29d",
+                  "expires_at": "2026-10-27T10:48:05.830944Z",
+                  "suggested_idempotency_key": "0998ca12-2306-48e6-851b-ff5ee0159e29"
+                },
+                "business_result": null,
+                "candidate_rooms": [
+                  {
+                    "capacity": 20,
+                    "room_code": "A101"
+                  }
+                ],
+                "reference_clock": "2026-10-27T09:00:00+08:00",
+                "original_history": {
+                  "last_id": "fc983e91-7716-4886-b2e4-a55c76008757",
+                  "first_id": "4fdd6386-d226-5f84-a497-f59014d0630d",
+                  "message_count": 11
+                },
+                "retrieval_result": {
+                  "query": "场地预约 空闲查询 人数容量 时段限制 A101 实验室预约规则",
+                  "chunks": [
+                    {
+                      "text": "场地与开放时间\nA101 容量 20 人，09:00—21:00 开放。",
+                      "score": 3.542565,
+                      "chunk_id": "booking-rules:r1:a6a1d61710a23b82",
+                      "chunk_hash": "a6a1d61710a23b8238708459a7e2ec039e1f3c4b37a79582a042301d8a627cb6",
+                      "source_ref": "knowledge/booking-rules-v1.md",
+                      "document_id": 1,
+                      "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                      "document_revision": 1
+                    },
+                    {
+                      "text": "时间与人数\n有效预约不能重叠；时段为左闭右开，相邻时段可以相接。",
+                      "score": 2.801124,
+                      "chunk_id": "booking-rules:r1:245245278a2b83a9",
+                      "chunk_hash": "245245278a2b83a94c7b1892d08353aff39898a9c11e81ce13b66380bd7b2fdb",
+                      "source_ref": "knowledge/booking-rules-v1.md",
+                      "document_id": 1,
+                      "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                      "document_revision": 1
+                    },
+                    {
+                      "text": "澄清与确认\n缺日期、起止时间或人数时追问；“下午”不直接等同具体时段。",
+                      "score": 1.961368,
+                      "chunk_id": "booking-rules:r1:d90836b0c00ba2ef",
+                      "chunk_hash": "d90836b0c00ba2ef329e89ea4a72b6666007de0e0cc87720a203075621f7d3d4",
+                      "source_ref": "knowledge/booking-rules-v1.md",
+                      "document_id": 1,
+                      "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                      "document_revision": 1
+                    }
+                  ],
+                  "status": "supported",
+                  "index_hash": "4fbf686cec03f3a21c9faa36aec2c0d61e00d23610e973ee83924ef68cecdce0",
+                  "query_tokens": [
+                    "空闲",
+                    "查询",
+                    "人数",
+                    "容量",
+                    "时段",
+                    "限制",
+                    "a101",
+                    "实验室"
+                  ]
+                },
+                "confirmation_state": "authorized",
+                "unknown_submission": null,
+                "confirmation_revision": 2,
+                "executed_tools_this_turn": []
+              },
+              "selected_message_ids": [
+                "fc983e91-7716-4886-b2e4-a55c76008757"
+              ],
+              "estimated_upper_tokens": 13220,
+              "dropped_from_model_context": 10,
+              "original_messages_retained": true
+            },
+            "source_turn": 2
+          },
+          {
+            "name": "confirm_booking",
+            "type": "tool",
+            "result": {
+              "code": "upstream_unavailable",
+              "status": "error",
+              "message": "业务服务明确返回503，本次事务已回滚。",
+              "retryable": false,
+              "http_status": 503,
+              "request_key": "0998ca12-2306-48e6-851b-ff5ee0159e29",
+              "commit_state": "not_committed"
+            },
+            "arguments": {
+              "draft_id": "0998ca12-2306-48e6-851b-ff5ee0159e29",
+              "draft_hash": "4da433dc61022ac6aa3ccaf9b2cc27bc6fe426017a3ab0ec468931c6876ef29d",
+              "idempotency_key": "0998ca12-2306-48e6-851b-ff5ee0159e29"
+            },
+            "evidence_id": "510b364d-0333-4642-9019-eb33ea97f4f4",
+            "source_turn": 2
+          },
+          {
+            "type": "model",
+            "usage": {
+              "input_tokens": 3957,
+              "total_tokens": 4023,
+              "output_tokens": 66,
+              "input_token_details": {
+                "cache_read": 1792
+              },
+              "output_token_details": {}
+            },
+            "call_id": "793d8e23-367e-4757-b787-6182310bcc97",
+            "streamed": true,
+            "source_turn": 2,
+            "model_requests": 1,
+            "model_returned": "deepseek-flash",
+            "estimated_peak_microusd": 1267
+          },
+          {
+            "type": "context_compacted",
+            "summary": {
+              "budget": 18000,
+              "method": "conservative UTF-8 byte token upper estimate",
+              "version": "structured-facts-v1",
+              "preserved_facts": {
+                "grant": null,
+                "fields": {
+                  "date": {
+                    "value": "2026-10-28",
+                    "source_kind": "validated_model_extraction",
+                    "source_turn": 1,
+                    "source_quote": "明天"
+                  },
+                  "end_time": {
+                    "value": "15:00",
+                    "source_kind": "validated_model_extraction",
+                    "source_turn": 1,
+                    "source_quote": "15:00"
+                  },
+                  "attendees": {
+                    "value": 10,
+                    "source_kind": "validated_model_extraction",
+                    "source_turn": 1,
+                    "source_quote": "10人"
+                  },
+                  "room_code": {
+                    "value": "A101",
+                    "source_kind": "validated_model_extraction",
+                    "source_turn": 1,
+                    "source_quote": "A101"
+                  },
+                  "start_time": {
+                    "value": "14:00",
+                    "source_kind": "validated_model_extraction",
+                    "source_turn": 1,
+                    "source_quote": "14:00"
+                  }
+                },
+                "denials": [],
+                "current_turn": 2,
+                "pending_draft": {
+                  "end_at": "2026-10-28T15:00:00+08:00",
+                  "status": "pending",
+                  "draft_id": "0998ca12-2306-48e6-851b-ff5ee0159e29",
+                  "start_at": "2026-10-28T14:00:00+08:00",
+                  "attendees": 10,
+                  "room_code": "A101",
+                  "draft_hash": "4da433dc61022ac6aa3ccaf9b2cc27bc6fe426017a3ab0ec468931c6876ef29d",
+                  "expires_at": "2026-10-27T10:48:05.830944Z",
+                  "suggested_idempotency_key": "0998ca12-2306-48e6-851b-ff5ee0159e29"
+                },
+                "business_result": null,
+                "candidate_rooms": [
+                  {
+                    "capacity": 20,
+                    "room_code": "A101"
+                  }
+                ],
+                "reference_clock": "2026-10-27T09:00:00+08:00",
+                "original_history": {
+                  "last_id": "e4d6b731-f181-4395-9d1f-2a13d4fc7f31",
+                  "first_id": "4fdd6386-d226-5f84-a497-f59014d0630d",
+                  "message_count": 13
+                },
+                "retrieval_result": {
+                  "query": "场地预约 空闲查询 人数容量 时段限制 A101 实验室预约规则",
+                  "chunks": [
+                    {
+                      "text": "场地与开放时间\nA101 容量 20 人，09:00—21:00 开放。",
+                      "score": 3.542565,
+                      "chunk_id": "booking-rules:r1:a6a1d61710a23b82",
+                      "chunk_hash": "a6a1d61710a23b8238708459a7e2ec039e1f3c4b37a79582a042301d8a627cb6",
+                      "source_ref": "knowledge/booking-rules-v1.md",
+                      "document_id": 1,
+                      "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                      "document_revision": 1
+                    },
+                    {
+                      "text": "时间与人数\n有效预约不能重叠；时段为左闭右开，相邻时段可以相接。",
+                      "score": 2.801124,
+                      "chunk_id": "booking-rules:r1:245245278a2b83a9",
+                      "chunk_hash": "245245278a2b83a94c7b1892d08353aff39898a9c11e81ce13b66380bd7b2fdb",
+                      "source_ref": "knowledge/booking-rules-v1.md",
+                      "document_id": 1,
+                      "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                      "document_revision": 1
+                    },
+                    {
+                      "text": "澄清与确认\n缺日期、起止时间或人数时追问；“下午”不直接等同具体时段。",
+                      "score": 1.961368,
+                      "chunk_id": "booking-rules:r1:d90836b0c00ba2ef",
+                      "chunk_hash": "d90836b0c00ba2ef329e89ea4a72b6666007de0e0cc87720a203075621f7d3d4",
+                      "source_ref": "knowledge/booking-rules-v1.md",
+                      "document_id": 1,
+                      "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                      "document_revision": 1
+                    }
+                  ],
+                  "status": "supported",
+                  "index_hash": "4fbf686cec03f3a21c9faa36aec2c0d61e00d23610e973ee83924ef68cecdce0",
+                  "query_tokens": [
+                    "空闲",
+                    "查询",
+                    "人数",
+                    "容量",
+                    "时段",
+                    "限制",
+                    "a101",
+                    "实验室"
+                  ]
+                },
+                "confirmation_state": "pending",
+                "unknown_submission": null,
+                "confirmation_revision": 2,
+                "executed_tools_this_turn": [
+                  {
+                    "code": "upstream_unavailable",
+                    "name": "confirm_booking",
+                    "status": "error",
+                    "booking_id": null,
+                    "commit_state": "not_committed"
+                  }
+                ]
+              },
+              "selected_message_ids": [
+                "fc983e91-7716-4886-b2e4-a55c76008757",
+                "lc_run--01a17cf5-0e51-7256-a767-276ab36d18cd",
+                "e4d6b731-f181-4395-9d1f-2a13d4fc7f31"
+              ],
+              "estimated_upper_tokens": 14493,
+              "dropped_from_model_context": 10,
+              "original_messages_retained": true
+            },
+            "source_turn": 2
+          },
+          {
+            "name": "lookup_booking_by_request",
+            "type": "tool",
+            "result": {
+              "code": "request_not_found",
+              "data": null,
+              "status": "not_found",
+              "summary": "本次查询未见已提交记录；在途事务仍可能随后提交，请保留原标识。",
+              "retryable": false,
+              "request_key": "0998ca12-2306-48e6-851b-ff5ee0159e29",
+              "commit_state": "unknown",
+              "evidence_refs": []
+            },
+            "arguments": {
+              "idempotency_key": "0998ca12-2306-48e6-851b-ff5ee0159e29"
+            },
+            "evidence_id": "0e72bb47-a359-49c2-822a-791b3e920184",
+            "source_turn": 2
+          },
+          {
+            "type": "model",
+            "usage": {
+              "input_tokens": 4167,
+              "total_tokens": 4358,
+              "output_tokens": 191,
+              "input_token_details": {
+                "cache_read": 1792
+              },
+              "output_token_details": {}
+            },
+            "call_id": "aed218fa-b0b0-4d95-a619-2bc3c86dc341",
+            "streamed": true,
+            "source_turn": 2,
+            "model_requests": 1,
+            "model_returned": "deepseek-flash",
+            "estimated_peak_microusd": 1480
+          },
+          {
+            "type": "context_compacted",
+            "summary": {
+              "budget": 18000,
+              "method": "conservative UTF-8 byte token upper estimate",
+              "version": "structured-facts-v1",
+              "preserved_facts": {
+                "grant": null,
+                "fields": {
+                  "date": {
+                    "value": "2026-10-28",
+                    "source_kind": "validated_model_extraction",
+                    "source_turn": 1,
+                    "source_quote": "明天"
+                  },
+                  "end_time": {
+                    "value": "15:00",
+                    "source_kind": "validated_model_extraction",
+                    "source_turn": 1,
+                    "source_quote": "15:00"
+                  },
+                  "attendees": {
+                    "value": 10,
+                    "source_kind": "validated_model_extraction",
+                    "source_turn": 1,
+                    "source_quote": "10人"
+                  },
+                  "room_code": {
+                    "value": "A101",
+                    "source_kind": "validated_model_extraction",
+                    "source_turn": 1,
+                    "source_quote": "A101"
+                  },
+                  "start_time": {
+                    "value": "14:00",
+                    "source_kind": "validated_model_extraction",
+                    "source_turn": 1,
+                    "source_quote": "14:00"
+                  }
+                },
+                "denials": [],
+                "current_turn": 2,
+                "pending_draft": {
+                  "end_at": "2026-10-28T15:00:00+08:00",
+                  "status": "pending",
+                  "draft_id": "0998ca12-2306-48e6-851b-ff5ee0159e29",
+                  "start_at": "2026-10-28T14:00:00+08:00",
+                  "attendees": 10,
+                  "room_code": "A101",
+                  "draft_hash": "4da433dc61022ac6aa3ccaf9b2cc27bc6fe426017a3ab0ec468931c6876ef29d",
+                  "expires_at": "2026-10-27T10:48:05.830944Z",
+                  "suggested_idempotency_key": "0998ca12-2306-48e6-851b-ff5ee0159e29"
+                },
+                "business_result": null,
+                "candidate_rooms": [
+                  {
+                    "capacity": 20,
+                    "room_code": "A101"
+                  }
+                ],
+                "reference_clock": "2026-10-27T09:00:00+08:00",
+                "original_history": {
+                  "last_id": "11fb08f6-2869-4a61-a425-6ba73aff1c72",
+                  "first_id": "4fdd6386-d226-5f84-a497-f59014d0630d",
+                  "message_count": 15
+                },
+                "retrieval_result": {
+                  "query": "场地预约 空闲查询 人数容量 时段限制 A101 实验室预约规则",
+                  "chunks": [
+                    {
+                      "text": "场地与开放时间\nA101 容量 20 人，09:00—21:00 开放。",
+                      "score": 3.542565,
+                      "chunk_id": "booking-rules:r1:a6a1d61710a23b82",
+                      "chunk_hash": "a6a1d61710a23b8238708459a7e2ec039e1f3c4b37a79582a042301d8a627cb6",
+                      "source_ref": "knowledge/booking-rules-v1.md",
+                      "document_id": 1,
+                      "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                      "document_revision": 1
+                    },
+                    {
+                      "text": "时间与人数\n有效预约不能重叠；时段为左闭右开，相邻时段可以相接。",
+                      "score": 2.801124,
+                      "chunk_id": "booking-rules:r1:245245278a2b83a9",
+                      "chunk_hash": "245245278a2b83a94c7b1892d08353aff39898a9c11e81ce13b66380bd7b2fdb",
+                      "source_ref": "knowledge/booking-rules-v1.md",
+                      "document_id": 1,
+                      "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                      "document_revision": 1
+                    },
+                    {
+                      "text": "澄清与确认\n缺日期、起止时间或人数时追问；“下午”不直接等同具体时段。",
+                      "score": 1.961368,
+                      "chunk_id": "booking-rules:r1:d90836b0c00ba2ef",
+                      "chunk_hash": "d90836b0c00ba2ef329e89ea4a72b6666007de0e0cc87720a203075621f7d3d4",
+                      "source_ref": "knowledge/booking-rules-v1.md",
+                      "document_id": 1,
+                      "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+                      "document_revision": 1
+                    }
+                  ],
+                  "status": "supported",
+                  "index_hash": "4fbf686cec03f3a21c9faa36aec2c0d61e00d23610e973ee83924ef68cecdce0",
+                  "query_tokens": [
+                    "空闲",
+                    "查询",
+                    "人数",
+                    "容量",
+                    "时段",
+                    "限制",
+                    "a101",
+                    "实验室"
+                  ]
+                },
+                "confirmation_state": "pending",
+                "unknown_submission": null,
+                "confirmation_revision": 2,
+                "executed_tools_this_turn": [
+                  {
+                    "code": "upstream_unavailable",
+                    "name": "confirm_booking",
+                    "status": "error",
+                    "booking_id": null,
+                    "commit_state": "not_committed"
+                  },
+                  {
+                    "code": "request_not_found",
+                    "name": "lookup_booking_by_request",
+                    "status": "not_found",
+                    "booking_id": null,
+                    "commit_state": "unknown"
+                  }
+                ]
+              },
+              "selected_message_ids": [
+                "fc983e91-7716-4886-b2e4-a55c76008757",
+                "lc_run--01a17cf5-0e51-7256-a767-276ab36d18cd",
+                "e4d6b731-f181-4395-9d1f-2a13d4fc7f31",
+                "lc_run--01a17cf5-167f-731e-886c-7ad5a6a62848",
+                "11fb08f6-2869-4a61-a425-6ba73aff1c72"
+              ],
+              "estimated_upper_tokens": 15907,
+              "dropped_from_model_context": 10,
+              "original_messages_retained": true
+            },
+            "source_turn": 2
+          }
+        ],
+        "fields": {
+          "date": {
+            "value": "2026-10-28",
+            "source_kind": "validated_model_extraction",
+            "source_turn": 1,
+            "source_quote": "明天"
+          },
+          "end_time": {
+            "value": "15:00",
+            "source_kind": "validated_model_extraction",
+            "source_turn": 1,
+            "source_quote": "15:00"
+          },
+          "attendees": {
+            "value": 10,
+            "source_kind": "validated_model_extraction",
+            "source_turn": 1,
+            "source_quote": "10人"
+          },
+          "room_code": {
+            "value": "A101",
+            "source_kind": "validated_model_extraction",
+            "source_turn": 1,
+            "source_quote": "A101"
+          },
+          "start_time": {
+            "value": "14:00",
+            "source_kind": "validated_model_extraction",
+            "source_turn": 1,
+            "source_quote": "14:00"
+          }
+        },
+        "status": "waiting_confirmation",
+        "denials": [],
+        "revision": 2,
+        "last_error": null,
+        "next_nodes": [
+          "wait_for_confirmation"
+        ],
+        "session_id": "308cb7a9-76d5-4e05-8a0c-4c54aac96fd5",
+        "version_id": 1,
+        "compactions": 3,
+        "config_hash": "fd1aa62039341adddad220e3c9f4e4a198868557a4af566c9a1437b4e695201d",
+        "evidence_refs": [
+          "booking-rules:r1:a6a1d61710a23b82",
+          "booking-rules:r1:245245278a2b83a9",
+          "booking-rules:r1:d90836b0c00ba2ef"
+        ],
+        "pending_draft": {
+          "end_at": "2026-10-28T15:00:00+08:00",
+          "status": "pending",
+          "draft_id": "0998ca12-2306-48e6-851b-ff5ee0159e29",
+          "start_at": "2026-10-28T14:00:00+08:00",
+          "attendees": 10,
+          "room_code": "A101",
+          "draft_hash": "4da433dc61022ac6aa3ccaf9b2cc27bc6fe426017a3ab0ec468931c6876ef29d",
+          "expires_at": "2026-10-27T10:48:05.830944Z",
+          "suggested_idempotency_key": "0998ca12-2306-48e6-851b-ff5ee0159e29"
+        },
+        "assistant_text": "**提交未成功，状态未知（不是预约成功）**\n\n- 场地：A101（容量20人，09:00—21:00开放，来源：booking-rules:r1:a6a1d61710a23b82，document_revision 1）\n- 日期与时间：2026-10-28 14:00—15:00（北京时间）\n- 人数：10人\n- 提交结果：业务服务返回 503，本次事务已回滚，未提交成功\n- 按原请求标识查证：暂未找到已提交记录，但在途事务仍可能随后提交，因此当前状态为**未知**，不能认定为失败或成功\n\n我不会换用新的标识提交预约，也不会生成草稿。稍后你要求时，我会用**原请求标识**再查证确认。待确认草稿本身仍未提交（pending 状态）。",
+        "last_retrieval": {
+          "query": "场地预约 空闲查询 人数容量 时段限制 A101 实验室预约规则",
+          "chunks": [
+            {
+              "text": "场地与开放时间\nA101 容量 20 人，09:00—21:00 开放。",
+              "score": 3.542565,
+              "chunk_id": "booking-rules:r1:a6a1d61710a23b82",
+              "chunk_hash": "a6a1d61710a23b8238708459a7e2ec039e1f3c4b37a79582a042301d8a627cb6",
+              "source_ref": "knowledge/booking-rules-v1.md",
+              "document_id": 1,
+              "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+              "document_revision": 1
+            },
+            {
+              "text": "时间与人数\n有效预约不能重叠；时段为左闭右开，相邻时段可以相接。",
+              "score": 2.801124,
+              "chunk_id": "booking-rules:r1:245245278a2b83a9",
+              "chunk_hash": "245245278a2b83a94c7b1892d08353aff39898a9c11e81ce13b66380bd7b2fdb",
+              "source_ref": "knowledge/booking-rules-v1.md",
+              "document_id": 1,
+              "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+              "document_revision": 1
+            },
+            {
+              "text": "澄清与确认\n缺日期、起止时间或人数时追问；“下午”不直接等同具体时段。",
+              "score": 1.961368,
+              "chunk_id": "booking-rules:r1:d90836b0c00ba2ef",
+              "chunk_hash": "d90836b0c00ba2ef329e89ea4a72b6666007de0e0cc87720a203075621f7d3d4",
+              "source_ref": "knowledge/booking-rules-v1.md",
+              "document_id": 1,
+              "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+              "document_revision": 1
+            }
+          ],
+          "status": "supported",
+          "index_hash": "4fbf686cec03f3a21c9faa36aec2c0d61e00d23610e973ee83924ef68cecdce0",
+          "query_tokens": [
+            "空闲",
+            "查询",
+            "人数",
+            "容量",
+            "时段",
+            "限制",
+            "a101",
+            "实验室"
+          ]
+        },
+        "business_result": null,
+        "reference_clock": "2026-10-27T09:00:00+08:00",
+        "history_messages": 16,
+        "confirmation_state": "pending",
+        "unknown_submission": null,
+        "confirmation_revision": 2
+      },
+      "before": [],
+      "after": [],
+      "task_outcome": null
+    }
+  ]
+}

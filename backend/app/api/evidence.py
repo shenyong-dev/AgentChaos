@@ -103,7 +103,7 @@ async def stream(
     yield ServerSentEvent(
         event="stream.ready",
         data={
-            "schema_version": "1.1",
+            "schema_version": "1.3",
             "run_id": binding["run_id"],
             "cursor": current,
             "heartbeat_seconds": 15,
@@ -171,4 +171,13 @@ def artifact(run_id: UUID, artifact_id: int, user_id: Identity, reader: Reader):
         media_type="application/json",
         filename=f"evidence-{artifact_id}.json",
         headers={"ETag": f'"{digest}"', "X-Content-Type-Options": "nosniff"},
+    )
+
+
+@router.get("/runs/{run_id}/events/{event_id}")
+def event(
+    run_id: UUID, event_id: UUID, request: Request, user_id: Identity, reader: Reader
+) -> Envelope[dict]:
+    return Envelope(
+        data=reader.event(user_id, run_id, event_id), request_id=request.state.request_id
     )

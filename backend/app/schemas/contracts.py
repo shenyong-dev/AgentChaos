@@ -1,10 +1,11 @@
 """T01 wire contracts only; execution and business assertions arrive in later tasks."""
 
-from datetime import date as Date
-from typing import Annotated, Literal
+from typing import Literal
 from uuid import UUID
 
-from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, JsonValue
+from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, JsonValue, model_validator
+
+from app.schemas.assertions import Assertion, BookingCount, BookingGoal, BookingMatches, NoBookingOn
 
 
 class ContractModel(BaseModel):
@@ -15,28 +16,8 @@ class UserTurn(ContractModel):
     user: str = Field(min_length=1, max_length=12000)
 
 
-class BookingMatches(ContractModel):
-    type: Literal["booking_matches"]
-    date: Date
-    attendees: int | None = Field(default=None, ge=1)
-    room_code: str | None = None
-
-
-class BookingCount(ContractModel):
-    type: Literal["booking_count"]
-    equals: int = Field(ge=0)
-
-
-class NoBookingOn(ContractModel):
-    type: Literal["no_booking_on"]
-    date: Date
-
-
-Assertion = Annotated[BookingMatches | BookingCount | NoBookingOn, Field(discriminator="type")]
-
-
 class TestCaseDraft(ContractModel):
-    schema_version: Literal["1.0"] = "1.0"
+    schema_version: Literal["1.0", "1.1"] = "1.0"
     case_key: str = Field(pattern=r"^[A-Z][A-Z0-9-]{2,79}$")
     revision: int = Field(ge=1)
     family_key: str = Field(min_length=1, max_length=100)
@@ -49,6 +30,19 @@ class TestCaseDraft(ContractModel):
     turns: list[UserTurn] = Field(min_length=1, max_length=50)
     assertions: list[Assertion] = Field(min_length=1, max_length=100)
     review_status: Literal["draft", "approved", "rejected"] = "draft"
+    task_goal: BookingGoal | None = None
+
+    @model_validator(mode="after")
+    def versioned_assertions(self):
+        if self.schema_version == "1.0" and (
+            self.task_goal
+            or any(
+                not isinstance(a, (BookingMatches, BookingCount, NoBookingOn))
+                for a in self.assertions
+            )
+        ):
+            raise ValueError("Extended predicates and task goals require DSL 1.1")
+        return self
 
 
 class TraceEvent(ContractModel):

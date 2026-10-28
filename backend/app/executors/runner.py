@@ -14,6 +14,7 @@ from app.evidence.recorder import EvidenceRecorder
 from app.executors.budget import ExecutorBudget
 from app.executors.control import ExecutionControl
 from app.executors.service import RunService, role_configs
+from app.faults.engine import FaultController
 
 
 def category(code):
@@ -47,6 +48,11 @@ def run_execution(engine, redis, settings, execution_uuid, *, gateway_factory=No
     thread.start()
     output = None
     try:
+        with control.transaction() as (_, _, execution):
+            execution.timing_json = {
+                **execution.timing_json,
+                "gateway_mode": "offline_test_double" if gateway_factory else "real_provider",
+            }
         if claim["manifest"]["roles"] != role_configs(settings):
             raise AgentError("run_config_mismatch", "Worker角色参数与冻结运行清单不一致。", 409)
         budget = ExecutorBudget(redis, settings, control, claim["run_uuid"], str(execution_uuid))
@@ -80,7 +86,13 @@ def run_execution(engine, redis, settings, execution_uuid, *, gateway_factory=No
             control=control,
             budget=budget,
             gateway=gateway,
+            document_ids=[
+                document["id"] for document in claim["manifest"]["target"]["retrieval"]["documents"]
+            ],
             recorder=recorder,
+            faults=FaultController(control, recorder, claim["manifest"]["fault_profile"])
+            if claim["manifest"].get("fault_profile")
+            else None,
         )
         if runtime.manifest["config_hash"] != claim["manifest"]["target"]["config_hash"]:
             raise AgentError(
@@ -207,14 +219,14 @@ def run_execution(engine, redis, settings, execution_uuid, *, gateway_factory=No
                 timing["revision"] += 1
                 e.timing_json, e.final_output_json = timing, output
         waiting = output["status"] == "waiting_confirmation"
-        service.finish(
+        finished = service.finish(
             claim["id"],
             claim["token"],
             "waiting_input" if waiting else "inconclusive",
             output,
             None if waiting else {"category": "evaluation", "code": "evaluation_not_implemented"},
         )
-        return {"claimed": True, "status": "waiting_input" if waiting else "inconclusive"}
+        return {"claimed": True, "status": finished or "lease_lost"}
     except AgentError as exc:
         service.finish(
             claim["id"],

@@ -1,0 +1,616 @@
+FFFFF                                                                    [100%]
+================================== FAILURES ===================================
+______ test_auto_evaluation_persists_and_api_is_readonly_paginated_owned ______
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1958: in _exec_single_context
+    self.dialect.do_execute(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\default.py:1192: in do_execute
+    cursor.execute(statement, parameters)
+backend\.venv\Lib\site-packages\pymysql\cursors.py:170: in execute
+    result = self._query(query)
+             ^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\pymysql\cursors.py:335: in _query
+    conn.query(q)
+backend\.venv\Lib\site-packages\pymysql\connections.py:581: in query
+    self._affected_rows = self._read_query_result(unbuffered=unbuffered)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\pymysql\connections.py:857: in _read_query_result
+    result.read()
+backend\.venv\Lib\site-packages\pymysql\connections.py:1290: in read
+    first_packet = self.connection._read_packet()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\pymysql\connections.py:810: in _read_packet
+    packet.raise_for_error()
+backend\.venv\Lib\site-packages\pymysql\protocol.py:219: in raise_for_error
+    err.raise_mysql_exception(self._data)
+backend\.venv\Lib\site-packages\pymysql\err.py:154: in raise_mysql_exception
+    raise errorclass(errno, errval, sqlstate=sqlstate)
+E   pymysql.err.OperationalError: (1644, 'approved_case_immutable')
+
+The above exception was the direct cause of the following exception:
+backend\tests\test_evaluation.py:134: in test_auto_evaluation_persists_and_api_is_readonly_paginated_owned
+    identifier, execution, result = run_greeting(lab)
+                                    ^^^^^^^^^^^^^^^^^
+backend\tests\test_evaluation.py:124: in run_greeting
+    identifier, execution = create(lab, **kwargs)
+                            ^^^^^^^^^^^^^^^^^^^^^
+backend\tests\test_evaluation.py:69: in create
+    with Session(engine) as session, session.begin():
+                                     ^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\engine\util.py:144: in __exit__
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\util\langhelpers.py:166: in __exit__
+    raise exc_value.with_traceback(exc_tb)
+backend\.venv\Lib\site-packages\sqlalchemy\engine\util.py:142: in __exit__
+    self.commit()
+<sqlalchemy generated _go() wrapper for sqlalchemy.orm.session.SessionTransaction.commit>:2: in commit
+    return target(fn, self, _to_root=_to_root)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\orm\state_changes.py:137: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:1330: in commit
+    self._prepare_impl()
+<sqlalchemy generated _go() wrapper for sqlalchemy.orm.session.SessionTransaction._prepare_impl>:2: in _prepare_impl
+    return target(fn, self)
+           ^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\orm\state_changes.py:137: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:1304: in _prepare_impl
+    self.session.flush()
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:4543: in flush
+    self._flush(objects)
+<sqlalchemy generated warned() wrapper for sqlalchemy.orm.session.Session._flush>:2: in _flush
+    return target(fn, self, objects=objects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\util\deprecations.py:281: in warned
+    return fn(*args, **kwargs)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:4686: in _flush
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\util\langhelpers.py:166: in __exit__
+    raise exc_value.with_traceback(exc_tb)
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:4647: in _flush
+    flush_context.execute()
+backend\.venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py:467: in execute
+    rec.execute(self)
+backend\.venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py:643: in execute
+    util.preloaded.orm_persistence._save_obj(
+backend\.venv\Lib\site-packages\sqlalchemy\orm\persistence.py:84: in _save_obj
+    _emit_update_statements(
+backend\.venv\Lib\site-packages\sqlalchemy\orm\persistence.py:916: in _emit_update_statements
+    c = connection.execute(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1463: in execute
+    return meth(
+backend\.venv\Lib\site-packages\sqlalchemy\sql\elements.py:533: in _execute_on_connection
+    return connection._execute_clauseelement(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1683: in _execute_clauseelement
+    ret = self._execute_context(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1837: in _execute_context
+    return self._exec_single_context(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1977: in _exec_single_context
+    self._handle_dbapi_exception(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:2347: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1958: in _exec_single_context
+    self.dialect.do_execute(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\default.py:1192: in do_execute
+    cursor.execute(statement, parameters)
+backend\.venv\Lib\site-packages\pymysql\cursors.py:170: in execute
+    result = self._query(query)
+             ^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\pymysql\cursors.py:335: in _query
+    conn.query(q)
+backend\.venv\Lib\site-packages\pymysql\connections.py:581: in query
+    self._affected_rows = self._read_query_result(unbuffered=unbuffered)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\pymysql\connections.py:857: in _read_query_result
+    result.read()
+backend\.venv\Lib\site-packages\pymysql\connections.py:1290: in read
+    first_packet = self.connection._read_packet()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\pymysql\connections.py:810: in _read_packet
+    packet.raise_for_error()
+backend\.venv\Lib\site-packages\pymysql\protocol.py:219: in raise_for_error
+    err.raise_mysql_exception(self._data)
+backend\.venv\Lib\site-packages\pymysql\err.py:154: in raise_mysql_exception
+    raise errorclass(errno, errval, sqlstate=sqlstate)
+E   sqlalchemy.exc.OperationalError: (pymysql.err.OperationalError) (1644, 'approved_case_immutable')
+E   [SQL: UPDATE ac_test_cases SET expected_json=%(expected_json)s, content_hash=%(content_hash)s WHERE ac_test_cases.id = %(ac_test_cases_id)s]
+E   [parameters: {'expected_json': '{"assertions": [{"equals": 0, "type": "booking_count"}], "schema_version": "1.1"}', 'content_hash': '83052ee5e69733768531a1645b938aae52bdc32acc1c89cae2ca96970b9e040f', 'ac_test_cases_id': 1}]
+E   (Background on this error at: https://sqlalche.me/e/21/e3q8)
+---------------------------- Captured stderr setup ----------------------------
+INFO  [alembic.runtime.migration] Context impl MySQLImpl.
+INFO  [alembic.runtime.migration] Will assume non-transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 20261025_0001, T02 initial sixteen-table schema
+INFO  [alembic.runtime.migration] Running upgrade 20261025_0001 -> 20261025_0002, T04 bind pending drafts to a trusted conversation without adding tables.
+INFO  [alembic.runtime.migration] Running upgrade 20261025_0002 -> 20261026_0003, T06 real run-level events and transactionally allocated per-run order.
+_________ test_failed_independent_expectation_is_not_a_platform_error _________
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1958: in _exec_single_context
+    self.dialect.do_execute(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\default.py:1192: in do_execute
+    cursor.execute(statement, parameters)
+backend\.venv\Lib\site-packages\pymysql\cursors.py:170: in execute
+    result = self._query(query)
+             ^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\pymysql\cursors.py:335: in _query
+    conn.query(q)
+backend\.venv\Lib\site-packages\pymysql\connections.py:581: in query
+    self._affected_rows = self._read_query_result(unbuffered=unbuffered)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\pymysql\connections.py:857: in _read_query_result
+    result.read()
+backend\.venv\Lib\site-packages\pymysql\connections.py:1290: in read
+    first_packet = self.connection._read_packet()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\pymysql\connections.py:810: in _read_packet
+    packet.raise_for_error()
+backend\.venv\Lib\site-packages\pymysql\protocol.py:219: in raise_for_error
+    err.raise_mysql_exception(self._data)
+backend\.venv\Lib\site-packages\pymysql\err.py:154: in raise_mysql_exception
+    raise errorclass(errno, errval, sqlstate=sqlstate)
+E   pymysql.err.OperationalError: (1644, 'approved_case_immutable')
+
+The above exception was the direct cause of the following exception:
+backend\tests\test_evaluation.py:178: in test_failed_independent_expectation_is_not_a_platform_error
+    identifier, execution, result = run_greeting(lab, count=1)
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\test_evaluation.py:124: in run_greeting
+    identifier, execution = create(lab, **kwargs)
+                            ^^^^^^^^^^^^^^^^^^^^^
+backend\tests\test_evaluation.py:69: in create
+    with Session(engine) as session, session.begin():
+                                     ^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\engine\util.py:144: in __exit__
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\util\langhelpers.py:166: in __exit__
+    raise exc_value.with_traceback(exc_tb)
+backend\.venv\Lib\site-packages\sqlalchemy\engine\util.py:142: in __exit__
+    self.commit()
+<sqlalchemy generated _go() wrapper for sqlalchemy.orm.session.SessionTransaction.commit>:2: in commit
+    return target(fn, self, _to_root=_to_root)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\orm\state_changes.py:137: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:1330: in commit
+    self._prepare_impl()
+<sqlalchemy generated _go() wrapper for sqlalchemy.orm.session.SessionTransaction._prepare_impl>:2: in _prepare_impl
+    return target(fn, self)
+           ^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\orm\state_changes.py:137: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:1304: in _prepare_impl
+    self.session.flush()
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:4543: in flush
+    self._flush(objects)
+<sqlalchemy generated warned() wrapper for sqlalchemy.orm.session.Session._flush>:2: in _flush
+    return target(fn, self, objects=objects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\util\deprecations.py:281: in warned
+    return fn(*args, **kwargs)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:4686: in _flush
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\util\langhelpers.py:166: in __exit__
+    raise exc_value.with_traceback(exc_tb)
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:4647: in _flush
+    flush_context.execute()
+backend\.venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py:467: in execute
+    rec.execute(self)
+backend\.venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py:643: in execute
+    util.preloaded.orm_persistence._save_obj(
+backend\.venv\Lib\site-packages\sqlalchemy\orm\persistence.py:84: in _save_obj
+    _emit_update_statements(
+backend\.venv\Lib\site-packages\sqlalchemy\orm\persistence.py:916: in _emit_update_statements
+    c = connection.execute(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1463: in execute
+    return meth(
+backend\.venv\Lib\site-packages\sqlalchemy\sql\elements.py:533: in _execute_on_connection
+    return connection._execute_clauseelement(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1683: in _execute_clauseelement
+    ret = self._execute_context(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1837: in _execute_context
+    return self._exec_single_context(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1977: in _exec_single_context
+    self._handle_dbapi_exception(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:2347: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1958: in _exec_single_context
+    self.dialect.do_execute(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\default.py:1192: in do_execute
+    cursor.execute(statement, parameters)
+backend\.venv\Lib\site-packages\pymysql\cursors.py:170: in execute
+    result = self._query(query)
+             ^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\pymysql\cursors.py:335: in _query
+    conn.query(q)
+backend\.venv\Lib\site-packages\pymysql\connections.py:581: in query
+    self._affected_rows = self._read_query_result(unbuffered=unbuffered)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\pymysql\connections.py:857: in _read_query_result
+    result.read()
+backend\.venv\Lib\site-packages\pymysql\connections.py:1290: in read
+    first_packet = self.connection._read_packet()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\pymysql\connections.py:810: in _read_packet
+    packet.raise_for_error()
+backend\.venv\Lib\site-packages\pymysql\protocol.py:219: in raise_for_error
+    err.raise_mysql_exception(self._data)
+backend\.venv\Lib\site-packages\pymysql\err.py:154: in raise_mysql_exception
+    raise errorclass(errno, errval, sqlstate=sqlstate)
+E   sqlalchemy.exc.OperationalError: (pymysql.err.OperationalError) (1644, 'approved_case_immutable')
+E   [SQL: UPDATE ac_test_cases SET expected_json=%(expected_json)s, content_hash=%(content_hash)s WHERE ac_test_cases.id = %(ac_test_cases_id)s]
+E   [parameters: {'expected_json': '{"assertions": [{"equals": 1, "type": "booking_count"}], "schema_version": "1.1"}', 'content_hash': '51deb2bd64fe5637d123cbdec432e1f019e3af08aa395ba036f313d34221dd78', 'ac_test_cases_id': 2}]
+E   (Background on this error at: https://sqlalche.me/e/21/e3q8)
+_____ test_waiting_confirmation_is_not_evaluated_until_actual_submission ______
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1958: in _exec_single_context
+    self.dialect.do_execute(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\default.py:1192: in do_execute
+    cursor.execute(statement, parameters)
+backend\.venv\Lib\site-packages\pymysql\cursors.py:170: in execute
+    result = self._query(query)
+             ^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\pymysql\cursors.py:335: in _query
+    conn.query(q)
+backend\.venv\Lib\site-packages\pymysql\connections.py:581: in query
+    self._affected_rows = self._read_query_result(unbuffered=unbuffered)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\pymysql\connections.py:857: in _read_query_result
+    result.read()
+backend\.venv\Lib\site-packages\pymysql\connections.py:1290: in read
+    first_packet = self.connection._read_packet()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\pymysql\connections.py:810: in _read_packet
+    packet.raise_for_error()
+backend\.venv\Lib\site-packages\pymysql\protocol.py:219: in raise_for_error
+    err.raise_mysql_exception(self._data)
+backend\.venv\Lib\site-packages\pymysql\err.py:154: in raise_mysql_exception
+    raise errorclass(errno, errval, sqlstate=sqlstate)
+E   pymysql.err.OperationalError: (1644, 'approved_case_immutable')
+
+The above exception was the direct cause of the following exception:
+backend\tests\test_evaluation.py:190: in test_waiting_confirmation_is_not_evaluated_until_actual_submission
+    identifier, execution = create(lab, count=1, text=text)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\test_evaluation.py:69: in create
+    with Session(engine) as session, session.begin():
+                                     ^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\engine\util.py:144: in __exit__
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\util\langhelpers.py:166: in __exit__
+    raise exc_value.with_traceback(exc_tb)
+backend\.venv\Lib\site-packages\sqlalchemy\engine\util.py:142: in __exit__
+    self.commit()
+<sqlalchemy generated _go() wrapper for sqlalchemy.orm.session.SessionTransaction.commit>:2: in commit
+    return target(fn, self, _to_root=_to_root)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\orm\state_changes.py:137: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:1330: in commit
+    self._prepare_impl()
+<sqlalchemy generated _go() wrapper for sqlalchemy.orm.session.SessionTransaction._prepare_impl>:2: in _prepare_impl
+    return target(fn, self)
+           ^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\orm\state_changes.py:137: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:1304: in _prepare_impl
+    self.session.flush()
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:4543: in flush
+    self._flush(objects)
+<sqlalchemy generated warned() wrapper for sqlalchemy.orm.session.Session._flush>:2: in _flush
+    return target(fn, self, objects=objects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\util\deprecations.py:281: in warned
+    return fn(*args, **kwargs)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:4686: in _flush
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\util\langhelpers.py:166: in __exit__
+    raise exc_value.with_traceback(exc_tb)
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:4647: in _flush
+    flush_context.execute()
+backend\.venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py:467: in execute
+    rec.execute(self)
+backend\.venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py:643: in execute
+    util.preloaded.orm_persistence._save_obj(
+backend\.venv\Lib\site-packages\sqlalchemy\orm\persistence.py:84: in _save_obj
+    _emit_update_statements(
+backend\.venv\Lib\site-packages\sqlalchemy\orm\persistence.py:916: in _emit_update_statements
+    c = connection.execute(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1463: in execute
+    return meth(
+backend\.venv\Lib\site-packages\sqlalchemy\sql\elements.py:533: in _execute_on_connection
+    return connection._execute_clauseelement(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1683: in _execute_clauseelement
+    ret = self._execute_context(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1837: in _execute_context
+    return self._exec_single_context(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1977: in _exec_single_context
+    self._handle_dbapi_exception(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:2347: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1958: in _exec_single_context
+    self.dialect.do_execute(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\default.py:1192: in do_execute
+    cursor.execute(statement, parameters)
+backend\.venv\Lib\site-packages\pymysql\cursors.py:170: in execute
+    result = self._query(query)
+             ^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\pymysql\cursors.py:335: in _query
+    conn.query(q)
+backend\.venv\Lib\site-packages\pymysql\connections.py:581: in query
+    self._affected_rows = self._read_query_result(unbuffered=unbuffered)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\pymysql\connections.py:857: in _read_query_result
+    result.read()
+backend\.venv\Lib\site-packages\pymysql\connections.py:1290: in read
+    first_packet = self.connection._read_packet()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\pymysql\connections.py:810: in _read_packet
+    packet.raise_for_error()
+backend\.venv\Lib\site-packages\pymysql\protocol.py:219: in raise_for_error
+    err.raise_mysql_exception(self._data)
+backend\.venv\Lib\site-packages\pymysql\err.py:154: in raise_mysql_exception
+    raise errorclass(errno, errval, sqlstate=sqlstate)
+E   sqlalchemy.exc.OperationalError: (pymysql.err.OperationalError) (1644, 'approved_case_immutable')
+E   [SQL: UPDATE ac_test_cases SET expected_json=%(expected_json)s, content_hash=%(content_hash)s WHERE ac_test_cases.id = %(ac_test_cases_id)s]
+E   [parameters: {'expected_json': '{"assertions": [{"equals": 1, "type": "booking_count"}], "schema_version": "1.1"}', 'content_hash': '463455f2160c675b2301fa05637db3f33df62d23c16fc0e4fca1e3a23dbc9bd8', 'ac_test_cases_id': 3}]
+E   (Background on this error at: https://sqlalche.me/e/21/e3q8)
+_ test_large_artifact_is_verified_and_late_damage_appends_error_without_rewriting _
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1958: in _exec_single_context
+    self.dialect.do_execute(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\default.py:1192: in do_execute
+    cursor.execute(statement, parameters)
+backend\.venv\Lib\site-packages\pymysql\cursors.py:170: in execute
+    result = self._query(query)
+             ^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\pymysql\cursors.py:335: in _query
+    conn.query(q)
+backend\.venv\Lib\site-packages\pymysql\connections.py:581: in query
+    self._affected_rows = self._read_query_result(unbuffered=unbuffered)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\pymysql\connections.py:857: in _read_query_result
+    result.read()
+backend\.venv\Lib\site-packages\pymysql\connections.py:1290: in read
+    first_packet = self.connection._read_packet()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\pymysql\connections.py:810: in _read_packet
+    packet.raise_for_error()
+backend\.venv\Lib\site-packages\pymysql\protocol.py:219: in raise_for_error
+    err.raise_mysql_exception(self._data)
+backend\.venv\Lib\site-packages\pymysql\err.py:154: in raise_mysql_exception
+    raise errorclass(errno, errval, sqlstate=sqlstate)
+E   pymysql.err.OperationalError: (1644, 'approved_case_immutable')
+
+The above exception was the direct cause of the following exception:
+backend\tests\test_evaluation.py:216: in test_large_artifact_is_verified_and_late_damage_appends_error_without_rewriting
+    identifier, execution, result = run_greeting(
+backend\tests\test_evaluation.py:124: in run_greeting
+    identifier, execution = create(lab, **kwargs)
+                            ^^^^^^^^^^^^^^^^^^^^^
+backend\tests\test_evaluation.py:69: in create
+    with Session(engine) as session, session.begin():
+                                     ^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\engine\util.py:144: in __exit__
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\util\langhelpers.py:166: in __exit__
+    raise exc_value.with_traceback(exc_tb)
+backend\.venv\Lib\site-packages\sqlalchemy\engine\util.py:142: in __exit__
+    self.commit()
+<sqlalchemy generated _go() wrapper for sqlalchemy.orm.session.SessionTransaction.commit>:2: in commit
+    return target(fn, self, _to_root=_to_root)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\orm\state_changes.py:137: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:1330: in commit
+    self._prepare_impl()
+<sqlalchemy generated _go() wrapper for sqlalchemy.orm.session.SessionTransaction._prepare_impl>:2: in _prepare_impl
+    return target(fn, self)
+           ^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\orm\state_changes.py:137: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:1304: in _prepare_impl
+    self.session.flush()
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:4543: in flush
+    self._flush(objects)
+<sqlalchemy generated warned() wrapper for sqlalchemy.orm.session.Session._flush>:2: in _flush
+    return target(fn, self, objects=objects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\util\deprecations.py:281: in warned
+    return fn(*args, **kwargs)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:4686: in _flush
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\util\langhelpers.py:166: in __exit__
+    raise exc_value.with_traceback(exc_tb)
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:4647: in _flush
+    flush_context.execute()
+backend\.venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py:467: in execute
+    rec.execute(self)
+backend\.venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py:643: in execute
+    util.preloaded.orm_persistence._save_obj(
+backend\.venv\Lib\site-packages\sqlalchemy\orm\persistence.py:84: in _save_obj
+    _emit_update_statements(
+backend\.venv\Lib\site-packages\sqlalchemy\orm\persistence.py:916: in _emit_update_statements
+    c = connection.execute(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1463: in execute
+    return meth(
+backend\.venv\Lib\site-packages\sqlalchemy\sql\elements.py:533: in _execute_on_connection
+    return connection._execute_clauseelement(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1683: in _execute_clauseelement
+    ret = self._execute_context(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1837: in _execute_context
+    return self._exec_single_context(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1977: in _exec_single_context
+    self._handle_dbapi_exception(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:2347: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1958: in _exec_single_context
+    self.dialect.do_execute(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\default.py:1192: in do_execute
+    cursor.execute(statement, parameters)
+backend\.venv\Lib\site-packages\pymysql\cursors.py:170: in execute
+    result = self._query(query)
+             ^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\pymysql\cursors.py:335: in _query
+    conn.query(q)
+backend\.venv\Lib\site-packages\pymysql\connections.py:581: in query
+    self._affected_rows = self._read_query_result(unbuffered=unbuffered)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\pymysql\connections.py:857: in _read_query_result
+    result.read()
+backend\.venv\Lib\site-packages\pymysql\connections.py:1290: in read
+    first_packet = self.connection._read_packet()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\pymysql\connections.py:810: in _read_packet
+    packet.raise_for_error()
+backend\.venv\Lib\site-packages\pymysql\protocol.py:219: in raise_for_error
+    err.raise_mysql_exception(self._data)
+backend\.venv\Lib\site-packages\pymysql\err.py:154: in raise_mysql_exception
+    raise errorclass(errno, errval, sqlstate=sqlstate)
+E   sqlalchemy.exc.OperationalError: (pymysql.err.OperationalError) (1644, 'approved_case_immutable')
+E   [SQL: UPDATE ac_test_cases SET expected_json=%(expected_json)s, content_hash=%(content_hash)s WHERE ac_test_cases.id = %(ac_test_cases_id)s]
+E   [parameters: {'expected_json': '{"assertions": [{"equals": 0, "type": "booking_count"}, {"contains": ["\\u6ca1\\u6709\\u63d0\\u4ea4"], "type": "reply_literals"}], "schema_version": "1.1"}', 'content_hash': 'b1ab65e3e5f2e1b786556ad5bf946c86b14d54bb9f03c60efdd9b781a08e209a', 'ac_test_cases_id': 4}]
+E   (Background on this error at: https://sqlalche.me/e/21/e3q8)
+_ test_legacy_evaluation_appends_results_without_changing_manifest_or_events __
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1958: in _exec_single_context
+    self.dialect.do_execute(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\default.py:1192: in do_execute
+    cursor.execute(statement, parameters)
+backend\.venv\Lib\site-packages\pymysql\cursors.py:170: in execute
+    result = self._query(query)
+             ^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\pymysql\cursors.py:335: in _query
+    conn.query(q)
+backend\.venv\Lib\site-packages\pymysql\connections.py:581: in query
+    self._affected_rows = self._read_query_result(unbuffered=unbuffered)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\pymysql\connections.py:857: in _read_query_result
+    result.read()
+backend\.venv\Lib\site-packages\pymysql\connections.py:1290: in read
+    first_packet = self.connection._read_packet()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\pymysql\connections.py:810: in _read_packet
+    packet.raise_for_error()
+backend\.venv\Lib\site-packages\pymysql\protocol.py:219: in raise_for_error
+    err.raise_mysql_exception(self._data)
+backend\.venv\Lib\site-packages\pymysql\err.py:154: in raise_mysql_exception
+    raise errorclass(errno, errval, sqlstate=sqlstate)
+E   pymysql.err.OperationalError: (1644, 'approved_case_immutable')
+
+The above exception was the direct cause of the following exception:
+backend\tests\test_evaluation.py:245: in test_legacy_evaluation_appends_results_without_changing_manifest_or_events
+    identifier, execution, result = run_greeting(lab, legacy=True)
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\test_evaluation.py:124: in run_greeting
+    identifier, execution = create(lab, **kwargs)
+                            ^^^^^^^^^^^^^^^^^^^^^
+backend\tests\test_evaluation.py:69: in create
+    with Session(engine) as session, session.begin():
+                                     ^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\engine\util.py:144: in __exit__
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\util\langhelpers.py:166: in __exit__
+    raise exc_value.with_traceback(exc_tb)
+backend\.venv\Lib\site-packages\sqlalchemy\engine\util.py:142: in __exit__
+    self.commit()
+<sqlalchemy generated _go() wrapper for sqlalchemy.orm.session.SessionTransaction.commit>:2: in commit
+    return target(fn, self, _to_root=_to_root)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\orm\state_changes.py:137: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:1330: in commit
+    self._prepare_impl()
+<sqlalchemy generated _go() wrapper for sqlalchemy.orm.session.SessionTransaction._prepare_impl>:2: in _prepare_impl
+    return target(fn, self)
+           ^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\orm\state_changes.py:137: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:1304: in _prepare_impl
+    self.session.flush()
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:4543: in flush
+    self._flush(objects)
+<sqlalchemy generated warned() wrapper for sqlalchemy.orm.session.Session._flush>:2: in _flush
+    return target(fn, self, objects=objects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\util\deprecations.py:281: in warned
+    return fn(*args, **kwargs)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:4686: in _flush
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\util\langhelpers.py:166: in __exit__
+    raise exc_value.with_traceback(exc_tb)
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:4647: in _flush
+    flush_context.execute()
+backend\.venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py:467: in execute
+    rec.execute(self)
+backend\.venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py:643: in execute
+    util.preloaded.orm_persistence._save_obj(
+backend\.venv\Lib\site-packages\sqlalchemy\orm\persistence.py:84: in _save_obj
+    _emit_update_statements(
+backend\.venv\Lib\site-packages\sqlalchemy\orm\persistence.py:916: in _emit_update_statements
+    c = connection.execute(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1463: in execute
+    return meth(
+backend\.venv\Lib\site-packages\sqlalchemy\sql\elements.py:533: in _execute_on_connection
+    return connection._execute_clauseelement(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1683: in _execute_clauseelement
+    ret = self._execute_context(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1837: in _execute_context
+    return self._exec_single_context(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1977: in _exec_single_context
+    self._handle_dbapi_exception(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:2347: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1958: in _exec_single_context
+    self.dialect.do_execute(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\default.py:1192: in do_execute
+    cursor.execute(statement, parameters)
+backend\.venv\Lib\site-packages\pymysql\cursors.py:170: in execute
+    result = self._query(query)
+             ^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\pymysql\cursors.py:335: in _query
+    conn.query(q)
+backend\.venv\Lib\site-packages\pymysql\connections.py:581: in query
+    self._affected_rows = self._read_query_result(unbuffered=unbuffered)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\pymysql\connections.py:857: in _read_query_result
+    result.read()
+backend\.venv\Lib\site-packages\pymysql\connections.py:1290: in read
+    first_packet = self.connection._read_packet()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\pymysql\connections.py:810: in _read_packet
+    packet.raise_for_error()
+backend\.venv\Lib\site-packages\pymysql\protocol.py:219: in raise_for_error
+    err.raise_mysql_exception(self._data)
+backend\.venv\Lib\site-packages\pymysql\err.py:154: in raise_mysql_exception
+    raise errorclass(errno, errval, sqlstate=sqlstate)
+E   sqlalchemy.exc.OperationalError: (pymysql.err.OperationalError) (1644, 'approved_case_immutable')
+E   [SQL: UPDATE ac_test_cases SET expected_json=%(expected_json)s, content_hash=%(content_hash)s WHERE ac_test_cases.id = %(ac_test_cases_id)s]
+E   [parameters: {'expected_json': '{"assertions": [{"equals": 0, "type": "booking_count"}], "schema_version": "1.1"}', 'content_hash': '7028cd917d5a94cb64d1d858a53e1f4d98551126b21386ce227ff70513486f73', 'ac_test_cases_id': 5}]
+E   (Background on this error at: https://sqlalche.me/e/21/e3q8)
+=========================== short test summary info ===========================
+FAILED backend\tests\test_evaluation.py::test_auto_evaluation_persists_and_api_is_readonly_paginated_owned
+FAILED backend\tests\test_evaluation.py::test_failed_independent_expectation_is_not_a_platform_error
+FAILED backend\tests\test_evaluation.py::test_waiting_confirmation_is_not_evaluated_until_actual_submission
+FAILED backend\tests\test_evaluation.py::test_large_artifact_is_verified_and_late_damage_appends_error_without_rewriting
+FAILED backend\tests\test_evaluation.py::test_legacy_evaluation_appends_results_without_changing_manifest_or_events
+5 failed in 13.23s

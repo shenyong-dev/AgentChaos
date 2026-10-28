@@ -30,10 +30,11 @@ class RequestLookup(BaseModel):
 
 
 class ToolRegistry:
-    def __init__(self, booking, retriever, *, control=None, settings=None):
+    def __init__(self, booking, retriever, *, control=None, settings=None, faults=None):
         self.booking, self.retriever = booking, retriever
         self.control = control
         self.settings = settings
+        self.faults = faults
         self.inputs = {
             "update_booking_request": FieldPatch,
             "retrieve_rules": RuleQuery,
@@ -81,7 +82,17 @@ class ToolRegistry:
             self.control.token if self.control else None,
         )
 
-    def dispatch(self, state, name: str, args: dict, *, capture=None):
+    def dispatch(
+        self,
+        state,
+        name: str,
+        args: dict,
+        *,
+        capture=None,
+        tool_call_id=None,
+        message_id=None,
+        parent=None,
+    ):
         evidence_id = str(uuid4())
         before = {
             "confirmation_state": state.get("confirmation_state"),
@@ -91,24 +102,32 @@ class ToolRegistry:
             if name not in self.inputs:
                 raise AgentError("tool_not_allowed", "模型请求了未开放的工具。", 403)
             values = self.inputs[name].model_validate(args)
-            result = self._dispatch(state, name, values)
+            if name == "confirm_booking":
+                self._check_confirmation(state, values)
+
+            def call(*, before_commit=None):
+                try:
+                    return self._dispatch(state, name, values, before_commit=before_commit)
+                except (AgentError, BookingError) as exc:
+                    return self._error(state, name, exc)
+
+            if self.faults:
+                observation = self.faults.invoke(
+                    state,
+                    name,
+                    values,
+                    call,
+                    tool_call_id=tool_call_id,
+                    message_id=message_id,
+                    parent=parent,
+                )
+                result = observation["visible_result"]
+                if capture is not None:
+                    capture.update(observation)
+            else:
+                result = call()
         except (AgentError, BookingError) as exc:
-            result = {
-                "status": "error",
-                "code": exc.code,
-                "message": exc.message,
-                "commit_state": getattr(exc, "commit_state", "not_applicable"),
-                "retryable": getattr(exc, "retryable", False),
-            }
-            key = getattr(exc, "request_key", None)
-            if key:
-                result["request_key"] = str(key)
-            if name == "confirm_booking" and result["commit_state"] == "unknown":
-                state["unknown_submission"] = {
-                    "request_key": str(key)
-                    if key
-                    else state.get("pending_draft", {}).get("suggested_idempotency_key")
-                }
+            result = self._error(state, name, exc)
         except ValidationError as exc:
             result = {
                 "status": "error",
@@ -136,7 +155,7 @@ class ToolRegistry:
             },
         }
         if capture is not None:
-            capture["raw_result"] = result
+            capture.setdefault("raw_result", result)
         if self.settings:
             from app.evidence.recorder import redact
 
@@ -163,8 +182,50 @@ class ToolRegistry:
         )
         return result
 
-    def _dispatch(self, state, name, values):
-        context = self.context(state)
+    @staticmethod
+    def _error(state, name, exc):
+        result = {
+            "status": "error",
+            "code": exc.code,
+            "message": exc.message,
+            "commit_state": getattr(exc, "commit_state", "not_applicable"),
+            "retryable": getattr(exc, "retryable", False),
+            "http_status": getattr(exc, "status_code", None),
+        }
+        key = getattr(exc, "request_key", None)
+        if key:
+            result["request_key"] = str(key)
+        if name == "confirm_booking" and result["commit_state"] == "unknown":
+            state["unknown_submission"] = {
+                "request_key": str(key)
+                if key
+                else state.get("pending_draft", {}).get("suggested_idempotency_key")
+            }
+        return result
+
+    @staticmethod
+    def _check_confirmation(state, values):
+        draft, grant = state.get("pending_draft"), state.get("grant")
+        if not draft or not grant or state.get("confirmation_state") != "authorized":
+            raise AgentError(
+                "confirmation_not_authorized", "必须等待合法用户确认入口，模型不能自授权。", 403
+            )
+        if (
+            str(values.draft_id) != draft["draft_id"]
+            or values.draft_hash != draft["draft_hash"]
+            or str(values.idempotency_key) != draft["suggested_idempotency_key"]
+            or grant["revision"] != state["confirmation_revision"]
+        ):
+            raise AgentError("confirmation_binding_mismatch", "确认授权与当前草稿/版本不一致。")
+        if state.get("write_attempted_this_turn"):
+            raise AgentError(
+                "write_retry_requires_user", "本轮已尝试提交，先查证原请求，不自动重试。"
+            )
+
+    def _dispatch(self, state, name, values, *, before_commit=None):
+        from dataclasses import replace
+
+        context = replace(self.context(state), before_commit=before_commit)
         if name == "update_booking_request":
             if state.get("unknown_submission"):
                 raise AgentError("submission_unknown", "先用原请求标识查证，不能改变未查清的提交。")
@@ -217,22 +278,7 @@ class ToolRegistry:
                 )
             return result.model_dump(mode="json")
         if name == "confirm_booking":
-            draft, grant = state.get("pending_draft"), state.get("grant")
-            if not draft or not grant or state.get("confirmation_state") != "authorized":
-                raise AgentError(
-                    "confirmation_not_authorized", "必须等待合法用户确认入口，模型不能自授权。", 403
-                )
-            if (
-                str(values.draft_id) != draft["draft_id"]
-                or values.draft_hash != draft["draft_hash"]
-                or str(values.idempotency_key) != draft["suggested_idempotency_key"]
-                or grant["revision"] != state["confirmation_revision"]
-            ):
-                raise AgentError("confirmation_binding_mismatch", "确认授权与当前草稿/版本不一致。")
-            if state.get("write_attempted_this_turn"):
-                raise AgentError(
-                    "write_retry_requires_user", "本轮已尝试提交，先查证原请求，不自动重试。"
-                )
+            self._check_confirmation(state, values)
             state["write_attempted_this_turn"] = True
             result = self.booking.confirm_booking(
                 context, ConfirmBooking(**values.model_dump(), confirmed=True)

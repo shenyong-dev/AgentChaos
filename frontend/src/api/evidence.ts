@@ -53,7 +53,7 @@ export function checkedFact(value: unknown, run: string): TraceFact {
   const e = fact?.event
   if (!fact || typeof fact.cursor !== 'string' || !e || e.run_id !== run ||
     typeof e.event_id !== 'string' || !Number.isSafeInteger(e.run_seq) || e.run_seq < 1 ||
-    !['1.0', '1.1'].includes(e.schema_version) || typeof e.type !== 'string' ||
+    !['1.0', '1.1', '1.2', '1.3'].includes(e.schema_version) || typeof e.type !== 'string' ||
     fact.cursor !== `v1:${run}:${e.run_seq}:${e.event_id}`) throw new Error('事件身份或游标不一致。')
   return fact
 }

@@ -43,6 +43,7 @@ class AgentRuntime:
         control=None,
         budget=None,
         recorder=None,
+        faults=None,
     ):
         self.engine, self.redis, self.settings = engine, redis, settings
         self.prefix, self.clock = prefix, clock
@@ -50,7 +51,7 @@ class AgentRuntime:
         self.booking = BookingService(engine, clock=clock)
         self.retriever = KnowledgeRetriever(engine, document_ids)
         self.registry = ToolRegistry(
-            self.booking, self.retriever, control=control, settings=settings
+            self.booking, self.retriever, control=control, settings=settings, faults=faults
         )
         self.budget = budget or AgentBudget(redis, settings)
         self.gateway = gateway or ModelGateway(settings, self.budget, control=control)
@@ -297,6 +298,7 @@ class AgentRuntime:
                     )
                 else:
                     prior_confirmation = state.get("confirmation_state", "idle")
+                    declined = looks_like_decline(text)
                     reopens_booking = bool(
                         re.search("重新预约|继续预约|现在(?:想|要)预约|还是预约|可以预约了", text)
                     )
@@ -305,9 +307,20 @@ class AgentRuntime:
                         "messages": [HumanMessage(content=text, id=request_id)],
                         "turn_index": state["turn_index"] + 1,
                         "last_user_text": text,
+                        "denials": state.get("denials", [])
+                        + (
+                            [
+                                {
+                                    "source_turn": state["turn_index"] + 1,
+                                    "draft_id": None,
+                                    "text": text,
+                                }
+                            ]
+                            if declined
+                            else []
+                        ),
                         "confirmation_state": "rejected"
-                        if looks_like_decline(text)
-                        or (prior_confirmation == "rejected" and not reopens_booking)
+                        if declined or (prior_confirmation == "rejected" and not reopens_booking)
                         else "idle",
                     }
             try:

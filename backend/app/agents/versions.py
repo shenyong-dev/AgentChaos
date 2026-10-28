@@ -8,6 +8,7 @@ from sqlalchemy import func, select, text
 from sqlalchemy.orm import Session
 
 from app.agents.budget import PRICING
+from app.agents.context import CONTEXT_POLICY
 from app.agents.errors import AgentError
 from app.core.config import PROJECT_ROOT
 from app.models import Target, TargetVersion
@@ -71,6 +72,7 @@ def build_manifest(settings, retriever, registry):
         "pricing": PRICING,
         "retrieval": retriever.manifest,
         "tools": registry.manifest,
+        "context": CONTEXT_POLICY,
         "validation_boundary": "protocol evidence here; dialogue outcomes recorded separately",
     }
     manifest["config_hash"] = canonical_hash(manifest)

@@ -10,7 +10,9 @@ from app import __version__
 from app.agents.errors import AgentError
 from app.api.agent import router as agent_router
 from app.api.booking import router as booking_router
+from app.api.evaluation import router as evaluation_router
 from app.api.evidence import router as evidence_router
+from app.api.faults import router as faults_router
 from app.api.routes import router
 from app.api.runs import router as runs_router
 from app.core.config import get_settings
@@ -24,7 +26,7 @@ def create_app() -> FastAPI:
     app = FastAPI(
         title="AgentChaos API",
         version=__version__,
-        description="真实预约Agent、持久批量执行、事件证据与SSE；断言评价尚未实现。",
+        description="预约Agent、持久批量执行、故障注入、只读证据与独立规则断言。",
     )
 
     @app.middleware("http")
@@ -103,6 +105,8 @@ def create_app() -> FastAPI:
     app.include_router(agent_router)
     app.include_router(runs_router)
     app.include_router(evidence_router)
+    app.include_router(faults_router)
+    app.include_router(evaluation_router)
 
     @app.exception_handler(AgentError)
     async def agent_error(request: Request, exc: AgentError):

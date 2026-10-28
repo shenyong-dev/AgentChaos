@@ -1,10 +1,10 @@
-# T06 持久事件与只读证据
+# T06—T08 持久事件与只读证据
 
-MySQL保存已提交事件和运行/预约事实。Redis检查点用于继续执行；事件查询不读取检查点来重演工具。T06不实现故障注入、断言评价、正式用例审核和T14完整工作台。
+MySQL保存已提交事件和运行/预约事实。Redis检查点用于继续执行；事件查询不读取检查点来重演工具。T07增加四类故障，T08增加独立规则评价及证据定位；正式用例审核、AI评价和T14完整管理工作台尚未实现。
 
 ## 事件身份与提交顺序
 
-`trace-event.schema.json`为严格的v1.1判别联合，payload.kind必须与type一致；原v1.0保留在`trace-event-v1.0.schema.json`。历史旧payload显式输出1.0，不伪装成完整的新轨迹。只有新冻结manifest.trace_schema=1.1的运行才启用记录器。
+`trace-event.schema.json`当前为严格的v1.3判别联合，payload.kind必须与type一致；原1.0/1.1/1.2保留对应Schema和读取边界。冻结manifest.trace_schema为1.1/1.2/1.3的运行启用记录器，新建使用1.3。旧运行按原版本读取，不补造故障或评价字段；旧运行重评仅追加结果表记录。
 
 迁移0003保留16表。ac_trace_events新增run_id和run_seq_no；run级事件execution_id/attempt在外部协议为空，执行级事件绑定真实execution与attempt。原execution/attempt/seq唯一约束及父事件复合关联保留，不允许跨执行或attempt引用；run级父事件由触发器核对归属。
 

@@ -48,6 +48,7 @@ class BookingContext:
     session_id: str | None = None
     execution_id: int | None = None
     lease_token: str | None = None
+    before_commit: object | None = None
 
     def __post_init__(self):
         if not re.fullmatch(r"demo|test:[A-Za-z0-9][A-Za-z0-9:_-]{0,58}", self.scope_id):
@@ -183,6 +184,8 @@ class BookingService:
                                 session_id=context.session_id,
                             )
                         result = operation(session)
+                        if context.before_commit is not None:
+                            context.before_commit(session, result)
                         if context.execution_id is not None:
                             fence(
                                 session,

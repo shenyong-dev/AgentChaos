@@ -7,6 +7,7 @@ import 'element-plus/theme-chalk/el-input.css'
 import 'element-plus/theme-chalk/el-tag.css'
 import { basicHeader, checkedFact, evidenceGet, streamEvidence } from '../api/evidence'
 import type { EventPage, RunSnapshot, TraceFact } from '../types/evidence'
+import AssertionsPanel from '../components/AssertionsPanel.vue'
 
 const route = useRoute(), router = useRouter()
 const runId = ref(String(route.params.runId ?? ''))
@@ -14,11 +15,16 @@ const username = ref('demo_operator'), password = ref('')
 const snapshot = ref<RunSnapshot>(), facts = ref<TraceFact[]>([]), selected = ref('')
 const error = ref(''), state = ref('未连接'), filter = ref(''), after = ref(''), more = ref(false)
 const busy = ref(false), live = ref(false)
+const activeTab = ref(route.query.view === 'assertions' ? 'assertions' : 'trace')
+const focusedFact = ref<TraceFact>(), factsElement = ref<HTMLDetailsElement>()
 let authorization = '', controller: AbortController | undefined, generation = 0
 const visible = computed(() => facts.value.filter(f => !filter.value ||
   `${f.event.type} ${f.event.node ?? ''} ${f.event.execution_id ?? ''}`.includes(filter.value)))
-const detail = computed(() => facts.value.find(f => f.event.event_id === selected.value))
+const detail = computed(() => facts.value.find(f => f.event.event_id === selected.value) ?? focusedFact.value)
 const references = computed(() => detail.value?.event.evidence_refs ?? [])
+const profile = computed(() => snapshot.value?.manifest?.fault_profile)
+const offlineModel = computed(() => snapshot.value?.executions.some(e => e.timing?.gateway_mode === 'offline_test_double'))
+const injected = computed(() => snapshot.value?.executions.reduce((n,e) => n + (e.timing?.faults?.injected ?? 0), 0) ?? 0)
 const types: Record<string, string> = {
   'run.created': '运行创建', 'run.started': '运行开始', 'run.completed': '运行结束',
   'execution.started': '执行开始', 'execution.waiting_input': '等待输入',
@@ -29,7 +35,18 @@ const types: Record<string, string> = {
   'retrieval.completed': '检索来源', 'confirmation.requested': '等待确认',
   'confirmation.resumed': '确认恢复', 'state.changed': '状态变化',
   'context.compacted': '上下文压缩', 'checkpoint.restored': '检查点恢复', 'input.received': '收到输入',
+  'fault.scheduled': '故障触发已登记', 'fault.injected': '故障已注入', 'fault.not_applied': '故障条件未达成',
+  'assertion.completed': '断言判定', 'evaluation.completed': '评价完成',
 }
+function setTab(value: string) { activeTab.value = value; void router.replace({ query: { ...route.query, view: value === 'assertions' ? 'assertions' : undefined } }) }
+async function locate(id: string) {
+  setTab('trace'); filter.value = ''; error.value = ''
+  try {
+    focusedFact.value = facts.value.find(f => f.event.event_id === id) ?? checkedFact(await evidenceGet<TraceFact>(`/runs/${snapshot.value!.run_id}/events/${id}`, authorization), snapshot.value!.run_id)
+    selected.value = id
+  } catch (e) { error.value = (e as Error).message }
+}
+function showSnapshot() { if (factsElement.value) { factsElement.value.open = true; factsElement.value.scrollIntoView({ behavior: 'smooth', block: 'nearest' }) } }
 function stop() { live.value = false; generation++; controller?.abort(); state.value = '已暂停' }
 function accept(value: unknown) {
   const fact = checkedFact(value, snapshot.value!.run_id)
@@ -47,8 +64,9 @@ function accept(value: unknown) {
   facts.value.push(fact); after.value = fact.cursor
   if (!selected.value) selected.value = fact.event.event_id
 }
-async function page() {
+async function page(replaceWindow = false) {
   const result = await evidenceGet<EventPage>(`/runs/${snapshot.value!.run_id}/events?cursor=${encodeURIComponent(after.value)}&limit=100`, authorization)
+  if (replaceWindow) { facts.value = []; selected.value = ''; focusedFact.value = undefined }
   result.items.forEach(accept); more.value = result.has_more
 }
 async function load(fromHead = false) {
@@ -58,17 +76,17 @@ async function load(fromHead = false) {
       throw new Error('请输入有效的运行 UUID。')
     authorization = basicHeader(username.value, password.value)
     const next = await evidenceGet<RunSnapshot>(`/runs/${runId.value.trim()}/snapshot`, authorization)
-    snapshot.value = next; facts.value = []; selected.value = ''; filter.value = ''
+    snapshot.value = next; facts.value = []; selected.value = ''; filter.value = ''; focusedFact.value = undefined
     after.value = fromHead ? `v1:${next.run_id}:0:0` : next.tail_cursor
-    await router.replace(`/runs/${next.run_id}`)
+    await router.replace({ path: `/runs/${next.run_id}`, query: route.query })
     await page(); state.value = fromHead ? '历史阅读' : '快照已载入'
     if (!fromHead && !more.value) void connect()
   } catch (e) { error.value = (e as Error).message; state.value = '读取失败' }
   finally { busy.value = false }
 }
-async function nextPage() {
+async function nextPage(replaceWindow = false) {
   busy.value = true; error.value = ''
-  try { await page() } catch (e) { error.value = (e as Error).message }
+  try { await page(replaceWindow) } catch (e) { error.value = (e as Error).message }
   finally { busy.value = false }
 }
 async function connect() {
@@ -132,10 +150,11 @@ onBeforeUnmount(() => {
 
 <template>
   <section class="evidence-page">
-    <div class="page-heading"><div><span class="eyebrow">T06 · EXECUTION EVIDENCE</span>
-      <h1>运行证据</h1><p>沿着真实调用，查看每一次状态变化。</p></div>
+    <div class="page-heading"><div><span class="eyebrow">AGENTCHAOS / EVALUATION</span>
+      <h1>运行证据</h1><p>从判定回到事实，定位每一次工具调用。</p></div>
       <ElTag :type="live ? 'success' : 'info'" role="status">{{ state }}</ElTag>
     </div>
+    <details class="connection-panel" :open="!snapshot"><summary>运行与访问凭据<span>{{ snapshot ? `${snapshot.run_id.slice(0,8)} · 已载入` : '载入一个已有运行' }}</span></summary>
     <form class="evidence-access" @submit.prevent="load()">
       <label class="run-field">运行 UUID<ElInput v-model="runId" placeholder="粘贴运行标识" aria-label="运行 UUID" /></label>
       <label>账号<ElInput v-model="username" autocomplete="username" aria-label="账号" /></label>
@@ -143,18 +162,31 @@ onBeforeUnmount(() => {
       <ElButton type="primary" native-type="submit" :loading="busy">载入最近事件</ElButton>
       <small>凭据仅保留在当前页面内存。浏览证据不会执行模型或预约工具。</small>
     </form>
+    </details>
     <p v-if="error" class="evidence-error" role="alert">{{ error }}</p>
     <template v-if="snapshot">
+      <aside v-if="profile" class="fault-profile" aria-label="冻结故障配置">
+        <div><strong>{{ profile.config.fault_type }} · {{ profile.config.trigger_stage }}</strong>
+          <span>{{ profile.config.profile_key }} / 修订 {{ profile.config.revision }}</span></div>
+        <p>目标 {{ profile.config.target_tool }} · 种子 {{ profile.config.seed }} · 每执行最多 {{ profile.config.max_triggers }} 次 · 快照已注入 {{ injected }} 次</p>
+        <small>故障是否生效，与规则判定分开记录；请结合断言和实际副作用核对。</small>
+        <ElButton size="small" @click="setTab('trace'); filter = 'fault.'">只看故障</ElButton>
+      </aside>
+      <p v-if="offlineModel" class="offline-notice" role="note">离线模型复验：真实数据库、Redis和预约工具；本次不调用DeepSeek，不代表真实模型验收。</p>
       <div class="evidence-summary">
         <div><small>运行状态</small><strong>{{ snapshot.status }}</strong></div>
         <div><small>持久事件 · 快照时刻</small><strong>{{ snapshot.event_count }}</strong></div>
         <div><small>执行数量</small><strong>{{ snapshot.executions.length }}</strong></div>
         <div><small>待返回模型观察</small><strong>{{ snapshot.pending_model_observations }}</strong></div>
       </div>
+      <div class="evidence-tabs" role="tablist" aria-label="运行视图"><button role="tab" :aria-selected="activeTab === 'trace'" @click="setTab('trace')">调用轨迹</button><button role="tab" :aria-selected="activeTab === 'assertions'" @click="setTab('assertions')">判定结果</button><span>证据先于结论</span></div>
+      <AssertionsPanel v-if="activeTab === 'assertions'" :run-id="snapshot.run_id" :authorization="authorization" :executions="snapshot.executions" @locate="locate" @snapshot="showSnapshot" />
+      <div v-show="activeTab === 'trace'" role="tabpanel" aria-label="调用轨迹">
       <div class="evidence-controls">
         <ElInput v-model="filter" placeholder="筛选事件、节点或执行标识" aria-label="筛选事件" clearable />
         <ElButton :disabled="busy" @click="load(true)">从头阅读</ElButton>
-        <ElButton v-if="more" :disabled="busy || facts.length >= 500" @click="nextPage">下一段</ElButton>
+        <ElButton v-if="more && facts.length < 500" :disabled="busy" @click="nextPage()">下一段</ElButton>
+        <ElButton v-else-if="more" :disabled="busy" @click="nextPage(true)">下一窗口</ElButton>
         <ElButton v-else :disabled="busy || facts.length >= 500" @click="live ? stop() : connect()">{{ live ? '暂停实时' : '继续同步' }}</ElButton>
       </div>
       <div class="evidence-workspace">
@@ -176,19 +208,27 @@ onBeforeUnmount(() => {
           <div class="evidence-pane-title"><h2>证据详情</h2><span>只读 · 原始记录</span></div>
           <template v-if="detail">
             <h3>{{ detail.event.type }}</h3>
+            <p v-if="focusedFact && !facts.some(f => f.event.event_id === focusedFact!.event.event_id)" class="focused-event-note">已按断言引用定位到持久事件；当前分页和同步游标保持不变。</p>
+            <details class="event-identity"><summary>事件身份与关联</summary>
             <dl><dt>事件</dt><dd>{{ detail.event.event_id }}</dd>
               <dt>归属</dt><dd>{{ detail.event.execution_id ?? '运行级事件' }}</dd>
               <dt>工具调用</dt><dd>{{ detail.event.tool_call_id ?? '—' }}</dd>
-              <dt>父事件</dt><dd><button v-if="facts.some(f => f.event.event_id === detail!.event.parent_event_id)" class="event-parent" @click="selected = detail!.event.parent_event_id!">{{ detail.event.parent_event_id }}</button><template v-else>{{ detail.event.parent_event_id ?? '—' }}</template></dd>
+              <dt>父事件</dt><dd><button v-if="detail.event.parent_event_id" class="event-parent" @click="locate(detail!.event.parent_event_id!)">{{ detail.event.parent_event_id }}</button><template v-else>—</template></dd>
             </dl>
+            </details>
             <ElButton v-for="reference in references" :key="reference" size="small" @click="download(reference)">下载完整证据与哈希</ElButton>
-            <pre tabindex="0" aria-label="事件原始数据">{{ JSON.stringify(detail.event.payload, null, 2) }}</pre>
+            <div v-if="detail.event.type === 'fault.injected'" class="fault-comparison">
+              <div><h4>工具实际观察</h4><pre aria-label="工具实际观察">{{ JSON.stringify(detail.event.payload.raw_result, null, 2) }}</pre></div>
+              <div><h4>模型可见结果</h4><pre aria-label="模型可见结果">{{ typeof detail.event.payload.visible_result === 'string' ? detail.event.payload.visible_result : JSON.stringify(detail.event.payload.visible_result, null, 2) }}</pre></div>
+            </div>
+            <details class="event-raw"><summary>原始事件 JSON</summary><pre tabindex="0" aria-label="事件原始数据">{{ JSON.stringify(detail.event.payload, null, 2) }}</pre></details>
             <small class="evidence-hint">schema {{ detail.event.schema_version }} · run_seq {{ detail.event.run_seq }} · seq {{ detail.event.seq }}</small>
           </template><p v-else class="evidence-empty">选择一条事件，查看调用参数、返回结果和状态差异。</p>
         </section>
       </div>
-      <details class="evidence-facts"><summary>执行快照与预算</summary><p>结果评价将在断言任务接入；inconclusive 表示尚未评价。</p><pre>{{ JSON.stringify({ executions: snapshot.executions, budget: snapshot.budget, manifest_hash: snapshot.manifest_hash }, null, 2) }}</pre></details>
-      <p class="evidence-hint">保留当前阅读位置；每页最多500条。刷新后重新载入持久记录，游标推进只依据完整事件。</p>
+      </div>
+      <details ref="factsElement" class="evidence-facts"><summary>执行快照与预算</summary><p>inconclusive 表示未能形成确定结论；历史未评价运行保持原状态。SQL任务达成与可靠性判定分开核对。</p><pre>{{ JSON.stringify({ executions: snapshot.executions, budget: snapshot.budget, manifest_hash: snapshot.manifest_hash }, null, 2) }}</pre></details>
+      <p class="evidence-hint">每个阅读窗口最多500条；下一窗口沿当前游标继续读取。刷新后重新载入持久记录，游标推进只依据完整事件。</p>
     </template>
     <div v-else class="empty-state"><h3>从一个真实运行开始</h3><p>输入运行标识和所属账号，读取快照后连接持久事件流。</p></div>
   </section>

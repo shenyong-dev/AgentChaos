@@ -50,11 +50,11 @@ def checked_cursor(session, run, value):
 
 def item(row, run, execution_uuid):
     wrapped = row.payload_json
-    is_current = wrapped.get("schema_version") == "1.1"
+    is_current = wrapped.get("schema_version") in ("1.1", "1.2", "1.3")
     if is_current and canonical_hash(wrapped) != row.payload_hash:
         raise AgentError("evidence_integrity_error", "事件内容与持久哈希不符。", 503)
     event = {
-        "schema_version": "1.1" if is_current else "1.0",
+        "schema_version": wrapped["schema_version"] if is_current else "1.0",
         "event_id": row.event_uuid,
         "run_id": run.run_uuid,
         "execution_id": execution_uuid,
@@ -72,7 +72,7 @@ def item(row, run, execution_uuid):
         "evidence_refs": wrapped.get("evidence_refs", []) if is_current else [],
     }
     if is_current:
-        event = WireEvent.model_validate(event).model_dump(mode="json")
+        event = WireEvent.model_validate(event).model_dump(mode="json", exclude_unset=True)
     return {"cursor": cursor(run.run_uuid, row.run_seq_no, row.event_uuid), "event": event}
 
 
@@ -97,6 +97,18 @@ def pending_models(session, run_id):
 class TraceReader:
     def __init__(self, engine, settings):
         self.engine, self.settings = engine, settings
+
+    def event(self, user_id, run_uuid, event_uuid):
+        with Session(self.engine) as session:
+            run = RunService.owned_run(session, user_id, run_uuid)
+            found = session.execute(
+                select(TraceEvent, TestExecution.execution_uuid)
+                .outerjoin(TestExecution, TraceEvent.execution_id == TestExecution.id)
+                .where(TraceEvent.run_id == run.id, TraceEvent.event_uuid == str(event_uuid))
+            ).one_or_none()
+            if found is None:
+                raise AgentError("event_not_found", "找不到该运行中的事件。", 404)
+            return item(found[0], run, found[1])
 
     def snapshot(self, user_id, run_uuid):
         with Session(self.engine) as session:

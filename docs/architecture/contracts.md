@@ -1,6 +1,6 @@
-# T01—T06 接口与数据契约
+# T01—T09 接口与数据契约
 
-更新日期：2026-10-26。已实现工程接口、确定性预约、交互Agent、持久执行器及T06事件/快照/SSE。用例DSL仍1.0，事件升级1.1并保留旧1.0解析边界；断言评价和故障引擎仍在后续任务。
+更新日期：2026-10-28。已实现工程接口、确定性预约、交互Agent、持久执行器、事件/快照/SSE、四类故障及独立规则评价。DSL1.1兼容1.0，事件1.3兼容旧1.0/1.1/1.2读取；正式审核/AI评价/缺陷报告仍在后续任务。
 
 ## 已实现接口
 
@@ -19,6 +19,9 @@
 | GET `/docs`、`/openapi.json` | FastAPI 实际文档与 schema | 200 |
 | POST/GET `/api/v1/runs`、`/{run_id}`及取消/补投/输入/恢复子路径 | 认证的冻结运行、持久状态和Linux执行控制，详见[执行器契约](executor.md) | 创建201、读取/控制200；参数400、越权404、冲突409 |
 | GET `/api/v1/runs/{id}/snapshot`、`/events`、`/events/stream`、`/artifacts/{id}`及`/executions/{id}`、`/events` | 已提交快照/事件、按持久游标续传及受控证据下载，详见[事件契约](evidence.md) | 200；认证401/403、归属404、游标400/409/410、证据完整性503 |
+| POST/GET `/api/v1/fault-profiles`及GET `/{id}` | 认证创建不可变故障修订、分页/读取；run可选fault_profile_id并冻结哈希，详见[故障契约](faults.md) | 创建201、读取200；参数400、认证401/403、不存在404、修订冲突409 |
+| GET `/api/v1/executions/{id}/assertions`、POST `/{id}/evaluate` | 读取已存判定，或已终止执行显式追加评价快照，详见[规则评价](evaluation.md)；GET不执行评价，POST不调用模型/工具 | 200；参数400、认证401/403、归属404、活动执行409 |
+| GET `/api/v1/runs/{id}/events/{event_id}` | 按断言引用定位同运行持久事件，不改变游标或重放工具 | 200；归属/不存在404、完整性503 |
 
 `infrastructure_ready` 仅表示 API、MySQL、Redis 必需能力可用。模型的 `not_configured`/`not_probed` 单独显示，不能据基础设施状态宣称模型已连通。健康检查不会调用模型、创建业务表或执行预约。
 
@@ -32,7 +35,9 @@
 
 - [OpenAPI](openapi.json)：从当前 FastAPI 应用生成。
 - [用例 JSON Schema](test-case.schema.json)：从 `TestCaseDraft` 生成。
-- [事件v1.1 JSON Schema](trace-event.schema.json)：严格payload联合；[保留v1.0](trace-event-v1.0.schema.json)供历史解析。
+- [事件v1.3 JSON Schema](trace-event.schema.json)：严格payload联合；[保留v1.0](trace-event-v1.0.schema.json)、[保留v1.1](trace-event-v1.1.schema.json)、[保留v1.2](trace-event-v1.2.schema.json)供历史解析。
+- [规则断言Schema](assertion.schema.json)：当前声明式类型；[原用例DSL1.0 Schema](test-case-v1.0.schema.json)保留。
+- [故障配置 JSON Schema](fault-profile.schema.json)：F01—F04的阶段、工具、种子和触发限制。
 - [预约工具契约](booking-tools.schema.json)：从T03输入输出及静态策略导出；直接HTTP接口以OpenAPI为准，模型工具不接收confirmed/身份/scope/时钟。
 - [Agent六工具](agent-tools.schema.json)：T04实际ToolRegistry输入，另含有引文的字段提取和规则检索；执行与来源边界见[Agent说明](agent.md)。
 
@@ -40,9 +45,9 @@
 
 ### 用例 DSL
 
-`schema_version=1.0`；`case_key + revision` 定位不可变用例修订，`family_key` 标识不可跨开发/保留集的家族。`dataset_split` 为 dev/calibration/holdout，`reference_clock` 必须带时区，`fixture` 是版本化初始数据标识。`turns` 为有序用户输入，不允许从输入指定服务端身份。
+`schema_version`支持1.0/1.1，缺省1.0保持兼容；扩展断言和task_goal必须显式1.1。`case_key + revision` 定位不可变用例修订，`family_key` 标识不可跨开发/保留集的家族。`dataset_split` 为 dev/calibration/holdout，`reference_clock` 必须带时区，`fixture` 是版本化初始数据标识。`turns` 为有序用户输入，不允许从输入指定服务端身份。
 
-类别为 normal、tool_execution、memory_and_tool、retrieval、security、robustness，分别对应规划的六类覆盖。当前 schema 只定义规划示例中的 booking_matches、booking_count、no_booking_on 三种断言；它们尚未执行。T08 扩展时先更新契约，不把未实现断言静默当通过。
+类别为 normal、tool_execution、memory_and_tool、retrieval、security、robustness，分别对应规划的六类覆盖。T08执行原三类SQL断言，并增加工具/参数、状态、确认、查证、唯一性、业务一致性及限定回复检查。缺证据不确定、未知断言拒绝/错误，详见[评价契约](evaluation.md)。可选task_goal独立核对SQL目标，不把任务未达成等同为Agent违规。
 
 当前限制：1—50 轮，每轮最多 12000 字符，1—100 条断言。未知字段和未知断言类型拒绝解析，避免拼写错误被忽略。限制是首版传输边界，不是正式数据集规模。
 
@@ -50,15 +55,19 @@ review_status 为 draft/approved/rejected。正式批准必须来自后续服务
 
 ### 事件
 
-外部event_id/run_id/execution_id使用UUID；执行级attempt/seq从1开始，重复节点以node_visit区分，run级execution_id/attempt为空。已实现run/execution/node生命周期、模型/工具/检索、状态/确认/上下文/检查点及预算/取消事件；fault.injected和assertion.completed仍属后续任务，不作为已采集事件。
+外部event_id/run_id/execution_id使用UUID；执行级attempt/seq从1开始，重复节点以node_visit区分，run级execution_id/attempt为空。已实现run/execution/node生命周期、模型/工具/检索、状态/确认/上下文/检查点、预算/取消、故障及assertion.completed/evaluation.completed事件。旧运行的显式重评不修改旧事件协议。
 
 `timestamp` 必须带时区；`payload` 保存原始可观察证据，`evidence_refs` 指向关联证据。字段 node、node_visit、tool_call_id、parent_event_id 在适用时填写。持久表的 parent_event_uuid 对应协议 parent_event_id。身份和 scope 由服务端绑定，不相信模型声明。
 
-T06已实现事件落库与原生SSE。v1.1补充真实scope/run_seq、可空execution/attempt和类型化payload；事件类型以生成Schema为准，故障/断言事件尚未实现。先持久化再读取推送，按run提交序列游标续传，前端按event_id去重；详见[事件契约](evidence.md)。
+T06已实现事件落库与原生SSE。v1.1补充真实scope/run_seq、可空execution/attempt和类型化payload；T07的v1.2增加故障阶段/计数/原始与可见结果、dispatch和回执复用。旧运行按原版本读取，不给历史payload补造新字段。先持久化再读取推送，按run提交序列游标续传，前端按event_id去重；详见[事件契约](evidence.md)。
+
+T08的v1.3增加评价事件；新运行冻结规则代码/Schema指纹，旧1.2 Schema保存。预约快照新增SQL读取的room_code，旧快照缺该字段不会自动补全。结果API提供预期、实际、原因、版本和事件/快照引用；认证和错误封装沿用既有协议。
+
+T09事件仍1.3/DSL1.1，不新增HTTP端点。目标manifest增加context策略，Worker按冻结知识修订构造索引，普通拒绝保存来源；健康配置task为T09。客户端仍不能指定知识修订、actor/scope/grant，详见[多轮与检索边界](dialogue-boundaries.md)。
 
 ## 后续接口约定
 
-对象管理、用例/审核、故障配置、缺陷/复核、版本对比/报告沿用任务规划第7章，尚未实现。T03预约接口、T04会话、T05运行/取消及T06执行事件已实现，详见[预约接口](booking.md)、[Agent基线](agent.md)、[执行器](executor.md)与[证据契约](evidence.md)。
+对象管理、用例/审核、缺陷/复核、版本对比/报告沿用任务规划第7章，尚未实现。T03预约接口、T04会话、T05运行/取消、T06执行事件、T07故障配置及T08断言/重评已实现，详见[预约接口](booking.md)、[Agent基线](agent.md)、[执行器](executor.md)、[证据契约](evidence.md)、[故障契约](faults.md)与[评价契约](evaluation.md)。
 
 后续列表采用 `data.items`、`data.next_cursor`，默认 limit=20、最大 100；以稳定 ID/创建顺序分页。创建运行必须保留幂等创建标识与冻结清单，基础设施恢复 attempt 不增加计划重复次数。
 
