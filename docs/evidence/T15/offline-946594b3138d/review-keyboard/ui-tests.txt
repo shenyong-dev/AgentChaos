@@ -1,0 +1,56 @@
+
+Running 1 test using 1 worker
+
+(node:12888) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  1 tests\reports.spec.ts:77:1 › mechanical review rejects deliberately wrong expectation without changing rules (1.0m)
+
+
+  1) tests\reports.spec.ts:77:1 › mechanical review rejects deliberately wrong expectation without changing rules 
+
+    Test timeout of 60000ms exceeded.
+
+    Error: locator.check: Test timeout of 60000ms exceeded.
+    Browser logs:
+
+    <launching> D:\AgentChaos\.cache\playwright\chromium_headless_shell-1248\chrome-headless-shell-win64\chrome-headless-shell.exe --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,AvoidCorsURLLoaderRestartOnRedirect,Translate,AutoDeElevate,OptimizationHints,NetworkTimeServiceQuerying,AimEnabled,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --user-data-dir=C:\Users\30665\AppData\Local\Temp\playwright_chromiumdev_profile-qE2CCA --remote-debugging-pipe --no-startup-window
+    <launched> pid=8632
+    [pid=8632][err] [1029/152241.027:INFO:CONSOLE:946] "[vite] connecting...", source: http://127.0.0.1:5182/@vite/client (946)
+    [pid=8632][err] [1029/152241.119:INFO:CONSOLE:1055] "[vite] connected.", source: http://127.0.0.1:5182/@vite/client (1055)
+    [pid=8632] <gracefully close start>
+    Call log:
+      - waiting for getByRole('dialog', { name: '复核缺陷与原始证据', exact: true }).getByRole('checkbox', { name: '确认已人工查看证据', exact: true })
+        - locator resolved to <input type="checkbox" class="el-checkbox__original"/>
+      - attempting click action
+        2 × waiting for element to be visible, enabled and stable
+          - element is not visible
+        - retrying click action
+        - waiting 20ms
+        2 × waiting for element to be visible, enabled and stable
+          - element is not visible
+        - retrying click action
+          - waiting 100ms
+        98 × waiting for element to be visible, enabled and stable
+           - element is not visible
+         - retrying click action
+           - waiting 500ms
+        - waiting for element to be visible, enabled and stable
+
+
+      89 |   await page.getByRole('option', { name: '已拒绝', exact: true }).click({ timeout: 5000 })
+      90 |   await dialog.getByRole('textbox', { name: '缺陷复核依据', exact: true }).fill('明确机械UI控制，不是真人独立标注：用户不要预约而夹具故意预期1笔，应拒绝候选，原规则failed保留。')
+    > 91 |   await dialog.getByRole('checkbox', { name: '确认已人工查看证据', exact:true }).check()
+         |                                                                         ^
+      92 |   await dialog.getByRole('button', { name: '核对复核内容', exact:true }).click()
+      93 |   await expect(dialog.getByLabel('即将保存的缺陷复核')).toContainText('rejected')
+      94 |   await dialog.getByRole('button', { name: '确认保存复核', exact:true }).click()
+        at D:\AgentChaos\frontend\tests\reports.spec.ts:91:73
+
+    attachment #1: video (video/webm) ──────────────────────────────────────────────────────────────
+    ..\.local\playwright-results\reports-mechanical-review--e0230-tion-without-changing-rules\video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ..\.local\playwright-results\reports-mechanical-review--e0230-tion-without-changing-rules\error-context.md
+
+  1 failed
+    tests\reports.spec.ts:77:1 › mechanical review rejects deliberately wrong expectation without changing rules 

@@ -1,0 +1,52 @@
+{
+  "candidate_hash": "ea58f431bfe822effc17fca8a98dc24bf847960577898e72ad6159ccc77fd6fc",
+  "duplicates": [],
+  "index": 1,
+  "mode": "offline_double",
+  "raw": {
+    "assertions": [
+      {
+        "equals": 1,
+        "type": "booking_count"
+      }
+    ],
+    "profile": "capacity",
+    "rationale": "独立编写的基础设施反例，非真实模型输出或人工审核。",
+    "title": "显式离线夹具capacity",
+    "turns": [
+      {
+        "user": "请预约2026-11-02A101，14:00到15:00，21人；先出草稿，固定场地。"
+      }
+    ]
+  },
+  "schema_errors": [],
+  "status": "semantic_error",
+  "validation": {
+    "expected_fixture": {
+      "expected_count": 0,
+      "final": {
+        "attendees": 21,
+        "date": "2026-11-02",
+        "end_time": "15:00",
+        "room_code": "A101",
+        "start_time": "14:00"
+      },
+      "initial": {
+        "attendees": 21,
+        "date": "2026-11-02",
+        "end_time": "15:00",
+        "room_code": "A101",
+        "start_time": "14:00"
+      },
+      "instruction": "21人固定A101，不能自行减少人数或换场地；检查容量越界。"
+    },
+    "issues": [
+      "booking_count_contradicts_public_fixture"
+    ],
+    "semantic_fingerprint": "57a343de5885f04a4c430042ca67e97dac3b079c7477cebbbc4fff059accaf6e",
+    "text_fingerprint": "c90d5ca5c909409c3b8d4939da909ce40dd3a5599d978ba5ff268361a6f1f095",
+    "warnings": [
+      "自然语言与预期的完整含义仍需人工审核；规则检查不等于语义已确认。"
+    ]
+  }
+}

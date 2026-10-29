@@ -1,0 +1,412 @@
+{
+  "execution_id": "141b7d8c-64c9-43d6-9968-599296f27d50",
+  "before": [],
+  "after": [],
+  "output": {
+    "trace": [
+      {
+        "type": "model",
+        "usage": null,
+        "call_id": "explicit-offline-control",
+        "streamed": false,
+        "source_turn": 1,
+        "model_requests": 0,
+        "model_returned": "offline-control",
+        "estimated_peak_microusd": null
+      },
+      {
+        "type": "model",
+        "usage": null,
+        "call_id": "explicit-offline-control",
+        "streamed": false,
+        "source_turn": 2,
+        "model_requests": 0,
+        "model_returned": "offline-control",
+        "estimated_peak_microusd": null
+      }
+    ],
+    "fields": {},
+    "status": "ready",
+    "denials": [],
+    "revision": 2,
+    "last_error": null,
+    "next_nodes": [],
+    "session_id": "3450e743-af3d-4564-801d-07d9bda85e7c",
+    "version_id": 41,
+    "compactions": 0,
+    "config_hash": "d4d720d86a4672fa6842faccd94a3f884fd5aaac9cfa229446c5c9e56bc9bfba",
+    "evidence_refs": [],
+    "pending_draft": null,
+    "assistant_text": "明确离线控制：没有发送模型请求，也没有执行预约工具。",
+    "last_retrieval": null,
+    "business_result": null,
+    "reference_clock": "2026-11-02T09:00:00+08:00",
+    "history_messages": 4,
+    "confirmation_state": "idle",
+    "unknown_submission": null,
+    "confirmation_revision": 0
+  },
+  "events": [
+    {
+      "event_id": "19bbbd74-bd19-4624-be0d-eb3bf5136e4d",
+      "type": "execution.started",
+      "run_seq": 3,
+      "attempt": 1,
+      "tool_call_id": null,
+      "parent_event_id": null,
+      "payload": {
+        "kind": "execution.started",
+        "after": null,
+        "usage": null,
+        "before": [],
+        "counts": null,
+        "output": null,
+        "reason": "claimed",
+        "status": "running",
+        "attempt": 1,
+        "artifact": null
+      }
+    },
+    {
+      "event_id": "58030d73-71cf-51be-b443-16b5e0b99468",
+      "type": "input.received",
+      "run_seq": 4,
+      "attempt": 1,
+      "tool_call_id": null,
+      "parent_event_id": null,
+      "payload": {
+        "kind": "input.received",
+        "text": "请预约2026-11-03A101，14:00到15:00，10人。只用指定条件，先展示草稿等我确认。",
+        "source": "script",
+        "artifact": null,
+        "request_id": "ce7f4534-7010-5f97-8457-18580889017d",
+        "expected_revision": 0
+      }
+    },
+    {
+      "event_id": "ae7d907d-d088-453b-80c6-6787cda613ff",
+      "type": "node.started",
+      "run_seq": 5,
+      "attempt": 1,
+      "tool_call_id": null,
+      "parent_event_id": null,
+      "payload": {
+        "code": null,
+        "kind": "node.started",
+        "status": "started",
+        "artifact": null,
+        "elapsed_ms": null
+      }
+    },
+    {
+      "event_id": "8aa2cb42-adc0-47d5-b8d5-fbfe23f0f058",
+      "type": "node.completed",
+      "run_seq": 6,
+      "attempt": 1,
+      "tool_call_id": null,
+      "parent_event_id": "ae7d907d-d088-453b-80c6-6787cda613ff",
+      "payload": {
+        "code": null,
+        "kind": "node.completed",
+        "status": "completed",
+        "artifact": null,
+        "elapsed_ms": 0.0
+      }
+    },
+    {
+      "event_id": "11f9f770-35fb-4e06-87c5-225fe890ec38",
+      "type": "node.started",
+      "run_seq": 7,
+      "attempt": 1,
+      "tool_call_id": null,
+      "parent_event_id": null,
+      "payload": {
+        "code": null,
+        "kind": "node.started",
+        "status": "started",
+        "artifact": null,
+        "elapsed_ms": null
+      }
+    },
+    {
+      "event_id": "0a987dc1-f759-4366-80e2-b121539ed056",
+      "type": "model.started",
+      "run_seq": 8,
+      "attempt": 1,
+      "tool_call_id": null,
+      "parent_event_id": "11f9f770-35fb-4e06-87c5-225fe890ec38",
+      "payload": {
+        "code": null,
+        "kind": "model.started",
+        "role": "agent",
+        "usage": null,
+        "call_id": null,
+        "artifact": null,
+        "response": null,
+        "elapsed_ms": null,
+        "raw_record": null,
+        "config_hash": "d4d720d86a4672fa6842faccd94a3f884fd5aaac9cfa229446c5c9e56bc9bfba",
+        "prompt_hash": "0db5754ab85de312ce138eeb814294e25f8bdc6b2797ba85b80b70aec147b025",
+        "model_requests": null,
+        "response_model": null,
+        "requested_model": "deepseek-flash",
+        "late_observation": false,
+        "automatic_retries": 0
+      }
+    },
+    {
+      "event_id": "854ce453-b9e2-512a-a760-51d2f53b19ea",
+      "type": "model.completed",
+      "run_seq": 9,
+      "attempt": 1,
+      "tool_call_id": null,
+      "parent_event_id": "0a987dc1-f759-4366-80e2-b121539ed056",
+      "payload": {
+        "code": null,
+        "kind": "model.completed",
+        "role": "agent",
+        "usage": null,
+        "call_id": "explicit-offline-control",
+        "artifact": null,
+        "response": {
+          "model_returned": "offline-control"
+        },
+        "elapsed_ms": null,
+        "raw_record": {
+          "call_id": "explicit-offline-control",
+          "response": {
+            "model_returned": "offline-control"
+          },
+          "model_requests": 0
+        },
+        "config_hash": "d4d720d86a4672fa6842faccd94a3f884fd5aaac9cfa229446c5c9e56bc9bfba",
+        "prompt_hash": "0db5754ab85de312ce138eeb814294e25f8bdc6b2797ba85b80b70aec147b025",
+        "model_requests": 0,
+        "response_model": "offline-control",
+        "requested_model": "deepseek-flash",
+        "late_observation": false,
+        "automatic_retries": 0
+      }
+    },
+    {
+      "event_id": "54679c91-173e-480b-8d30-b6a2a10f6441",
+      "type": "node.completed",
+      "run_seq": 10,
+      "attempt": 1,
+      "tool_call_id": null,
+      "parent_event_id": "11f9f770-35fb-4e06-87c5-225fe890ec38",
+      "payload": {
+        "code": null,
+        "kind": "node.completed",
+        "status": "completed",
+        "artifact": null,
+        "elapsed_ms": 47.0
+      }
+    },
+    {
+      "event_id": "dbfe959f-7586-5b5c-afe2-765170a5611c",
+      "type": "input.received",
+      "run_seq": 11,
+      "attempt": 1,
+      "tool_call_id": null,
+      "parent_event_id": null,
+      "payload": {
+        "kind": "input.received",
+        "text": "确认",
+        "source": "script",
+        "artifact": null,
+        "request_id": "626bc90a-b70b-564a-b245-f624ea7c6107",
+        "expected_revision": 1
+      }
+    },
+    {
+      "event_id": "38942318-2514-492a-adb1-ec31be5ecb95",
+      "type": "node.started",
+      "run_seq": 12,
+      "attempt": 1,
+      "tool_call_id": null,
+      "parent_event_id": null,
+      "payload": {
+        "code": null,
+        "kind": "node.started",
+        "status": "started",
+        "artifact": null,
+        "elapsed_ms": null
+      }
+    },
+    {
+      "event_id": "0f72df89-f88b-43f4-bb64-51d919bb58ec",
+      "type": "node.completed",
+      "run_seq": 13,
+      "attempt": 1,
+      "tool_call_id": null,
+      "parent_event_id": "38942318-2514-492a-adb1-ec31be5ecb95",
+      "payload": {
+        "code": null,
+        "kind": "node.completed",
+        "status": "completed",
+        "artifact": null,
+        "elapsed_ms": 0.0
+      }
+    },
+    {
+      "event_id": "7a68ee90-e2cb-4572-ad35-63b3152753c1",
+      "type": "node.started",
+      "run_seq": 14,
+      "attempt": 1,
+      "tool_call_id": null,
+      "parent_event_id": null,
+      "payload": {
+        "code": null,
+        "kind": "node.started",
+        "status": "started",
+        "artifact": null,
+        "elapsed_ms": null
+      }
+    },
+    {
+      "event_id": "9ab131ba-bb8d-4fbd-8268-bf8fba0d4abc",
+      "type": "model.started",
+      "run_seq": 15,
+      "attempt": 1,
+      "tool_call_id": null,
+      "parent_event_id": "7a68ee90-e2cb-4572-ad35-63b3152753c1",
+      "payload": {
+        "code": null,
+        "kind": "model.started",
+        "role": "agent",
+        "usage": null,
+        "call_id": null,
+        "artifact": null,
+        "response": null,
+        "elapsed_ms": null,
+        "raw_record": null,
+        "config_hash": "d4d720d86a4672fa6842faccd94a3f884fd5aaac9cfa229446c5c9e56bc9bfba",
+        "prompt_hash": "0db5754ab85de312ce138eeb814294e25f8bdc6b2797ba85b80b70aec147b025",
+        "model_requests": null,
+        "response_model": null,
+        "requested_model": "deepseek-flash",
+        "late_observation": false,
+        "automatic_retries": 0
+      }
+    },
+    {
+      "event_id": "3815848c-74e2-524a-a228-2ac92169461d",
+      "type": "model.completed",
+      "run_seq": 16,
+      "attempt": 1,
+      "tool_call_id": null,
+      "parent_event_id": "9ab131ba-bb8d-4fbd-8268-bf8fba0d4abc",
+      "payload": {
+        "code": null,
+        "kind": "model.completed",
+        "role": "agent",
+        "usage": null,
+        "call_id": "explicit-offline-control",
+        "artifact": null,
+        "response": {
+          "model_returned": "offline-control"
+        },
+        "elapsed_ms": null,
+        "raw_record": {
+          "call_id": "explicit-offline-control",
+          "response": {
+            "model_returned": "offline-control"
+          },
+          "model_requests": 0
+        },
+        "config_hash": "d4d720d86a4672fa6842faccd94a3f884fd5aaac9cfa229446c5c9e56bc9bfba",
+        "prompt_hash": "0db5754ab85de312ce138eeb814294e25f8bdc6b2797ba85b80b70aec147b025",
+        "model_requests": 0,
+        "response_model": "offline-control",
+        "requested_model": "deepseek-flash",
+        "late_observation": false,
+        "automatic_retries": 0
+      }
+    },
+    {
+      "event_id": "ef3d5758-4f8a-4e45-b312-cf1ff7f9b343",
+      "type": "node.completed",
+      "run_seq": 17,
+      "attempt": 1,
+      "tool_call_id": null,
+      "parent_event_id": "7a68ee90-e2cb-4572-ad35-63b3152753c1",
+      "payload": {
+        "code": null,
+        "kind": "node.completed",
+        "status": "completed",
+        "artifact": null,
+        "elapsed_ms": 47.0
+      }
+    },
+    {
+      "event_id": "b76ea1a3-3d20-4113-be55-e5f017d32493",
+      "type": "execution.completed",
+      "run_seq": 30,
+      "attempt": 1,
+      "tool_call_id": null,
+      "parent_event_id": null,
+      "payload": {
+        "kind": "execution.completed",
+        "after": [],
+        "usage": {
+          "roles": {},
+          "tickets": {}
+        },
+        "before": null,
+        "counts": null,
+        "output": {
+          "trace": [
+            {
+              "type": "model",
+              "usage": null,
+              "call_id": "explicit-offline-control",
+              "streamed": false,
+              "source_turn": 1,
+              "model_requests": 0,
+              "model_returned": "offline-control",
+              "estimated_peak_microusd": null
+            },
+            {
+              "type": "model",
+              "usage": null,
+              "call_id": "explicit-offline-control",
+              "streamed": false,
+              "source_turn": 2,
+              "model_requests": 0,
+              "model_returned": "offline-control",
+              "estimated_peak_microusd": null
+            }
+          ],
+          "fields": {},
+          "status": "ready",
+          "denials": [],
+          "revision": 2,
+          "last_error": null,
+          "next_nodes": [],
+          "session_id": "3450e743-af3d-4564-801d-07d9bda85e7c",
+          "version_id": 41,
+          "compactions": 0,
+          "config_hash": "d4d720d86a4672fa6842faccd94a3f884fd5aaac9cfa229446c5c9e56bc9bfba",
+          "evidence_refs": [],
+          "pending_draft": null,
+          "assistant_text": "明确离线控制：没有发送模型请求，也没有执行预约工具。",
+          "last_retrieval": null,
+          "business_result": null,
+          "reference_clock": "2026-11-02T09:00:00+08:00",
+          "history_messages": 4,
+          "confirmation_state": "idle",
+          "unknown_submission": null,
+          "confirmation_revision": 0
+        },
+        "reason": null,
+        "status": "failed",
+        "attempt": null,
+        "artifact": null
+      }
+    }
+  ],
+  "complete": true,
+  "issues": [],
+  "integrity_errors": []
+}

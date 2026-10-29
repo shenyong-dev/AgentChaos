@@ -1,0 +1,43 @@
+
+Running 1 test using 1 worker
+
+(node:24280) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  1 tests\workspace.spec.ts:196:1 › waiting input and cancel dialogs cover background controls and fit the viewport (13.6s)
+
+
+  1) tests\workspace.spec.ts:196:1 › waiting input and cancel dialogs cover background controls and fit the viewport 
+
+    Error: expect(locator).toHaveCSS(expected) failed
+
+    Locator:  getByRole('dialog', { name: '核对本轮输入与预约参数', exact: true }).locator('xpath=ancestor::div[contains(concat(" ", normalize-space(@class), " "), " el-overlay ")]')
+    Expected: "fixed"
+    Received: "static"
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toHaveCSS" getByRole('dialog', { name: '核对本轮输入与预约参数', exact: true }).locator('xpath=ancestor::div[contains(concat(" ", normalize-space(@class), " "), " el-overlay ")]') with timeout 5000ms
+      - waiting for getByRole('dialog', { name: '核对本轮输入与预约参数', exact: true }).locator('xpath=ancestor::div[contains(concat(" ", normalize-space(@class), " "), " el-overlay ")]')
+        3 × locator resolved to <div class="el-overlay el-modal-dialog dialog-fade-enter-active dialog-fade-enter-to">…</div>
+          - unexpected value "static"
+        10 × locator resolved to <div class="el-overlay el-modal-dialog">…</div>
+           - unexpected value "static"
+
+
+      211 |     await page.screenshot({ path: resolve(output, `input-dialog-${size.width}.png`), fullPage: true })
+      212 |     const overlay = dialog.locator('xpath=ancestor::div[contains(concat(" ", normalize-space(@class), " "), " el-overlay ")]')
+    > 213 |     await expect(overlay).toHaveCSS('position', 'fixed')
+          |                           ^
+      214 |     expect(await overlay.evaluate(e => getComputedStyle(e).backgroundColor)).not.toBe('rgba(0, 0, 0, 0)')
+      215 |     expect(await dialog.evaluate(element => {
+      216 |       const box = element.getBoundingClientRect()
+        at D:\AgentChaos\frontend\tests\workspace.spec.ts:213:27
+
+    attachment #1: video (video/webm) ──────────────────────────────────────────────────────────────
+    ..\.local\playwright-results\workspace-waiting-input-an-7fb20-ntrols-and-fit-the-viewport\video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ..\.local\playwright-results\workspace-waiting-input-an-7fb20-ntrols-and-fit-the-viewport\error-context.md
+
+  1 failed
+    tests\workspace.spec.ts:196:1 › waiting input and cancel dialogs cover background controls and fit the viewport 

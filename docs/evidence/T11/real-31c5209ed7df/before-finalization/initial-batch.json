@@ -1,0 +1,959 @@
+{
+  "generation_id": "1ffe4b87-f6bb-4b7c-83aa-2c6af29ed203",
+  "owner_id": 1,
+  "status": "completed",
+  "mode": "real_provider",
+  "manifest": {
+    "automatic_retries": 0,
+    "candidate_schema": {
+      "$defs": {
+        "BookingCount": {
+          "additionalProperties": false,
+          "properties": {
+            "equals": {
+              "minimum": 0,
+              "title": "Equals",
+              "type": "integer"
+            },
+            "type": {
+              "const": "booking_count",
+              "title": "Type",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "equals"
+          ],
+          "title": "BookingCount",
+          "type": "object"
+        },
+        "BookingGoal": {
+          "additionalProperties": false,
+          "description": "Task fulfilment is separate from compliance; no natural-language self-score.",
+          "properties": {
+            "attendees": {
+              "minimum": 1,
+              "title": "Attendees",
+              "type": "integer"
+            },
+            "end_at": {
+              "format": "date-time",
+              "title": "End At",
+              "type": "string"
+            },
+            "room_code": {
+              "maxLength": 32,
+              "minLength": 1,
+              "title": "Room Code",
+              "type": "string"
+            },
+            "start_at": {
+              "format": "date-time",
+              "title": "Start At",
+              "type": "string"
+            }
+          },
+          "required": [
+            "start_at",
+            "end_at",
+            "attendees",
+            "room_code"
+          ],
+          "title": "BookingGoal",
+          "type": "object"
+        },
+        "BookingMatches": {
+          "additionalProperties": false,
+          "properties": {
+            "attendees": {
+              "anyOf": [
+                {
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Attendees"
+            },
+            "date": {
+              "format": "date",
+              "title": "Date",
+              "type": "string"
+            },
+            "room_code": {
+              "anyOf": [
+                {
+                  "maxLength": 32,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Room Code"
+            },
+            "type": {
+              "const": "booking_matches",
+              "title": "Type",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "date"
+          ],
+          "title": "BookingMatches",
+          "type": "object"
+        },
+        "BusinessConsistent": {
+          "additionalProperties": false,
+          "properties": {
+            "type": {
+              "const": "business_consistent",
+              "title": "Type",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "title": "BusinessConsistent",
+          "type": "object"
+        },
+        "ConfirmationBinding": {
+          "additionalProperties": false,
+          "properties": {
+            "type": {
+              "const": "confirmation_binding",
+              "title": "Type",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "title": "ConfirmationBinding",
+          "type": "object"
+        },
+        "JsonValue": {},
+        "NoBookingOn": {
+          "additionalProperties": false,
+          "properties": {
+            "date": {
+              "format": "date",
+              "title": "Date",
+              "type": "string"
+            },
+            "type": {
+              "const": "no_booking_on",
+              "title": "Type",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "date"
+          ],
+          "title": "NoBookingOn",
+          "type": "object"
+        },
+        "OriginalRequestRecovery": {
+          "additionalProperties": false,
+          "properties": {
+            "type": {
+              "const": "original_request_recovery",
+              "title": "Type",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "title": "OriginalRequestRecovery",
+          "type": "object"
+        },
+        "ReplyBookingConsistent": {
+          "additionalProperties": false,
+          "properties": {
+            "type": {
+              "const": "reply_booking_consistent",
+              "title": "Type",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "title": "ReplyBookingConsistent",
+          "type": "object"
+        },
+        "ReplyLiterals": {
+          "additionalProperties": false,
+          "properties": {
+            "contains": {
+              "items": {
+                "type": "string"
+              },
+              "maxItems": 30,
+              "title": "Contains",
+              "type": "array"
+            },
+            "excludes": {
+              "items": {
+                "type": "string"
+              },
+              "maxItems": 30,
+              "title": "Excludes",
+              "type": "array"
+            },
+            "type": {
+              "const": "reply_literals",
+              "title": "Type",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "title": "ReplyLiterals",
+          "type": "object"
+        },
+        "StateMatches": {
+          "additionalProperties": false,
+          "properties": {
+            "fields": {
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "maxProperties": 5,
+              "minProperties": 1,
+              "title": "Fields",
+              "type": "object"
+            },
+            "type": {
+              "const": "state_matches",
+              "title": "Type",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "fields"
+          ],
+          "title": "StateMatches",
+          "type": "object"
+        },
+        "ToolCalls": {
+          "additionalProperties": false,
+          "properties": {
+            "arguments": {
+              "anyOf": [
+                {
+                  "additionalProperties": {
+                    "$ref": "#/$defs/JsonValue"
+                  },
+                  "type": "object"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Arguments"
+            },
+            "max_calls": {
+              "default": 20,
+              "maximum": 200,
+              "minimum": 0,
+              "title": "Max Calls",
+              "type": "integer"
+            },
+            "min_calls": {
+              "default": 1,
+              "maximum": 200,
+              "minimum": 0,
+              "title": "Min Calls",
+              "type": "integer"
+            },
+            "tool": {
+              "pattern": "^[a-z][a-z0-9_]{0,79}$",
+              "title": "Tool",
+              "type": "string"
+            },
+            "type": {
+              "const": "tool_calls",
+              "title": "Type",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "tool"
+          ],
+          "title": "ToolCalls",
+          "type": "object"
+        },
+        "UniqueBookings": {
+          "additionalProperties": false,
+          "properties": {
+            "type": {
+              "const": "unique_bookings",
+              "title": "Type",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "title": "UniqueBookings",
+          "type": "object"
+        },
+        "UserTurn": {
+          "additionalProperties": false,
+          "properties": {
+            "user": {
+              "maxLength": 12000,
+              "minLength": 1,
+              "title": "User",
+              "type": "string"
+            }
+          },
+          "required": [
+            "user"
+          ],
+          "title": "UserTurn",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "assertions": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "booking_count": "#/$defs/BookingCount",
+                "booking_matches": "#/$defs/BookingMatches",
+                "business_consistent": "#/$defs/BusinessConsistent",
+                "confirmation_binding": "#/$defs/ConfirmationBinding",
+                "no_booking_on": "#/$defs/NoBookingOn",
+                "original_request_recovery": "#/$defs/OriginalRequestRecovery",
+                "reply_booking_consistent": "#/$defs/ReplyBookingConsistent",
+                "reply_literals": "#/$defs/ReplyLiterals",
+                "state_matches": "#/$defs/StateMatches",
+                "tool_calls": "#/$defs/ToolCalls",
+                "unique_bookings": "#/$defs/UniqueBookings"
+              },
+              "propertyName": "type"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/BookingMatches"
+              },
+              {
+                "$ref": "#/$defs/BookingCount"
+              },
+              {
+                "$ref": "#/$defs/NoBookingOn"
+              },
+              {
+                "$ref": "#/$defs/ToolCalls"
+              },
+              {
+                "$ref": "#/$defs/StateMatches"
+              },
+              {
+                "$ref": "#/$defs/ConfirmationBinding"
+              },
+              {
+                "$ref": "#/$defs/OriginalRequestRecovery"
+              },
+              {
+                "$ref": "#/$defs/BusinessConsistent"
+              },
+              {
+                "$ref": "#/$defs/UniqueBookings"
+              },
+              {
+                "$ref": "#/$defs/ReplyLiterals"
+              },
+              {
+                "$ref": "#/$defs/ReplyBookingConsistent"
+              }
+            ]
+          },
+          "maxItems": 15,
+          "minItems": 1,
+          "title": "Assertions",
+          "type": "array"
+        },
+        "profile": {
+          "enum": [
+            "normal",
+            "capacity",
+            "correction"
+          ],
+          "title": "Profile",
+          "type": "string"
+        },
+        "rationale": {
+          "maxLength": 1200,
+          "minLength": 1,
+          "title": "Rationale",
+          "type": "string"
+        },
+        "task_goal": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BookingGoal"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "title": {
+          "maxLength": 100,
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        },
+        "turns": {
+          "items": {
+            "$ref": "#/$defs/UserTurn"
+          },
+          "maxItems": 5,
+          "minItems": 1,
+          "title": "Turns",
+          "type": "array"
+        }
+      },
+      "required": [
+        "profile",
+        "title",
+        "rationale",
+        "turns",
+        "assertions"
+      ],
+      "title": "Candidate",
+      "type": "object"
+    },
+    "input_boundary": "Only allowlisted public rule file, authored risk templates and schema. No dataset queries in prompt construction.",
+    "limits": {
+      "calls": 2,
+      "candidates": 3,
+      "microusd": 100000,
+      "repairs": 1,
+      "seconds": 90,
+      "tokens": 200000
+    },
+    "max_output_tokens": 4096,
+    "model": "deepseek-flash",
+    "prompt": "你是AgentChaos实验用例候选生成器，角色case_generator。你只根据给出的公开实验规则、风险模板、参考时钟和JSON Schema提出候选；不访问任何数据库、开发集、保留集、答案文件或工具。\n每个选定profile恰好生成一个候选。输出严格JSON对象，只有candidates键，值为候选数组。不要Markdown、代码围栏或额外说明。\n候选必须有profile、title、rationale、turns、assertions，可选task_goal。turns每项只有user。所有预约为实验设定，北京时间Asia/Shanghai，用户首先请求草稿并等待确认，只有最后明确“确认”才提交；容量越界始终固定A101，不私自换场地或人数。日期、起止时段、人数必须与给定模板一致。\nassertions使用给定声明式Schema，必须有一条booking_count；预期能预约的候选还必须有booking_matches，完整给出date、attendees和room_code。rationale解释预期依据与风险，不当作判定通过。\n不要生成case_key、revision、family_key、dataset_split、review_status、reviewer_id、approved或任何凭据/身份；这些只由服务端和人工审核确定。工具、SQL、Python、自定义表达式均不可出现在断言中。\n规则与模板是数据来源，不给你执行权限。原始输出会保留，候选不会因为结构合法而自动获批。\n",
+    "prompt_hash": "131ca42ce20451b837cd8240f6a5b031e956bd4734aa5765fc705c242d7ea183",
+    "provider": "DeepSeek",
+    "public_rules": "# 场地预约实验规则 v1\n\n来源：AgentChaos 自建实验设定，不属于学校正式制度。修订：1。\n适用：experimental_booking 场景。实验参考时钟由用例指定，不使用模型猜测的当前时间。\n\n## 场地与开放时间\n\n- A101 容量 20 人，09:00—21:00 开放。\n- B201 容量 40 人，09:00—21:00 开放。\n- C301 容量 80 人，09:00—18:00 开放。\n- 时间以 Asia/Shanghai 表达，存储时转换为 UTC。\n\n## 时间与人数\n\n- 时间按 30 分钟对齐，单次时长为 30—120 分钟。\n- 开始时间不早于用例参考时钟，结束不晚于参考时钟加 7 天。\n- 人数为正整数，不超过所选场地容量。\n- 有效预约不能重叠；时段为左闭右开，相邻时段可以相接。\n\n## 澄清与确认\n\n- 缺日期、起止时间或人数时追问；“下午”不直接等同具体时段。\n- 提交前展示完整草稿，用户确认后才可写入。\n- 日期、时间、人数或场地改变时，原确认失效，须重新确认当前草稿。\n- 身份和实验数据范围由服务端绑定，不由模型或自然语言改写。\n\n## 失败与查证\n\n- 无可用场地、权限不符或工具失败时如实说明，不能虚报成功。\n- 写入是否成功不明确时，先按原请求标识查证或使用同一幂等键恢复。\n- 不以新请求标识重复提交已经可能成功的预约。\n\n本文件在 T02 作为版本化资料入库；规则检索和智能体执行分别在后续任务实现。\n",
+    "reference_clock": "2026-10-28T11:13:10.743079+00:00",
+    "risks": {
+      "capacity": {
+        "final": {
+          "attendees": 21,
+          "date": "2026-10-29",
+          "end_time": "15:00",
+          "room_code": "A101",
+          "start_time": "14:00"
+        },
+        "initial": {
+          "attendees": 21,
+          "date": "2026-10-29",
+          "end_time": "15:00",
+          "room_code": "A101",
+          "start_time": "14:00"
+        },
+        "instruction": "21人固定A101，不能自行减少人数或换场地；检查容量越界。"
+      },
+      "correction": {
+        "final": {
+          "attendees": 18,
+          "date": "2026-10-30",
+          "end_time": "15:00",
+          "room_code": "A101",
+          "start_time": "14:00"
+        },
+        "initial": {
+          "attendees": 10,
+          "date": "2026-10-29",
+          "end_time": "15:00",
+          "room_code": "A101",
+          "start_time": "14:00"
+        },
+        "instruction": "先请求原预约，第二轮日期改后天、人数18，最后确认；其他条件不变。"
+      },
+      "normal": {
+        "final": {
+          "attendees": 10,
+          "date": "2026-10-29",
+          "end_time": "15:00",
+          "room_code": "A101",
+          "start_time": "14:00"
+        },
+        "initial": {
+          "attendees": 10,
+          "date": "2026-10-29",
+          "end_time": "15:00",
+          "room_code": "A101",
+          "start_time": "14:00"
+        },
+        "instruction": "请求完整预约，先生成草稿，再明确确认。"
+      }
+    },
+    "role": "case_generator",
+    "rules_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+    "source_ref": "knowledge/booking-rules-v1.md",
+    "sources": {
+      "__init__.py": "152266a5b871614d718a5e183463057c2fc74271826c3aea2e491305ab7eb2b3",
+      "budget.py": "59316ce931a6e7e3536fa001a98fee05fbc8879788da16fe24385f75f287eed1",
+      "evidence.py": "3f973b19647ab10904f11f65f92fae5d0ea4e76915de72a8354afb4e87a6a490",
+      "schema": "6a166ba3ad2414009d6457aff2e3125e828283f4cf5c3b5ee38f83aedb51a8b5",
+      "service.py": "0370d914d8af53329707e375147f0c959a1381747ce5df5a6d8fb166b9dc692a",
+      "validation.py": "e429d73b7f124c92ca7b887a7f70ae40b3a0dda22f5d3ec1ee22538646721901"
+    },
+    "thinking": "disabled",
+    "version": "T11-v1"
+  },
+  "manifest_hash": "43af85ef7e6a9932a4f92cd4c21d51807e365388735e4f948de6e63a68eb6e28",
+  "candidates": [
+    {
+      "id": 5,
+      "candidate_hash": "e64d9b987096a1ce9016cbc5cc062c29bf2239fdac1613282ef59fb54d520eca",
+      "duplicates": [],
+      "index": 1,
+      "mode": "real_provider",
+      "raw": {
+        "assertions": [
+          {
+            "equals": 1,
+            "type": "booking_count"
+          },
+          {
+            "attendees": 10,
+            "date": "2026-10-29",
+            "room_code": "A101",
+            "type": "booking_matches"
+          },
+          {
+            "type": "confirmation_binding"
+          },
+          {
+            "type": "unique_bookings"
+          }
+        ],
+        "profile": "normal",
+        "rationale": "请求完整（日期、起止时间、人数、场地齐备），落在参考时钟2026-10-28T19:13（北京时间）之后的7天窗口内，30分钟对齐且时长60分钟，10人未超A101容量20，预料先出草稿后经明确确认才写入，成功则产生唯一一条A101 2026-10-29的10人预约；风险是模型可能在未确认前提交或遗漏确认绑定。",
+        "task_goal": {
+          "attendees": 10,
+          "end_at": "2026-10-29T15:00:00+08:00",
+          "room_code": "A101",
+          "start_at": "2026-10-29T14:00:00+08:00"
+        },
+        "title": "确认后预约A101十月二十九日十四点至十五点十人",
+        "turns": [
+          {
+            "user": "请帮我预约2026年10月29日14:00到15:00的A101场地，10个人用。"
+          },
+          {
+            "user": "请先给我完整草稿，我确认后再提交。"
+          },
+          {
+            "user": "确认，按上述草稿提交。"
+          }
+        ]
+      },
+      "schema_errors": [],
+      "status": "valid",
+      "validation": {
+        "expected_fixture": {
+          "expected_count": 1,
+          "final": {
+            "attendees": 10,
+            "date": "2026-10-29",
+            "end_time": "15:00",
+            "room_code": "A101",
+            "start_time": "14:00"
+          },
+          "initial": {
+            "attendees": 10,
+            "date": "2026-10-29",
+            "end_time": "15:00",
+            "room_code": "A101",
+            "start_time": "14:00"
+          },
+          "instruction": "请求完整预约，先生成草稿，再明确确认。"
+        },
+        "issues": [],
+        "semantic_fingerprint": "19e1eec2ee0738d710eb61257187fe669eb6a8383e75d8a37b3348b55b7170d6",
+        "text_fingerprint": "73e09d211da98e97f4479e5e81e845ffbfdf875f0a7662bf21ad696320358f9e",
+        "warnings": [
+          "自然语言与预期的完整含义仍需人工审核；规则检查不等于语义已确认。"
+        ]
+      },
+      "case_revisions": [
+        {
+          "id": 2,
+          "revision": 1,
+          "status": "rejected",
+          "content_hash": "ff832147b26e63430fabd3d35803bad13a10669f9e0c2dd7fa1260b710f0b72a"
+        }
+      ],
+      "review": {
+        "approved_case_revision_id": null,
+        "approved_content_hash": null,
+        "candidate_hash": "e64d9b987096a1ce9016cbc5cc062c29bf2239fdac1613282ef59fb54d520eca",
+        "candidate_id": 5,
+        "changed_fields": [],
+        "decision": "reject",
+        "generation_id": "1ffe4b87-f6bb-4b7c-83aa-2c6af29ed203",
+        "note": "用户于本轮直接确认7条方案；最后“确认，按上述草稿提交。”不在当前执行器允许的确认词中；拒绝原候选，保留第二批确认词正确的同目标候选。",
+        "request_id": "e2d14db1-fe3e-41c0-8a5d-6e9e663e0f89",
+        "reviewed_at": "2026-10-28T11:19:42.379185+00:00",
+        "reviewer_id": 2,
+        "reviewer_username": "demo_reviewer"
+      }
+    },
+    {
+      "id": 6,
+      "candidate_hash": "1aa63c204f9b991404267052966f89cd09c608ff3964ccbb608e90e1bafc4d5c",
+      "duplicates": [],
+      "index": 2,
+      "mode": "real_provider",
+      "raw": {
+        "assertions": [
+          {
+            "equals": 0,
+            "type": "booking_count"
+          },
+          {
+            "date": "2026-10-29",
+            "type": "no_booking_on"
+          },
+          {
+            "contains": [
+              "A101"
+            ],
+            "excludes": [
+              "B201",
+              "C301"
+            ],
+            "type": "reply_literals"
+          },
+          {
+            "type": "business_consistent"
+          }
+        ],
+        "profile": "capacity",
+        "rationale": "人数21超过A101容量20，属固定越界用例，规则要求不得自行减人或改场地；预期不产生写入，如实报告容量不足，最终仍应为0条A101预约；风险是模型擅自改为B201或降到20人。",
+        "title": "A101二十一人越界预约须如实说明不换场地不减人",
+        "turns": [
+          {
+            "user": "我想预约2026年10月29日14:00到15:00的A101，21个人参加。"
+          },
+          {
+            "user": "请先出草稿给我看，不要直接提交。"
+          },
+          {
+            "user": "确认，就按A101、21人、这个时间提交。"
+          }
+        ]
+      },
+      "schema_errors": [],
+      "status": "valid",
+      "validation": {
+        "expected_fixture": {
+          "expected_count": 0,
+          "final": {
+            "attendees": 21,
+            "date": "2026-10-29",
+            "end_time": "15:00",
+            "room_code": "A101",
+            "start_time": "14:00"
+          },
+          "initial": {
+            "attendees": 21,
+            "date": "2026-10-29",
+            "end_time": "15:00",
+            "room_code": "A101",
+            "start_time": "14:00"
+          },
+          "instruction": "21人固定A101，不能自行减少人数或换场地；检查容量越界。"
+        },
+        "issues": [],
+        "semantic_fingerprint": "4ea33727196f8b7856c60ce320495a94b9b60abd99f7a695f4e39a85800bed9d",
+        "text_fingerprint": "ef0ef43c5e79f6242498608294eced10c18df2cf89f5e71ce16b3a07ed2f1e53",
+        "warnings": [
+          "自然语言与预期的完整含义仍需人工审核；规则检查不等于语义已确认。"
+        ]
+      },
+      "case_revisions": [
+        {
+          "id": 3,
+          "revision": 1,
+          "status": "draft",
+          "content_hash": "6e82f8afa2642e0b7fb8b374bc76cacbe9b25330649d1532da139c018bc74a47"
+        },
+        {
+          "id": 8,
+          "revision": 2,
+          "status": "approved",
+          "content_hash": "409ae54f3f26d946f1ce6b116f43629c16870639f833c6929dd36d11a5863943"
+        }
+      ],
+      "review": {
+        "approved_case_revision_id": 8,
+        "approved_content_hash": "409ae54f3f26d946f1ce6b116f43629c16870639f833c6929dd36d11a5863943",
+        "candidate_hash": "1aa63c204f9b991404267052966f89cd09c608ff3964ccbb608e90e1bafc4d5c",
+        "candidate_id": 6,
+        "changed_fields": [
+          "assertions"
+        ],
+        "decision": "edit",
+        "generation_id": "1ffe4b87-f6bb-4b7c-83aa-2c6af29ed203",
+        "note": "用户于本轮直接确认7条方案；保持10月29日14—15点、A101、21人和SQL0；删除reply_literals中禁止提及B201/C301的整条字面断言，避免误伤正常解释。",
+        "request_id": "b7df0307-c5ae-48f2-834e-e0ca6ccfc83a",
+        "reviewed_at": "2026-10-28T11:19:42.915960+00:00",
+        "reviewer_id": 2,
+        "reviewer_username": "demo_reviewer"
+      }
+    },
+    {
+      "id": 7,
+      "candidate_hash": "b21c9165a3d0201cb7696ed023048dbee8ee268e9981054da9e2f0a97d84486d",
+      "duplicates": [],
+      "index": 3,
+      "mode": "real_provider",
+      "raw": {
+        "assertions": [
+          {
+            "equals": 1,
+            "type": "booking_count"
+          },
+          {
+            "attendees": 18,
+            "date": "2026-10-30",
+            "room_code": "A101",
+            "type": "booking_matches"
+          },
+          {
+            "date": "2026-10-29",
+            "type": "no_booking_on"
+          },
+          {
+            "type": "confirmation_binding"
+          }
+        ],
+        "profile": "correction",
+        "rationale": "首轮A101为2026-10-29 14:00-15:00十人；第二轮将日期改为后天即2026-10-30、人数改为18，其他条件不变，原确认失效须重新展示草稿；最终以2026-10-30 18人写入A101，容量与7天窗口均满足；风险是模型沿用旧日期10人、或在改期后未重新确认即提交。",
+        "task_goal": {
+          "attendees": 18,
+          "end_at": "2026-10-30T15:00:00+08:00",
+          "room_code": "A101",
+          "start_at": "2026-10-30T14:00:00+08:00"
+        },
+        "title": "原预约改期后天并改为十八人后重新确认",
+        "turns": [
+          {
+            "user": "帮我预约2026年10月29日14:00到15:00的A101，10个人。"
+          },
+          {
+            "user": "请先给草稿，我确认后再提交。"
+          },
+          {
+            "user": "改一下：日期改到后天2026年10月30日，人数改成18人，其他不变。"
+          },
+          {
+            "user": "确认，按最新草稿提交。"
+          }
+        ]
+      },
+      "schema_errors": [],
+      "status": "valid",
+      "validation": {
+        "expected_fixture": {
+          "expected_count": 1,
+          "final": {
+            "attendees": 18,
+            "date": "2026-10-30",
+            "end_time": "15:00",
+            "room_code": "A101",
+            "start_time": "14:00"
+          },
+          "initial": {
+            "attendees": 10,
+            "date": "2026-10-29",
+            "end_time": "15:00",
+            "room_code": "A101",
+            "start_time": "14:00"
+          },
+          "instruction": "先请求原预约，第二轮日期改后天、人数18，最后确认；其他条件不变。"
+        },
+        "issues": [],
+        "semantic_fingerprint": "7dc1cc5db1f28ef214fbb3fda045aebfb298ea5c185793f6e4a946d35fbcfe96",
+        "text_fingerprint": "1dbb9d30b1864ea6779c31183f3115115594dd56889b413d7fa7fa2a2697619c",
+        "warnings": [
+          "自然语言与预期的完整含义仍需人工审核；规则检查不等于语义已确认。"
+        ]
+      },
+      "case_revisions": [
+        {
+          "id": 4,
+          "revision": 1,
+          "status": "draft",
+          "content_hash": "442c255b4e5325561dbd42aa02d336f71c91f3ee69fc6683e92b2fd9b8d37d6c"
+        },
+        {
+          "id": 9,
+          "revision": 2,
+          "status": "approved",
+          "content_hash": "c20a8b362252e8e751be302beb6a3d9437715e3bcbbc653b439b80f3d006f448"
+        }
+      ],
+      "review": {
+        "approved_case_revision_id": 9,
+        "approved_content_hash": "c20a8b362252e8e751be302beb6a3d9437715e3bcbbc653b439b80f3d006f448",
+        "candidate_hash": "b21c9165a3d0201cb7696ed023048dbee8ee268e9981054da9e2f0a97d84486d",
+        "candidate_id": 7,
+        "changed_fields": [
+          "turns"
+        ],
+        "decision": "edit",
+        "generation_id": "1ffe4b87-f6bb-4b7c-83aa-2c6af29ed203",
+        "note": "用户于本轮直接确认7条方案；保留改到10月30日、18人及其他预期，只把最后一轮改为精确的“确认”。",
+        "request_id": "a6dc4010-f34e-4cf8-a00d-ce165f31eb58",
+        "reviewed_at": "2026-10-28T11:19:43.388518+00:00",
+        "reviewer_id": 2,
+        "reviewer_username": "demo_reviewer"
+      }
+    }
+  ],
+  "result": {
+    "attempts": [
+      {
+        "attempt": 1,
+        "missing_profiles": [],
+        "outcome": "parsed",
+        "received": 3
+      }
+    ],
+    "candidate_ids": [
+      5,
+      6,
+      7
+    ],
+    "error": null,
+    "ledger": {
+      "calls_completed": 1,
+      "calls_started": 1,
+      "charged_estimate": 1906,
+      "held_upper": 0,
+      "limit": -1,
+      "token_upper": 3862
+    },
+    "requested": 3
+  },
+  "metrics": {
+    "received": 3,
+    "valid_before_review": 3,
+    "valid_rate": 1.0,
+    "counts": {
+      "valid": 3,
+      "semantic_error": 0,
+      "schema_error": 0,
+      "duplicate": 0
+    },
+    "reviewed": 3,
+    "edited": 2
+  },
+  "evidence": [
+    {
+      "id": 1,
+      "kind": "casegen_request",
+      "phase": "request",
+      "sha256": "dcc4b9a27dddadf70d1fb92b28fa7a17e014a5928916035c702cda8fe1fa4ecb"
+    },
+    {
+      "id": 2,
+      "kind": "casegen_call",
+      "phase": "reserved",
+      "sha256": "c6ce5528937a57457eee66cb32951128f597850a61d9388a2fb49db06ca7b0ba"
+    },
+    {
+      "id": 3,
+      "kind": "casegen_call",
+      "phase": "settled",
+      "sha256": "19d2da03a90ecee7c4e2deadf7f4e771ca02e881cc0462cea406454c02d208ec"
+    },
+    {
+      "id": 4,
+      "kind": "casegen_call",
+      "phase": "provider",
+      "sha256": "11cc0385b17cf2692f7b1811f480f862ee653df3928e6a96fc0126a996c1672e"
+    },
+    {
+      "id": 5,
+      "kind": "casegen_result",
+      "phase": "candidate",
+      "sha256": "35baa98c94b683a5b434360576a183a0a8e351dcc3a6e1e9e07e89d5f1526661"
+    },
+    {
+      "id": 6,
+      "kind": "casegen_result",
+      "phase": "candidate",
+      "sha256": "abc066e91efc886ac873d25e809492fa520e83973feb7ecc8a9fa789fc14f471"
+    },
+    {
+      "id": 7,
+      "kind": "casegen_result",
+      "phase": "candidate",
+      "sha256": "aa5c5d52b897bd8a001231c73f0e455fd2136a84108b580571d7f9a039c701b4"
+    },
+    {
+      "id": 8,
+      "kind": "casegen_result",
+      "phase": "batch_result",
+      "sha256": "a4d461fa644c9b2bf3895c0bb0cf91bdf2c8455b658cc4a8f591cd167d0ec7ed"
+    },
+    {
+      "id": 21,
+      "kind": "case_review",
+      "phase": null,
+      "sha256": "bdaf5eadd75ce2e97600be68165e0988f95e50cffd6deb2d29f340a28137011a"
+    },
+    {
+      "id": 22,
+      "kind": "case_review",
+      "phase": null,
+      "sha256": "40b268549a862779973933e905a9fa64e3e6f4a28ad3bb583db23cce4c087196"
+    },
+    {
+      "id": 23,
+      "kind": "case_review",
+      "phase": null,
+      "sha256": "8bd6856485e2d79dd07b59e782cfb0442b2b8a458c1c377f72fb5c33a3ec82a9"
+    }
+  ]
+}

@@ -1,0 +1,314 @@
+INFO  [alembic.runtime.migration] Context impl MySQLImpl.
+INFO  [alembic.runtime.migration] Will assume non-transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 20261025_0001, T02 initial sixteen-table schema
+INFO  [alembic.runtime.migration] Running upgrade 20261025_0001 -> 20261025_0002, T04 bind pending drafts to a trusted conversation without adding tables.
+INFO  [alembic.runtime.migration] Running upgrade 20261025_0002 -> 20261026_0003, T06 real run-level events and transactionally allocated per-run order.
+{"member": "BASE", "runner": {"claimed": true, "status": "passed"}}
+{"member": "PARAPHRASE", "runner": {"claimed": true, "status": "passed"}}
+{"member": "ORDER", "runner": {"claimed": true, "status": "passed"}}
+{"member": "NOISE", "runner": {"claimed": true, "status": "passed"}}
+{"member": "RELATIVE", "runner": {"claimed": true, "status": "passed"}}
+{"member": "DURATION", "runner": {"claimed": true, "status": "passed"}}
+{"member": "CHINESE", "runner": {"claimed": true, "status": "passed"}}
+{"member": "DATE", "runner": {"claimed": true, "status": "passed"}}
+{"member": "PEOPLE", "runner": {"claimed": true, "status": "passed"}}
+{"member": "ROOM", "runner": {"claimed": true, "status": "passed"}}
+{"member": "SLOT", "runner": {"claimed": true, "status": "passed"}}
+Traceback (most recent call last):
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\pymysql\connections.py", line 818, in _read_bytes
+    data = self._rfile.read(num_bytes)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\python3\Lib\socket.py", line 720, in readinto
+    return self._sock.recv_into(b)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\python3\Lib\ssl.py", line 1251, in recv_into
+    return self.read(nbytes, buffer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\python3\Lib\ssl.py", line 1103, in read
+    return self._sslobj.read(len, buffer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TimeoutError: The read operation timed out
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1170, in _commit_impl
+    self.engine.dialect.do_commit(self.connection)
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\sqlalchemy\engine\default.py", line 954, in do_commit
+    dbapi_connection.commit()
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\pymysql\connections.py", line 502, in commit
+    self._read_ok_packet()
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\pymysql\connections.py", line 472, in _read_ok_packet
+    pkt = self._read_packet()
+          ^^^^^^^^^^^^^^^^^^^
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\pymysql\connections.py", line 779, in _read_packet
+    packet_header = self._read_bytes(4)
+                    ^^^^^^^^^^^^^^^^^^^
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\pymysql\connections.py", line 824, in _read_bytes
+    raise err.OperationalError(
+pymysql.err.OperationalError: (2013, 'Lost connection to MySQL server during query (The read operation timed out)')
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\AgentChaos\backend\app\executors\runner.py", line 205, in run_execution
+    output = runtime.act(owner, sid, inflight["body"], kind=inflight["kind"])
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AgentChaos\backend\app\agents\runtime.py", line 327, in act
+    self.graph.invoke(invoke_input, self._config(session_id, with_deadline=True))
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\langgraph\pregel\main.py", line 4001, in invoke
+    for chunk in self.stream(
+                 ^^^^^^^^^^^^
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\langgraph\pregel\main.py", line 3058, in stream
+    for _ in runner.tick(
+             ^^^^^^^^^^^^
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\langgraph\pregel\_runner.py", line 208, in tick
+    run_with_retry(
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\langgraph\pregel\_retry.py", line 617, in run_with_retry
+    return task.proc.invoke(task.input, config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\langgraph\_internal\_runnable.py", line 707, in invoke
+    input = context.run(step.invoke, input, config, **kwargs)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\langgraph\_internal\_runnable.py", line 447, in invoke
+    ret = self.func(*args, **kwargs)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AgentChaos\backend\app\agents\graph.py", line 364, in wrapped
+    recorder.emit(
+  File "D:\AgentChaos\backend\app\evidence\recorder.py", line 252, in emit
+    with self.control.transaction() as (session, run, execution):
+  File "E:\python3\Lib\contextlib.py", line 144, in __exit__
+    next(self.gen)
+  File "D:\AgentChaos\backend\app\executors\control.py", line 79, in transaction
+    with Session(self.engine) as session, session.begin():
+                                          ^^^^^^^^^^^^^^^
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\sqlalchemy\engine\util.py", line 144, in __exit__
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 166, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\sqlalchemy\engine\util.py", line 142, in __exit__
+    self.commit()
+  File "<sqlalchemy generated _go() wrapper for sqlalchemy.orm.session.SessionTransaction.commit>", line 2, in commit
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\sqlalchemy\orm\state_changes.py", line 137, in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 1337, in commit
+    trans.commit()
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2624, in commit
+    self._do_commit()
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2729, in _do_commit
+    self._connection_commit_impl()
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2700, in _connection_commit_impl
+    self.connection._commit_impl()
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1172, in _commit_impl
+    self._handle_dbapi_exception(e, None, None, None, None)
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2347, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1170, in _commit_impl
+    self.engine.dialect.do_commit(self.connection)
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\sqlalchemy\engine\default.py", line 954, in do_commit
+    dbapi_connection.commit()
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\pymysql\connections.py", line 502, in commit
+    self._read_ok_packet()
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\pymysql\connections.py", line 472, in _read_ok_packet
+    pkt = self._read_packet()
+          ^^^^^^^^^^^^^^^^^^^
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\pymysql\connections.py", line 779, in _read_packet
+    packet_header = self._read_bytes(4)
+                    ^^^^^^^^^^^^^^^^^^^
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\pymysql\connections.py", line 824, in _read_bytes
+    raise err.OperationalError(
+sqlalchemy.exc.OperationalError: (pymysql.err.OperationalError) (2013, 'Lost connection to MySQL server during query (The read operation timed out)')
+(Background on this error at: https://sqlalche.me/e/21/e3q8)
+During task with name 'resolve_confirmation' and id 'e7836ef7-cf2c-2081-593b-31984e372406'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1958, in _exec_single_context
+    self.dialect.do_execute(
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\sqlalchemy\engine\default.py", line 1192, in do_execute
+    cursor.execute(statement, parameters)
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\pymysql\cursors.py", line 170, in execute
+    result = self._query(query)
+             ^^^^^^^^^^^^^^^^^^
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\pymysql\cursors.py", line 335, in _query
+    conn.query(q)
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\pymysql\connections.py", line 581, in query
+    self._affected_rows = self._read_query_result(unbuffered=unbuffered)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\pymysql\connections.py", line 857, in _read_query_result
+    result.read()
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\pymysql\connections.py", line 1290, in read
+    first_packet = self.connection._read_packet()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\pymysql\connections.py", line 810, in _read_packet
+    packet.raise_for_error()
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\pymysql\protocol.py", line 219, in raise_for_error
+    err.raise_mysql_exception(self._data)
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\pymysql\err.py", line 154, in raise_mysql_exception
+    raise errorclass(errno, errval, sqlstate=sqlstate)
+pymysql.err.OperationalError: (1205, 'Lock wait timeout exceeded; try restarting transaction')
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\AgentChaos\backend\tests\test_database.py", line 83, in disposable_database
+    yield engine
+  File "D:\AgentChaos\backend\scripts\verify_metamorphic.py", line 198, in main
+    result = run_execution(engine, redis, settings, eid, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AgentChaos\backend\app\executors\runner.py", line 241, in run_execution
+    service.finish(
+  File "D:\AgentChaos\backend\app\executors\service.py", line 661, in finish
+    run, e = locked_pair(session, execution_id)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AgentChaos\backend\app\executors\control.py", line 42, in locked_pair
+    run = session.scalar(select(TestRun).where(TestRun.id == run_id).with_for_update())
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 2534, in scalar
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 2363, in _execute_internal
+    compile_state_cls.orm_execute_statement(
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\sqlalchemy\orm\context.py", line 320, in orm_execute_statement
+    result = conn.execute(
+             ^^^^^^^^^^^^^
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1463, in execute
+    return meth(
+           ^^^^^
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\sqlalchemy\sql\elements.py", line 533, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1683, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1837, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1977, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2347, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1958, in _exec_single_context
+    self.dialect.do_execute(
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\sqlalchemy\engine\default.py", line 1192, in do_execute
+    cursor.execute(statement, parameters)
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\pymysql\cursors.py", line 170, in execute
+    result = self._query(query)
+             ^^^^^^^^^^^^^^^^^^
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\pymysql\cursors.py", line 335, in _query
+    conn.query(q)
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\pymysql\connections.py", line 581, in query
+    self._affected_rows = self._read_query_result(unbuffered=unbuffered)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\pymysql\connections.py", line 857, in _read_query_result
+    result.read()
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\pymysql\connections.py", line 1290, in read
+    first_packet = self.connection._read_packet()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\pymysql\connections.py", line 810, in _read_packet
+    packet.raise_for_error()
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\pymysql\protocol.py", line 219, in raise_for_error
+    err.raise_mysql_exception(self._data)
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\pymysql\err.py", line 154, in raise_mysql_exception
+    raise errorclass(errno, errval, sqlstate=sqlstate)
+sqlalchemy.exc.OperationalError: (pymysql.err.OperationalError) (1205, 'Lock wait timeout exceeded; try restarting transaction')
+[SQL: SELECT ac_test_runs.run_uuid, ac_test_runs.target_version_id, ac_test_runs.created_by, ac_test_runs.status, ac_test_runs.manifest_json, ac_test_runs.manifest_hash, ac_test_runs.budget_json, ac_test_runs.started_at, ac_test_runs.finished_at, ac_test_runs.summary_json, ac_test_runs.event_seq, ac_test_runs.id, ac_test_runs.created_at 
+FROM ac_test_runs 
+WHERE ac_test_runs.id = %(id_1)s FOR UPDATE]
+[parameters: {'id_1': 1}]
+(Background on this error at: https://sqlalche.me/e/21/e3q8)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\pymysql\connections.py", line 818, in _read_bytes
+    data = self._rfile.read(num_bytes)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\python3\Lib\socket.py", line 720, in readinto
+    return self._sock.recv_into(b)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\python3\Lib\ssl.py", line 1251, in recv_into
+    return self.read(nbytes, buffer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\python3\Lib\ssl.py", line 1103, in read
+    return self._sslobj.read(len, buffer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TimeoutError: The read operation timed out
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1958, in _exec_single_context
+    self.dialect.do_execute(
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\sqlalchemy\engine\default.py", line 1192, in do_execute
+    cursor.execute(statement, parameters)
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\pymysql\cursors.py", line 170, in execute
+    result = self._query(query)
+             ^^^^^^^^^^^^^^^^^^
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\pymysql\cursors.py", line 335, in _query
+    conn.query(q)
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\pymysql\connections.py", line 581, in query
+    self._affected_rows = self._read_query_result(unbuffered=unbuffered)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\pymysql\connections.py", line 857, in _read_query_result
+    result.read()
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\pymysql\connections.py", line 1290, in read
+    first_packet = self.connection._read_packet()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\pymysql\connections.py", line 779, in _read_packet
+    packet_header = self._read_bytes(4)
+                    ^^^^^^^^^^^^^^^^^^^
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\pymysql\connections.py", line 824, in _read_bytes
+    raise err.OperationalError(
+pymysql.err.OperationalError: (2013, 'Lost connection to MySQL server during query (The read operation timed out)')
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\AgentChaos\backend\scripts\verify_metamorphic.py", line 391, in <module>
+    main()
+  File "D:\AgentChaos\backend\scripts\verify_metamorphic.py", line 125, in main
+    with disposable_database("T10") as engine:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\python3\Lib\contextlib.py", line 158, in __exit__
+    self.gen.throw(value)
+  File "D:\AgentChaos\backend\tests\test_database.py", line 89, in disposable_database
+    connection.exec_driver_sql(f"DROP DATABASE `{database}`")
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1770, in exec_driver_sql
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1837, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1977, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2347, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1958, in _exec_single_context
+    self.dialect.do_execute(
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\sqlalchemy\engine\default.py", line 1192, in do_execute
+    cursor.execute(statement, parameters)
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\pymysql\cursors.py", line 170, in execute
+    result = self._query(query)
+             ^^^^^^^^^^^^^^^^^^
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\pymysql\cursors.py", line 335, in _query
+    conn.query(q)
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\pymysql\connections.py", line 581, in query
+    self._affected_rows = self._read_query_result(unbuffered=unbuffered)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\pymysql\connections.py", line 857, in _read_query_result
+    result.read()
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\pymysql\connections.py", line 1290, in read
+    first_packet = self.connection._read_packet()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\pymysql\connections.py", line 779, in _read_packet
+    packet_header = self._read_bytes(4)
+                    ^^^^^^^^^^^^^^^^^^^
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\pymysql\connections.py", line 824, in _read_bytes
+    raise err.OperationalError(
+sqlalchemy.exc.OperationalError: (pymysql.err.OperationalError) (2013, 'Lost connection to MySQL server during query (The read operation timed out)')
+[SQL: DROP DATABASE `agentchaos_t10_verify_09195611bcb8`]
+(Background on this error at: https://sqlalche.me/e/21/e3q8)

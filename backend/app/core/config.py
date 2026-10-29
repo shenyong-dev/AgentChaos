@@ -33,6 +33,7 @@ class Settings(BaseSettings):
     casegen_model: str = "deepseek-flash"
     judge_model: str = "deepseek-flash"
     agent_thinking: Literal["enabled", "disabled"] = "disabled"
+    agent_tool_policy: Literal["baseline", "single_call_v1"] = "baseline"
     casegen_thinking: Literal["enabled", "disabled"] = "disabled"
     judge_thinking: Literal["enabled", "disabled"] = "disabled"
     model_timeout_seconds: int = Field(default=30, ge=1, le=300)
@@ -44,7 +45,13 @@ class Settings(BaseSettings):
     model_budget_authorization_id: str = ""
     agent_budget_usd: float = Field(default=0, ge=0, allow_inf_nan=False)
     casegen_budget_usd: float = Field(default=0, ge=0, allow_inf_nan=False)
+    casegen_allow_paid_model_calls: bool = False
+    casegen_budget_authorization_id: str = ""
+    casegen_budget_unlimited: bool = False
     judge_budget_usd: float = Field(default=0, ge=0, allow_inf_nan=False)
+    judge_allow_paid_model_calls: bool = False
+    judge_budget_authorization_id: str = ""
+    judge_budget_unlimited: bool = False
     run_concurrency: int = Field(default=1, ge=1, le=5)
     executor_allow_paid_model_calls: bool = False
     executor_budget_authorization_id: str = ""

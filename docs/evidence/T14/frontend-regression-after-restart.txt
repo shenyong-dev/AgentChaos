@@ -1,0 +1,36 @@
+
+Running 6 tests using 1 worker
+
+(node:13176) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  1 tests\environment.spec.ts:7:1 › real services show infrastructure and the configured model observation status (156ms)
+(node:8028) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 2 tests\environment.spec.ts:37:1 › mobile view fits and refresh makes another real health request (933ms)
+  ok 3 tests\environment.spec.ts:51:1 › a simulated network failure shows an error and no fake health result (390ms)
+  ok 4 tests\evidence.spec.ts:5:1 › SSE parser keeps chunk boundaries, multiline data and ignores partial frames (2ms)
+  ok 5 tests\evidence.spec.ts:14:1 › empty evidence page has no invented run and handles invalid identifiers (388ms)
+  ok 6 tests\judging.spec.ts:110:1 › T12 execution change clears previous review fields (explicit network control; no save) (443ms)
+
+
+  1) tests\environment.spec.ts:7:1 › real services show infrastructure and the configured model observation status 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 502
+
+       9 |   page.on('pageerror', (error) => failures.push(error.message))
+      10 |   const response = await request.get('/api/v1/health')
+    > 11 |   expect(response.status()).toBe(200)
+         |                             ^
+      12 |   const body = await response.json()
+      13 |   const config = (await (await request.get('/api/v1/system/config')).json()).data
+      14 |   const model = body.data.checks.find((c: { name: string }) => c.name === 'model')
+        at D:\AgentChaos\frontend\tests\environment.spec.ts:11:29
+
+    Error Context: ..\.local\t14\regression-final\environment-real-services--80bd1-ed-model-observation-status\error-context.md
+
+  1 failed
+    tests\environment.spec.ts:7:1 › real services show infrastructure and the configured model observation status 
+  5 passed (3.7s)

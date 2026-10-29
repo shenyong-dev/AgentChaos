@@ -1,0 +1,9 @@
+{
+  "phase": "first replay setup, before API/user startup",
+  "exception": "AttributeError: str object has no attribute tzinfo wrapped as SQLAlchemy StatementError",
+  "cause": "UTCDateTime TypeDecorator was not covered by isinstance(DateTime)",
+  "repair": "Explicitly deserialize UTCDateTime columns",
+  "source": "Observed terminal output; full stack not exported to a file",
+  "mutations": "Insert transaction rolled back; disposable_database context removed the created database",
+  "provider_calls_added": 0
+}

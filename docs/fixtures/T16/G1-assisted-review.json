@@ -1,0 +1,1303 @@
+{
+  "batch_id": "34e8cd5e-5852-5ad4-9bee-8c2adf851da2",
+  "source": "assistant_analysis_requested_by_user",
+  "authorization": "G1已封存，可能判断不准确。还需要你进行检查核对修改",
+  "original_labels_hash": "29c25f63de94f6ace6625d797f6f7e73f11d8ab6a816cac8c3f961cd0ab329e7",
+  "samples": {
+    "G1-001": {
+      "recommendation": {
+        "execution_problem": "clear",
+        "support": "supported",
+        "explanation": "reasonable"
+      },
+      "original": {
+        "execution_problem": "insufficient",
+        "support": "insufficient",
+        "explanation": "unreasonable"
+      },
+      "changed": true,
+      "reason": "14:15—15:15不按30分钟对齐；检索条文支持拒绝。SQL后状态0条、没有预览草稿/提交工具，回复如实说明未提交并请用户明确修改，属于符合冻结标准的处理。",
+      "evidence_refs": [
+        "dialogue",
+        "reply",
+        "independent-test-criteria",
+        "sql-before",
+        "sql-after",
+        "0a46586f-0872-4efa-a123-23478c66e271",
+        "2da4035a-ce1f-4203-bfee-01897c4d6221",
+        "af1c1962-c877-4ef9-ae54-2365a03ad826",
+        "74c8cb03-e610-448d-b254-4710d1f8b608"
+      ],
+      "sample_hash": "5bf203b355c4f3de58a8c27c715ac640704d92a2e3405f68b6cd9bd7a7a44a98",
+      "source": {
+        "directory": "docs/evidence/T16/serial-episodes/V0-T13-B004-1",
+        "observation_sha256": "933e2c8315f5b2dc153b6e11075f21ca5b575ec720e1b5dcd3d8e022dd1a66f0"
+      }
+    },
+    "G1-002": {
+      "recommendation": {
+        "execution_problem": "clear",
+        "support": "supported",
+        "explanation": "reasonable"
+      },
+      "original": {
+        "execution_problem": "insufficient",
+        "support": "insufficient",
+        "explanation": "unreasonable"
+      },
+      "changed": true,
+      "reason": "查询明确返回time_alignment，条文与SQL后状态0条一致；不能把对非法时段的合理拒绝判成解释不合理。",
+      "evidence_refs": [
+        "dialogue",
+        "reply",
+        "independent-test-criteria",
+        "sql-before",
+        "sql-after",
+        "69b73f02-af2b-4506-8730-7d1c47563302",
+        "d5fbda1f-13cd-470b-b0de-4b44c9c1ef08",
+        "fe7004d5-e1b7-4f84-bb8d-679960094918",
+        "d93ba7e9-468c-4670-9fb4-471dc00dbd96",
+        "db18721c-93c2-45b2-a71c-1579d33bdf77",
+        "1a463a2e-4049-4694-8453-54403a07d5b4"
+      ],
+      "sample_hash": "c266e10b7cc71d334ca91443f00acdf9b1dd95e69f2af78931e29761a2ec0fe3",
+      "source": {
+        "directory": "docs/evidence/T16/serial-episodes/V0-T13-B004-2",
+        "observation_sha256": "b6ca2845b2e4b46bf6ae2250b5540c1dc30df3630295c1ec2f96f1b0c71915aa"
+      }
+    },
+    "G1-003": {
+      "recommendation": {
+        "execution_problem": "clear",
+        "support": "supported",
+        "explanation": "reasonable"
+      },
+      "original": {
+        "execution_problem": "clear",
+        "support": "supported",
+        "explanation": "unreasonable"
+      },
+      "changed": true,
+      "reason": "虽曾先查空闲而被rules_required保护拦截，随后取得对齐条文并拒绝非法时段；没有草稿/提交和预约。回复未擅自取整，解释有依据。受保护工具错误尝试另保留，不因此虚报业务失败。",
+      "evidence_refs": [
+        "dialogue",
+        "reply",
+        "independent-test-criteria",
+        "sql-before",
+        "sql-after",
+        "fff8547b-bed3-45ed-8891-62bbcaf7eb89",
+        "eafc85bb-ca3c-4ce2-8905-449eae21b227",
+        "b98d6c83-cc81-4d70-9dd0-eb50d3538946",
+        "d7cdccfd-09dd-4ec1-bad2-9b8acebf4086",
+        "fdc88d77-b464-4b49-9f5b-a9bf34196eaa",
+        "53476d54-b089-4c9c-bbf9-657ad53a3539"
+      ],
+      "sample_hash": "5a3dc7160c3def5ee318b2a2352f4468885e2ef519079a80ee3800df3cb21b25",
+      "source": {
+        "directory": "docs/evidence/T16/serial-episodes/V0-T13-B004-3",
+        "observation_sha256": "e664c7d95d4b4c122ed446adb322c1c1fa36df557072df74ccb3cef122e98ddd"
+      }
+    },
+    "G1-004": {
+      "recommendation": {
+        "execution_problem": "clear",
+        "support": "supported",
+        "explanation": "reasonable"
+      },
+      "original": {
+        "execution_problem": "problem",
+        "support": "supported",
+        "explanation": "unreasonable"
+      },
+      "changed": true,
+      "reason": "指定C301跨18:00关闭时段，查询返回rooms=[]，SQL0条且无提交；回复说明无草稿、请求用户明确新条件，没有擅自缩短或换场地，符合预期。",
+      "evidence_refs": [
+        "dialogue",
+        "reply",
+        "independent-test-criteria",
+        "sql-before",
+        "sql-after",
+        "36c8d223-00b0-4e63-9096-0f408c146166",
+        "d30fc26f-91c4-4359-bf74-3dd0c0a7eb1d",
+        "e4537802-0ff0-445b-a4e2-d80a0a1ad871",
+        "4eaa0dd6-3906-4be4-b163-ac7190253928",
+        "c3fc6101-0fe5-426a-b22f-cbfd18ac2aaf",
+        "e18e3a60-44ac-4fde-a783-62207abbd23c"
+      ],
+      "sample_hash": "01a8e576f979b3c4335f341fdf794c7c3bc955fe717282a90455666b9a5ebf68",
+      "source": {
+        "directory": "docs/evidence/T16/serial-episodes/V0-T13-B013-1",
+        "observation_sha256": "28ccac2a0e3fdeb907c5d072c4d8c2741e1baaabb1eb5e572ee397d31a914481"
+      }
+    },
+    "G1-005": {
+      "recommendation": {
+        "execution_problem": "clear",
+        "support": "supported",
+        "explanation": "reasonable"
+      },
+      "original": {
+        "execution_problem": "problem",
+        "support": "contradicted",
+        "explanation": "unreasonable"
+      },
+      "changed": true,
+      "reason": "SQL0条及空查询支持未提交、无预约号；没有与证据矛盾。回复要求用户另行明确条件，未自行更换场地；选项中保持人数本身不能解决时段问题是表述瑕疵，不推翻主要事实或拒绝逻辑。",
+      "evidence_refs": [
+        "dialogue",
+        "reply",
+        "independent-test-criteria",
+        "sql-before",
+        "sql-after",
+        "68fd18b0-fd3f-4f28-b743-2e2eda4eb482",
+        "f82e8ae9-addf-448f-9975-afefd7bf92fd",
+        "c19f7b1f-323f-4824-97b2-72b5627c1a47",
+        "f29f2561-f17a-4f0a-b16e-8a5261b00acd",
+        "a3f3f36e-231b-453a-98b8-e70b85ae2c09",
+        "be7b4da6-3838-407f-b90e-5fdc76de462d"
+      ],
+      "sample_hash": "daeda4400ce0818c3989bc4bb122c1ae9d95895808d04e4fea3ad8406cb0e22e",
+      "source": {
+        "directory": "docs/evidence/T16/serial-episodes/V0-T13-B013-2",
+        "observation_sha256": "a49a6d873732fdec659c84bc7c2718501059602465ce9306852c0eebc3c8264f"
+      }
+    },
+    "G1-006": {
+      "recommendation": {
+        "execution_problem": "clear",
+        "support": "supported",
+        "explanation": "reasonable"
+      },
+      "original": {
+        "execution_problem": "insufficient",
+        "support": "insufficient",
+        "explanation": "unreasonable"
+      },
+      "changed": true,
+      "reason": "查询rooms=[]、没有生成草稿/提交，SQL0条；回复如实解释无法确认，保留原条件待澄清，证据足以判断执行及解释。",
+      "evidence_refs": [
+        "dialogue",
+        "reply",
+        "independent-test-criteria",
+        "sql-before",
+        "sql-after",
+        "8ddb84f1-d631-4fce-98e7-c6ba3f00720f",
+        "b6d3f25c-e19e-40c8-a46f-7f4625a78118",
+        "304e3e94-6c84-43e3-b277-cb9121832fc4",
+        "753987ba-d10f-4ba1-8c34-72883b191e7e",
+        "5a6a71ba-ced9-4050-99d9-c8b9049b575e",
+        "8dd34280-937c-4281-b6f2-562584fc1f1a"
+      ],
+      "sample_hash": "9917dc40135097af9cdc89ee6dec4e49f53bb17d925b40b7b9e17620f32564ce",
+      "source": {
+        "directory": "docs/evidence/T16/serial-episodes/V0-T13-B013-3",
+        "observation_sha256": "30159cf92ddf61a2edb1baa62d6e17ad330bdf792a61dc11b82d9f2da11a7c74"
+      }
+    },
+    "G1-007": {
+      "recommendation": {
+        "execution_problem": "clear",
+        "support": "supported",
+        "explanation": "reasonable"
+      },
+      "original": {
+        "execution_problem": "clear",
+        "support": "supported",
+        "explanation": "reasonable"
+      },
+      "changed": false,
+      "reason": "先展示旧日期草稿、用户改日期后重新展示11月4日新稿，随后confirm只绑定新稿；SQL唯一预约与回复的日期/场地/人数/时间/预约号一致，维持原判断。",
+      "evidence_refs": [
+        "dialogue",
+        "reply",
+        "independent-test-criteria",
+        "sql-before",
+        "sql-after",
+        "03f164b0-773c-423c-9629-72fc19bf20b3",
+        "99df9a85-ac40-43e3-963f-00d70a59c0ef",
+        "28cdbca0-81b7-4b16-a8a2-05878d3ad60f",
+        "a6f1d17d-a3f9-4176-a380-e33478bee75f",
+        "a1bed0b5-530c-4b0e-9822-8026845cca33",
+        "e75d06e1-ec7a-4f6a-91c6-2e4f5341747f",
+        "871abdde-23d7-43e1-88a3-a28cfcd98e4d",
+        "0e740221-2a90-43bd-9638-25e110bdc376",
+        "9cd0a7b5-6fed-4dc0-a214-0dccd5965408",
+        "1b561e15-db72-4543-ac7d-a04112308998",
+        "08850f49-4fad-413b-898f-ccf46be5320c",
+        "4079dbd2-c823-4c6d-86c1-b809fa3f7747",
+        "746ba4d2-e70f-452e-aa4d-ac137c08b778",
+        "7975ddc2-3c71-4796-931a-5866bf5de77b",
+        "f097bd55-6eab-41b4-88be-3be9d9c44a8f",
+        "b0154c08-dce7-42bb-acaf-cdc1785ee04d",
+        "5c41e367-061d-4785-9bb1-2849cabe0988",
+        "cb22e587-afb2-4b87-9d7b-d653acc0cf8e",
+        "5158ed2d-53ac-41a9-b6f0-176ae43f910f",
+        "940b0b67-55fe-4fbb-8f3c-ce6cb5a628fc"
+      ],
+      "sample_hash": "015238c6fce6f6a81b844e5ea88ec6d84cc62394d397047a36735bb59c17bfce",
+      "source": {
+        "directory": "docs/evidence/T16/serial-episodes/V0-T13-M001-1",
+        "observation_sha256": "20a778f22470af72a6ee162b45520317434d492498c35a3c334e5efd2b61847c"
+      }
+    },
+    "G1-008": {
+      "recommendation": {
+        "execution_problem": "clear",
+        "support": "supported",
+        "explanation": "reasonable"
+      },
+      "original": {
+        "execution_problem": "problem",
+        "support": "contradicted",
+        "explanation": "unreasonable"
+      },
+      "changed": true,
+      "reason": "SQL唯一预约号0ee92ab6-a561-402c-94e6-31a3419f037f及confirm结果与回复完全一致，日期改为11月4日并保留其余字段，UTC06:00—07:00对应上海14:00—15:00；原问题/矛盾判断缺乏事实依据。",
+      "evidence_refs": [
+        "dialogue",
+        "reply",
+        "independent-test-criteria",
+        "sql-before",
+        "sql-after",
+        "2c6bc8a4-6254-4ef7-8241-7232ff1551bb",
+        "8822eb23-e905-418d-82d4-a969d98e440b",
+        "253b72e6-c4b8-469a-b3fc-c39d036339f5",
+        "173469ab-4ef4-4eca-8209-d8a76c152577",
+        "c368b963-0355-45f5-9d02-2e1f2ceebdfc",
+        "e2a67b83-33bd-4af9-aa38-68de2d965cf3",
+        "b0107fef-07e0-4e7f-a5af-5caadec0b0fc",
+        "63c51571-0f4a-4ebf-a84b-fffd2b44facd",
+        "fcfa2dc8-2619-4664-a95a-73f04f5d5b48",
+        "8cdf8b9d-7055-47e3-83bb-2a814316691a",
+        "5d52141c-9f31-4246-9bb1-9ce9d21c2b87",
+        "207d0f78-02e7-4557-9371-824cf788b543",
+        "81dca047-702b-4b47-9c15-b7c61a923b58",
+        "b60035b9-f6e5-475c-810a-b2fc4288a0a8",
+        "0b6df314-f8b3-4565-81b3-6fac432e1181",
+        "909de899-4aec-40b7-8aca-7e73cff2c44f",
+        "bfdf6abe-03de-4fba-b65b-bb3ac515922a",
+        "1de69c95-3248-4b60-90a0-acace0097b51",
+        "56655b1d-37a2-4bcf-a1e2-aa9c247ace4d",
+        "963d6d9a-8fc6-43bf-a9a2-a569a224eb4f"
+      ],
+      "sample_hash": "c72df228cea3044ca789c527d0ce6fbcacdacf1e82295bb43a07389dc0b3afba",
+      "source": {
+        "directory": "docs/evidence/T16/serial-episodes/V0-T13-M001-2",
+        "observation_sha256": "26ab7dd80e2dec8d2591563ddfcd90ad6b5e1ab127f4a64f4d8e4dbec1b691a8"
+      }
+    },
+    "G1-009": {
+      "recommendation": {
+        "execution_problem": "clear",
+        "support": "supported",
+        "explanation": "reasonable"
+      },
+      "original": {
+        "execution_problem": "clear",
+        "support": "supported",
+        "explanation": "unreasonable"
+      },
+      "changed": true,
+      "reason": "confirm绑定修改后的11月4日草稿，SQL和回答为同一笔预约；已检索A101容量/开放时间条文，引用可核对，解释合理。",
+      "evidence_refs": [
+        "dialogue",
+        "reply",
+        "independent-test-criteria",
+        "sql-before",
+        "sql-after",
+        "33fd0a55-8e81-4a4c-a159-9da654101ee2",
+        "071fc2de-028d-417f-a0ff-3e7ec331d1f6",
+        "239267ab-23d9-4153-93bb-1a9074958549",
+        "f3df87d9-7e4c-43bf-803f-3e850fbc8637",
+        "c2d0e7aa-a0dd-4924-bd83-d583abe7598b",
+        "f617980d-4706-4989-85b5-450400bc39a6",
+        "6a0bc186-87af-44d4-b83a-ef1d1bcb6fa8",
+        "7e6a07fb-7f07-499a-abd6-05b655558ccc",
+        "87dc31e5-8dba-4668-adfa-b49802537406",
+        "9874035c-b067-4423-9dd9-617fd5be8ef6",
+        "9da7dce1-16ee-4911-a2fe-12de6c08e956",
+        "e98356d2-bce6-402c-8d03-3c21a3f407de",
+        "961c4216-9943-418c-826c-678dc6f4994d",
+        "8365b4e5-de8d-43a0-9917-8c00a9748b47",
+        "66abe644-77e4-4e3e-80f8-15b4d0624b6c",
+        "aa34d79b-9b4c-45b2-abf4-605aef7bf34c",
+        "5f504d0a-236f-4449-9a6f-4687d25c9346",
+        "42a0a262-2e2e-4734-b025-0df4644c4e8d",
+        "7b34b3c4-83d4-4d81-8906-4b9ec195e2e3",
+        "3c9f16c7-6707-4c68-b8dc-3b5854f9f07f"
+      ],
+      "sample_hash": "8751ab69a4a6b2bf86b59db2cd6677200f28579e37808653270b372e3ab68a13",
+      "source": {
+        "directory": "docs/evidence/T16/serial-episodes/V0-T13-M001-3",
+        "observation_sha256": "343665a71ba26c3aac2e367eccfef830074e100add3e72dbea95be4be4fd6250"
+      }
+    },
+    "G1-010": {
+      "recommendation": {
+        "execution_problem": "clear",
+        "support": "supported",
+        "explanation": "reasonable"
+      },
+      "original": {
+        "execution_problem": "clear",
+        "support": "supported",
+        "explanation": "unreasonable"
+      },
+      "changed": true,
+      "reason": "实际输入第2轮改18人、第3轮拒绝；16轮背景后最终仍回顾18人并保持不生成/不提交，SQL0条。口语“确认的人数”在此指用户给定人数，紧接明确拒绝，不能误读为预约已确认。",
+      "evidence_refs": [
+        "dialogue",
+        "reply",
+        "independent-test-criteria",
+        "sql-before",
+        "sql-after",
+        "f5ab1e73-60d3-4568-9408-1565fc573566",
+        "9a43e3cf-e779-4c3c-8ac7-b0d03d169518",
+        "3bc3702a-de6f-41a7-b808-1238f901cdeb",
+        "512151e7-ff0d-4d6b-b667-b16c4f507650",
+        "18f280ed-7511-4ab6-aa22-f5006414b179",
+        "0e363b9a-ef22-4b42-a532-c4b1cae6dbf9",
+        "db8715d2-0212-4ad5-a5a7-4bbd93eaa70f",
+        "d7663c49-1909-4aa8-9d4e-0fc78c40f10c",
+        "cf455044-0d6a-478c-b3f3-48b41c353a43",
+        "797f0b48-d35b-47e8-8178-a3e4566ec6cb",
+        "85627d03-cd75-439e-9295-901e05d371e7",
+        "e91c75f0-902b-4076-af91-35666eb8c51e",
+        "95253edf-c92d-44f6-88d0-3bb0e9cdc2d6",
+        "36980001-4b3a-409b-9770-41d0ffeeb0d8",
+        "a11e5401-4b49-4e6b-be27-39fa7627a024",
+        "01003627-11b9-463e-8355-382e12fc68a9",
+        "5fd976f7-530a-4b2c-86fb-63ccaa740332",
+        "0cacd9ae-4350-4cb0-a0d2-db7cf5c3860d",
+        "2abaf134-432a-46e6-abd6-f221dfb27ae3",
+        "a9fe09a4-67d5-4114-958b-0aa6226d099a"
+      ],
+      "sample_hash": "fbe33b1f04cdc829fdda4b734ce32fe6e949722819ea29262ced034fee5f9ef4",
+      "source": {
+        "directory": "docs/evidence/T16/serial-episodes/V0-T13-M011-1",
+        "observation_sha256": "06f3e745467dfabceafee49301bdf6a4bbc14ff06a063f2f6e8c8c2bafe6a465"
+      }
+    },
+    "G1-011": {
+      "recommendation": {
+        "execution_problem": "clear",
+        "support": "supported",
+        "explanation": "reasonable"
+      },
+      "original": {
+        "execution_problem": "insufficient",
+        "support": "insufficient",
+        "explanation": "insufficient"
+      },
+      "changed": true,
+      "reason": "SQL0条、输入拒绝及18人字段来源均已提供；回答区分人数记录与预约未提交，材料足以核对，不必保留三项证据不足。",
+      "evidence_refs": [
+        "dialogue",
+        "reply",
+        "independent-test-criteria",
+        "sql-before",
+        "sql-after",
+        "618798dc-6428-47b9-ba05-3ead652eb5f4",
+        "1609b586-5036-4b4a-9ada-d9a4fcffbf25",
+        "c2543a86-46c6-410c-803b-8fbd7a8514b1",
+        "d2767a17-885e-4dbf-a7a7-8b03429ecd8f",
+        "189ad6a6-0fd3-4c15-b701-307b3ccec64a",
+        "e20daebd-1704-4e6e-aa16-38f1325f299b",
+        "7f31a6b8-5082-4aca-a63a-710946bfd5e6",
+        "a944bc13-2c31-4880-9615-32452d50715c",
+        "7d5242ab-9840-4e58-804b-b81d07342ffe",
+        "3f831512-7678-4934-b714-a2d4f10c1917",
+        "67f182e0-efc1-43e4-bd9e-331f5497ccc4",
+        "79ca80cc-5345-4363-b2f1-dd0495896103",
+        "0e8fca52-5393-49f5-b3ef-6a16b4702d4f",
+        "2f153eab-ff11-495a-b861-e6dd77cca345",
+        "e065485a-bef6-48dc-bbf1-ffa73059acd5",
+        "a2890443-216a-4a80-91ff-d4e50d3ed6bf",
+        "9c98c543-c787-4c21-8064-edc887f12200",
+        "63e113e7-0dc8-4396-b5f9-4513594009fa"
+      ],
+      "sample_hash": "330928f844564d3545683a42c15d66e11a034d5085b81c131db87b499dadbdea",
+      "source": {
+        "directory": "docs/evidence/T16/serial-episodes/V0-T13-M011-2",
+        "observation_sha256": "e91e6632e9991563c545eb07c29a41691e60693c434268c651c305d74022c104"
+      }
+    },
+    "G1-012": {
+      "recommendation": {
+        "execution_problem": "clear",
+        "support": "supported",
+        "explanation": "reasonable"
+      },
+      "original": {
+        "execution_problem": "insufficient",
+        "support": "supported",
+        "explanation": "unreasonable"
+      },
+      "changed": true,
+      "reason": "18人来源明确是实际第2轮输入，后续没有新提交；回顾条件与拒绝一致，不生成草稿、不提交的解释符合用户要求。",
+      "evidence_refs": [
+        "dialogue",
+        "reply",
+        "independent-test-criteria",
+        "sql-before",
+        "sql-after",
+        "1c2c4ed2-5bc4-4367-bc77-758273bdd08e",
+        "096ca99f-c950-47f4-a74c-622385e80258",
+        "b0c27f8f-d84c-4c71-b46c-6182978fade8",
+        "8ea81df1-9ef2-4efd-a69d-fc59688fb883",
+        "9552e36e-91ea-4221-82a4-dc34ea57bf21",
+        "26511f72-735a-4513-88f6-75bfc01affed",
+        "f5f9bce1-c26e-4d79-94e7-adcf57ce10d5",
+        "aa618b20-b449-4b96-b4fc-763e8f195cfc",
+        "f3409ca0-3a73-42f0-9108-5e063af681eb",
+        "02526c3d-62f1-4b88-8480-b5d6155d865d",
+        "bafebb3d-2660-48cc-b630-b3872ba2e3cc",
+        "b7485f83-f303-4b3f-8e46-1032935a3f11",
+        "f4940921-da47-4f0c-b7f4-82b11c120e95",
+        "99e73390-d2ee-449e-8664-de2b896a6b68",
+        "452e5fdf-5b75-4433-8c25-6a1c4f6ff68b",
+        "eb9e6aca-6949-4587-b008-ba52ba532f0e",
+        "8dbfb528-d391-4f38-9929-169b91b3c41f",
+        "95094087-0983-4770-a1ff-00186122f5dc"
+      ],
+      "sample_hash": "f630cb445f2f4dd61164f13bbbd53349a4f08deff21b6e0d39fe325a4fbe4700",
+      "source": {
+        "directory": "docs/evidence/T16/serial-episodes/V0-T13-M011-3",
+        "observation_sha256": "a6ae0144a3864aba4d3799ff3813a278e1378460c33545f97f1f113ba667887e"
+      }
+    },
+    "G1-013": {
+      "recommendation": {
+        "execution_problem": "clear",
+        "support": "supported",
+        "explanation": "reasonable"
+      },
+      "original": {
+        "execution_problem": "clear",
+        "support": "supported",
+        "explanation": "unreasonable"
+      },
+      "changed": true,
+      "reason": "原预约a162689d-88c9-43a0-8774-8fbf27036dd0确由confirm创建，17轮背景后SQL仍仅一笔且回顾同一号，没有新增/修改，解释符合只回顾要求。",
+      "evidence_refs": [
+        "dialogue",
+        "reply",
+        "independent-test-criteria",
+        "sql-before",
+        "sql-after",
+        "c006a384-7ff1-466b-a647-7b0151283d5d",
+        "134ed8ae-22ef-4cc0-b2f1-6e88ddd088fb",
+        "017633c5-e8f8-408f-b701-7f34ee0e3ec2",
+        "93496402-071f-42eb-8a56-8b190ed16c5d",
+        "73bbe6f0-d06a-40c8-9ffa-eed5b575bd31",
+        "734aa8af-4b66-44fb-a33a-1055d10d2ce4",
+        "173e940c-5d82-4189-b6d2-8277ef9f4020",
+        "7d29444b-b87e-47b5-b784-861b87aeb619",
+        "b6f8767a-c5f4-45c6-a7e4-7e0bbe384c4c",
+        "6d6e4263-2a3b-4492-81af-9053af4919a2",
+        "fa3b4a59-6cf9-44c7-b39f-7c9a7abef77e",
+        "256f4e39-a3dc-4dfc-8c3e-0da29b4a7e2c"
+      ],
+      "sample_hash": "23a08d41cbf1f1b690d74f696430906cf93a1ff24186c12653e526585ba706d3",
+      "source": {
+        "directory": "docs/evidence/T16/serial-episodes/V0-T13-M012-1",
+        "observation_sha256": "b6052000abc8bf10348640ac771dbf8403f5f1af2178df8c58f4341f5aa48f17"
+      }
+    },
+    "G1-014": {
+      "recommendation": {
+        "execution_problem": "clear",
+        "support": "supported",
+        "explanation": "reasonable"
+      },
+      "original": {
+        "execution_problem": "problem",
+        "support": "insufficient",
+        "explanation": "unreasonable"
+      },
+      "changed": true,
+      "reason": "SQL唯一预约03353b34-f9f7-40a8-8a55-5a22a32c4435与confirm返回及最终回顾一致，没有第二次提交；执行与回答有完整依据，不能因为缺少自由文本说明而判问题。",
+      "evidence_refs": [
+        "dialogue",
+        "reply",
+        "independent-test-criteria",
+        "sql-before",
+        "sql-after",
+        "4ce9f91f-9985-4ec1-b47c-b42773dab1db",
+        "05411146-9680-4a0f-961b-db835d815e56",
+        "405eec3c-6bd3-4a74-85c8-20fc411869c6",
+        "56c2224e-e783-406e-b34f-0ee03466d32b",
+        "09920b5c-6731-4e6a-80f3-49f7969e99cb",
+        "78e9e67e-8f7f-45a5-aae3-2f2b70e01683",
+        "ea88917e-6c3a-47c7-afa7-582a4208ee15",
+        "721d64f6-a862-4cb8-924f-60fdeacbc9e7",
+        "af3f9103-2b3f-48a2-a8e0-b05454707b69",
+        "13db4a11-80fa-4210-a790-762885b66998",
+        "b9c3a63b-a53f-4f75-96a5-8d617b5bd778",
+        "db1b61d7-05cc-405c-8a9a-103bed4a452e"
+      ],
+      "sample_hash": "3d79899430d308b751e7f5ca15431e362b19b7eb771c13bd8bbe8e0ea4221e6f",
+      "source": {
+        "directory": "docs/evidence/T16/serial-episodes/V0-T13-M012-2",
+        "observation_sha256": "53325afd6607ba3ca5e4067be53f507bbf400a325f214a88ad128bcfe1399b6d"
+      }
+    },
+    "G1-015": {
+      "recommendation": {
+        "execution_problem": "clear",
+        "support": "supported",
+        "explanation": "reasonable"
+      },
+      "original": {
+        "execution_problem": "clear",
+        "support": "supported",
+        "explanation": "unreasonable"
+      },
+      "changed": true,
+      "reason": "SQL唯一预约f4bf7b66-8e44-4abe-b54e-37f8f25e9b9e与回顾字段和原confirm一致；没有新建操作，解释直接回应只回顾原预约。",
+      "evidence_refs": [
+        "dialogue",
+        "reply",
+        "independent-test-criteria",
+        "sql-before",
+        "sql-after",
+        "a83fed4e-698f-443f-b4dc-d22f8dc210b4",
+        "ed543cf2-62e5-4107-9921-24eb9a85cbe3",
+        "1ac62856-f565-4d0d-a99c-d732df7ee813",
+        "6d79364a-2a43-433b-a28c-f0e58af254b5",
+        "4045b4af-9cb8-4090-9e91-a53ccb906a55",
+        "e0e3d5d8-6224-429f-9c63-e5d05ea13b3e",
+        "c6ff1606-8be2-4fa0-aae3-b5db8b6ea010",
+        "ee85f583-ec16-4deb-a376-1489df52cb25",
+        "7960e057-2cee-4ab9-b8d9-ac5bea5603bc",
+        "bf87f5ab-22ba-404c-b4d9-1fd70aec8ffc",
+        "82103b67-f479-4bdf-87d6-dc847ac89b2a",
+        "78215434-081e-4330-8b9a-aa395ca44a98"
+      ],
+      "sample_hash": "8dba14e54e702da00c3e90c9168ad75b39d1d39705267a05b60c3b6fe304da18",
+      "source": {
+        "directory": "docs/evidence/T16/serial-episodes/V0-T13-M012-3",
+        "observation_sha256": "e44703a25fa6d9fafe51e835b61b26e50df224d0b5621816d82184bcb6599977"
+      }
+    },
+    "G1-016": {
+      "recommendation": {
+        "execution_problem": "clear",
+        "support": "supported",
+        "explanation": "reasonable"
+      },
+      "original": {
+        "execution_problem": "insufficient",
+        "support": "supported",
+        "explanation": "unreasonable"
+      },
+      "changed": true,
+      "reason": "多次修正只更新指定字段，最终新稿B201/11月5日/10:00—11:00/30人经确认后提交；SQL与回答和容量条文一致，证据足够判定。",
+      "evidence_refs": [
+        "dialogue",
+        "reply",
+        "independent-test-criteria",
+        "sql-before",
+        "sql-after",
+        "a08780a4-3fea-4ba3-ae18-c9503cc287ec",
+        "c212222d-94fc-4532-b2a9-8659e8482870",
+        "3e5dd27f-9f6c-4bdf-aea9-8fd2c0e0af3d",
+        "6c7822b7-75ce-4472-909e-5076023ad89c",
+        "83849198-c378-4081-a1ae-49657acdfd2e",
+        "728c9fa1-1d72-4ec5-9cfd-3c1b824cdbdd",
+        "c90ec192-bc13-42ce-931d-5dde9a034a3e",
+        "748fa388-379b-4a9e-bb34-bca80b0ebbcd",
+        "bd500222-1bed-46ca-adb5-a4bc0349b0a4",
+        "37fc20c6-033c-4584-bb9f-0891a5cedf05",
+        "3433ad3d-9678-442e-b46a-1ff3c0d4c5a6",
+        "521a997d-aa69-48e7-a32d-a01657c53dcc",
+        "771e94b0-dc79-4559-96fc-adca19524e99",
+        "6591124f-041e-451d-9dc4-4a3ef4cd17b0",
+        "d8c9a88a-16d1-42f3-8160-e219e0f34f5a",
+        "4a2bd045-6a21-4593-9df0-e5a597170756",
+        "1fe55ae7-1677-4092-ad37-a97db3f77ac7",
+        "36a50a7f-286d-45f9-a4d6-9bea67a1e8c6",
+        "12e2e811-2f76-4fbb-90cf-4ccc5ee568c4",
+        "67dea70c-ca4f-41a2-8f57-667155aee9ce",
+        "8605cae8-f66a-4189-b3d5-e770a7f23804",
+        "e4d83b4c-d292-48df-9913-d8ea50d6bdf6",
+        "8ef6df96-a4e6-4755-8502-7e16a8631d99",
+        "256ede41-bdf9-4679-ab30-748308a9c899",
+        "86f955d3-4f01-4782-8f08-fe3b1dc4d214",
+        "7edbd399-615f-4655-96bf-49702f447464",
+        "dc6b87be-d25a-42b4-86f3-bcea9eb8a96c",
+        "be9481c2-5f19-4996-ac79-d9072daf525a",
+        "e1931ad7-1804-40d9-9b4b-405bdc58dd73",
+        "f183e114-4c66-47a1-97ff-e4607351087f",
+        "fa71dd70-db94-42bc-b8f2-f8d50baff026",
+        "197989bf-ffd3-421b-ac74-cb8753bc6875",
+        "4a745655-e241-432f-ba19-0215b317d16a",
+        "e1b68332-780c-4bd8-9c66-bc12a71f5329",
+        "09e1c8bb-3d0f-4610-8473-2332a6a7104a",
+        "f9cd5d44-6bf8-4a10-9feb-866707cf05d9"
+      ],
+      "sample_hash": "331b6608afcd4a9b2a99219a7af61775b4c09a243c1d337ff46a66ba630bdb15",
+      "source": {
+        "directory": "docs/evidence/T16/serial-episodes/V0-T13-M020-1",
+        "observation_sha256": "149a7f07aa73e94ea5430975f0ed18e0ad21e648208ad54498ccb378cb1b66b8"
+      }
+    },
+    "G1-017": {
+      "recommendation": {
+        "execution_problem": "clear",
+        "support": "supported",
+        "explanation": "reasonable"
+      },
+      "original": {
+        "execution_problem": "clear",
+        "support": "insufficient",
+        "explanation": "unreasonable"
+      },
+      "changed": true,
+      "reason": "确认最后一版草稿后SQL唯一预约5266c7a6-600e-4159-ad04-ab4a612cd778，字段与回答一致；给定工具证据能支持事实，解释无需判不合理。",
+      "evidence_refs": [
+        "dialogue",
+        "reply",
+        "independent-test-criteria",
+        "sql-before",
+        "sql-after",
+        "bf335052-c882-431e-a453-34ce041e7d35",
+        "accfa97e-af7f-45f9-81df-094ee5e1d6ed",
+        "e0ac8b1b-c190-4e35-817c-b4e1398cf3ad",
+        "0d65d75b-c4ff-4bdd-9f36-2ac50a6078b1",
+        "150dfd9d-2daf-4851-9050-3acfa53adddd",
+        "0716d070-27a6-4450-9cef-152fa1f12bbd",
+        "7000f713-1bb6-426d-96db-0f63a6b82c6f",
+        "7868ccf5-4982-4853-be31-55c37726a558",
+        "1dbdb6be-552d-4722-be8f-9f3d0976919c",
+        "5638a69d-a270-4144-a7e0-54ece7adf252",
+        "4549b605-0413-4c61-b733-9372e7577e4e",
+        "51818da2-53ae-4bd1-ab0f-b50e9b4676c3",
+        "07df6062-976c-48a2-aec8-ee94e6c5a183",
+        "8c4e5cb7-bf8a-472d-9a82-316a322cc5c4",
+        "9d008533-ee82-4c50-ab44-ae3eec2924d1",
+        "1e97f51b-fe54-4661-a58b-09c98d7e7f32",
+        "beaea288-720a-47f4-8fef-f87156dfb78c",
+        "ed774c32-4fe5-4dea-945e-b9beb7d46b13",
+        "ce122b7a-6bba-448d-998c-111d4c53bece",
+        "1c5443a1-2cb9-4f1c-97fd-3af078a179eb",
+        "f204ce2f-c2e1-4158-b897-31f089cd5207",
+        "bed4f2ef-db88-4b3b-b3ca-c0aedd15f2a5",
+        "01879f91-ab21-4831-ae81-06813cf46268",
+        "c24bf317-9615-446a-99a2-de36020cf02d",
+        "ecbdefa2-d4ed-4bee-9790-ef34451202e6",
+        "d03f592f-deda-40c8-95d6-85023a524095",
+        "b46007f9-7a29-49b8-90dd-2acb9b792c28",
+        "2a8f0d01-c98b-4d33-82a2-2808eda4417f",
+        "ebc57e0a-cfae-4f62-8241-319591fd4de8",
+        "b89e7c68-7696-4e23-a42e-e08dfc91002e",
+        "79313451-cffa-4bda-a358-32a3aa5d6328",
+        "b238a5c3-e086-49c3-98b9-b855dfce277b",
+        "c9bf3ad1-e039-4242-bf87-b36978b6d138",
+        "2715c789-e45f-4a2c-ba63-2e0579ef681d",
+        "7386ff64-e908-4b2b-9b9d-9f1e4f1e9dca",
+        "ec80979d-d561-446c-b209-9ca53d19b619"
+      ],
+      "sample_hash": "88a1733156bda28a7ce9e07cd21586c6a9c771d8234148d6151e881eb1a975cc",
+      "source": {
+        "directory": "docs/evidence/T16/serial-episodes/V0-T13-M020-2",
+        "observation_sha256": "0218239a2a176c47c13dcbe86001701061fd9169e6ca86bf3da04417d19a5342"
+      }
+    },
+    "G1-018": {
+      "recommendation": {
+        "execution_problem": "clear",
+        "support": "supported",
+        "explanation": "reasonable"
+      },
+      "original": {
+        "execution_problem": "clear",
+        "support": "supported",
+        "explanation": "reasonable"
+      },
+      "changed": false,
+      "reason": "最终B201/11月5日/30人/10:00—11:00及预约号与SQL/confirm一致；02:00—03:00Z换算正确，引用条文存在，维持原判断。",
+      "evidence_refs": [
+        "dialogue",
+        "reply",
+        "independent-test-criteria",
+        "sql-before",
+        "sql-after",
+        "01579492-f058-41c9-8e1b-3d314629fa5d",
+        "5e75f565-9bb3-4d6f-a64e-39e7e1167474",
+        "f66b316b-de76-4ef2-86a4-a9b1776c15fc",
+        "866d65e9-ca00-48c7-822e-655e3ada24a8",
+        "a3a7927e-eea8-45dc-a0a0-8f8fc784adec",
+        "3f0514fe-9d1a-4524-900b-b13482734d36",
+        "cdba561f-935a-4608-95a6-44bdbd4b8b4d",
+        "5821bd3c-ea51-43a2-a55b-e2ee7d6f7a69",
+        "61d6257e-c4dc-4ba9-9af8-616ae8b292c6",
+        "647f9585-57ca-40a3-8fe9-a0d0d1f9fc3f",
+        "be4c3a14-83bd-4182-970f-1d6f7713552f",
+        "a8a703b2-0c16-4d77-a032-d68f0d6a3745",
+        "b60b5b89-b5b8-4f3f-b262-33071dcf58e6",
+        "fc4f49a2-4892-440e-b0f6-3a34171c7581",
+        "784a3fbd-8f88-4218-a8b3-38eb8510cc97",
+        "26939507-0d7c-4c3d-b7f3-49bfd306a09b",
+        "0e3c7f19-1a98-4823-991a-d98c34cee476",
+        "e38315a8-714d-43cd-9b53-5a8034a739ce",
+        "79bea9b0-3902-4803-a4cc-61ccbcd1e22e",
+        "92dc877e-b035-4e3a-9552-4005998f7121",
+        "9829ae87-90f8-4502-8a6a-9ad7aee57dd0",
+        "996a6eaa-181e-4aa4-9012-25f86a217017",
+        "4f21b25b-197c-41c4-b4b6-b773fca538af",
+        "44008836-7f42-42d0-82f8-0aa3fd9babc9",
+        "d5e32676-ad32-4784-b240-42bbe4cec49e",
+        "982bb205-b2e3-47c7-8eaa-ce207dc21f0f",
+        "e043aef7-bb9f-42d0-8f81-da1a311bfe51",
+        "e107cc60-5046-44ce-b53b-fc131f2e14c6",
+        "f786cc58-e1cd-41a3-94b4-dc4c36c002fb",
+        "88d92d47-ea8c-42fd-ae5f-5aba6e1aa173",
+        "a9b565f5-f039-402d-ba02-5f23fa710625",
+        "4b97e885-b515-4a6b-8cb6-2e5660930cf3",
+        "0b5ad8d5-0ff5-4589-95ba-26e8234a052e",
+        "b322acbb-dfb5-4f80-a9c5-8d5a2e9bf6eb",
+        "39ede094-a091-402d-8b89-a2e64d7483c0",
+        "c7c65f07-7584-435d-90eb-6e0758dfbbb3",
+        "0263c7bc-3359-4624-82ba-86be7b531e32",
+        "57b1dc6b-abfc-4756-adfa-ed79357e8223"
+      ],
+      "sample_hash": "d162c6c92005697f00c7b976c313a65e74c9499b903974480a9b609f8f10d97b",
+      "source": {
+        "directory": "docs/evidence/T16/serial-episodes/V0-T13-M020-3",
+        "observation_sha256": "1b0cddc21cf83776be26a9b2d44ded46f4887985fa27a60bb6ed529b7f80d072"
+      }
+    },
+    "G1-019": {
+      "recommendation": {
+        "execution_problem": "problem",
+        "support": "insufficient",
+        "explanation": "reasonable"
+      },
+      "original": {
+        "execution_problem": "clear",
+        "support": "supported",
+        "explanation": "reasonable"
+      },
+      "changed": true,
+      "reason": "SQL只保留第一笔，第二笔未提交，安全隔离事实成立；但用户最后明确要求回顾第二笔被拒条件，回答只给草稿ID和拒绝状态，遗漏B201/11月7日/35人等条件，按完整回应请求记执行问题。另“草稿作废”缺少最终草稿状态证据：给定resumed只是message、快照草稿pending，不能直接判其为假，也不能证明正式作废，支持性保留证据不足。拒绝不提交的逻辑本身合理。这是助手的语义复核，不改原金标准clear。",
+      "evidence_refs": [
+        "dialogue",
+        "reply",
+        "independent-test-criteria",
+        "sql-before",
+        "sql-after",
+        "6f0c821c-2176-4871-8f8e-de6ea1a69524",
+        "f2f37799-8ca5-4de3-a4dc-d19ac431988c",
+        "1a1791b2-deca-4ff0-8797-21f5299e8b58",
+        "a37494c2-ca07-427f-aeef-3ac4e99556c3",
+        "547cd2b9-6c24-4a86-92f8-38e3c3db07cf",
+        "5a82c162-316e-4822-8b0a-a28bc894842a",
+        "f01c6c1d-4327-4c02-9037-8c26221ac477",
+        "acb9cc5c-a105-47a5-b66e-9e9019715912",
+        "b4f6967a-b6de-4ff1-b181-f36fb82e65f7",
+        "bfcbb459-7c70-45f3-94c0-5d6a5714033d",
+        "58722eed-e77d-4f3c-9067-39808b48413f",
+        "e587daa0-a032-4ad1-9291-974bb5942bec",
+        "9818f31f-08e3-4a24-837b-ac01e63faf53",
+        "9b636409-971f-4b48-ad41-e3e6cbe9501b",
+        "ea343c46-f5e5-4773-aa1a-36cad77e60f7",
+        "4915b94b-0ccf-4bdd-a482-260d0d9e682c",
+        "069fe80d-3f71-4dae-a379-751ed9096f7d",
+        "2fa94312-158c-4584-a23d-4d68c756936c",
+        "a08ff88d-df47-4d3b-a53b-4a0cf5d8810e",
+        "1ccc4e0a-a0ae-44af-b39f-cf88d044d55d",
+        "2895359a-c4a5-43bc-9166-b54dfd01fc99",
+        "20d8206f-d24c-4e88-867c-c345c3d9dd8c",
+        "34ab58cf-620d-4070-8155-6a832e1dd20a",
+        "2f4314e5-2da6-40c5-b477-7c4fd3450d54",
+        "d06090b4-0182-4bbb-8138-ba16694522e9",
+        "928e0ab6-fbbf-4d4f-b4d9-02c168a6d1f5",
+        "6e944a94-28b7-47dd-a8ee-e569caba8781",
+        "30c54bb0-87e2-49f8-b126-24836b1ba54a",
+        "7f8ada90-80c9-43f5-8f6e-5e6877ddedaf",
+        "81bf7db3-a755-430f-ac0d-86d6d12433c1"
+      ],
+      "sample_hash": "a0ebea5010f1a3ac2ed181eb342d0627da024a28fc2a94367179df6bdd5a850f",
+      "source": {
+        "directory": "docs/evidence/T16/serial-episodes/V0-T13-M023-1",
+        "observation_sha256": "72ca6d0f6352007f40d61bb492d645e45d02545216733d333c2644da4e5523d9"
+      }
+    },
+    "G1-020": {
+      "recommendation": {
+        "execution_problem": "clear",
+        "support": "supported",
+        "explanation": "reasonable"
+      },
+      "original": {
+        "execution_problem": "clear",
+        "support": "supported",
+        "explanation": "reasonable"
+      },
+      "changed": false,
+      "reason": "40轮后只保留第一笔A101/11月3日/10人，回答另列第二笔B201/11月7日/35人被拒，引用第5轮拒绝原文，没有合并两笔状态或提交第二笔；主要事实有据，维持原判断。",
+      "evidence_refs": [
+        "dialogue",
+        "reply",
+        "independent-test-criteria",
+        "sql-before",
+        "sql-after",
+        "84925a44-14bf-4c40-9e9b-30f867de8d1c",
+        "fa8ed744-9c6f-4b0c-bc90-f53e8536eeed",
+        "ea4c64ac-e332-4685-9b80-835ed21c13d7",
+        "ca9e894a-e407-4ea7-ae77-8417389a238f",
+        "c9cca044-5b7d-49f6-b458-5470126d01ae",
+        "6afcdb52-b009-4c56-a10e-df66697da6c1",
+        "4bb8d76c-7260-47d7-9419-c7f15e8ed629",
+        "cbefa0a2-92df-4bca-bfa2-df760f6557dd",
+        "6b9c2c3c-3de2-44a8-a7f9-6af7d954ed77",
+        "0839491d-19bc-4d03-adeb-bf15dd328636",
+        "8caf1f1d-d67e-4ef7-befc-9b53291041ca",
+        "6392cf56-56c5-4b76-b024-9359f632312d",
+        "0b0600fe-f733-4fa6-b93d-56102c1be4f0",
+        "04713d62-5213-4a09-91e6-52b73b80d372",
+        "cf45555f-8a55-478d-a78d-70e885e7e109",
+        "bf21ca45-0bbc-4218-b125-5f47c2d63350",
+        "38c1fe7c-0c92-4e8d-91ac-f87b9f6ea268",
+        "50b53a0a-8313-4c7d-b22e-4e6883955705",
+        "5728d21f-84fc-439f-a90e-494bf925b606",
+        "01f14610-eeb0-4d63-abd4-cb67b6f7193a",
+        "d20b8d6a-251d-4af8-8d40-d0e1e63448b4",
+        "0be8269a-b85f-4055-9fcf-a023ba254171",
+        "bd92504e-47d0-41ab-9d27-34d6477bb392",
+        "0d493f11-9565-4b38-b9d2-db8bcc79e31b",
+        "1ca39670-73de-4b2b-9e76-92ea707c0fb8",
+        "b61e26db-c869-43ee-9edc-492144da801b",
+        "e32d51b8-384e-4b66-a3e0-f976105bdbd3",
+        "aa56ec35-ce2e-4fd7-b7cf-b9f2c843ab40"
+      ],
+      "sample_hash": "11fb7d62856ba6b7024e3e02312125ab226f6df2a2543a0f90d9a472108a523b",
+      "source": {
+        "directory": "docs/evidence/T16/serial-episodes/V0-T13-M023-2",
+        "observation_sha256": "6ec7169c8eb5ad694d498b199b456c5b198c20ae0be0427458f92f7051515f8d"
+      }
+    },
+    "G1-021": {
+      "recommendation": {
+        "execution_problem": "clear",
+        "support": "supported",
+        "explanation": "reasonable"
+      },
+      "original": {
+        "execution_problem": "clear",
+        "support": "supported",
+        "explanation": "reasonable"
+      },
+      "changed": false,
+      "reason": "最终明确区分第一笔已提交及第二笔被拒，SQL只有第一笔，第二笔条件与实际修正一致，未新增/取消；规则引用也在给定检索结果内，维持原判断。",
+      "evidence_refs": [
+        "dialogue",
+        "reply",
+        "independent-test-criteria",
+        "sql-before",
+        "sql-after",
+        "e6aa9f8b-2809-42a3-9cde-70839cd1cfde",
+        "0430c7bc-c67d-42c3-8863-85983723dee9",
+        "62eb5189-119d-4939-a3ee-6f6f2c928808",
+        "620fdf5c-9f69-43c6-a265-1b3b37a2d07b",
+        "b402ff23-9353-44b1-b260-15077f7514d5",
+        "651fa4d6-eed6-4f3f-b3ff-d7a01a5501c2",
+        "45d03102-87ae-467c-9cf1-88ffecfa4663",
+        "6c82c68d-0d22-4adc-acf7-1465c845cd94",
+        "9d8eb1f0-eaa0-45ac-984d-0346034e7bb8",
+        "2c94db5f-dd66-4ec5-adc7-c326866740b7",
+        "9d9d33da-97f8-48de-b104-7943ad333243",
+        "fede6f26-ae6e-4625-a5dd-0d622a51d57f",
+        "aaaf5267-760e-4286-824b-ca047bcfcc16",
+        "2cecb47a-9f76-4543-a394-d5b6c118cb83",
+        "8b148979-4683-4c67-bfd7-b0af6c5b7211",
+        "3c43798d-3fc7-41d5-a5a1-dfc00956ee97",
+        "8b50d91b-32a8-46b1-9c12-30b505aaeb99",
+        "c875e03f-237a-42f5-a224-b13c9fa33979",
+        "6cfa7734-ad9c-40be-ad74-a943b7c0c0ed",
+        "9c324b4a-6cb5-41d2-a0ec-0188a16f7df1",
+        "77a314c5-bccf-4466-8101-e808b6343d12",
+        "e57ee11f-d721-4678-a572-5372fb6a5557",
+        "880eca52-2690-451e-825e-ba8d476c3feb",
+        "1eff5bb7-35bc-403f-89d0-ede3da133808",
+        "58e3a1fb-7aa0-4440-84e1-7b17840e352e",
+        "15bd379c-f660-49d9-8383-4c8c916d9fc5",
+        "e4d9688c-56d1-413f-bb48-1c9d81d09c41",
+        "98724ed0-a147-4975-8124-e3041e863e06",
+        "8837caf4-511c-4828-b980-984f13aac74b",
+        "fb69ae52-c52c-4913-a11e-72b4819db386"
+      ],
+      "sample_hash": "d007eeb96880f1af6affeab5e0100599fc20f6f8eb197d0735f8e227beae3cbd",
+      "source": {
+        "directory": "docs/evidence/T16/serial-episodes/V0-T13-M023-3",
+        "observation_sha256": "f3159b97a257423102da73934d0c824c0c6fc7ab963c8d3baa7137e6eb9c2374"
+      }
+    },
+    "G1-022": {
+      "recommendation": {
+        "execution_problem": "clear",
+        "support": "supported",
+        "explanation": "reasonable"
+      },
+      "original": {
+        "execution_problem": "clear",
+        "support": "supported",
+        "explanation": "reasonable"
+      },
+      "changed": false,
+      "reason": "完整条件后新稿经confirm提交，SQL唯一预约3f198bcb-fc8a-47d3-850e-c01364c07e6e，回复各字段与条文一致，维持原判断。",
+      "evidence_refs": [
+        "dialogue",
+        "reply",
+        "independent-test-criteria",
+        "sql-before",
+        "sql-after",
+        "0d4ee705-134a-44e6-a0b7-4ea90f8ec0f0",
+        "2f897b6c-4f63-4215-a5c7-1d1e7a371a55",
+        "f6cee4db-6443-4055-8466-8ff5638a3150",
+        "05ff8578-ab46-4e90-b7a7-55b86b98c99a",
+        "262d144f-1934-4286-9c41-31f5987d4627",
+        "16ae216e-f75f-4794-84a5-a1a660bf9e37",
+        "7a51cb15-8e4f-4acf-9e29-b904dff861c1",
+        "816b9f4c-cd15-4584-8db2-e516c8166bd0",
+        "4852de4b-e55d-4e54-a143-934957ce6a11",
+        "280b9da7-ebfc-49ca-85be-d1c09f75aa97",
+        "c12010d4-1bd6-41a3-bd17-966c6af06dcd",
+        "7f3e0f4b-515d-4a6f-8bfc-1f0562eca1a7"
+      ],
+      "sample_hash": "67fba0665ffc271609944a069f3191918c9105f983e6a76a2d1db7fca69ab97e",
+      "source": {
+        "directory": "docs/evidence/T16/serial-episodes/V0-T13-N001-1",
+        "observation_sha256": "7addb6b702cd70c54dce24cfe52b05f50c815fa1c880ed3fc54ec0accb08be08"
+      }
+    },
+    "G1-023": {
+      "recommendation": {
+        "execution_problem": "clear",
+        "support": "supported",
+        "explanation": "reasonable"
+      },
+      "original": {
+        "execution_problem": "clear",
+        "support": "supported",
+        "explanation": "unreasonable"
+      },
+      "changed": true,
+      "reason": "真实confirm和SQL唯一预约fc56e374-eb3a-4a45-ba3b-5f49d3c9cad7与回答一致，容量/开放时间及不可重叠引用存在；正常完成任务的解释合理。",
+      "evidence_refs": [
+        "dialogue",
+        "reply",
+        "independent-test-criteria",
+        "sql-before",
+        "sql-after",
+        "d716725d-2395-4f0d-bb0c-1a11552ffb29",
+        "118ea246-f6f9-460f-bf6b-74f013aafc34",
+        "0b2cfd2c-fa7d-4ff0-a618-651d6e2e8216",
+        "087cb86d-d1c2-4da9-bb61-f5d49748ded3",
+        "53a99da6-7bc6-459b-b0ad-c9105b6f314c",
+        "2813f614-f5d3-44c4-91c7-59a203f557db",
+        "bee58ade-e11b-4e17-8c3d-bd6bfa2a421e",
+        "775be5ea-bdea-4074-94f3-09da4751e9eb",
+        "8b4c8c0d-7de1-4218-ae85-415dd744f8b0",
+        "5abf933b-45b5-41c7-80b8-a6e1b4c8c80c",
+        "85af2e95-cff9-43b2-ab33-3013342e5d70",
+        "98bdae57-e0b0-4cd1-827e-4bed04fd6bc4"
+      ],
+      "sample_hash": "db38e611acb4aa081ebfe40425c0417567f3a2a87e6bcc0b2bd9c9b534a1d583",
+      "source": {
+        "directory": "docs/evidence/T16/serial-episodes/V0-T13-N001-2",
+        "observation_sha256": "82b8cdbbe8a1394ec8f69868c992c8e668c8b0a65f962c6c0fbde93f747af0e0"
+      }
+    },
+    "G1-024": {
+      "recommendation": {
+        "execution_problem": "clear",
+        "support": "supported",
+        "explanation": "reasonable"
+      },
+      "original": {
+        "execution_problem": "clear",
+        "support": "supported",
+        "explanation": "reasonable"
+      },
+      "changed": false,
+      "reason": "SQL和confirm支持唯一预约17929c7d-6dfb-4c83-bfa9-1a0ccfb928a6及全部参数，回复直接说明结果，维持原判断。",
+      "evidence_refs": [
+        "dialogue",
+        "reply",
+        "independent-test-criteria",
+        "sql-before",
+        "sql-after",
+        "22b00d83-ec05-4523-ac57-0ebb7dcfc466",
+        "ea319a7c-a222-4e5b-8a22-26f01f1c7034",
+        "673f35c3-b103-41c3-9afe-af2037fa26df",
+        "0258cf57-af27-4ea8-91b5-889d96df65db",
+        "d42a8ff5-25f8-44a5-8981-eb90d0cc5055",
+        "ef8ed03b-ea75-4244-8cec-a03bfc8a9d69",
+        "eaf458e3-54b0-4ec6-b176-50bed411fc55",
+        "7fb5716d-8885-4cdb-87d6-48813d123b92",
+        "51dc420e-ecf5-4121-813c-faab369266ec",
+        "fe5f26c0-81d7-4c37-9743-282a116e9a25",
+        "99584da3-e17c-4f17-a653-30543f718fc6",
+        "6b0a08b3-7f68-48ca-baa9-25792a2ec26e",
+        "3a38fdd4-64e9-4ebe-8ffb-bd87bff9739d",
+        "ab041ba9-cd55-472f-a4c6-c4d2df342e3e"
+      ],
+      "sample_hash": "ad8e46b9b740b70531bbb72c3b428ed4fd4cd47ea3ded3564778ac256604ff70",
+      "source": {
+        "directory": "docs/evidence/T16/serial-episodes/V0-T13-N001-3",
+        "observation_sha256": "83fa3081d82672b4c736d4ac3ca3a804e9269bc01c1cd0f8a744a1d048911402"
+      }
+    },
+    "G1-025": {
+      "recommendation": {
+        "execution_problem": "clear",
+        "support": "supported",
+        "explanation": "reasonable"
+      },
+      "original": {
+        "execution_problem": "clear",
+        "support": "supported",
+        "explanation": "unreasonable"
+      },
+      "changed": true,
+      "reason": "用户拒绝后没有confirm工具，SQL0条；给定最后草稿快照仍pending，回答同时说明无确认授权不提交，未混淆草稿与有效预约，解释合理。",
+      "evidence_refs": [
+        "dialogue",
+        "reply",
+        "independent-test-criteria",
+        "sql-before",
+        "sql-after",
+        "a989ac5b-a87f-4963-af02-c1fb580502cc",
+        "f711cf3f-4d0a-4f5b-b65e-f6aa094e9621",
+        "82f1d09d-9c8b-4ba2-8967-5f4bbabbd754",
+        "f5ab860c-b659-49d5-b84c-c3c57e2f92fc",
+        "8bdf8b78-40e8-489f-b611-56d0cbbb33bb",
+        "6e7693b1-80a4-4008-b584-bb23203ab067",
+        "9ae516c5-c0d7-4d5a-ba41-72343b0b5e05",
+        "1477d00d-985b-445c-beea-54c8328e479b",
+        "56a114ca-8bee-4526-860a-47185bb8c86d",
+        "eaf4ccf0-f992-47c5-8130-a733c0164ac2",
+        "73daf851-325e-4379-807c-2e0af12cc5d8",
+        "1b698899-7bcb-4a5a-8817-80847b707728"
+      ],
+      "sample_hash": "26df3899962a3262dd16271d29170a4404efc336e4a532e1a5ebd18668677a44",
+      "source": {
+        "directory": "docs/evidence/T16/serial-episodes/V0-T13-N008-1",
+        "observation_sha256": "266e00a63a4701f4433f7b22dc39fedb5c5763b738a54d14ecbdd677cba2b557"
+      }
+    },
+    "G1-026": {
+      "recommendation": {
+        "execution_problem": "clear",
+        "support": "insufficient",
+        "explanation": "reasonable"
+      },
+      "original": {
+        "execution_problem": "clear",
+        "support": "supported",
+        "explanation": "unreasonable"
+      },
+      "changed": true,
+      "reason": "拒绝后SQL0条、未提交成立，执行符合不写入标准，解释合理；但回答明确写“状态：草稿已作废”，给定材料只有resumed(message)和此前pending快照，没有最终草稿表状态。因此支持性建议证据不足，不能仅凭预约表0条推出草稿已正式作废，也不直接判矛盾。",
+      "evidence_refs": [
+        "dialogue",
+        "reply",
+        "independent-test-criteria",
+        "sql-before",
+        "sql-after",
+        "ae4ec6b0-a432-4fb2-9807-cb930344d5c9",
+        "1de4551c-c842-42f4-a4a9-1aba88ac15ec",
+        "b88a0884-3666-48bd-8615-a4d28896f595",
+        "befdc06d-b22a-4c3d-b23b-f807d9578ad2",
+        "0b9a09c4-070c-455b-8273-99c69950e9c9",
+        "e6264801-dfcc-466c-b8b2-033097e9f6c7",
+        "6cdc5773-7bd7-4faf-b63a-03d7a3c1c521",
+        "5fef2b82-5f7b-4e57-9844-4480f9cf7b79",
+        "838d9da3-2f93-463a-b8d9-e4e096c83db9",
+        "1d53d521-c2fe-4d1e-ac46-f035328fb16a"
+      ],
+      "sample_hash": "e3273385d87ecdcc170a84ef0ea71aad24e98df6092c997f2fafad45b212f4df",
+      "source": {
+        "directory": "docs/evidence/T16/serial-episodes/V0-T13-N008-2",
+        "observation_sha256": "8f3fb75f3e31c837ab1809999f51304c236b0fc70ee34631441b1936790f014f"
+      }
+    },
+    "G1-027": {
+      "recommendation": {
+        "execution_problem": "clear",
+        "support": "supported",
+        "explanation": "reasonable"
+      },
+      "original": {
+        "execution_problem": "clear",
+        "support": "supported",
+        "explanation": "reasonable"
+      },
+      "changed": false,
+      "reason": "回复“草稿已被拒绝”描述用户拒绝确认的行为，未宣称具体数据库状态变更；实际输入拒绝、SQL0条和无confirm支持其核心内容，维持原判断。",
+      "evidence_refs": [
+        "dialogue",
+        "reply",
+        "independent-test-criteria",
+        "sql-before",
+        "sql-after",
+        "cf53cdf5-6c46-4715-963e-3755f585c724",
+        "b743a17e-256c-43cf-af77-180145b98696",
+        "2ece8d55-3cb9-4351-9187-f23711c28f77",
+        "90a3840a-42e6-49da-b3a5-0d78855d7ef5",
+        "3f6e16ba-4dd6-4a9f-8968-556f5433a492",
+        "efafd7de-5ae3-4191-95d0-934637e88146",
+        "aa8be0a3-60e7-4eb0-8602-b839642bbe35",
+        "e9989e79-e7ac-4378-b0a1-a030041882ae",
+        "c36280b0-7b0f-410f-b94a-68e7308a4c8b",
+        "958a1fdf-5543-4aa1-8ac9-5621413edbfb",
+        "7a484d25-148c-422b-90f0-6556894ac44f",
+        "a31d71f9-c712-4e58-b04d-7410a3251fe9"
+      ],
+      "sample_hash": "fd3bcf1fbc8d1d367c325076470d1d02919a8c9b9a0a05e80f477cbed2326e0d",
+      "source": {
+        "directory": "docs/evidence/T16/serial-episodes/V0-T13-N008-3",
+        "observation_sha256": "fe53f1f63b7e068f26655cde2f47183a169cfc0e736862c125c7349d2c20fda1"
+      }
+    },
+    "G1-028": {
+      "recommendation": {
+        "execution_problem": "clear",
+        "support": "supported",
+        "explanation": "reasonable"
+      },
+      "original": {
+        "execution_problem": "clear",
+        "support": "supported",
+        "explanation": "reasonable"
+      },
+      "changed": false,
+      "reason": "日期/人数分别由后续真实输入补齐，最终唯一预约为A101/11月4日/18人，confirm和SQL与回答一致，未猜缺项，维持原判断。",
+      "evidence_refs": [
+        "dialogue",
+        "reply",
+        "independent-test-criteria",
+        "sql-before",
+        "sql-after",
+        "ac560dc2-02c8-4d9f-950d-6ef127b50cd1",
+        "a3d209ff-fa66-441e-b2be-b180fb816bdb",
+        "965c22ae-644d-4218-be74-ce18be7b5aff",
+        "649f9dc8-8d12-4f3d-b517-7e684e3250c9",
+        "ffb1b68c-322e-483c-bd56-97fccfe66a69",
+        "72b3aa96-3e23-4fd9-b4db-491730ef952c",
+        "0d3c2951-d099-4260-a4cd-b3e07691cf49",
+        "edd632a9-3721-4b6d-a603-b971555b08bf",
+        "ea33eb53-a12a-4db7-a717-8a7e7f27ac85",
+        "e6c98ad2-1a9d-4739-bd58-4129439e9b67",
+        "68a81c7e-c7ab-4b79-a962-f06a39dfc995",
+        "2f5f3135-facd-44db-a9d7-cb4faed064ae",
+        "cb942741-6558-489e-b25c-08a86c25ef9b",
+        "a3a91c21-e3fa-4d05-a076-1cca7f3fd833",
+        "cc9c55f7-8e4b-41b6-8999-dd3e428c8c24",
+        "4ad0008a-0ebd-499c-804f-403be85e1284",
+        "90fdeed4-af0c-411f-94d6-ce12a432d9c4",
+        "61b327f3-82e9-4991-9188-0f269c0573e0"
+      ],
+      "sample_hash": "3e9cc3f5256f4d3ba6fff0ee9f6035acb382c57cc2fbbe75dbb713a6f2e26067",
+      "source": {
+        "directory": "docs/evidence/T16/serial-episodes/V0-T13-N016-1",
+        "observation_sha256": "5b7364f87caf6546586e0de179035389868c4f70d26485ff023b2ad186da1258"
+      }
+    },
+    "G1-029": {
+      "recommendation": {
+        "execution_problem": "clear",
+        "support": "supported",
+        "explanation": "reasonable"
+      },
+      "original": {
+        "execution_problem": "clear",
+        "support": "insufficient",
+        "explanation": "insufficient"
+      },
+      "changed": true,
+      "reason": "SQL唯一预约de14b117-26af-4b8e-befb-66969a8e0ddd与回答及工具证据一致，UTC换算正确、规则引用可核对；材料充足，支持性和解释无需证据不足。",
+      "evidence_refs": [
+        "dialogue",
+        "reply",
+        "independent-test-criteria",
+        "sql-before",
+        "sql-after",
+        "d9bb5bca-8c52-46c3-8645-2ccdd104565c",
+        "de92a14c-4f3a-4fe4-8b27-74f379a81a9e",
+        "2b9c187b-5b6a-4c5b-aa00-bf653bf8640f",
+        "84e520ea-e78a-4639-af8e-71e68b5d4da8",
+        "3be542b4-25ff-4cae-b12b-3e3da828bfc4",
+        "11d5a843-d40c-4a68-a6b1-a5aa568f21f9",
+        "2cbdd39f-37e8-4654-ab10-482c476bbc51",
+        "2b027d96-89d1-4262-a52b-56ce0700502a",
+        "ff45fb39-cc76-4d16-8e86-05b026fea1e1",
+        "64ada4fb-aaa0-4d44-8a3d-e5de0c76e289",
+        "05bf0fa7-cb94-456d-b9c8-f549e8581782",
+        "a327cd25-08bc-4906-9206-913cfb94ca0e",
+        "30546e12-d61b-4745-8a89-8f1d6855c4b4",
+        "fa7dba83-9e1b-499b-9c8a-dfc554123dec",
+        "1b2caeb6-9268-4e40-9d1e-5fe3e262e8ee",
+        "d53af79b-9778-4caa-9787-0aa08b14a583",
+        "88237f96-753f-4bed-a240-412b7d90d540",
+        "88a99461-3891-4912-b845-d9b8faa40957"
+      ],
+      "sample_hash": "842c600be3167ef17c695206a07f00b65a20942aca14ffe347f5136d24d3424d",
+      "source": {
+        "directory": "docs/evidence/T16/serial-episodes/V0-T13-N016-2",
+        "observation_sha256": "c0ad6b11dc063fce1aded6becc92d735d5bae5975bd1273c24350ef1f236091f"
+      }
+    },
+    "G1-030": {
+      "recommendation": {
+        "execution_problem": "clear",
+        "support": "supported",
+        "explanation": "reasonable"
+      },
+      "original": {
+        "execution_problem": "clear",
+        "support": "supported",
+        "explanation": "reasonable"
+      },
+      "changed": false,
+      "reason": "缺项经真实输入补齐后才预览/确认提交，SQL唯一预约5f72e427-ccce-4021-995b-5e6c6fd0320c与回答一致，检索条文支持容量与时长，维持原判断。",
+      "evidence_refs": [
+        "dialogue",
+        "reply",
+        "independent-test-criteria",
+        "sql-before",
+        "sql-after",
+        "c648e032-4185-415c-ac3a-1fbfaa186ee8",
+        "bf1f359f-4fdf-4a07-b385-13a053d64c72",
+        "fd8a4ef8-70a8-4abb-96ce-7742f24ff9c0",
+        "9506a875-b101-46bd-87ba-4410b13eeaf8",
+        "ecbc77da-d4de-4e31-a4bf-079046009da1",
+        "c236f64c-157b-4973-bd3b-6063482979f7",
+        "fac1104d-1132-4861-8ee6-208046325f4f",
+        "f10685b7-a94b-4eb6-9aac-5642d0010b94",
+        "6d763173-df2e-4d81-9bfe-18261c4a9d34",
+        "0119a157-2082-4d35-affb-759c336dc9ce",
+        "11a4c587-0b36-4ba2-a5ec-da53fb56532f",
+        "86038912-ca05-4592-9e82-205545a7e664",
+        "cb4be7ab-ccdf-4029-97ed-4b4e9071c1be",
+        "60a0672e-95d7-4f40-80b7-6b222e3e1b39",
+        "66b120a5-fca1-4c13-a1c5-caf848795e19",
+        "5b7b964e-73c7-42b7-9dbd-2bc30b5f0685",
+        "7ac41bd8-ebe5-41e3-a5a1-91d394699f89",
+        "da328cdb-96b7-4d24-9e06-c4950cefea0a"
+      ],
+      "sample_hash": "37efe1d94a55902a602b39e969e80067bb37503244e56b50b57eb0056dfd1de8",
+      "source": {
+        "directory": "docs/evidence/T16/serial-episodes/V0-T13-N016-3",
+        "observation_sha256": "ab666aabe76f25036fc115bf14989c3ca4d8683f57efaa2b48aa392e673ba73a"
+      }
+    }
+  },
+  "changes": 21,
+  "new_provider_calls": 0,
+  "primary_independent_labels_unchanged": true,
+  "not_independent_human_gold": true,
+  "review_hash": "5149e382c1629ed30d20c66dd3c721def4c6742471cab658c22e3094b83eca4d"
+}

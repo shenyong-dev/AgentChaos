@@ -1,0 +1,133 @@
+{
+  "$defs": {
+    "ExplanationRating": {
+      "additionalProperties": false,
+      "properties": {
+        "confidence": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "reason": {
+          "maxLength": 1500,
+          "minLength": 1,
+          "title": "Reason",
+          "type": "string"
+        },
+        "evidence_refs": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 10,
+          "minItems": 1,
+          "title": "Evidence Refs",
+          "type": "array"
+        },
+        "label": {
+          "enum": [
+            "reasonable",
+            "unreasonable",
+            "insufficient"
+          ],
+          "title": "Label",
+          "type": "string"
+        }
+      },
+      "required": [
+        "confidence",
+        "reason",
+        "evidence_refs",
+        "label"
+      ],
+      "title": "ExplanationRating",
+      "type": "object"
+    },
+    "SupportRating": {
+      "additionalProperties": false,
+      "properties": {
+        "confidence": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "reason": {
+          "maxLength": 1500,
+          "minLength": 1,
+          "title": "Reason",
+          "type": "string"
+        },
+        "evidence_refs": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 10,
+          "minItems": 1,
+          "title": "Evidence Refs",
+          "type": "array"
+        },
+        "label": {
+          "enum": [
+            "supported",
+            "contradicted",
+            "insufficient"
+          ],
+          "title": "Label",
+          "type": "string"
+        }
+      },
+      "required": [
+        "confidence",
+        "reason",
+        "evidence_refs",
+        "label"
+      ],
+      "title": "SupportRating",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "support": {
+      "$ref": "#/$defs/SupportRating"
+    },
+    "explanation": {
+      "$ref": "#/$defs/ExplanationRating"
+    },
+    "conclusion": {
+      "enum": [
+        "acceptable",
+        "problematic",
+        "uncertain"
+      ],
+      "title": "Conclusion",
+      "type": "string"
+    },
+    "needs_review": {
+      "title": "Needs Review",
+      "type": "boolean"
+    },
+    "suspected_cause": {
+      "anyOf": [
+        {
+          "maxLength": 1000,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Suspected Cause"
+    }
+  },
+  "required": [
+    "support",
+    "explanation",
+    "conclusion",
+    "needs_review"
+  ],
+  "title": "Judgment",
+  "type": "object"
+}

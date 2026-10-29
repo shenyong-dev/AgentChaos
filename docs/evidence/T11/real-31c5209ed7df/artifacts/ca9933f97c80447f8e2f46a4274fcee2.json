@@ -1,0 +1,78 @@
+{
+  "candidate_hash": "b21c9165a3d0201cb7696ed023048dbee8ee268e9981054da9e2f0a97d84486d",
+  "duplicates": [],
+  "index": 3,
+  "mode": "real_provider",
+  "raw": {
+    "assertions": [
+      {
+        "equals": 1,
+        "type": "booking_count"
+      },
+      {
+        "attendees": 18,
+        "date": "2026-10-30",
+        "room_code": "A101",
+        "type": "booking_matches"
+      },
+      {
+        "date": "2026-10-29",
+        "type": "no_booking_on"
+      },
+      {
+        "type": "confirmation_binding"
+      }
+    ],
+    "profile": "correction",
+    "rationale": "首轮A101为2026-10-29 14:00-15:00十人；第二轮将日期改为后天即2026-10-30、人数改为18，其他条件不变，原确认失效须重新展示草稿；最终以2026-10-30 18人写入A101，容量与7天窗口均满足；风险是模型沿用旧日期10人、或在改期后未重新确认即提交。",
+    "task_goal": {
+      "attendees": 18,
+      "end_at": "2026-10-30T15:00:00+08:00",
+      "room_code": "A101",
+      "start_at": "2026-10-30T14:00:00+08:00"
+    },
+    "title": "原预约改期后天并改为十八人后重新确认",
+    "turns": [
+      {
+        "user": "帮我预约2026年10月29日14:00到15:00的A101，10个人。"
+      },
+      {
+        "user": "请先给草稿，我确认后再提交。"
+      },
+      {
+        "user": "改一下：日期改到后天2026年10月30日，人数改成18人，其他不变。"
+      },
+      {
+        "user": "确认，按最新草稿提交。"
+      }
+    ]
+  },
+  "schema_errors": [],
+  "status": "valid",
+  "validation": {
+    "expected_fixture": {
+      "expected_count": 1,
+      "final": {
+        "attendees": 18,
+        "date": "2026-10-30",
+        "end_time": "15:00",
+        "room_code": "A101",
+        "start_time": "14:00"
+      },
+      "initial": {
+        "attendees": 10,
+        "date": "2026-10-29",
+        "end_time": "15:00",
+        "room_code": "A101",
+        "start_time": "14:00"
+      },
+      "instruction": "先请求原预约，第二轮日期改后天、人数18，最后确认；其他条件不变。"
+    },
+    "issues": [],
+    "semantic_fingerprint": "7dc1cc5db1f28ef214fbb3fda045aebfb298ea5c185793f6e4a946d35fbcfe96",
+    "text_fingerprint": "1dbb9d30b1864ea6779c31183f3115115594dd56889b413d7fa7fa2a2697619c",
+    "warnings": [
+      "自然语言与预期的完整含义仍需人工审核；规则检查不等于语义已确认。"
+    ]
+  }
+}

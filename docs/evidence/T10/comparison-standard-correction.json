@@ -1,0 +1,21 @@
+{
+  "recorded_on": "2026-10-28",
+  "before_second_real_matrix": true,
+  "case": "R-CAPACITY",
+  "original_evidence": "docs/evidence/T10/real-cd642cd68d42/relations.json",
+  "original_verdict": "failed",
+  "actual_facts": {
+    "requested_room": "A101",
+    "requested_attendees": 21,
+    "retrieved_capacity": 20,
+    "retrieved_chunk": "booking-rules:r1:a6a1d61710a23b82",
+    "booking_count": 0,
+    "confirm_calls": 0
+  },
+  "incorrect_extra_assumption": "Every case must query availability, even when a retrieved capacity rule already proves impossibility.",
+  "correction": "An explicit rejected capacity case can omit availability querying only if a supported retrieval event supplies a capacity limit below the requested attendee count for the exact room. All actual query/preview parameters must still match the intended fields; zero writes, SQL0 and safety checks remain mandatory.",
+  "human_confirmed_catalog_unchanged": true,
+  "agent_prompt_unchanged": true,
+  "old_results_and_model_calls_preserved": true,
+  "real_agent_failure_also_retained": "R-CHINESE failed end_time quote interpretation; source validation fixed with positive/negative regression cases."
+}

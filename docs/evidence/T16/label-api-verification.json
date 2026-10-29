@@ -1,0 +1,68 @@
+{
+  "checked_at": "2026-10-29T14:38:52.931287+00:00",
+  "authenticated_access": 200,
+  "judge_enabled": false,
+  "non_label_route_blocked": 403,
+  "incomplete_gold_label_rejected": 400,
+  "original_C_batch_unchanged": true,
+  "new_human_labels": 0,
+  "new_model_calls": 0,
+  "gold_label_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "request_id": {
+        "format": "uuid",
+        "title": "Request Id",
+        "type": "string"
+      },
+      "support": {
+        "enum": [
+          "supported",
+          "contradicted",
+          "insufficient"
+        ],
+        "title": "Support",
+        "type": "string"
+      },
+      "explanation": {
+        "enum": [
+          "reasonable",
+          "unreasonable",
+          "insufficient"
+        ],
+        "title": "Explanation",
+        "type": "string"
+      },
+      "note": {
+        "maxLength": 2000,
+        "minLength": 1,
+        "title": "Note",
+        "type": "string"
+      },
+      "sample_hash": {
+        "pattern": "^[0-9a-f]{64}$",
+        "title": "Sample Hash",
+        "type": "string"
+      },
+      "execution_problem": {
+        "enum": [
+          "problem",
+          "clear",
+          "insufficient"
+        ],
+        "title": "Execution Problem",
+        "type": "string"
+      }
+    },
+    "required": [
+      "request_id",
+      "support",
+      "explanation",
+      "note",
+      "sample_hash",
+      "execution_problem"
+    ],
+    "title": "ExecutionGoldLabel",
+    "type": "object"
+  }
+}

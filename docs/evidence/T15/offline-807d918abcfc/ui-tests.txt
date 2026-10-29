@@ -1,0 +1,42 @@
+
+Running 6 tests using 1 worker
+
+(node:4712) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 tests\reports.spec.ts:27:1 › reports download actual JSON Markdown ZIP and prove original hashes (4.8s)
+  ok 2 tests\reports.spec.ts:63:1 › comparison distinguishes matched controls from a real seed mismatch (5.3s)
+  ok 3 tests\reports.spec.ts:78:1 › mechanical review rejects deliberately wrong expectation without changing rules (5.2s)
+  ok 4 tests\reports.spec.ts:106:1 › lost committed export response retries original identifiers (3.6s)
+  x  5 tests\reports.spec.ts:119:1 › editing a reviewed decision requires a fresh preview without writing (31.3s)
+(node:35972) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 6 tests\reports.spec.ts:143:1 › expired foreign and unfinished boundaries plus linked execution stay read-only (3.9s)
+
+
+  1) tests\reports.spec.ts:119:1 › editing a reviewed decision requires a fresh preview without writing 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.fill: Target page, context or browser has been closed
+    Call log:
+      - waiting for getByRole('dialog', { name: '复核缺陷与原始证据', exact: true }).getByRole('textbox', { name: '缺陷复核依据', exact: true })
+
+
+      129 |   await dialog.getByRole('button', { name: '核对复核内容', exact:true }).click()
+      130 |   await expect(dialog.getByLabel('即将保存的缺陷复核')).toContainText('第一份说明')
+    > 131 |   await note.fill('只读机械检查：已修改说明，必须重新核对。')
+          |              ^
+      132 |   await expect(dialog.getByLabel('即将保存的缺陷复核')).toHaveCount(0)
+      133 |   await expect(dialog.getByRole('button', { name: '确认保存复核', exact:true })).toHaveCount(0)
+      134 |   await dialog.getByRole('button', { name: '核对复核内容', exact:true }).click()
+        at D:\AgentChaos\frontend\tests\reports.spec.ts:131:14
+
+    attachment #1: video (video/webm) ──────────────────────────────────────────────────────────────
+    ..\.local\playwright-results\reports-editing-a-reviewed-e840c-esh-preview-without-writing\video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ..\.local\playwright-results\reports-editing-a-reviewed-e840c-esh-preview-without-writing\error-context.md
+
+  1 failed
+    tests\reports.spec.ts:119:1 › editing a reviewed decision requires a fresh preview without writing 
+  5 passed (55.2s)

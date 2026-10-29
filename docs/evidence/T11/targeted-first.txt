@@ -1,0 +1,61 @@
+..F.....                                                                 [100%]
+================================== FAILURES ===================================
+__ test_generation_drafts_idempotency_duplicate_order_and_role_bound_review ___
+
+lab = (Engine(mysql+pymysql://root:***@127.0.0.1:3306/agentchaos_t11_verify_264e161585c1?charset=utf8mb4), <redis.client.Red...espace='ac:t07', executor_lease_seconds=45, sse_max_seconds=30, sse_send_timeout_seconds=5.0, sse_max_backlog=1000), 3)
+
+    def test_generation_drafts_idempotency_duplicate_order_and_role_bound_review(lab):
+        svc, gateway = service(lab, [{"candidates": [proposal(), proposal("capacity")]}])
+        req = GenerateCandidates(request_id=uuid4(), profiles=["normal", "capacity"])
+        first = svc.generate(1, req)
+        assert first["status"] == "completed" and first["metrics"]["valid_before_review"] == 2
+        assert all(c["case_revisions"][0]["status"] == "draft" for c in first["candidates"])
+        assert svc.generate(1, req) == first and len(gateway.calls) == 1
+        repeated, _ = service(lab, [{"candidates": [proposal(), proposal("capacity")]}])
+        second = repeated.generate(
+            1, GenerateCandidates(request_id=uuid4(), profiles=["normal", "capacity"])
+        )
+        assert second["metrics"]["counts"]["duplicate"] == 2
+        normal = first["candidates"][0]
+        approve = decision(normal)
+        with pytest.raises(AgentError) as err:
+            svc.review(1, normal["id"], approve)
+        assert err.value.status_code == 403
+        receipt = svc.review(2, normal["id"], approve)
+        assert receipt["approved_case_revision_id"] and receipt["reviewer_id"] == 2
+        assert svc.review(2, normal["id"], approve) == receipt
+        with pytest.raises(AgentError):
+            svc.review(2, normal["id"], decision(normal, "reject"))
+        duplicate = second["candidates"][0]
+        with pytest.raises(AgentError):
+            repeated.review(2, duplicate["id"], decision(duplicate))
+        rejected = repeated.review(2, duplicate["id"], decision(duplicate, "reject"))
+        assert rejected["approved_case_revision_id"] is None
+        with Session(lab[0]) as session:
+            approved = session.get(TestCase, receipt["approved_case_revision_id"])
+            assert approved.review_status == "approved" and approved.revision == 2
+        app = create_app()
+        app.dependency_overrides[get_case_service] = lambda: svc
+        app.dependency_overrides[get_booking_service] = lambda: BookingService(lab[0])
+        with TestClient(app) as client:
+            path = "/api/v1/case-generation/" + first["generation_id"]
+            assert client.get(path).status_code == 401
+            assert client.get(path, auth=("demo_operator", TEST_PASSWORD)).status_code == 200
+            assert client.get(path, auth=("other_generator_operator", TEST_PASSWORD)).status_code == 404
+>           assert client.get(path, auth=("demo_reviewer", TEST_PASSWORD)).status_code == 200
+E           AssertionError: assert 403 == 200
+E            +  where 403 = <Response [403 Forbidden]>.status_code
+E            +    where <Response [403 Forbidden]> = get('/api/v1/case-generation/ce811da9-1084-4838-97d9-c81aadcc375d', auth=('demo_reviewer', 'synthetic-password-only-for-schema-tests'))
+E            +      where get = <starlette.testclient.TestClient object at 0x0000021558E2E6C0>.get
+
+backend\tests\test_case_generation.py:150: AssertionError
+---------------------------- Captured stderr setup ----------------------------
+INFO  [alembic.runtime.migration] Context impl MySQLImpl.
+INFO  [alembic.runtime.migration] Will assume non-transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 20261025_0001, T02 initial sixteen-table schema
+INFO  [alembic.runtime.migration] Running upgrade 20261025_0001 -> 20261025_0002, T04 bind pending drafts to a trusted conversation without adding tables.
+INFO  [alembic.runtime.migration] Running upgrade 20261025_0002 -> 20261026_0003, T06 real run-level events and transactionally allocated per-run order.
+INFO  [alembic.runtime.migration] Running upgrade 20261026_0003 -> 20261028_0004, T11 owner-bound immutable evidence without inventing Agent test runs.
+=========================== short test summary info ===========================
+FAILED backend\tests\test_case_generation.py::test_generation_drafts_idempotency_duplicate_order_and_role_bound_review
+1 failed, 7 passed in 8.86s

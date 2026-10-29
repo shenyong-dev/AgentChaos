@@ -1,0 +1,33 @@
+
+Running 1 test using 1 worker
+
+(node:33912) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  1 tests\reports.spec.ts:119:1 › editing a reviewed decision requires a fresh preview without writing (313ms)
+
+
+  1) tests\reports.spec.ts:119:1 › editing a reviewed decision requires a fresh preview without writing 
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:5182/reports?run=5f7ffc80-cdf0-4a19-9bda-ebe3118256fe
+    Call log:
+      - navigating to "http://127.0.0.1:5182/reports?run=5f7ffc80-cdf0-4a19-9bda-ebe3118256fe", waiting until "load"
+
+
+      13 | test.afterEach(async ({ page }, info) => { const video = page.video(); if (video && lab) { await page.close(); await video.saveAs(resolve(output, info.title.replace(/[^a-zA-Z0-9]+/g,'-').slice(0,80) + '.webm')) } })
+      14 | async function login(page: import('@playwright/test').Page, run: string) {
+    > 15 |   await page.goto(`/reports?run=${run}`)
+         |              ^
+      16 |   await page.getByRole('textbox', { name: '工作区密码', exact: true }).fill(password)
+      17 |   await page.getByRole('button', { name: '进入工作区', exact: true }).click()
+      18 |   await expect(page.locator('.report-summary')).toBeVisible()
+        at login (D:\AgentChaos\frontend\tests\reports.spec.ts:15:14)
+        at D:\AgentChaos\frontend\tests\reports.spec.ts:120:9
+
+    attachment #1: video (video/webm) ──────────────────────────────────────────────────────────────
+    ..\.local\playwright-results\reports-editing-a-reviewed-e840c-esh-preview-without-writing\video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ..\.local\playwright-results\reports-editing-a-reviewed-e840c-esh-preview-without-writing\error-context.md
+
+  1 failed
+    tests\reports.spec.ts:119:1 › editing a reviewed decision requires a fresh preview without writing 

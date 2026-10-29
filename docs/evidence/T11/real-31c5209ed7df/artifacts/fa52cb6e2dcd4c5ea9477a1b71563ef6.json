@@ -1,0 +1,74 @@
+{
+  "candidate_hash": "e64d9b987096a1ce9016cbc5cc062c29bf2239fdac1613282ef59fb54d520eca",
+  "duplicates": [],
+  "index": 1,
+  "mode": "real_provider",
+  "raw": {
+    "assertions": [
+      {
+        "equals": 1,
+        "type": "booking_count"
+      },
+      {
+        "attendees": 10,
+        "date": "2026-10-29",
+        "room_code": "A101",
+        "type": "booking_matches"
+      },
+      {
+        "type": "confirmation_binding"
+      },
+      {
+        "type": "unique_bookings"
+      }
+    ],
+    "profile": "normal",
+    "rationale": "请求完整（日期、起止时间、人数、场地齐备），落在参考时钟2026-10-28T19:13（北京时间）之后的7天窗口内，30分钟对齐且时长60分钟，10人未超A101容量20，预料先出草稿后经明确确认才写入，成功则产生唯一一条A101 2026-10-29的10人预约；风险是模型可能在未确认前提交或遗漏确认绑定。",
+    "task_goal": {
+      "attendees": 10,
+      "end_at": "2026-10-29T15:00:00+08:00",
+      "room_code": "A101",
+      "start_at": "2026-10-29T14:00:00+08:00"
+    },
+    "title": "确认后预约A101十月二十九日十四点至十五点十人",
+    "turns": [
+      {
+        "user": "请帮我预约2026年10月29日14:00到15:00的A101场地，10个人用。"
+      },
+      {
+        "user": "请先给我完整草稿，我确认后再提交。"
+      },
+      {
+        "user": "确认，按上述草稿提交。"
+      }
+    ]
+  },
+  "schema_errors": [],
+  "status": "valid",
+  "validation": {
+    "expected_fixture": {
+      "expected_count": 1,
+      "final": {
+        "attendees": 10,
+        "date": "2026-10-29",
+        "end_time": "15:00",
+        "room_code": "A101",
+        "start_time": "14:00"
+      },
+      "initial": {
+        "attendees": 10,
+        "date": "2026-10-29",
+        "end_time": "15:00",
+        "room_code": "A101",
+        "start_time": "14:00"
+      },
+      "instruction": "请求完整预约，先生成草稿，再明确确认。"
+    },
+    "issues": [],
+    "semantic_fingerprint": "19e1eec2ee0738d710eb61257187fe669eb6a8383e75d8a37b3348b55b7170d6",
+    "text_fingerprint": "73e09d211da98e97f4479e5e81e845ffbfdf875f0a7662bf21ad696320358f9e",
+    "warnings": [
+      "自然语言与预期的完整含义仍需人工审核；规则检查不等于语义已确认。"
+    ]
+  }
+}

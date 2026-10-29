@@ -333,7 +333,10 @@ class EvaluationService:
             versions = list(
                 session.scalars(
                     select(AssertionResult.evaluator_version)
-                    .where(AssertionResult.execution_id == execution.id)
+                    .where(
+                        AssertionResult.execution_id == execution.id,
+                        AssertionResult.evaluator_kind == "rule",
+                    )
                     .group_by(AssertionResult.evaluator_version)
                     .order_by(func.max(AssertionResult.id).desc())
                     .limit(20)

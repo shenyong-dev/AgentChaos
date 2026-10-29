@@ -27,6 +27,10 @@ def looks_like_decline(text: str):
 def build_agent_graph(gateway, registry, checkpointer, *, control=None, recorder=None):
     prompt = Path(__file__).with_name("prompt.txt").read_text(encoding="utf-8")
     schema_bytes = len(json.dumps(registry.schemas, ensure_ascii=False).encode())
+    single_call = (
+        getattr(getattr(registry, "settings", None), "agent_tool_policy", "baseline")
+        == "single_call_v1"
+    )
 
     def intake(state: AgentState):
         return {"model_calls_this_turn": 0, "write_attempted_this_turn": False, "last_error": None}
@@ -112,6 +116,9 @@ def build_agent_graph(gateway, registry, checkpointer, *, control=None, recorder
         current = copy.deepcopy(state)
         message = current["messages"][-1]
         results = []
+        # The baseline prompt already asks for one call, but it did not enforce it.
+        # Reject the complete batch before any dispatch; do not execute a partial write.
+        rejected_batch = single_call and len(message.tool_calls + message.invalid_tool_calls) > 1
         for call in message.tool_calls:
             if control:
                 control.step("tool:" + call["name"])
@@ -130,15 +137,23 @@ def build_agent_graph(gateway, registry, checkpointer, *, control=None, recorder
             capture = {}
             began = time.monotonic()
             try:
-                result = registry.dispatch(
-                    current,
-                    call["name"],
-                    call["args"],
-                    capture=capture,
-                    tool_call_id=call["id"],
-                    message_id=message.id,
-                    parent=requested,
-                )
+                if rejected_batch:
+                    result = {
+                        "status": "error",
+                        "code": "single_tool_call_required",
+                        "message": "本组工具均未执行。每次只请求一个工具，读取结果后再决定下一步。",
+                    }
+                    capture.update(raw_result=result, dispatched=False)
+                else:
+                    result = registry.dispatch(
+                        current,
+                        call["name"],
+                        call["args"],
+                        capture=capture,
+                        tool_call_id=call["id"],
+                        message_id=message.id,
+                        parent=requested,
+                    )
             except Exception as exc:
                 if recorder:
                     recorder.emit(

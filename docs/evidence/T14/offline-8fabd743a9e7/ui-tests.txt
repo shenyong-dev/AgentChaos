@@ -1,0 +1,35 @@
+
+Running 4 tests using 1 worker
+
+(node:21228) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 tests\workspace.spec.ts:40:1 › owned workspace, development pagination, detail, version and mobile layout (4.9s)
+  x  2 tests\workspace.spec.ts:67:1 › UI creates actual fault run, receives SSE, reconnects, confirms once and locates raw evidence (12.3s)
+(node:12984) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 3 tests\workspace.spec.ts:103:1 › cancel dialog really cancels waiting execution without a booking (8.5s)
+  ok 4 tests\workspace.spec.ts:114:1 › failed control assertion leads to SQL snapshot, terminal event and downloadable artifact (3.0s)
+
+
+  1) tests\workspace.spec.ts:67:1 › UI creates actual fault run, receives SSE, reconnects, confirms once and locates raw evidence 
+
+    Error: expect(received).toHaveLength(expected)
+
+    Expected length: 1
+    Received length: 0
+    Received array:  []
+
+      85 |   await expect.poll(async () => (await snapshot(page, run)).status).toBe('completed')
+      86 |   const state = await snapshot(page, run)
+    > 87 |   expect(state.executions[0].after.filter((r: { status: string }) => r.status === 'booked')).toHaveLength(1)
+         |                                                                                              ^
+      88 |   expect(state.executions[0].timing.gateway_mode).toBe('offline_test_double')
+      89 |   await page.getByRole('textbox', { name: '筛选事件', exact: true }).fill('fault.injected')
+      90 |   await page.locator('.event-list li').first().getByRole('button').click()
+        at D:\AgentChaos\frontend\tests\workspace.spec.ts:87:94
+
+    Error Context: ..\.local\playwright-results\workspace-UI-creates-actua-f610a-ce-and-locates-raw-evidence\error-context.md
+
+  1 failed
+    tests\workspace.spec.ts:67:1 › UI creates actual fault run, receives SSE, reconnects, confirms once and locates raw evidence 
+  3 passed (30.1s)

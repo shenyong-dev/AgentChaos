@@ -16,6 +16,7 @@ from app.evaluation.engine import evaluator_manifest
 from app.evidence.recorder import append_event
 from app.executors.control import TERMINAL, advisory, database_now, locked_pair
 from app.faults.service import frozen_profile
+from app.metamorphic.catalog import frozen_relations
 from app.models import Booking, Room, Target, TargetVersion, TestCase, TestExecution, TestRun
 from app.schemas.contracts import TestCaseDraft
 
@@ -224,6 +225,12 @@ class RunService:
                     "pricing": {**PRICING, "verified_on": "2026-10-26"},
                     "evaluation": evaluator_manifest(),
                 }
+                relations = frozen_relations(cases)
+                if relations:
+                    manifest["metamorphic"] = relations
+                    from app.metamorphic.engine import comparator_manifest
+
+                    manifest["relation_comparator"] = comparator_manifest()
                 budget = {
                     "currency": "USD",
                     "unit": "microUSD",
@@ -304,6 +311,7 @@ class RunService:
     def execution_view(e):
         return {
             "execution_id": e.execution_uuid,
+            "case_key": e.input_snapshot_json.get("content", {}).get("case_key"),
             "status": e.status,
             "attempt": e.attempt_no,
             "case_revision_id": e.case_revision_id,

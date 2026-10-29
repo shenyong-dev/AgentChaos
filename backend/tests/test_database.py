@@ -66,7 +66,7 @@ def save_evidence(name, data, *, task="T02"):
 @contextmanager
 def disposable_database(task="T02"):
     settings = Settings()
-    assert task in ("T02", "T03", "T04", "T05", "T06", "T07", "T08", "T09")
+    assert task in tuple(f"T{i:02}" for i in range(2, 17))
     prefix = f"agentchaos_{task.lower()}_verify_"
     database = prefix + uuid4().hex[:12]
     assert database.startswith(prefix) and database != settings.mysql_database

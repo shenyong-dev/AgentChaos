@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="7" time="11.420" timestamp="2026-10-28T20:12:40.805320+08:00" hostname="深拥"><testcase classname="tests.test_judging" name="test_judge_strict_missing_fields_unknown_references_contradiction_and_uncertainty" time="0.003" /><testcase classname="tests.test_judging" name="test_agreement_keeps_failure_denominators_and_does_not_invent_inter_human_reliability" time="0.000" /><testcase classname="tests.test_judging" name="test_label_seal_is_required_before_judge_and_no_human_or_rule_labels_cross_boundary" time="3.897"><failure message="AttributeError: 'tuple' object has no attribute 'content'">lab = (Engine(mysql+pymysql://root:***@127.0.0.1:3306/agentchaos_t12_verify_1906924a15ff?charset=utf8mb4), &lt;redis.client.Red...namespace='ac:t07', executor_lease_seconds=45, sse_max_seconds=30, sse_send_timeout_seconds=5.0, sse_max_backlog=1000))
+
+    def test_label_seal_is_required_before_judge_and_no_human_or_rule_labels_cross_boundary(lab):
+        svc, gateway = service(lab, [answer()])
+        request = RequestID(request_id=uuid4())
+        batch = svc.create(1, request)
+        assert svc.create(1, request) == batch and not gateway.calls
+        sample = batch["frozen"]["dataset"]["samples"][0]
+        sid = sample["id"]
+        bid = batch["batch_id"]
+        with pytest.raises(AgentError) as exc:
+            svc.evaluate(1, bid, sid, RequestID(request_id=uuid4()))
+        assert exc.value.code == "judge_labels_not_sealed" and not gateway.calls
+        with pytest.raises(AgentError):
+            svc.seal(
+                2,
+                bid,
+                SealLabels(
+                    request_id=uuid4(),
+                    dataset_hash=batch["frozen"]["dataset"]["dataset_hash"],
+                    independent_from_judge=True,
+                ),
+            )
+        labels = label_all(svc, batch)
+        seal = svc.seal(
+            2,
+            bid,
+            SealLabels(
+                request_id=uuid4(),
+                dataset_hash=batch["frozen"]["dataset"]["dataset_hash"],
+                independent_from_judge=True,
+            ),
+        )
+        assert len(seal["labels"]) == 30
+        with pytest.raises(AgentError):
+            svc.label(
+                2,
+                bid,
+                sid,
+                HumanLabel(
+                    request_id=uuid4(),
+                    sample_hash=sample["sample_hash"],
+                    support="contradicted",
+                    explanation="unreasonable",
+                    note="must not overwrite frozen labels",
+                ),
+            )
+        call = RequestID(request_id=uuid4())
+        result = svc.evaluate(1, bid, sid, call)
+        assert svc.evaluate(1, bid, sid, call) == result and len(gateway.calls) == 1
+        messages = gateway.calls[0][0]
+&gt;       serialized = json.dumps([m.content for m in messages])
+                                 ^^^^^^^^^
+E       AttributeError: 'tuple' object has no attribute 'content'
+
+backend\tests\test_judging.py:187: AttributeError</failure></testcase><testcase classname="tests.test_judging" name="test_judge_failures_do_not_become_pass_or_retry[value0]" time="1.697" /><testcase classname="tests.test_judging" name="test_judge_failures_do_not_become_pass_or_retry[value1]" time="1.068" /><testcase classname="tests.test_judging" name="test_judge_failures_do_not_become_pass_or_retry[value2]" time="1.553" /><testcase classname="tests.test_judging" name="test_t12_budget_closed_missing_shared_limit_and_unknown_holds" time="0.642"><failure message="Failed: DID NOT RAISE AgentError">lab = (Engine(mysql+pymysql://root:***@127.0.0.1:3306/agentchaos_t12_verify_1906924a15ff?charset=utf8mb4), &lt;redis.client.Red...namespace='ac:t07', executor_lease_seconds=45, sse_max_seconds=30, sse_send_timeout_seconds=5.0, sse_max_backlog=1000))
+
+    def test_t12_budget_closed_missing_shared_limit_and_unknown_holds(lab):
+        _, r, s = lab
+        prefix = "ac:t12:test:" + uuid4().hex
+        events = []
+        settings = s.model_copy(
+            update={
+                "judge_allow_paid_model_calls": True,
+                "judge_budget_unlimited": True,
+                "judge_budget_authorization_id": AUTHORIZATION,
+            }
+        )
+        budget = JudgeBudget(
+            r, settings, str(uuid4()), lambda k, v: events.append((k, v)), prefix=prefix
+        )
+        try:
+            with pytest.raises(AgentError):
+                budget.reserve(1000, 1024)
+            assert not r.exists(budget.key)
+            r.hset(budget.key, "limit", -1)
+            ticket = budget.reserve(1000, 1024)
+            budget.unknown(ticket)
+            assert budget.snapshot()["held_upper"] &gt; 0 and budget.snapshot()["calls_unknown"] == 1
+            budget.settle(ticket, {"input_tokens": 100, "output_tokens": 20})
+            assert budget.snapshot()["held_upper"] == 0
+            r.hset(budget.batch_key, "calls_started", 30)
+&gt;           with pytest.raises(AgentError):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE AgentError
+
+backend\tests\test_judging.py:287: Failed</failure></testcase></testsuite></testsuites>

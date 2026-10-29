@@ -18,6 +18,7 @@ AUTHORIZATION = "T05-20261026-agent-1"
 OPEN_AUTHORIZATION = "T06-20261026-agent-open"
 FAULT_AUTHORIZATION = "T07-20261027-agent-open"
 DIALOGUE_AUTHORIZATION = "T09-20261028-agent-open"
+METAMORPHIC_AUTHORIZATION = "T10-20261028-agent-open"
 
 
 def authorization_limit(settings):
@@ -26,6 +27,7 @@ def authorization_limit(settings):
         OPEN_AUTHORIZATION,
         FAULT_AUTHORIZATION,
         DIALOGUE_AUTHORIZATION,
+        METAMORPHIC_AUTHORIZATION,
     ):
         return -1 if settings.executor_agent_budget_unlimited else 0
     if (

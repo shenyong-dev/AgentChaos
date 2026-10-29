@@ -1,0 +1,55 @@
+
+Running 1 test using 1 worker
+
+(node:31204) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  1 tests\reports.spec.ts:77:1 › mechanical review rejects deliberately wrong expectation without changing rules (8.4s)
+
+
+  1) tests\reports.spec.ts:77:1 › mechanical review rejects deliberately wrong expectation without changing rules 
+
+    TimeoutError: locator.click: Timeout 5000ms exceeded.
+    Call log:
+      - waiting for getByRole('dialog', { name: '复核缺陷与原始证据', exact: true }).getByRole('combobox', { name: '缺陷复核决定', exact: true })
+        - locator resolved to <input readonly value="" type="text" tabindex="0" role="combobox" autocomplete="off" spellcheck="false" id="el-id-6909-48" aria-label="缺陷复核决定" aria-expanded="false" aria-haspopup="listbox" class="el-select__input" aria-activedescendant="" aria-autocomplete="none" aria-controls="el-id-6909-38"/>
+      - attempting click action
+        2 × waiting for element to be visible, enabled and stable
+          - element is visible, enabled and stable
+          - scrolling into view if needed
+          - done scrolling
+          - <div class="el-select__selected-item el-select__placeholder">…</div> intercepts pointer events
+        - retrying click action
+        - waiting 20ms
+        2 × waiting for element to be visible, enabled and stable
+          - element is visible, enabled and stable
+          - scrolling into view if needed
+          - done scrolling
+          - <div class="el-select__selected-item el-select__placeholder">…</div> intercepts pointer events
+        - retrying click action
+          - waiting 100ms
+        9 × waiting for element to be visible, enabled and stable
+          - element is visible, enabled and stable
+          - scrolling into view if needed
+          - done scrolling
+          - <div class="el-select__selected-item el-select__placeholder">…</div> intercepts pointer events
+        - retrying click action
+          - waiting 500ms
+
+
+      84 |   await expect(dialog).toBeVisible()
+      85 |   await page.screenshot({ path: resolve(output, 'reports-review-open.png'), animations:'disabled' })
+    > 86 |   await dialog.getByRole('combobox', { name: '缺陷复核决定', exact:true }).click({ timeout: 5000 })
+         |                                                                      ^
+      87 |   await page.getByRole('option', { name: '已拒绝', exact: true }).click({ timeout: 5000 })
+      88 |   await dialog.getByRole('textbox', { name: '缺陷复核依据', exact: true }).fill('明确机械UI控制，不是真人独立标注：用户不要预约而夹具故意预期1笔，应拒绝候选，原规则failed保留。')
+      89 |   await dialog.getByRole('checkbox', { name: '确认已人工查看证据', exact:true }).check()
+        at D:\AgentChaos\frontend\tests\reports.spec.ts:86:70
+
+    attachment #1: video (video/webm) ──────────────────────────────────────────────────────────────
+    ..\.local\playwright-results\reports-mechanical-review--e0230-tion-without-changing-rules\video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ..\.local\playwright-results\reports-mechanical-review--e0230-tion-without-changing-rules\error-context.md
+
+  1 failed
+    tests\reports.spec.ts:77:1 › mechanical review rejects deliberately wrong expectation without changing rules 

@@ -1,0 +1,80 @@
+{
+  "candidate_hash": "39c8d64c78473bf29be60630d6c0daa10e241f1f8e70ff8c9669d12c1a32db5f",
+  "duplicates": [
+    4
+  ],
+  "index": 3,
+  "mode": "real_provider",
+  "raw": {
+    "assertions": [
+      {
+        "equals": 1,
+        "type": "booking_count"
+      },
+      {
+        "attendees": 18,
+        "date": "2026-10-30",
+        "room_code": "A101",
+        "type": "booking_matches"
+      },
+      {
+        "date": "2026-10-29",
+        "type": "no_booking_on"
+      },
+      {
+        "type": "confirmation_binding"
+      },
+      {
+        "type": "business_consistent"
+      }
+    ],
+    "profile": "correction",
+    "rationale": "第一轮请求2026-10-29 14:00—15:00、10人、A101草稿；第二轮改为后天即2026-10-30、18人，其余条件不变，原确认失效须重新展示草稿；最后确认。预期仅写入1条2026-10-30、18人、A101的预约，且不保留10-29旧预约。风险是沿用旧确认直接提交或仍按10人写入。",
+    "task_goal": {
+      "attendees": 18,
+      "end_at": "2026-10-30T15:00:00+08:00",
+      "room_code": "A101",
+      "start_at": "2026-10-30T14:00:00+08:00"
+    },
+    "title": "改期改人数后重新确认：2026-10-30 14:00—15:00 A101 18人",
+    "turns": [
+      {
+        "user": "请帮我预约2026年10月29日14:00到15:00的A101场地，10人使用，先给我草稿确认。"
+      },
+      {
+        "user": "改一下：日期改成后天2026年10月30日，人数改成18人，其他条件不变，请重新给草稿。"
+      },
+      {
+        "user": "确认。"
+      }
+    ]
+  },
+  "schema_errors": [],
+  "status": "duplicate",
+  "validation": {
+    "expected_fixture": {
+      "expected_count": 1,
+      "final": {
+        "attendees": 18,
+        "date": "2026-10-30",
+        "end_time": "15:00",
+        "room_code": "A101",
+        "start_time": "14:00"
+      },
+      "initial": {
+        "attendees": 10,
+        "date": "2026-10-29",
+        "end_time": "15:00",
+        "room_code": "A101",
+        "start_time": "14:00"
+      },
+      "instruction": "先请求原预约，第二轮日期改后天、人数18，最后确认；其他条件不变。"
+    },
+    "issues": [],
+    "semantic_fingerprint": "7dc1cc5db1f28ef214fbb3fda045aebfb298ea5c185793f6e4a946d35fbcfe96",
+    "text_fingerprint": "0390a6b8f070762e34e4eac2727044a80d86a6ee855bac7b67b07c0ab0b6c5dd",
+    "warnings": [
+      "自然语言与预期的完整含义仍需人工审核；规则检查不等于语义已确认。"
+    ]
+  }
+}

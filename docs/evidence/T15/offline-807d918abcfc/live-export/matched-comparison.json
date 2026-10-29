@@ -1,0 +1,2084 @@
+{
+  "left_run": "9ee1b99d-0b1e-4fe0-974b-274f383c94fa",
+  "right_run": "0b633226-68e6-45d1-bccf-e902b809dffd",
+  "conditions_match": true,
+  "checks": [
+    {
+      "condition": "target_id",
+      "left": 1,
+      "right": 1,
+      "status": "match"
+    },
+    {
+      "condition": "case_hashes",
+      "left": [
+        "dd9de5f0a6ab586ca1db01ab9fa7a04df9f88d711efb6fdd05f1cdf38d444b25"
+      ],
+      "right": [
+        "dd9de5f0a6ab586ca1db01ab9fa7a04df9f88d711efb6fdd05f1cdf38d444b25"
+      ],
+      "status": "match"
+    },
+    {
+      "condition": "repetitions",
+      "left": 1,
+      "right": 1,
+      "status": "match"
+    },
+    {
+      "condition": "seed",
+      "left": 0,
+      "right": 0,
+      "status": "match"
+    },
+    {
+      "condition": "fault",
+      "left": "control",
+      "right": "control",
+      "status": "match"
+    },
+    {
+      "condition": "limits",
+      "left": {
+        "max_steps": 100,
+        "max_tokens": 500000,
+        "concurrency": 1,
+        "max_model_calls": 20,
+        "timeout_seconds": 300
+      },
+      "right": {
+        "max_steps": 100,
+        "max_tokens": 500000,
+        "concurrency": 1,
+        "max_model_calls": 20,
+        "timeout_seconds": 300
+      },
+      "status": "match"
+    },
+    {
+      "condition": "run_budgets",
+      "left": {
+        "unit": "microUSD",
+        "currency": "USD",
+        "agent_microusd": 0,
+        "judge_microusd": 0,
+        "case_generator_microusd": 0
+      },
+      "right": {
+        "unit": "microUSD",
+        "currency": "USD",
+        "agent_microusd": 0,
+        "judge_microusd": 0,
+        "case_generator_microusd": 0
+      },
+      "status": "match"
+    },
+    {
+      "condition": "model",
+      "left": {
+        "provider": "DeepSeek",
+        "base_url": "https://api.deepseek.com",
+        "model_requested": "deepseek-flash",
+        "thinking": "disabled",
+        "max_output_tokens": 1024,
+        "sampling": "not asserted; temperature/top_p omitted",
+        "sdk_versions": {
+          "langgraph": "1.2.17",
+          "langchain-core": "1.7.0",
+          "langchain-deepseek": "1.1.1",
+          "langgraph-checkpoint-redis": "0.5.2"
+        }
+      },
+      "right": {
+        "provider": "DeepSeek",
+        "base_url": "https://api.deepseek.com",
+        "model_requested": "deepseek-flash",
+        "thinking": "disabled",
+        "max_output_tokens": 1024,
+        "sampling": "not asserted; temperature/top_p omitted",
+        "sdk_versions": {
+          "langgraph": "1.2.17",
+          "langchain-core": "1.7.0",
+          "langchain-deepseek": "1.1.1",
+          "langgraph-checkpoint-redis": "0.5.2"
+        }
+      },
+      "status": "match"
+    },
+    {
+      "condition": "knowledge_documents",
+      "left": [
+        {
+          "id": 1,
+          "title": "场地预约实验规则 v1",
+          "revision": 1,
+          "valid_to": null,
+          "source_ref": "knowledge/booking-rules-v1.md",
+          "valid_from": "2026-01-01T00:00:00+00:00",
+          "source_type": "experiment",
+          "content_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+          "document_key": "booking-rules",
+          "applicability": {
+            "scenario": "experimental_booking",
+            "rule_version": "v1"
+          }
+        }
+      ],
+      "right": [
+        {
+          "id": 1,
+          "title": "场地预约实验规则 v1",
+          "revision": 1,
+          "valid_to": null,
+          "source_ref": "knowledge/booking-rules-v1.md",
+          "valid_from": "2026-01-01T00:00:00+00:00",
+          "source_type": "experiment",
+          "content_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+          "document_key": "booking-rules",
+          "applicability": {
+            "scenario": "experimental_booking",
+            "rule_version": "v1"
+          }
+        }
+      ],
+      "status": "match"
+    },
+    {
+      "condition": "tool_contracts",
+      "left": {
+        "tools": {
+          "tools": [
+            {
+              "name": "query_availability",
+              "effect": "read",
+              "version": "1.0",
+              "idempotent": false,
+              "input_schema": {
+                "type": "object",
+                "title": "AvailabilityQuery",
+                "required": [
+                  "start_at",
+                  "end_at",
+                  "attendees"
+                ],
+                "properties": {
+                  "end_at": {
+                    "type": "string",
+                    "title": "End At",
+                    "format": "date-time"
+                  },
+                  "start_at": {
+                    "type": "string",
+                    "title": "Start At",
+                    "format": "date-time"
+                  },
+                  "attendees": {
+                    "type": "integer",
+                    "title": "Attendees",
+                    "maximum": 2147483647,
+                    "minimum": 1
+                  },
+                  "room_code": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,31}$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "title": "Room Code",
+                    "default": null
+                  }
+                },
+                "additionalProperties": false
+              },
+              "output_schema": {
+                "type": "object",
+                "$defs": {
+                  "RoomView": {
+                    "type": "object",
+                    "title": "RoomView",
+                    "required": [
+                      "room_code",
+                      "capacity"
+                    ],
+                    "properties": {
+                      "capacity": {
+                        "type": "integer",
+                        "title": "Capacity"
+                      },
+                      "room_code": {
+                        "type": "string",
+                        "title": "Room Code"
+                      }
+                    },
+                    "additionalProperties": false
+                  },
+                  "AvailabilityView": {
+                    "type": "object",
+                    "title": "AvailabilityView",
+                    "required": [
+                      "rooms",
+                      "start_at",
+                      "end_at",
+                      "attendees"
+                    ],
+                    "properties": {
+                      "rooms": {
+                        "type": "array",
+                        "items": {
+                          "$ref": "#/$defs/RoomView"
+                        },
+                        "title": "Rooms"
+                      },
+                      "end_at": {
+                        "type": "string",
+                        "title": "End At",
+                        "format": "date-time"
+                      },
+                      "start_at": {
+                        "type": "string",
+                        "title": "Start At",
+                        "format": "date-time"
+                      },
+                      "attendees": {
+                        "type": "integer",
+                        "title": "Attendees"
+                      },
+                      "truncated": {
+                        "type": "boolean",
+                        "title": "Truncated",
+                        "default": false
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                },
+                "title": "BookingToolResult[AvailabilityView]",
+                "required": [
+                  "code",
+                  "summary",
+                  "data",
+                  "commit_state"
+                ],
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "title": "Code"
+                  },
+                  "data": {
+                    "$ref": "#/$defs/AvailabilityView"
+                  },
+                  "status": {
+                    "enum": [
+                      "ok",
+                      "not_found"
+                    ],
+                    "type": "string",
+                    "title": "Status",
+                    "default": "ok"
+                  },
+                  "summary": {
+                    "type": "string",
+                    "title": "Summary"
+                  },
+                  "retryable": {
+                    "type": "boolean",
+                    "title": "Retryable",
+                    "default": false
+                  },
+                  "request_key": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "title": "Request Key",
+                    "default": null
+                  },
+                  "commit_state": {
+                    "enum": [
+                      "not_applicable",
+                      "not_committed",
+                      "committed",
+                      "unknown"
+                    ],
+                    "type": "string",
+                    "title": "Commit State"
+                  },
+                  "evidence_refs": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "title": "Evidence Refs"
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            {
+              "name": "preview_booking",
+              "effect": "draft_write",
+              "version": "1.0",
+              "idempotent": false,
+              "input_schema": {
+                "type": "object",
+                "title": "PreviewBooking",
+                "required": [
+                  "start_at",
+                  "end_at",
+                  "attendees",
+                  "room_code"
+                ],
+                "properties": {
+                  "end_at": {
+                    "type": "string",
+                    "title": "End At",
+                    "format": "date-time"
+                  },
+                  "start_at": {
+                    "type": "string",
+                    "title": "Start At",
+                    "format": "date-time"
+                  },
+                  "attendees": {
+                    "type": "integer",
+                    "title": "Attendees",
+                    "maximum": 2147483647,
+                    "minimum": 1
+                  },
+                  "room_code": {
+                    "type": "string",
+                    "title": "Room Code",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,31}$"
+                  }
+                },
+                "additionalProperties": false
+              },
+              "output_schema": {
+                "type": "object",
+                "$defs": {
+                  "DraftView": {
+                    "type": "object",
+                    "title": "DraftView",
+                    "required": [
+                      "draft_id",
+                      "draft_hash",
+                      "suggested_idempotency_key",
+                      "room_code",
+                      "start_at",
+                      "end_at",
+                      "attendees",
+                      "status",
+                      "expires_at"
+                    ],
+                    "properties": {
+                      "end_at": {
+                        "type": "string",
+                        "title": "End At",
+                        "format": "date-time"
+                      },
+                      "status": {
+                        "enum": [
+                          "pending",
+                          "confirmed",
+                          "expired",
+                          "superseded",
+                          "rejected"
+                        ],
+                        "type": "string",
+                        "title": "Status"
+                      },
+                      "draft_id": {
+                        "type": "string",
+                        "title": "Draft Id",
+                        "format": "uuid"
+                      },
+                      "start_at": {
+                        "type": "string",
+                        "title": "Start At",
+                        "format": "date-time"
+                      },
+                      "attendees": {
+                        "type": "integer",
+                        "title": "Attendees"
+                      },
+                      "room_code": {
+                        "type": "string",
+                        "title": "Room Code"
+                      },
+                      "draft_hash": {
+                        "type": "string",
+                        "title": "Draft Hash",
+                        "pattern": "^[0-9a-f]{64}$"
+                      },
+                      "expires_at": {
+                        "type": "string",
+                        "title": "Expires At",
+                        "format": "date-time"
+                      },
+                      "suggested_idempotency_key": {
+                        "type": "string",
+                        "title": "Suggested Idempotency Key",
+                        "format": "uuid"
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                },
+                "title": "BookingToolResult[DraftView]",
+                "required": [
+                  "code",
+                  "summary",
+                  "data",
+                  "commit_state"
+                ],
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "title": "Code"
+                  },
+                  "data": {
+                    "$ref": "#/$defs/DraftView"
+                  },
+                  "status": {
+                    "enum": [
+                      "ok",
+                      "not_found"
+                    ],
+                    "type": "string",
+                    "title": "Status",
+                    "default": "ok"
+                  },
+                  "summary": {
+                    "type": "string",
+                    "title": "Summary"
+                  },
+                  "retryable": {
+                    "type": "boolean",
+                    "title": "Retryable",
+                    "default": false
+                  },
+                  "request_key": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "title": "Request Key",
+                    "default": null
+                  },
+                  "commit_state": {
+                    "enum": [
+                      "not_applicable",
+                      "not_committed",
+                      "committed",
+                      "unknown"
+                    ],
+                    "type": "string",
+                    "title": "Commit State"
+                  },
+                  "evidence_refs": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "title": "Evidence Refs"
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            {
+              "name": "confirm_booking",
+              "effect": "booking_write",
+              "version": "1.0",
+              "idempotent": true,
+              "input_schema": {
+                "type": "object",
+                "title": "ConfirmBookingToolInput",
+                "required": [
+                  "draft_id",
+                  "draft_hash",
+                  "idempotency_key"
+                ],
+                "properties": {
+                  "draft_id": {
+                    "type": "string",
+                    "title": "Draft Id",
+                    "format": "uuid"
+                  },
+                  "draft_hash": {
+                    "type": "string",
+                    "title": "Draft Hash",
+                    "pattern": "^[0-9a-f]{64}$"
+                  },
+                  "idempotency_key": {
+                    "type": "string",
+                    "title": "Idempotency Key",
+                    "format": "uuid"
+                  }
+                },
+                "additionalProperties": false
+              },
+              "output_schema": {
+                "type": "object",
+                "$defs": {
+                  "BookingView": {
+                    "type": "object",
+                    "title": "BookingView",
+                    "required": [
+                      "booking_id",
+                      "draft_id",
+                      "idempotency_key",
+                      "room_code",
+                      "start_at",
+                      "end_at",
+                      "attendees",
+                      "status",
+                      "created_at"
+                    ],
+                    "properties": {
+                      "end_at": {
+                        "type": "string",
+                        "title": "End At",
+                        "format": "date-time"
+                      },
+                      "status": {
+                        "enum": [
+                          "confirmed",
+                          "cancelled"
+                        ],
+                        "type": "string",
+                        "title": "Status"
+                      },
+                      "draft_id": {
+                        "type": "string",
+                        "title": "Draft Id",
+                        "format": "uuid"
+                      },
+                      "start_at": {
+                        "type": "string",
+                        "title": "Start At",
+                        "format": "date-time"
+                      },
+                      "attendees": {
+                        "type": "integer",
+                        "title": "Attendees"
+                      },
+                      "room_code": {
+                        "type": "string",
+                        "title": "Room Code"
+                      },
+                      "booking_id": {
+                        "type": "string",
+                        "title": "Booking Id",
+                        "format": "uuid"
+                      },
+                      "created_at": {
+                        "type": "string",
+                        "title": "Created At",
+                        "format": "date-time"
+                      },
+                      "idempotency_key": {
+                        "type": "string",
+                        "title": "Idempotency Key",
+                        "format": "uuid"
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                },
+                "title": "BookingToolResult[BookingView]",
+                "required": [
+                  "code",
+                  "summary",
+                  "data",
+                  "commit_state"
+                ],
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "title": "Code"
+                  },
+                  "data": {
+                    "$ref": "#/$defs/BookingView"
+                  },
+                  "status": {
+                    "enum": [
+                      "ok",
+                      "not_found"
+                    ],
+                    "type": "string",
+                    "title": "Status",
+                    "default": "ok"
+                  },
+                  "summary": {
+                    "type": "string",
+                    "title": "Summary"
+                  },
+                  "retryable": {
+                    "type": "boolean",
+                    "title": "Retryable",
+                    "default": false
+                  },
+                  "request_key": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "title": "Request Key",
+                    "default": null
+                  },
+                  "commit_state": {
+                    "enum": [
+                      "not_applicable",
+                      "not_committed",
+                      "committed",
+                      "unknown"
+                    ],
+                    "type": "string",
+                    "title": "Commit State"
+                  },
+                  "evidence_refs": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "title": "Evidence Refs"
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            {
+              "name": "lookup_booking_by_request",
+              "effect": "read",
+              "version": "1.0",
+              "idempotent": true,
+              "input_schema": {
+                "type": "object",
+                "required": [
+                  "idempotency_key"
+                ],
+                "properties": {
+                  "idempotency_key": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                },
+                "additionalProperties": false
+              },
+              "output_schema": {
+                "type": "object",
+                "$defs": {
+                  "BookingView": {
+                    "type": "object",
+                    "title": "BookingView",
+                    "required": [
+                      "booking_id",
+                      "draft_id",
+                      "idempotency_key",
+                      "room_code",
+                      "start_at",
+                      "end_at",
+                      "attendees",
+                      "status",
+                      "created_at"
+                    ],
+                    "properties": {
+                      "end_at": {
+                        "type": "string",
+                        "title": "End At",
+                        "format": "date-time"
+                      },
+                      "status": {
+                        "enum": [
+                          "confirmed",
+                          "cancelled"
+                        ],
+                        "type": "string",
+                        "title": "Status"
+                      },
+                      "draft_id": {
+                        "type": "string",
+                        "title": "Draft Id",
+                        "format": "uuid"
+                      },
+                      "start_at": {
+                        "type": "string",
+                        "title": "Start At",
+                        "format": "date-time"
+                      },
+                      "attendees": {
+                        "type": "integer",
+                        "title": "Attendees"
+                      },
+                      "room_code": {
+                        "type": "string",
+                        "title": "Room Code"
+                      },
+                      "booking_id": {
+                        "type": "string",
+                        "title": "Booking Id",
+                        "format": "uuid"
+                      },
+                      "created_at": {
+                        "type": "string",
+                        "title": "Created At",
+                        "format": "date-time"
+                      },
+                      "idempotency_key": {
+                        "type": "string",
+                        "title": "Idempotency Key",
+                        "format": "uuid"
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                },
+                "title": "BookingToolResult[Union[BookingView, NoneType]]",
+                "required": [
+                  "code",
+                  "summary",
+                  "data",
+                  "commit_state"
+                ],
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "title": "Code"
+                  },
+                  "data": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/$defs/BookingView"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "status": {
+                    "enum": [
+                      "ok",
+                      "not_found"
+                    ],
+                    "type": "string",
+                    "title": "Status",
+                    "default": "ok"
+                  },
+                  "summary": {
+                    "type": "string",
+                    "title": "Summary"
+                  },
+                  "retryable": {
+                    "type": "boolean",
+                    "title": "Retryable",
+                    "default": false
+                  },
+                  "request_key": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "title": "Request Key",
+                    "default": null
+                  },
+                  "commit_state": {
+                    "enum": [
+                      "not_applicable",
+                      "not_committed",
+                      "committed",
+                      "unknown"
+                    ],
+                    "type": "string",
+                    "title": "Commit State"
+                  },
+                  "evidence_refs": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "title": "Evidence Refs"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          ],
+          "version": "1.0",
+          "permission": "authenticated operator; confirmation requires explicit user action",
+          "error_schema": {
+            "type": "object",
+            "$defs": {
+              "ErrorBody": {
+                "type": "object",
+                "title": "ErrorBody",
+                "required": [
+                  "code",
+                  "message"
+                ],
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "title": "Code"
+                  },
+                  "details": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": true
+                    },
+                    "title": "Details"
+                  },
+                  "message": {
+                    "type": "string",
+                    "title": "Message"
+                  }
+                }
+              }
+            },
+            "title": "ErrorEnvelope",
+            "required": [
+              "error",
+              "request_id"
+            ],
+            "properties": {
+              "error": {
+                "$ref": "#/$defs/ErrorBody"
+              },
+              "request_id": {
+                "type": "string",
+                "title": "Request Id"
+              }
+            }
+          },
+          "unknown_commit": "lookup original idempotency key; never replace key",
+          "trusted_context": [
+            "actor_key",
+            "scope_id",
+            "reference_clock",
+            "confirmed"
+          ],
+          "automatic_retries": 0,
+          "implemented_limits": {
+            "candidate_rooms": 50,
+            "db_socket_seconds": 15,
+            "actor_lock_wait_seconds": 3,
+            "innodb_lock_wait_seconds": 5
+          },
+          "adapter_limits_for_T04": {
+            "max_response_bytes": 16384,
+            "wall_timeout_and_confirmation_gate": "implemented in T04"
+          }
+        },
+        "version": "booking-registry-v1",
+        "state_tool": {
+          "type": "object",
+          "title": "FieldPatch",
+          "properties": {
+            "date": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Date",
+              "default": null,
+              "description": "当地日期YYYY-MM-DD；相对日期按服务端参考时钟解析。"
+            },
+            "end_time": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "End Time",
+              "default": null,
+              "description": "当地钟表时间HH:MM，例如15:00；不含日期、秒或时区。"
+            },
+            "attendees": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "maximum": 2147483647,
+                  "minimum": 1
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Attendees",
+              "default": null
+            },
+            "room_code": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Room Code",
+              "default": null
+            },
+            "start_time": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Start Time",
+              "default": null,
+              "description": "当地钟表时间HH:MM，例如14:00；不含日期、秒或时区。"
+            },
+            "clear_fields": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "title": "Clear Fields",
+              "maxItems": 6
+            },
+            "source_quotes": {
+              "type": "object",
+              "title": "Source Quotes",
+              "description": "每个本次填写的字段都要有同名键，对应当前用户输入的原文片段；保留的旧字段不要重复填写。",
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            "duration_minutes": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "maximum": 120,
+                  "minimum": 30
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Duration Minutes",
+              "default": null,
+              "description": "仅当用户明确说时长时填写；已给起止时间就分别填写start_time和end_time。"
+            }
+          },
+          "additionalProperties": false
+        },
+        "retrieval_tool": {
+          "type": "object",
+          "title": "RuleQuery",
+          "required": [
+            "query"
+          ],
+          "properties": {
+            "query": {
+              "type": "string",
+              "title": "Query",
+              "maxLength": 1000,
+              "minLength": 1
+            }
+          },
+          "additionalProperties": false
+        },
+        "max_response_bytes": 16384,
+        "automatic_write_retries": 0
+      },
+      "right": {
+        "tools": {
+          "tools": [
+            {
+              "name": "query_availability",
+              "effect": "read",
+              "version": "1.0",
+              "idempotent": false,
+              "input_schema": {
+                "type": "object",
+                "title": "AvailabilityQuery",
+                "required": [
+                  "start_at",
+                  "end_at",
+                  "attendees"
+                ],
+                "properties": {
+                  "end_at": {
+                    "type": "string",
+                    "title": "End At",
+                    "format": "date-time"
+                  },
+                  "start_at": {
+                    "type": "string",
+                    "title": "Start At",
+                    "format": "date-time"
+                  },
+                  "attendees": {
+                    "type": "integer",
+                    "title": "Attendees",
+                    "maximum": 2147483647,
+                    "minimum": 1
+                  },
+                  "room_code": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,31}$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "title": "Room Code",
+                    "default": null
+                  }
+                },
+                "additionalProperties": false
+              },
+              "output_schema": {
+                "type": "object",
+                "$defs": {
+                  "RoomView": {
+                    "type": "object",
+                    "title": "RoomView",
+                    "required": [
+                      "room_code",
+                      "capacity"
+                    ],
+                    "properties": {
+                      "capacity": {
+                        "type": "integer",
+                        "title": "Capacity"
+                      },
+                      "room_code": {
+                        "type": "string",
+                        "title": "Room Code"
+                      }
+                    },
+                    "additionalProperties": false
+                  },
+                  "AvailabilityView": {
+                    "type": "object",
+                    "title": "AvailabilityView",
+                    "required": [
+                      "rooms",
+                      "start_at",
+                      "end_at",
+                      "attendees"
+                    ],
+                    "properties": {
+                      "rooms": {
+                        "type": "array",
+                        "items": {
+                          "$ref": "#/$defs/RoomView"
+                        },
+                        "title": "Rooms"
+                      },
+                      "end_at": {
+                        "type": "string",
+                        "title": "End At",
+                        "format": "date-time"
+                      },
+                      "start_at": {
+                        "type": "string",
+                        "title": "Start At",
+                        "format": "date-time"
+                      },
+                      "attendees": {
+                        "type": "integer",
+                        "title": "Attendees"
+                      },
+                      "truncated": {
+                        "type": "boolean",
+                        "title": "Truncated",
+                        "default": false
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                },
+                "title": "BookingToolResult[AvailabilityView]",
+                "required": [
+                  "code",
+                  "summary",
+                  "data",
+                  "commit_state"
+                ],
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "title": "Code"
+                  },
+                  "data": {
+                    "$ref": "#/$defs/AvailabilityView"
+                  },
+                  "status": {
+                    "enum": [
+                      "ok",
+                      "not_found"
+                    ],
+                    "type": "string",
+                    "title": "Status",
+                    "default": "ok"
+                  },
+                  "summary": {
+                    "type": "string",
+                    "title": "Summary"
+                  },
+                  "retryable": {
+                    "type": "boolean",
+                    "title": "Retryable",
+                    "default": false
+                  },
+                  "request_key": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "title": "Request Key",
+                    "default": null
+                  },
+                  "commit_state": {
+                    "enum": [
+                      "not_applicable",
+                      "not_committed",
+                      "committed",
+                      "unknown"
+                    ],
+                    "type": "string",
+                    "title": "Commit State"
+                  },
+                  "evidence_refs": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "title": "Evidence Refs"
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            {
+              "name": "preview_booking",
+              "effect": "draft_write",
+              "version": "1.0",
+              "idempotent": false,
+              "input_schema": {
+                "type": "object",
+                "title": "PreviewBooking",
+                "required": [
+                  "start_at",
+                  "end_at",
+                  "attendees",
+                  "room_code"
+                ],
+                "properties": {
+                  "end_at": {
+                    "type": "string",
+                    "title": "End At",
+                    "format": "date-time"
+                  },
+                  "start_at": {
+                    "type": "string",
+                    "title": "Start At",
+                    "format": "date-time"
+                  },
+                  "attendees": {
+                    "type": "integer",
+                    "title": "Attendees",
+                    "maximum": 2147483647,
+                    "minimum": 1
+                  },
+                  "room_code": {
+                    "type": "string",
+                    "title": "Room Code",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,31}$"
+                  }
+                },
+                "additionalProperties": false
+              },
+              "output_schema": {
+                "type": "object",
+                "$defs": {
+                  "DraftView": {
+                    "type": "object",
+                    "title": "DraftView",
+                    "required": [
+                      "draft_id",
+                      "draft_hash",
+                      "suggested_idempotency_key",
+                      "room_code",
+                      "start_at",
+                      "end_at",
+                      "attendees",
+                      "status",
+                      "expires_at"
+                    ],
+                    "properties": {
+                      "end_at": {
+                        "type": "string",
+                        "title": "End At",
+                        "format": "date-time"
+                      },
+                      "status": {
+                        "enum": [
+                          "pending",
+                          "confirmed",
+                          "expired",
+                          "superseded",
+                          "rejected"
+                        ],
+                        "type": "string",
+                        "title": "Status"
+                      },
+                      "draft_id": {
+                        "type": "string",
+                        "title": "Draft Id",
+                        "format": "uuid"
+                      },
+                      "start_at": {
+                        "type": "string",
+                        "title": "Start At",
+                        "format": "date-time"
+                      },
+                      "attendees": {
+                        "type": "integer",
+                        "title": "Attendees"
+                      },
+                      "room_code": {
+                        "type": "string",
+                        "title": "Room Code"
+                      },
+                      "draft_hash": {
+                        "type": "string",
+                        "title": "Draft Hash",
+                        "pattern": "^[0-9a-f]{64}$"
+                      },
+                      "expires_at": {
+                        "type": "string",
+                        "title": "Expires At",
+                        "format": "date-time"
+                      },
+                      "suggested_idempotency_key": {
+                        "type": "string",
+                        "title": "Suggested Idempotency Key",
+                        "format": "uuid"
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                },
+                "title": "BookingToolResult[DraftView]",
+                "required": [
+                  "code",
+                  "summary",
+                  "data",
+                  "commit_state"
+                ],
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "title": "Code"
+                  },
+                  "data": {
+                    "$ref": "#/$defs/DraftView"
+                  },
+                  "status": {
+                    "enum": [
+                      "ok",
+                      "not_found"
+                    ],
+                    "type": "string",
+                    "title": "Status",
+                    "default": "ok"
+                  },
+                  "summary": {
+                    "type": "string",
+                    "title": "Summary"
+                  },
+                  "retryable": {
+                    "type": "boolean",
+                    "title": "Retryable",
+                    "default": false
+                  },
+                  "request_key": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "title": "Request Key",
+                    "default": null
+                  },
+                  "commit_state": {
+                    "enum": [
+                      "not_applicable",
+                      "not_committed",
+                      "committed",
+                      "unknown"
+                    ],
+                    "type": "string",
+                    "title": "Commit State"
+                  },
+                  "evidence_refs": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "title": "Evidence Refs"
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            {
+              "name": "confirm_booking",
+              "effect": "booking_write",
+              "version": "1.0",
+              "idempotent": true,
+              "input_schema": {
+                "type": "object",
+                "title": "ConfirmBookingToolInput",
+                "required": [
+                  "draft_id",
+                  "draft_hash",
+                  "idempotency_key"
+                ],
+                "properties": {
+                  "draft_id": {
+                    "type": "string",
+                    "title": "Draft Id",
+                    "format": "uuid"
+                  },
+                  "draft_hash": {
+                    "type": "string",
+                    "title": "Draft Hash",
+                    "pattern": "^[0-9a-f]{64}$"
+                  },
+                  "idempotency_key": {
+                    "type": "string",
+                    "title": "Idempotency Key",
+                    "format": "uuid"
+                  }
+                },
+                "additionalProperties": false
+              },
+              "output_schema": {
+                "type": "object",
+                "$defs": {
+                  "BookingView": {
+                    "type": "object",
+                    "title": "BookingView",
+                    "required": [
+                      "booking_id",
+                      "draft_id",
+                      "idempotency_key",
+                      "room_code",
+                      "start_at",
+                      "end_at",
+                      "attendees",
+                      "status",
+                      "created_at"
+                    ],
+                    "properties": {
+                      "end_at": {
+                        "type": "string",
+                        "title": "End At",
+                        "format": "date-time"
+                      },
+                      "status": {
+                        "enum": [
+                          "confirmed",
+                          "cancelled"
+                        ],
+                        "type": "string",
+                        "title": "Status"
+                      },
+                      "draft_id": {
+                        "type": "string",
+                        "title": "Draft Id",
+                        "format": "uuid"
+                      },
+                      "start_at": {
+                        "type": "string",
+                        "title": "Start At",
+                        "format": "date-time"
+                      },
+                      "attendees": {
+                        "type": "integer",
+                        "title": "Attendees"
+                      },
+                      "room_code": {
+                        "type": "string",
+                        "title": "Room Code"
+                      },
+                      "booking_id": {
+                        "type": "string",
+                        "title": "Booking Id",
+                        "format": "uuid"
+                      },
+                      "created_at": {
+                        "type": "string",
+                        "title": "Created At",
+                        "format": "date-time"
+                      },
+                      "idempotency_key": {
+                        "type": "string",
+                        "title": "Idempotency Key",
+                        "format": "uuid"
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                },
+                "title": "BookingToolResult[BookingView]",
+                "required": [
+                  "code",
+                  "summary",
+                  "data",
+                  "commit_state"
+                ],
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "title": "Code"
+                  },
+                  "data": {
+                    "$ref": "#/$defs/BookingView"
+                  },
+                  "status": {
+                    "enum": [
+                      "ok",
+                      "not_found"
+                    ],
+                    "type": "string",
+                    "title": "Status",
+                    "default": "ok"
+                  },
+                  "summary": {
+                    "type": "string",
+                    "title": "Summary"
+                  },
+                  "retryable": {
+                    "type": "boolean",
+                    "title": "Retryable",
+                    "default": false
+                  },
+                  "request_key": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "title": "Request Key",
+                    "default": null
+                  },
+                  "commit_state": {
+                    "enum": [
+                      "not_applicable",
+                      "not_committed",
+                      "committed",
+                      "unknown"
+                    ],
+                    "type": "string",
+                    "title": "Commit State"
+                  },
+                  "evidence_refs": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "title": "Evidence Refs"
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            {
+              "name": "lookup_booking_by_request",
+              "effect": "read",
+              "version": "1.0",
+              "idempotent": true,
+              "input_schema": {
+                "type": "object",
+                "required": [
+                  "idempotency_key"
+                ],
+                "properties": {
+                  "idempotency_key": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                },
+                "additionalProperties": false
+              },
+              "output_schema": {
+                "type": "object",
+                "$defs": {
+                  "BookingView": {
+                    "type": "object",
+                    "title": "BookingView",
+                    "required": [
+                      "booking_id",
+                      "draft_id",
+                      "idempotency_key",
+                      "room_code",
+                      "start_at",
+                      "end_at",
+                      "attendees",
+                      "status",
+                      "created_at"
+                    ],
+                    "properties": {
+                      "end_at": {
+                        "type": "string",
+                        "title": "End At",
+                        "format": "date-time"
+                      },
+                      "status": {
+                        "enum": [
+                          "confirmed",
+                          "cancelled"
+                        ],
+                        "type": "string",
+                        "title": "Status"
+                      },
+                      "draft_id": {
+                        "type": "string",
+                        "title": "Draft Id",
+                        "format": "uuid"
+                      },
+                      "start_at": {
+                        "type": "string",
+                        "title": "Start At",
+                        "format": "date-time"
+                      },
+                      "attendees": {
+                        "type": "integer",
+                        "title": "Attendees"
+                      },
+                      "room_code": {
+                        "type": "string",
+                        "title": "Room Code"
+                      },
+                      "booking_id": {
+                        "type": "string",
+                        "title": "Booking Id",
+                        "format": "uuid"
+                      },
+                      "created_at": {
+                        "type": "string",
+                        "title": "Created At",
+                        "format": "date-time"
+                      },
+                      "idempotency_key": {
+                        "type": "string",
+                        "title": "Idempotency Key",
+                        "format": "uuid"
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                },
+                "title": "BookingToolResult[Union[BookingView, NoneType]]",
+                "required": [
+                  "code",
+                  "summary",
+                  "data",
+                  "commit_state"
+                ],
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "title": "Code"
+                  },
+                  "data": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/$defs/BookingView"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "status": {
+                    "enum": [
+                      "ok",
+                      "not_found"
+                    ],
+                    "type": "string",
+                    "title": "Status",
+                    "default": "ok"
+                  },
+                  "summary": {
+                    "type": "string",
+                    "title": "Summary"
+                  },
+                  "retryable": {
+                    "type": "boolean",
+                    "title": "Retryable",
+                    "default": false
+                  },
+                  "request_key": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "title": "Request Key",
+                    "default": null
+                  },
+                  "commit_state": {
+                    "enum": [
+                      "not_applicable",
+                      "not_committed",
+                      "committed",
+                      "unknown"
+                    ],
+                    "type": "string",
+                    "title": "Commit State"
+                  },
+                  "evidence_refs": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "title": "Evidence Refs"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          ],
+          "version": "1.0",
+          "permission": "authenticated operator; confirmation requires explicit user action",
+          "error_schema": {
+            "type": "object",
+            "$defs": {
+              "ErrorBody": {
+                "type": "object",
+                "title": "ErrorBody",
+                "required": [
+                  "code",
+                  "message"
+                ],
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "title": "Code"
+                  },
+                  "details": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": true
+                    },
+                    "title": "Details"
+                  },
+                  "message": {
+                    "type": "string",
+                    "title": "Message"
+                  }
+                }
+              }
+            },
+            "title": "ErrorEnvelope",
+            "required": [
+              "error",
+              "request_id"
+            ],
+            "properties": {
+              "error": {
+                "$ref": "#/$defs/ErrorBody"
+              },
+              "request_id": {
+                "type": "string",
+                "title": "Request Id"
+              }
+            }
+          },
+          "unknown_commit": "lookup original idempotency key; never replace key",
+          "trusted_context": [
+            "actor_key",
+            "scope_id",
+            "reference_clock",
+            "confirmed"
+          ],
+          "automatic_retries": 0,
+          "implemented_limits": {
+            "candidate_rooms": 50,
+            "db_socket_seconds": 15,
+            "actor_lock_wait_seconds": 3,
+            "innodb_lock_wait_seconds": 5
+          },
+          "adapter_limits_for_T04": {
+            "max_response_bytes": 16384,
+            "wall_timeout_and_confirmation_gate": "implemented in T04"
+          }
+        },
+        "version": "booking-registry-v1",
+        "state_tool": {
+          "type": "object",
+          "title": "FieldPatch",
+          "properties": {
+            "date": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Date",
+              "default": null,
+              "description": "当地日期YYYY-MM-DD；相对日期按服务端参考时钟解析。"
+            },
+            "end_time": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "End Time",
+              "default": null,
+              "description": "当地钟表时间HH:MM，例如15:00；不含日期、秒或时区。"
+            },
+            "attendees": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "maximum": 2147483647,
+                  "minimum": 1
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Attendees",
+              "default": null
+            },
+            "room_code": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Room Code",
+              "default": null
+            },
+            "start_time": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Start Time",
+              "default": null,
+              "description": "当地钟表时间HH:MM，例如14:00；不含日期、秒或时区。"
+            },
+            "clear_fields": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "title": "Clear Fields",
+              "maxItems": 6
+            },
+            "source_quotes": {
+              "type": "object",
+              "title": "Source Quotes",
+              "description": "每个本次填写的字段都要有同名键，对应当前用户输入的原文片段；保留的旧字段不要重复填写。",
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            "duration_minutes": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "maximum": 120,
+                  "minimum": 30
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Duration Minutes",
+              "default": null,
+              "description": "仅当用户明确说时长时填写；已给起止时间就分别填写start_time和end_time。"
+            }
+          },
+          "additionalProperties": false
+        },
+        "retrieval_tool": {
+          "type": "object",
+          "title": "RuleQuery",
+          "required": [
+            "query"
+          ],
+          "properties": {
+            "query": {
+              "type": "string",
+              "title": "Query",
+              "maxLength": 1000,
+              "minLength": 1
+            }
+          },
+          "additionalProperties": false
+        },
+        "max_response_bytes": 16384,
+        "automatic_write_retries": 0
+      },
+      "status": "match"
+    },
+    {
+      "condition": "trace_schema",
+      "left": "1.3",
+      "right": "1.3",
+      "status": "match"
+    },
+    {
+      "condition": "rule_evaluator",
+      "left": {
+        "dsl": "1.1",
+        "kind": "rule",
+        "sources": {
+          "engine.py": "2fda812429cf6a8af51c6b622d777c7253c7b2a8d89f3673e1bcd5b3f8a5861c",
+          "service.py": "e0c6a13894dfab35b21a6f617ac8a0b96991e82b6d4370c57ed52d61d7139e76",
+          "__init__.py": "c6b52f473229bc9a56fe07dd05085f1ef74c5193bda5022f3edb29ee81f8570f",
+          "assertion-schema": "6601388185108c270025c72d0203f3d306da2149e3369b92743bd0c88f378477",
+          "tool-input-schemas": "9daddd2681fb888436baf0ae52ff991ca4744160f567c3c208768e5fd5984cda"
+        },
+        "version": "T08-v1-48062f5f529bd701a13b",
+        "source_hash": "48062f5f529bd701a13bfb20e0726a2a0ab19ed93ebc230b3fbc26775ed67b2d"
+      },
+      "right": {
+        "dsl": "1.1",
+        "kind": "rule",
+        "sources": {
+          "engine.py": "2fda812429cf6a8af51c6b622d777c7253c7b2a8d89f3673e1bcd5b3f8a5861c",
+          "service.py": "e0c6a13894dfab35b21a6f617ac8a0b96991e82b6d4370c57ed52d61d7139e76",
+          "__init__.py": "c6b52f473229bc9a56fe07dd05085f1ef74c5193bda5022f3edb29ee81f8570f",
+          "assertion-schema": "6601388185108c270025c72d0203f3d306da2149e3369b92743bd0c88f378477",
+          "tool-input-schemas": "9daddd2681fb888436baf0ae52ff991ca4744160f567c3c208768e5fd5984cda"
+        },
+        "version": "T08-v1-48062f5f529bd701a13b",
+        "source_hash": "48062f5f529bd701a13bfb20e0726a2a0ab19ed93ebc230b3fbc26775ed67b2d"
+      },
+      "status": "match"
+    },
+    {
+      "condition": "observed_rule_evaluators",
+      "left": [
+        "12915ffd7bbfd3a4b19df1d111dc61862ae14d00197d8813bb18bd970eaaf866"
+      ],
+      "right": [
+        "12915ffd7bbfd3a4b19df1d111dc61862ae14d00197d8813bb18bd970eaaf866"
+      ],
+      "status": "match"
+    },
+    {
+      "condition": "relation_comparator",
+      "left": "not_applicable",
+      "right": "not_applicable",
+      "status": "match"
+    },
+    {
+      "condition": "gateway_modes",
+      "left": [
+        "offline_test_double"
+      ],
+      "right": [
+        "offline_test_double"
+      ],
+      "status": "match"
+    },
+    {
+      "condition": "external_user_inputs",
+      "left": [
+        [
+          "dd9de5f0a6ab586ca1db01ab9fa7a04df9f88d711efb6fdd05f1cdf38d444b25",
+          1,
+          []
+        ]
+      ],
+      "right": [
+        [
+          "dd9de5f0a6ab586ca1db01ab9fa7a04df9f88d711efb6fdd05f1cdf38d444b25",
+          1,
+          []
+        ]
+      ],
+      "status": "match"
+    }
+  ],
+  "paired_executions": [
+    {
+      "case_key": "T15-POLICY-CONTROL",
+      "repeat_no": 1,
+      "left_execution": "964fffd6-f675-4a42-89ec-e3aecd5da693",
+      "right_execution": "7095fa87-8996-4e25-9fb1-555c109680fc",
+      "left_rule": "failed",
+      "right_rule": "passed"
+    }
+  ],
+  "left_statistics": {
+    "planned_executions": 1,
+    "unique_cases": 1,
+    "attempts_including_recovery": 1,
+    "execution_status_counts": {
+      "failed": 1
+    },
+    "rule_outcomes": {
+      "failed": 1
+    },
+    "reliability": {
+      "numerator": 0,
+      "denominator": 1,
+      "rate": 0.0,
+      "unit": "execution, latest rule version; repeats are not independent families",
+      "exclusions": {}
+    },
+    "task_outcomes": {
+      "unknown": 1
+    },
+    "task_fulfilment": {
+      "numerator": 0,
+      "denominator": 0,
+      "rate": null,
+      "exclusions": {
+        "unknown": 1
+      }
+    },
+    "ai_assistance_outcomes": {
+      "not_evaluated": 1
+    },
+    "usage_records": [
+      {
+        "execution_id": "964fffd6-f675-4a42-89ec-e3aecd5da693",
+        "reported": {
+          "roles": {},
+          "tickets": {}
+        }
+      }
+    ],
+    "usage_boundary": "Reported usage is retained verbatim. Missing/unknown is not zero or a provider bill."
+  },
+  "right_statistics": {
+    "planned_executions": 1,
+    "unique_cases": 1,
+    "attempts_including_recovery": 1,
+    "execution_status_counts": {
+      "passed": 1
+    },
+    "rule_outcomes": {
+      "passed": 1
+    },
+    "reliability": {
+      "numerator": 1,
+      "denominator": 1,
+      "rate": 1.0,
+      "unit": "execution, latest rule version; repeats are not independent families",
+      "exclusions": {}
+    },
+    "task_outcomes": {
+      "unknown": 1
+    },
+    "task_fulfilment": {
+      "numerator": 0,
+      "denominator": 0,
+      "rate": null,
+      "exclusions": {
+        "unknown": 1
+      }
+    },
+    "ai_assistance_outcomes": {
+      "not_evaluated": 1
+    },
+    "usage_records": [
+      {
+        "execution_id": "7095fa87-8996-4e25-9fb1-555c109680fc",
+        "reported": {
+          "roles": {},
+          "tickets": {}
+        }
+      }
+    ],
+    "usage_boundary": "Reported usage is retained verbatim. Missing/unknown is not zero or a provider bill."
+  },
+  "reliability_rate_delta": 1.0,
+  "target_changes": {
+    "config_hash": {
+      "left": "2fe0332d3afe4efb25cd725271b70dfcdf33871688ecc297ea91498ee1a94468",
+      "right": "b96efce419467920d7a82729959b5b43b6e312562fd569843d3a556e822e3e5b"
+    }
+  },
+  "formal_v0_v1_experiment": false,
+  "boundary": "Development run comparison of the whole target version. Matching conditions do not establish a formal V0/V1 experiment, single-factor causality or significance."
+}

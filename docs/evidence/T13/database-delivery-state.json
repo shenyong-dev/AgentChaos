@@ -1,0 +1,1447 @@
+{
+  "checked_at": "2026-10-29T03:35:17.205715+00:00",
+  "mysql_version": "8.0.39",
+  "database": "agentchaos",
+  "revision": "20261028_0006",
+  "migration_sha256": "8297f3228b7f3d9f81ad6e1522658e6193bb7e5240c2a8d0d24d36dac7b2a2f1",
+  "migration_files": {
+    "20261028_0006_t13_dataset_evidence.py": "8297f3228b7f3d9f81ad6e1522658e6193bb7e5240c2a8d0d24d36dac7b2a2f1",
+    "20261028_0005_t12_judge_evidence.py": "9a6c2dd0a2af8d3b64a7580bcebb8dc38966714321351da0054d42a8a2b821af",
+    "20261028_0004_t11_generation_evidence.py": "694726f49bfd451ec7432276e7fbe6fa95e34253a01be404dff8a2559f958dcb",
+    "20261026_0003_t06_run_event_order.py": "1ada1734e97a62a3bd8909716577ab9b8c3480426c5398e26665b45efe524fc2",
+    "20261025_0002_t04_draft_session.py": "4427509597810f4db3519faa7dd6bbddf294365d575a65d26648bcac1b12274c",
+    "20261025_0001_t02_initial_sixteen_table_schema.py": "d1161f0001f5d4ab9660898ff05ef5e632ecc4396aeffe322b1350d67f7c18ea"
+  },
+  "session_time_zone": "+00:00",
+  "transaction_isolation": "REPEATABLE-READ",
+  "innodb_lock_wait_timeout_seconds": 5,
+  "domain_table_count": 16,
+  "alembic_version_table_count": 1,
+  "tables": {
+    "ac_artifacts": {
+      "options": {
+        "mysql_engine": "InnoDB",
+        "mysql_default charset": "utf8mb4",
+        "mysql_collate": "utf8mb4_0900_ai_ci"
+      },
+      "rows": 4,
+      "foreign_keys": [
+        {
+          "name": "fk_ac_artifacts_owner_id_ac_users",
+          "constrained_columns": [
+            "owner_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "ac_users",
+          "referred_columns": [
+            "id"
+          ],
+          "options": {}
+        },
+        {
+          "name": "fk_ac_artifacts_run_id_ac_test_runs",
+          "constrained_columns": [
+            "run_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "ac_test_runs",
+          "referred_columns": [
+            "id"
+          ],
+          "options": {}
+        }
+      ],
+      "checks": [
+        {
+          "name": "ck_artifact_owner",
+          "sqltext": "(((`run_id` is not null) and (`owner_id` is null)) or ((`run_id` is null) and (`owner_id` is not null) and (`kind` in (_utf8mb4'casegen_request',_utf8mb4'casegen_result',_utf8mb4'casegen_call',_utf8mb4'case_review',_utf8mb4'judge_request',_utf8mb4'judge_result',_utf8mb4'judge_call',_utf8mb4'judge_label',_utf8mb4'judge_review',_utf8mb4'dataset_manifest'))))"
+        },
+        {
+          "name": "ck_artifact_size",
+          "sqltext": "(`size_bytes` >= 0)"
+        }
+      ],
+      "unique_constraints": [],
+      "indexes": [
+        {
+          "name": "fk_ac_artifacts_run_id_ac_test_runs",
+          "column_names": [
+            "run_id"
+          ],
+          "unique": false
+        },
+        {
+          "name": "ix_artifact_owner",
+          "column_names": [
+            "owner_id",
+            "id"
+          ],
+          "unique": false
+        }
+      ]
+    },
+    "ac_assertion_results": {
+      "options": {
+        "mysql_engine": "InnoDB",
+        "mysql_default charset": "utf8mb4",
+        "mysql_collate": "utf8mb4_0900_ai_ci"
+      },
+      "rows": 0,
+      "foreign_keys": [
+        {
+          "name": "fk_ac_assertion_results_execution_id_ac_test_executions",
+          "constrained_columns": [
+            "execution_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "ac_test_executions",
+          "referred_columns": [
+            "id"
+          ],
+          "options": {}
+        }
+      ],
+      "checks": [
+        {
+          "name": "ck_assertion_kind",
+          "sqltext": "(`evaluator_kind` in (_utf8mb4'rule',_utf8mb4'ai',_utf8mb4'human'))"
+        },
+        {
+          "name": "ck_assertion_verdict",
+          "sqltext": "(`verdict` in (_utf8mb4'passed',_utf8mb4'failed',_utf8mb4'inconclusive',_utf8mb4'error',_utf8mb4'na'))"
+        }
+      ],
+      "unique_constraints": [
+        {
+          "name": "uq_assertion_evaluator",
+          "column_names": [
+            "execution_id",
+            "assertion_key",
+            "evaluator_kind",
+            "evaluator_version"
+          ],
+          "duplicates_index": "uq_assertion_evaluator"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "uq_assertion_evaluator",
+          "column_names": [
+            "execution_id",
+            "assertion_key",
+            "evaluator_kind",
+            "evaluator_version"
+          ],
+          "unique": true
+        }
+      ]
+    },
+    "ac_defects": {
+      "options": {
+        "mysql_engine": "InnoDB",
+        "mysql_default charset": "utf8mb4",
+        "mysql_collate": "utf8mb4_0900_ai_ci"
+      },
+      "rows": 0,
+      "foreign_keys": [
+        {
+          "name": "fk_ac_defects_first_execution_id_ac_test_executions",
+          "constrained_columns": [
+            "first_execution_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "ac_test_executions",
+          "referred_columns": [
+            "id"
+          ],
+          "options": {}
+        },
+        {
+          "name": "fk_ac_defects_reviewer_id_ac_users",
+          "constrained_columns": [
+            "reviewer_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "ac_users",
+          "referred_columns": [
+            "id"
+          ],
+          "options": {}
+        },
+        {
+          "name": "fk_ac_defects_target_id_ac_targets",
+          "constrained_columns": [
+            "target_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "ac_targets",
+          "referred_columns": [
+            "id"
+          ],
+          "options": {}
+        },
+        {
+          "name": "fk_defect_fixed_target",
+          "constrained_columns": [
+            "target_id",
+            "fixed_version_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "ac_target_versions",
+          "referred_columns": [
+            "target_id",
+            "id"
+          ],
+          "options": {}
+        }
+      ],
+      "checks": [
+        {
+          "name": "ck_defect_status",
+          "sqltext": "(`status` in (_utf8mb4'open',_utf8mb4'confirmed',_utf8mb4'fixed',_utf8mb4'verified',_utf8mb4'rejected'))"
+        }
+      ],
+      "unique_constraints": [
+        {
+          "name": "uq_ac_defects_defect_key",
+          "column_names": [
+            "defect_key"
+          ],
+          "duplicates_index": "uq_ac_defects_defect_key"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "fk_ac_defects_first_execution_id_ac_test_executions",
+          "column_names": [
+            "first_execution_id"
+          ],
+          "unique": false
+        },
+        {
+          "name": "fk_ac_defects_reviewer_id_ac_users",
+          "column_names": [
+            "reviewer_id"
+          ],
+          "unique": false
+        },
+        {
+          "name": "fk_defect_fixed_target",
+          "column_names": [
+            "target_id",
+            "fixed_version_id"
+          ],
+          "unique": false
+        },
+        {
+          "name": "ix_defect_fingerprint",
+          "column_names": [
+            "target_id",
+            "fingerprint"
+          ],
+          "unique": false
+        },
+        {
+          "name": "uq_ac_defects_defect_key",
+          "column_names": [
+            "defect_key"
+          ],
+          "unique": true
+        }
+      ]
+    },
+    "ac_fault_profiles": {
+      "options": {
+        "mysql_engine": "InnoDB",
+        "mysql_default charset": "utf8mb4",
+        "mysql_collate": "utf8mb4_0900_ai_ci"
+      },
+      "rows": 20,
+      "foreign_keys": [],
+      "checks": [
+        {
+          "name": "ck_fault_revision",
+          "sqltext": "(`revision` >= 1)"
+        },
+        {
+          "name": "ck_fault_triggers",
+          "sqltext": "(`max_triggers` >= 1)"
+        },
+        {
+          "name": "ck_fault_type",
+          "sqltext": "(`fault_type` in (_utf8mb4'F01',_utf8mb4'F02',_utf8mb4'F03',_utf8mb4'F04'))"
+        }
+      ],
+      "unique_constraints": [
+        {
+          "name": "uq_fault_revision",
+          "column_names": [
+            "profile_key",
+            "revision"
+          ],
+          "duplicates_index": "uq_fault_revision"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "uq_fault_revision",
+          "column_names": [
+            "profile_key",
+            "revision"
+          ],
+          "unique": true
+        }
+      ]
+    },
+    "ac_knowledge_documents": {
+      "options": {
+        "mysql_engine": "InnoDB",
+        "mysql_default charset": "utf8mb4",
+        "mysql_collate": "utf8mb4_0900_ai_ci"
+      },
+      "rows": 15,
+      "foreign_keys": [],
+      "checks": [
+        {
+          "name": "ck_knowledge_revision",
+          "sqltext": "(`revision` >= 1)"
+        },
+        {
+          "name": "ck_knowledge_validity",
+          "sqltext": "((`valid_to` is null) or (`valid_from` is null) or (`valid_to` > `valid_from`))"
+        }
+      ],
+      "unique_constraints": [
+        {
+          "name": "uq_knowledge_revision",
+          "column_names": [
+            "document_key",
+            "revision"
+          ],
+          "duplicates_index": "uq_knowledge_revision"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "uq_knowledge_revision",
+          "column_names": [
+            "document_key",
+            "revision"
+          ],
+          "unique": true
+        }
+      ]
+    },
+    "ac_target_versions": {
+      "options": {
+        "mysql_engine": "InnoDB",
+        "mysql_default charset": "utf8mb4",
+        "mysql_collate": "utf8mb4_0900_ai_ci"
+      },
+      "rows": 37,
+      "foreign_keys": [
+        {
+          "name": "fk_ac_target_versions_target_id_ac_targets",
+          "constrained_columns": [
+            "target_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "ac_targets",
+          "referred_columns": [
+            "id"
+          ],
+          "options": {}
+        }
+      ],
+      "checks": [
+        {
+          "name": "ck_target_version_positive",
+          "sqltext": "(`version_no` >= 1)"
+        }
+      ],
+      "unique_constraints": [
+        {
+          "name": "uq_target_version",
+          "column_names": [
+            "target_id",
+            "version_no"
+          ],
+          "duplicates_index": "uq_target_version"
+        },
+        {
+          "name": "uq_target_version_owner",
+          "column_names": [
+            "target_id",
+            "id"
+          ],
+          "duplicates_index": "uq_target_version_owner"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "uq_target_version",
+          "column_names": [
+            "target_id",
+            "version_no"
+          ],
+          "unique": true
+        },
+        {
+          "name": "uq_target_version_owner",
+          "column_names": [
+            "target_id",
+            "id"
+          ],
+          "unique": true
+        }
+      ]
+    },
+    "ac_targets": {
+      "options": {
+        "mysql_engine": "InnoDB",
+        "mysql_default charset": "utf8mb4",
+        "mysql_collate": "utf8mb4_0900_ai_ci"
+      },
+      "rows": 1,
+      "foreign_keys": [
+        {
+          "name": "fk_ac_targets_owner_id_ac_users",
+          "constrained_columns": [
+            "owner_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "ac_users",
+          "referred_columns": [
+            "id"
+          ],
+          "options": {}
+        }
+      ],
+      "checks": [],
+      "unique_constraints": [],
+      "indexes": [
+        {
+          "name": "fk_ac_targets_owner_id_ac_users",
+          "column_names": [
+            "owner_id"
+          ],
+          "unique": false
+        }
+      ]
+    },
+    "ac_test_cases": {
+      "options": {
+        "mysql_engine": "InnoDB",
+        "mysql_default charset": "utf8mb4",
+        "mysql_collate": "utf8mb4_0900_ai_ci"
+      },
+      "rows": 123,
+      "foreign_keys": [
+        {
+          "name": "fk_ac_test_cases_reviewer_id_ac_users",
+          "constrained_columns": [
+            "reviewer_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "ac_users",
+          "referred_columns": [
+            "id"
+          ],
+          "options": {}
+        }
+      ],
+      "checks": [
+        {
+          "name": "ck_case_approval_audit",
+          "sqltext": "((`review_status` <> _utf8mb4'approved') or ((`reviewer_id` is not null) and (`reviewed_at` is not null)))"
+        },
+        {
+          "name": "ck_case_category",
+          "sqltext": "(`category` in (_utf8mb4'normal',_utf8mb4'tool_execution',_utf8mb4'memory_and_tool',_utf8mb4'retrieval',_utf8mb4'security',_utf8mb4'robustness'))"
+        },
+        {
+          "name": "ck_case_review",
+          "sqltext": "(`review_status` in (_utf8mb4'draft',_utf8mb4'approved',_utf8mb4'rejected'))"
+        },
+        {
+          "name": "ck_case_revision",
+          "sqltext": "(`revision` >= 1)"
+        },
+        {
+          "name": "ck_case_split",
+          "sqltext": "(`dataset_split` in (_utf8mb4'dev',_utf8mb4'calibration',_utf8mb4'holdout'))"
+        }
+      ],
+      "unique_constraints": [
+        {
+          "name": "uq_case_revision",
+          "column_names": [
+            "case_key",
+            "revision"
+          ],
+          "duplicates_index": "uq_case_revision"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "fk_ac_test_cases_reviewer_id_ac_users",
+          "column_names": [
+            "reviewer_id"
+          ],
+          "unique": false
+        },
+        {
+          "name": "ix_case_family",
+          "column_names": [
+            "family_key"
+          ],
+          "unique": false
+        },
+        {
+          "name": "ix_case_filter",
+          "column_names": [
+            "dataset_split",
+            "review_status",
+            "category"
+          ],
+          "unique": false
+        },
+        {
+          "name": "uq_case_revision",
+          "column_names": [
+            "case_key",
+            "revision"
+          ],
+          "unique": true
+        }
+      ]
+    },
+    "ac_test_executions": {
+      "options": {
+        "mysql_engine": "InnoDB",
+        "mysql_default charset": "utf8mb4",
+        "mysql_collate": "utf8mb4_0900_ai_ci"
+      },
+      "rows": 0,
+      "foreign_keys": [
+        {
+          "name": "fk_ac_test_executions_case_revision_id_ac_test_cases",
+          "constrained_columns": [
+            "case_revision_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "ac_test_cases",
+          "referred_columns": [
+            "id"
+          ],
+          "options": {}
+        },
+        {
+          "name": "fk_ac_test_executions_run_id_ac_test_runs",
+          "constrained_columns": [
+            "run_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "ac_test_runs",
+          "referred_columns": [
+            "id"
+          ],
+          "options": {}
+        }
+      ],
+      "checks": [
+        {
+          "name": "ck_execution_numbers",
+          "sqltext": "((`repeat_no` >= 1) and (`attempt_no` >= 1))"
+        },
+        {
+          "name": "ck_execution_outcome",
+          "sqltext": "((`task_outcome` is null) or (`task_outcome` in (_utf8mb4'fulfilled',_utf8mb4'safely_degraded',_utf8mb4'unknown',_utf8mb4'not_fulfilled')))"
+        },
+        {
+          "name": "ck_execution_status",
+          "sqltext": "(`status` in (_utf8mb4'queued',_utf8mb4'running',_utf8mb4'waiting_input',_utf8mb4'passed',_utf8mb4'failed',_utf8mb4'inconclusive',_utf8mb4'error',_utf8mb4'cancelled',_utf8mb4'skipped'))"
+        }
+      ],
+      "unique_constraints": [
+        {
+          "name": "uq_ac_test_executions_execution_uuid",
+          "column_names": [
+            "execution_uuid"
+          ],
+          "duplicates_index": "uq_ac_test_executions_execution_uuid"
+        },
+        {
+          "name": "uq_execution_plan",
+          "column_names": [
+            "run_id",
+            "case_revision_id",
+            "repeat_no"
+          ],
+          "duplicates_index": "uq_execution_plan"
+        },
+        {
+          "name": "uq_execution_scope",
+          "column_names": [
+            "scope_id"
+          ],
+          "duplicates_index": "uq_execution_scope"
+        },
+        {
+          "name": "uq_execution_session",
+          "column_names": [
+            "session_id"
+          ],
+          "duplicates_index": "uq_execution_session"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "fk_ac_test_executions_case_revision_id_ac_test_cases",
+          "column_names": [
+            "case_revision_id"
+          ],
+          "unique": false
+        },
+        {
+          "name": "ix_execution_lease",
+          "column_names": [
+            "status",
+            "lease_until"
+          ],
+          "unique": false
+        },
+        {
+          "name": "ix_execution_run_status",
+          "column_names": [
+            "run_id",
+            "status"
+          ],
+          "unique": false
+        },
+        {
+          "name": "uq_ac_test_executions_execution_uuid",
+          "column_names": [
+            "execution_uuid"
+          ],
+          "unique": true
+        },
+        {
+          "name": "uq_execution_plan",
+          "column_names": [
+            "run_id",
+            "case_revision_id",
+            "repeat_no"
+          ],
+          "unique": true
+        },
+        {
+          "name": "uq_execution_scope",
+          "column_names": [
+            "scope_id"
+          ],
+          "unique": true
+        },
+        {
+          "name": "uq_execution_session",
+          "column_names": [
+            "session_id"
+          ],
+          "unique": true
+        }
+      ]
+    },
+    "ac_test_runs": {
+      "options": {
+        "mysql_engine": "InnoDB",
+        "mysql_default charset": "utf8mb4",
+        "mysql_collate": "utf8mb4_0900_ai_ci"
+      },
+      "rows": 0,
+      "foreign_keys": [
+        {
+          "name": "fk_ac_test_runs_created_by_ac_users",
+          "constrained_columns": [
+            "created_by"
+          ],
+          "referred_schema": null,
+          "referred_table": "ac_users",
+          "referred_columns": [
+            "id"
+          ],
+          "options": {}
+        },
+        {
+          "name": "fk_ac_test_runs_target_version_id_ac_target_versions",
+          "constrained_columns": [
+            "target_version_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "ac_target_versions",
+          "referred_columns": [
+            "id"
+          ],
+          "options": {}
+        }
+      ],
+      "checks": [
+        {
+          "name": "ck_run_status",
+          "sqltext": "(`status` in (_utf8mb4'queued',_utf8mb4'running',_utf8mb4'cancelling',_utf8mb4'completed',_utf8mb4'failed',_utf8mb4'cancelled'))"
+        }
+      ],
+      "unique_constraints": [
+        {
+          "name": "uq_ac_test_runs_run_uuid",
+          "column_names": [
+            "run_uuid"
+          ],
+          "duplicates_index": "uq_ac_test_runs_run_uuid"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "fk_ac_test_runs_target_version_id_ac_target_versions",
+          "column_names": [
+            "target_version_id"
+          ],
+          "unique": false
+        },
+        {
+          "name": "ix_run_creator_created",
+          "column_names": [
+            "created_by",
+            "created_at"
+          ],
+          "unique": false
+        },
+        {
+          "name": "ix_run_status_created",
+          "column_names": [
+            "status",
+            "created_at"
+          ],
+          "unique": false
+        },
+        {
+          "name": "uq_ac_test_runs_run_uuid",
+          "column_names": [
+            "run_uuid"
+          ],
+          "unique": true
+        }
+      ]
+    },
+    "ac_trace_events": {
+      "options": {
+        "mysql_engine": "InnoDB",
+        "mysql_default charset": "utf8mb4",
+        "mysql_collate": "utf8mb4_0900_ai_ci"
+      },
+      "rows": 0,
+      "foreign_keys": [
+        {
+          "name": "fk_ac_trace_events_execution_id_ac_test_executions",
+          "constrained_columns": [
+            "execution_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "ac_test_executions",
+          "referred_columns": [
+            "id"
+          ],
+          "options": {}
+        },
+        {
+          "name": "fk_event_parent_scope",
+          "constrained_columns": [
+            "execution_id",
+            "attempt_no",
+            "parent_event_uuid"
+          ],
+          "referred_schema": null,
+          "referred_table": "ac_trace_events",
+          "referred_columns": [
+            "execution_id",
+            "attempt_no",
+            "event_uuid"
+          ],
+          "options": {}
+        },
+        {
+          "name": "fk_trace_run",
+          "constrained_columns": [
+            "run_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "ac_test_runs",
+          "referred_columns": [
+            "id"
+          ],
+          "options": {}
+        }
+      ],
+      "checks": [
+        {
+          "name": "ck_event_sequence",
+          "sqltext": "((`attempt_no` >= 1) and (`seq_no` >= 1))"
+        },
+        {
+          "name": "ck_event_visit",
+          "sqltext": "((`node_visit_no` is null) or (`node_visit_no` >= 1))"
+        }
+      ],
+      "unique_constraints": [
+        {
+          "name": "uq_ac_trace_events_event_uuid",
+          "column_names": [
+            "event_uuid"
+          ],
+          "duplicates_index": "uq_ac_trace_events_event_uuid"
+        },
+        {
+          "name": "uq_event_parent_scope",
+          "column_names": [
+            "execution_id",
+            "attempt_no",
+            "event_uuid"
+          ],
+          "duplicates_index": "uq_event_parent_scope"
+        },
+        {
+          "name": "uq_event_sequence",
+          "column_names": [
+            "execution_id",
+            "attempt_no",
+            "seq_no"
+          ],
+          "duplicates_index": "uq_event_sequence"
+        },
+        {
+          "name": "uq_run_event_sequence",
+          "column_names": [
+            "run_id",
+            "run_seq_no"
+          ],
+          "duplicates_index": "uq_run_event_sequence"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "fk_event_parent_scope",
+          "column_names": [
+            "execution_id",
+            "attempt_no",
+            "parent_event_uuid"
+          ],
+          "unique": false
+        },
+        {
+          "name": "ix_event_cursor",
+          "column_names": [
+            "execution_id",
+            "id"
+          ],
+          "unique": false
+        },
+        {
+          "name": "ix_event_parent",
+          "column_names": [
+            "parent_event_uuid"
+          ],
+          "unique": false
+        },
+        {
+          "name": "ix_run_event_cursor",
+          "column_names": [
+            "run_id",
+            "run_seq_no"
+          ],
+          "unique": false
+        },
+        {
+          "name": "ix_run_event_type",
+          "column_names": [
+            "run_id",
+            "event_type"
+          ],
+          "unique": false
+        },
+        {
+          "name": "uq_ac_trace_events_event_uuid",
+          "column_names": [
+            "event_uuid"
+          ],
+          "unique": true
+        },
+        {
+          "name": "uq_event_parent_scope",
+          "column_names": [
+            "execution_id",
+            "attempt_no",
+            "event_uuid"
+          ],
+          "unique": true
+        },
+        {
+          "name": "uq_event_sequence",
+          "column_names": [
+            "execution_id",
+            "attempt_no",
+            "seq_no"
+          ],
+          "unique": true
+        },
+        {
+          "name": "uq_run_event_sequence",
+          "column_names": [
+            "run_id",
+            "run_seq_no"
+          ],
+          "unique": true
+        }
+      ]
+    },
+    "ac_users": {
+      "options": {
+        "mysql_engine": "InnoDB",
+        "mysql_default charset": "utf8mb4",
+        "mysql_collate": "utf8mb4_0900_ai_ci"
+      },
+      "rows": 2,
+      "foreign_keys": [],
+      "checks": [
+        {
+          "name": "ck_users_role",
+          "sqltext": "(`role` in (_utf8mb4'operator',_utf8mb4'reviewer'))"
+        }
+      ],
+      "unique_constraints": [
+        {
+          "name": "uq_ac_users_username",
+          "column_names": [
+            "username"
+          ],
+          "duplicates_index": "uq_ac_users_username"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "uq_ac_users_username",
+          "column_names": [
+            "username"
+          ],
+          "unique": true
+        }
+      ]
+    },
+    "sb_booking_drafts": {
+      "options": {
+        "mysql_engine": "InnoDB",
+        "mysql_default charset": "utf8mb4",
+        "mysql_collate": "utf8mb4_0900_ai_ci"
+      },
+      "rows": 0,
+      "foreign_keys": [
+        {
+          "name": "fk_draft_room_scope",
+          "constrained_columns": [
+            "scope_id",
+            "room_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "sb_rooms",
+          "referred_columns": [
+            "scope_id",
+            "id"
+          ],
+          "options": {}
+        }
+      ],
+      "checks": [
+        {
+          "name": "ck_draft_status",
+          "sqltext": "(`status` in (_utf8mb4'pending',_utf8mb4'confirmed',_utf8mb4'expired',_utf8mb4'superseded',_utf8mb4'rejected'))"
+        },
+        {
+          "name": "ck_draft_values",
+          "sqltext": "((`end_at` > `start_at`) and (`attendees` > 0))"
+        }
+      ],
+      "unique_constraints": [
+        {
+          "name": "uq_draft_scope_actor_room",
+          "column_names": [
+            "scope_id",
+            "actor_key",
+            "room_id",
+            "id"
+          ],
+          "duplicates_index": "uq_draft_scope_actor_room"
+        },
+        {
+          "name": "uq_sb_booking_drafts_draft_uuid",
+          "column_names": [
+            "draft_uuid"
+          ],
+          "duplicates_index": "uq_sb_booking_drafts_draft_uuid"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "fk_draft_room_scope",
+          "column_names": [
+            "scope_id",
+            "room_id"
+          ],
+          "unique": false
+        },
+        {
+          "name": "ix_draft_session",
+          "column_names": [
+            "scope_id",
+            "actor_key",
+            "session_id",
+            "status"
+          ],
+          "unique": false
+        },
+        {
+          "name": "uq_draft_scope_actor_room",
+          "column_names": [
+            "scope_id",
+            "actor_key",
+            "room_id",
+            "id"
+          ],
+          "unique": true
+        },
+        {
+          "name": "uq_sb_booking_drafts_draft_uuid",
+          "column_names": [
+            "draft_uuid"
+          ],
+          "unique": true
+        }
+      ]
+    },
+    "sb_booking_slots": {
+      "options": {
+        "mysql_engine": "InnoDB",
+        "mysql_default charset": "utf8mb4",
+        "mysql_collate": "utf8mb4_0900_ai_ci"
+      },
+      "rows": 0,
+      "foreign_keys": [
+        {
+          "name": "fk_slot_booking_scope_room",
+          "constrained_columns": [
+            "scope_id",
+            "room_id",
+            "booking_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "sb_bookings",
+          "referred_columns": [
+            "scope_id",
+            "room_id",
+            "id"
+          ],
+          "options": {}
+        },
+        {
+          "name": "fk_slot_room_scope",
+          "constrained_columns": [
+            "scope_id",
+            "room_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "sb_rooms",
+          "referred_columns": [
+            "scope_id",
+            "id"
+          ],
+          "options": {}
+        }
+      ],
+      "checks": [
+        {
+          "name": "ck_slot_alignment",
+          "sqltext": "((minute(`slot_start`) in (0,30)) and (second(`slot_start`) = 0) and (microsecond(`slot_start`) = 0))"
+        }
+      ],
+      "unique_constraints": [
+        {
+          "name": "uq_room_slot_scope",
+          "column_names": [
+            "scope_id",
+            "room_id",
+            "slot_start"
+          ],
+          "duplicates_index": "uq_room_slot_scope"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "fk_slot_booking_scope_room",
+          "column_names": [
+            "scope_id",
+            "room_id",
+            "booking_id"
+          ],
+          "unique": false
+        },
+        {
+          "name": "uq_room_slot_scope",
+          "column_names": [
+            "scope_id",
+            "room_id",
+            "slot_start"
+          ],
+          "unique": true
+        }
+      ]
+    },
+    "sb_bookings": {
+      "options": {
+        "mysql_engine": "InnoDB",
+        "mysql_default charset": "utf8mb4",
+        "mysql_collate": "utf8mb4_0900_ai_ci"
+      },
+      "rows": 0,
+      "foreign_keys": [
+        {
+          "name": "fk_booking_draft_scope_actor",
+          "constrained_columns": [
+            "scope_id",
+            "actor_key",
+            "room_id",
+            "draft_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "sb_booking_drafts",
+          "referred_columns": [
+            "scope_id",
+            "actor_key",
+            "room_id",
+            "id"
+          ],
+          "options": {}
+        },
+        {
+          "name": "fk_booking_room_scope",
+          "constrained_columns": [
+            "scope_id",
+            "room_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "sb_rooms",
+          "referred_columns": [
+            "scope_id",
+            "id"
+          ],
+          "options": {}
+        }
+      ],
+      "checks": [
+        {
+          "name": "ck_booking_status",
+          "sqltext": "(`status` in (_utf8mb4'confirmed',_utf8mb4'cancelled'))"
+        },
+        {
+          "name": "ck_booking_values",
+          "sqltext": "((`end_at` > `start_at`) and (`attendees` > 0))"
+        }
+      ],
+      "unique_constraints": [
+        {
+          "name": "uq_booking_draft",
+          "column_names": [
+            "draft_id"
+          ],
+          "duplicates_index": "uq_booking_draft"
+        },
+        {
+          "name": "uq_booking_idempotency",
+          "column_names": [
+            "scope_id",
+            "actor_key",
+            "idempotency_key"
+          ],
+          "duplicates_index": "uq_booking_idempotency"
+        },
+        {
+          "name": "uq_booking_scope_room",
+          "column_names": [
+            "scope_id",
+            "room_id",
+            "id"
+          ],
+          "duplicates_index": "uq_booking_scope_room"
+        },
+        {
+          "name": "uq_sb_bookings_booking_uuid",
+          "column_names": [
+            "booking_uuid"
+          ],
+          "duplicates_index": "uq_sb_bookings_booking_uuid"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "fk_booking_draft_scope_actor",
+          "column_names": [
+            "scope_id",
+            "actor_key",
+            "room_id",
+            "draft_id"
+          ],
+          "unique": false
+        },
+        {
+          "name": "uq_booking_draft",
+          "column_names": [
+            "draft_id"
+          ],
+          "unique": true
+        },
+        {
+          "name": "uq_booking_idempotency",
+          "column_names": [
+            "scope_id",
+            "actor_key",
+            "idempotency_key"
+          ],
+          "unique": true
+        },
+        {
+          "name": "uq_booking_scope_room",
+          "column_names": [
+            "scope_id",
+            "room_id",
+            "id"
+          ],
+          "unique": true
+        },
+        {
+          "name": "uq_sb_bookings_booking_uuid",
+          "column_names": [
+            "booking_uuid"
+          ],
+          "unique": true
+        }
+      ]
+    },
+    "sb_rooms": {
+      "options": {
+        "mysql_engine": "InnoDB",
+        "mysql_default charset": "utf8mb4",
+        "mysql_collate": "utf8mb4_0900_ai_ci"
+      },
+      "rows": 3,
+      "foreign_keys": [],
+      "checks": [
+        {
+          "name": "ck_room_capacity",
+          "sqltext": "(`capacity` > 0)"
+        }
+      ],
+      "unique_constraints": [
+        {
+          "name": "uq_room_code_scope",
+          "column_names": [
+            "scope_id",
+            "room_code"
+          ],
+          "duplicates_index": "uq_room_code_scope"
+        },
+        {
+          "name": "uq_room_scope_id",
+          "column_names": [
+            "scope_id",
+            "id"
+          ],
+          "duplicates_index": "uq_room_scope_id"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "uq_room_code_scope",
+          "column_names": [
+            "scope_id",
+            "room_code"
+          ],
+          "unique": true
+        },
+        {
+          "name": "uq_room_scope_id",
+          "column_names": [
+            "scope_id",
+            "id"
+          ],
+          "unique": true
+        }
+      ]
+    }
+  },
+  "triggers": [
+    {
+      "name": "guard_ac_artifacts_delete",
+      "event": "DELETE",
+      "target_table": "ac_artifacts",
+      "definition_sha256": "5fb62aa4f894610d511aea2ada6e71a8da84c70902b7e30f32d82619b9726a47"
+    },
+    {
+      "name": "guard_ac_artifacts_update",
+      "event": "UPDATE",
+      "target_table": "ac_artifacts",
+      "definition_sha256": "5fb62aa4f894610d511aea2ada6e71a8da84c70902b7e30f32d82619b9726a47"
+    },
+    {
+      "name": "guard_ac_assertion_results_delete",
+      "event": "DELETE",
+      "target_table": "ac_assertion_results",
+      "definition_sha256": "5fb62aa4f894610d511aea2ada6e71a8da84c70902b7e30f32d82619b9726a47"
+    },
+    {
+      "name": "guard_ac_assertion_results_update",
+      "event": "UPDATE",
+      "target_table": "ac_assertion_results",
+      "definition_sha256": "5fb62aa4f894610d511aea2ada6e71a8da84c70902b7e30f32d82619b9726a47"
+    },
+    {
+      "name": "guard_ac_fault_profiles_delete",
+      "event": "DELETE",
+      "target_table": "ac_fault_profiles",
+      "definition_sha256": "5fb62aa4f894610d511aea2ada6e71a8da84c70902b7e30f32d82619b9726a47"
+    },
+    {
+      "name": "guard_ac_fault_profiles_update",
+      "event": "UPDATE",
+      "target_table": "ac_fault_profiles",
+      "definition_sha256": "5fb62aa4f894610d511aea2ada6e71a8da84c70902b7e30f32d82619b9726a47"
+    },
+    {
+      "name": "guard_ac_knowledge_documents_delete",
+      "event": "DELETE",
+      "target_table": "ac_knowledge_documents",
+      "definition_sha256": "5fb62aa4f894610d511aea2ada6e71a8da84c70902b7e30f32d82619b9726a47"
+    },
+    {
+      "name": "guard_ac_knowledge_documents_update",
+      "event": "UPDATE",
+      "target_table": "ac_knowledge_documents",
+      "definition_sha256": "5fb62aa4f894610d511aea2ada6e71a8da84c70902b7e30f32d82619b9726a47"
+    },
+    {
+      "name": "guard_ac_target_versions_delete",
+      "event": "DELETE",
+      "target_table": "ac_target_versions",
+      "definition_sha256": "5fb62aa4f894610d511aea2ada6e71a8da84c70902b7e30f32d82619b9726a47"
+    },
+    {
+      "name": "guard_ac_target_versions_update",
+      "event": "UPDATE",
+      "target_table": "ac_target_versions",
+      "definition_sha256": "5fb62aa4f894610d511aea2ada6e71a8da84c70902b7e30f32d82619b9726a47"
+    },
+    {
+      "name": "guard_ac_trace_events_delete",
+      "event": "DELETE",
+      "target_table": "ac_trace_events",
+      "definition_sha256": "5fb62aa4f894610d511aea2ada6e71a8da84c70902b7e30f32d82619b9726a47"
+    },
+    {
+      "name": "guard_ac_trace_events_update",
+      "event": "UPDATE",
+      "target_table": "ac_trace_events",
+      "definition_sha256": "f2f96f12375a345da56f91cc4c8c297e0eded811962e320d8952be26bb74b470"
+    },
+    {
+      "name": "guard_case_delete",
+      "event": "DELETE",
+      "target_table": "ac_test_cases",
+      "definition_sha256": "cd15fb5e46a87e06f25a038155466ba22951c6b319d0f92ae3bf55b6ae0e4177"
+    },
+    {
+      "name": "guard_case_insert",
+      "event": "INSERT",
+      "target_table": "ac_test_cases",
+      "definition_sha256": "f4aac8bf7b06c41c9ee3745eb39cbbe3bf564c8e82ea99196dd131a80f25f309"
+    },
+    {
+      "name": "guard_case_update",
+      "event": "UPDATE",
+      "target_table": "ac_test_cases",
+      "definition_sha256": "b64b66c89586eacfd3b4360c6d246e90adc27d8974c3761f4200db30058f2c87"
+    },
+    {
+      "name": "guard_defect_insert",
+      "event": "INSERT",
+      "target_table": "ac_defects",
+      "definition_sha256": "a852de22ed7b1c4fc457976fc69af8ee53dd4b439153bde3e33d069f747bd6f4"
+    },
+    {
+      "name": "guard_defect_update",
+      "event": "UPDATE",
+      "target_table": "ac_defects",
+      "definition_sha256": "a852de22ed7b1c4fc457976fc69af8ee53dd4b439153bde3e33d069f747bd6f4"
+    },
+    {
+      "name": "guard_execution_config",
+      "event": "UPDATE",
+      "target_table": "ac_test_executions",
+      "definition_sha256": "d6c70ebc15a4f841239e79e56190c52fe0aa377a0d4ffce651c7b960939554f3"
+    },
+    {
+      "name": "guard_execution_delete",
+      "event": "DELETE",
+      "target_table": "ac_test_executions",
+      "definition_sha256": "81228baa8a060c0cffa7f0dcd1551fc9b4eeb757d260e275ccaced2ae4129b27"
+    },
+    {
+      "name": "guard_execution_insert",
+      "event": "INSERT",
+      "target_table": "ac_test_executions",
+      "definition_sha256": "ab596804e47fe0365b9036219573b0e4fd6440ca6ad0f5997919935af0550b13"
+    },
+    {
+      "name": "guard_run_config",
+      "event": "UPDATE",
+      "target_table": "ac_test_runs",
+      "definition_sha256": "635d14a00ceb51028e59effd11f743cd431d00669cc85beb49ecd88ca04b4e49"
+    },
+    {
+      "name": "guard_run_delete",
+      "event": "DELETE",
+      "target_table": "ac_test_runs",
+      "definition_sha256": "81228baa8a060c0cffa7f0dcd1551fc9b4eeb757d260e275ccaced2ae4129b27"
+    },
+    {
+      "name": "guard_trace_insert",
+      "event": "INSERT",
+      "target_table": "ac_trace_events",
+      "definition_sha256": "11974b7e0a673a98d2df8669ef707d37c88f800f3e9a4cfbe4846a13479d1fa3"
+    }
+  ],
+  "accounts": [
+    {
+      "username": "demo_operator",
+      "role": "operator",
+      "salted_hash": true,
+      "matches_local_seed_credential": true
+    },
+    {
+      "username": "demo_reviewer",
+      "role": "reviewer",
+      "salted_hash": true,
+      "matches_local_seed_credential": true
+    }
+  ],
+  "remaining_temporary_databases": [
+    "agentchaos_t07_verify_33f390c735b6",
+    "agentchaos_t10_verify_dbdf6c37ed0a"
+  ],
+  "verification": "Declared table, foreign-key, CHECK, unique and index names exist",
+  "limitations": "Alembic check does not verify trigger bodies or all CHECK changes"
+}

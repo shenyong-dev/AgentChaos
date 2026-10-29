@@ -11,6 +11,7 @@ from app.executors.budget import (
     AUTHORIZATION,
     DIALOGUE_AUTHORIZATION,
     FAULT_AUTHORIZATION,
+    METAMORPHIC_AUTHORIZATION,
     OPEN_AUTHORIZATION,
     authorization_limit,
 )
@@ -21,7 +22,13 @@ def main():
     parser.add_argument(
         "--authorization",
         required=True,
-        choices=[AUTHORIZATION, OPEN_AUTHORIZATION, FAULT_AUTHORIZATION, DIALOGUE_AUTHORIZATION],
+        choices=[
+            AUTHORIZATION,
+            OPEN_AUTHORIZATION,
+            FAULT_AUTHORIZATION,
+            DIALOGUE_AUTHORIZATION,
+            METAMORPHIC_AUTHORIZATION,
+        ],
     )
     args = parser.parse_args()
     settings = Settings()

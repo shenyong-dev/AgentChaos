@@ -1,8 +1,8 @@
-# T02—T06 数据库字段字典与关系
+# T02—T13 数据库字段字典与关系
 
-迁移：`20261026_0003`。12张平台表+4张实验业务表；另有Alembic自身的版本表。
+迁移：`20261028_0006`。12张平台表+4张实验业务表；另有Alembic自身的版本表。
 
-由 backend/scripts/export_database_docs.py 生成；约束/索引为应用显式声明。MySQL可能自动建立外键支持索引；session见T04，run事件序列及可空execution见T06验收记录。
+由 backend/scripts/export_database_docs.py 生成；约束/索引为应用显式声明。MySQL可能自动建立外键支持索引；session见T04，run事件序列及可空execution见T06，owner证据见T11/T12/T13验收记录。
 
 所有表为InnoDB/utf8mb4；符号标识使用区分大小写的utf8mb4_bin。UTCDateTime要求带时区输入，转UTC存DATETIME(6)，读取时补UTC。JSON赋值复制并拒绝NaN；修改可变JSON字段应赋新值。
 
@@ -70,7 +70,8 @@ erDiagram
     AC_TARGET_VERSIONS ||--o{ AC_TEST_RUNS : fk_ac_test_runs_target_version_id_ac_target_versions
     SB_BOOKINGS ||--o{ SB_BOOKING_SLOTS : fk_slot_booking_scope_room
     SB_ROOMS ||--o{ SB_BOOKING_SLOTS : fk_slot_room_scope
-    AC_TEST_RUNS ||--o{ AC_ARTIFACTS : fk_ac_artifacts_run_id_ac_test_runs
+    AC_USERS o|--o{ AC_ARTIFACTS : fk_ac_artifacts_owner_id_ac_users
+    AC_TEST_RUNS o|--o{ AC_ARTIFACTS : fk_ac_artifacts_run_id_ac_test_runs
     AC_TEST_CASES ||--o{ AC_TEST_EXECUTIONS : fk_ac_test_executions_case_revision_id_ac_test_cases
     AC_TEST_RUNS ||--o{ AC_TEST_EXECUTIONS : fk_ac_test_executions_run_id_ac_test_runs
     AC_TEST_EXECUTIONS ||--o{ AC_ASSERTION_RESULTS : fk_ac_assertion_results_execution_id_ac_test_executions
@@ -363,11 +364,12 @@ erDiagram
 
 ## ac_artifacts
 
-不可变证据/报告清单；T06按运行归属校验哈希后下载证据
+不可变清单；运行归属run，T11—T13生成/校准/冻结归属owner，二者互斥
 
 | 字段 | MySQL类型 | NULL | 默认值 |
 |---|---|---|---|
-| `run_id` | `BIGINT UNSIGNED` | 否 | `—` |
+| `run_id` | `BIGINT UNSIGNED` | 是 | `—` |
+| `owner_id` | `BIGINT UNSIGNED` | 是 | `—` |
 | `kind` | `VARCHAR(64) COLLATE utf8mb4_bin` | 否 | `—` |
 | `relative_path` | `VARCHAR(512)` | 否 | `—` |
 | `sha256` | `VARCHAR(64) COLLATE utf8mb4_bin` | 否 | `—` |
@@ -379,8 +381,11 @@ erDiagram
 
 约束：
 
+- `ck_artifact_owner`（check）：(run_id IS NOT NULL AND owner_id IS NULL) OR (run_id IS NULL AND owner_id IS NOT NULL AND kind IN ('casegen_request','casegen_result','casegen_call','case_review','judge_request','judge_result','judge_call','judge_label','judge_review','dataset_manifest'))
 - `ck_artifact_size`（check）：size_bytes >= 0
+- `fk_ac_artifacts_owner_id_ac_users`（foreign_key）：owner_id → ac_users.id
 - `fk_ac_artifacts_run_id_ac_test_runs`（foreign_key）：run_id → ac_test_runs.id
+- 索引 `ix_artifact_owner`：owner_id, id
 
 ## ac_test_executions
 

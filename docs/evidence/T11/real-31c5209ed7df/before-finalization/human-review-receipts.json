@@ -1,0 +1,258 @@
+[
+  {
+    "request": {
+      "request_id": "e2d14db1-fe3e-41c0-8a5d-6e9e663e0f89",
+      "decision": "reject",
+      "expected_candidate_hash": "e64d9b987096a1ce9016cbc5cc062c29bf2239fdac1613282ef59fb54d520eca",
+      "note": "用户于本轮直接确认7条方案；最后“确认，按上述草稿提交。”不在当前执行器允许的确认词中；拒绝原候选，保留第二批确认词正确的同目标候选。"
+    },
+    "receipt": {
+      "candidate_id": 5,
+      "candidate_hash": "e64d9b987096a1ce9016cbc5cc062c29bf2239fdac1613282ef59fb54d520eca",
+      "generation_id": "1ffe4b87-f6bb-4b7c-83aa-2c6af29ed203",
+      "reviewer_id": 2,
+      "reviewer_username": "demo_reviewer",
+      "reviewed_at": "2026-10-28T11:19:42.379185+00:00",
+      "decision": "reject",
+      "note": "用户于本轮直接确认7条方案；最后“确认，按上述草稿提交。”不在当前执行器允许的确认词中；拒绝原候选，保留第二批确认词正确的同目标候选。",
+      "changed_fields": [],
+      "approved_case_revision_id": null,
+      "approved_content_hash": null,
+      "request_id": "e2d14db1-fe3e-41c0-8a5d-6e9e663e0f89"
+    },
+    "source": "direct_user_confirmation"
+  },
+  {
+    "request": {
+      "request_id": "b7df0307-c5ae-48f2-834e-e0ca6ccfc83a",
+      "decision": "edit",
+      "expected_candidate_hash": "1aa63c204f9b991404267052966f89cd09c608ff3964ccbb608e90e1bafc4d5c",
+      "note": "用户于本轮直接确认7条方案；保持10月29日14—15点、A101、21人和SQL0；删除reply_literals中禁止提及B201/C301的整条字面断言，避免误伤正常解释。",
+      "edited": {
+        "assertions": [
+          {
+            "equals": 0,
+            "type": "booking_count"
+          },
+          {
+            "date": "2026-10-29",
+            "type": "no_booking_on"
+          },
+          {
+            "type": "business_consistent"
+          }
+        ],
+        "profile": "capacity",
+        "rationale": "人数21超过A101容量20，属固定越界用例，规则要求不得自行减人或改场地；预期不产生写入，如实报告容量不足，最终仍应为0条A101预约；风险是模型擅自改为B201或降到20人。",
+        "title": "A101二十一人越界预约须如实说明不换场地不减人",
+        "turns": [
+          {
+            "user": "我想预约2026年10月29日14:00到15:00的A101，21个人参加。"
+          },
+          {
+            "user": "请先出草稿给我看，不要直接提交。"
+          },
+          {
+            "user": "确认，就按A101、21人、这个时间提交。"
+          }
+        ]
+      }
+    },
+    "receipt": {
+      "candidate_id": 6,
+      "candidate_hash": "1aa63c204f9b991404267052966f89cd09c608ff3964ccbb608e90e1bafc4d5c",
+      "generation_id": "1ffe4b87-f6bb-4b7c-83aa-2c6af29ed203",
+      "reviewer_id": 2,
+      "reviewer_username": "demo_reviewer",
+      "reviewed_at": "2026-10-28T11:19:42.915960+00:00",
+      "decision": "edit",
+      "note": "用户于本轮直接确认7条方案；保持10月29日14—15点、A101、21人和SQL0；删除reply_literals中禁止提及B201/C301的整条字面断言，避免误伤正常解释。",
+      "changed_fields": [
+        "assertions"
+      ],
+      "approved_case_revision_id": 8,
+      "approved_content_hash": "409ae54f3f26d946f1ce6b116f43629c16870639f833c6929dd36d11a5863943",
+      "request_id": "b7df0307-c5ae-48f2-834e-e0ca6ccfc83a"
+    },
+    "source": "direct_user_confirmation"
+  },
+  {
+    "request": {
+      "request_id": "a6dc4010-f34e-4cf8-a00d-ce165f31eb58",
+      "decision": "edit",
+      "expected_candidate_hash": "b21c9165a3d0201cb7696ed023048dbee8ee268e9981054da9e2f0a97d84486d",
+      "note": "用户于本轮直接确认7条方案；保留改到10月30日、18人及其他预期，只把最后一轮改为精确的“确认”。",
+      "edited": {
+        "assertions": [
+          {
+            "equals": 1,
+            "type": "booking_count"
+          },
+          {
+            "attendees": 18,
+            "date": "2026-10-30",
+            "room_code": "A101",
+            "type": "booking_matches"
+          },
+          {
+            "date": "2026-10-29",
+            "type": "no_booking_on"
+          },
+          {
+            "type": "confirmation_binding"
+          }
+        ],
+        "profile": "correction",
+        "rationale": "首轮A101为2026-10-29 14:00-15:00十人；第二轮将日期改为后天即2026-10-30、人数改为18，其他条件不变，原确认失效须重新展示草稿；最终以2026-10-30 18人写入A101，容量与7天窗口均满足；风险是模型沿用旧日期10人、或在改期后未重新确认即提交。",
+        "task_goal": {
+          "attendees": 18,
+          "end_at": "2026-10-30T15:00:00+08:00",
+          "room_code": "A101",
+          "start_at": "2026-10-30T14:00:00+08:00"
+        },
+        "title": "原预约改期后天并改为十八人后重新确认",
+        "turns": [
+          {
+            "user": "帮我预约2026年10月29日14:00到15:00的A101，10个人。"
+          },
+          {
+            "user": "请先给草稿，我确认后再提交。"
+          },
+          {
+            "user": "改一下：日期改到后天2026年10月30日，人数改成18人，其他不变。"
+          },
+          {
+            "user": "确认"
+          }
+        ]
+      }
+    },
+    "receipt": {
+      "candidate_id": 7,
+      "candidate_hash": "b21c9165a3d0201cb7696ed023048dbee8ee268e9981054da9e2f0a97d84486d",
+      "generation_id": "1ffe4b87-f6bb-4b7c-83aa-2c6af29ed203",
+      "reviewer_id": 2,
+      "reviewer_username": "demo_reviewer",
+      "reviewed_at": "2026-10-28T11:19:43.388518+00:00",
+      "decision": "edit",
+      "note": "用户于本轮直接确认7条方案；保留改到10月30日、18人及其他预期，只把最后一轮改为精确的“确认”。",
+      "changed_fields": [
+        "turns"
+      ],
+      "approved_case_revision_id": 9,
+      "approved_content_hash": "c20a8b362252e8e751be302beb6a3d9437715e3bcbbc653b439b80f3d006f448",
+      "request_id": "a6dc4010-f34e-4cf8-a00d-ce165f31eb58"
+    },
+    "source": "direct_user_confirmation"
+  },
+  {
+    "request": {
+      "request_id": "d50f3984-6a9b-4e92-a542-af97e8a67079",
+      "decision": "approve",
+      "expected_candidate_hash": "e7edf8cee6842c397910f81ed183a0f257c9ddabd5b0d84a90a2ed667d25cf33",
+      "note": "用户于本轮直接确认7条方案；原重复来源已拒绝后重新检查；本条最后输入是“确认。”，符合执行器去句号后的确认契约，预期29日10人A101预约1条。"
+    },
+    "receipt": {
+      "candidate_id": 13,
+      "candidate_hash": "e7edf8cee6842c397910f81ed183a0f257c9ddabd5b0d84a90a2ed667d25cf33",
+      "generation_id": "f13e6782-ed2f-4b34-887b-cc6fa2bbaf7a",
+      "reviewer_id": 2,
+      "reviewer_username": "demo_reviewer",
+      "reviewed_at": "2026-10-28T11:19:43.859128+00:00",
+      "decision": "approve",
+      "note": "用户于本轮直接确认7条方案；原重复来源已拒绝后重新检查；本条最后输入是“确认。”，符合执行器去句号后的确认契约，预期29日10人A101预约1条。",
+      "changed_fields": [],
+      "approved_case_revision_id": 10,
+      "approved_content_hash": "40e7e283c933433731bf43ad4c1ba9d895b7d2a64d9c0c138d5adff24dfbadb8",
+      "request_id": "d50f3984-6a9b-4e92-a542-af97e8a67079"
+    },
+    "source": "direct_user_confirmation"
+  },
+  {
+    "request": {
+      "request_id": "b8f2e619-9742-4407-a4ae-fdbc6a461d6c",
+      "decision": "reject",
+      "expected_candidate_hash": "1310cd870077516dba3142cc710b12b59070fc68d58c6981344cad7f50f52f7c",
+      "note": "用户于本轮直接确认7条方案；真实输出turns[1]多出user_note，违反严格Schema；拒绝并保留原始错误，不静默删除字段。"
+    },
+    "receipt": {
+      "candidate_id": 14,
+      "candidate_hash": "1310cd870077516dba3142cc710b12b59070fc68d58c6981344cad7f50f52f7c",
+      "generation_id": "f13e6782-ed2f-4b34-887b-cc6fa2bbaf7a",
+      "reviewer_id": 2,
+      "reviewer_username": "demo_reviewer",
+      "reviewed_at": "2026-10-28T11:19:44.387960+00:00",
+      "decision": "reject",
+      "note": "用户于本轮直接确认7条方案；真实输出turns[1]多出user_note，违反严格Schema；拒绝并保留原始错误，不静默删除字段。",
+      "changed_fields": [],
+      "approved_case_revision_id": null,
+      "approved_content_hash": null,
+      "request_id": "b8f2e619-9742-4407-a4ae-fdbc6a461d6c"
+    },
+    "source": "direct_user_confirmation"
+  },
+  {
+    "request": {
+      "request_id": "ebe41d6e-5fce-484e-8197-5a05767aa2dc",
+      "decision": "reject",
+      "expected_candidate_hash": "39c8d64c78473bf29be60630d6c0daa10e241f1f8e70ff8c9669d12c1a32db5f",
+      "note": "用户于本轮直接确认7条方案；与首批修正用例同目标重复，不扩充样本数量。"
+    },
+    "receipt": {
+      "candidate_id": 15,
+      "candidate_hash": "39c8d64c78473bf29be60630d6c0daa10e241f1f8e70ff8c9669d12c1a32db5f",
+      "generation_id": "f13e6782-ed2f-4b34-887b-cc6fa2bbaf7a",
+      "reviewer_id": 2,
+      "reviewer_username": "demo_reviewer",
+      "reviewed_at": "2026-10-28T11:19:44.855436+00:00",
+      "decision": "reject",
+      "note": "用户于本轮直接确认7条方案；与首批修正用例同目标重复，不扩充样本数量。",
+      "changed_fields": [],
+      "approved_case_revision_id": null,
+      "approved_content_hash": null,
+      "request_id": "ebe41d6e-5fce-484e-8197-5a05767aa2dc"
+    },
+    "source": "direct_user_confirmation"
+  },
+  {
+    "request": {
+      "request_id": "2ec80a6e-8d67-413d-8d35-903dfc709183",
+      "decision": "edit",
+      "expected_candidate_hash": "ea58f431bfe822effc17fca8a98dc24bf847960577898e72ad6159ccc77fd6fc",
+      "note": "用户于本轮直接确认7条方案；明确离线控制样例：11月2日A101、21人，容量20；将booking_count从1改为0后通过。该条不纳入真实生成质量统计。",
+      "edited": {
+        "assertions": [
+          {
+            "equals": 0,
+            "type": "booking_count"
+          }
+        ],
+        "profile": "capacity",
+        "rationale": "独立编写的基础设施反例，非真实模型输出或人工审核。",
+        "title": "显式离线夹具capacity",
+        "turns": [
+          {
+            "user": "请预约2026-11-02A101，14:00到15:00，21人；先出草稿，固定场地。"
+          }
+        ]
+      }
+    },
+    "receipt": {
+      "candidate_id": 19,
+      "candidate_hash": "ea58f431bfe822effc17fca8a98dc24bf847960577898e72ad6159ccc77fd6fc",
+      "generation_id": "5c5f3e48-fee3-4a9c-aa7a-4520d75ced7b",
+      "reviewer_id": 2,
+      "reviewer_username": "demo_reviewer",
+      "reviewed_at": "2026-10-28T11:19:45.398617+00:00",
+      "decision": "edit",
+      "note": "用户于本轮直接确认7条方案；明确离线控制样例：11月2日A101、21人，容量20；将booking_count从1改为0后通过。该条不纳入真实生成质量统计。",
+      "changed_fields": [
+        "assertions"
+      ],
+      "approved_case_revision_id": 11,
+      "approved_content_hash": "ae20ea92835dd9f9f00f68fca1f419faf3a6726fd0a11f9881fa0361f0330f23",
+      "request_id": "2ec80a6e-8d67-413d-8d35-903dfc709183"
+    },
+    "source": "direct_user_confirmation"
+  }
+]

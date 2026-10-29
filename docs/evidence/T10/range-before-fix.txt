@@ -1,0 +1,209 @@
+FFF...                                                                   [100%]
+================================== FAILURES ===================================
+_ test_range_daypart_inherits_only_within_explicit_source_range[\u4e0b\u5348\u4e24\u70b9\u5230\u4e09\u70b9-\u4e09\u70b9-15:00-True] _
+
+text = '下午两点到三点', quote = '三点', value = '15:00', valid = True
+
+    @pytest.mark.parametrize("text,quote,value,valid", [
+        ("下午两点到三点", "三点", "15:00", True),
+        ("下午两点到三点", "三点", "03:00", False),
+        ("下午2点至3点", "2点", "14:00", True),
+        ("上午九点到十点", "十点", "10:00", True),
+        ("下午两点开会。另外三点这个时刻尚未明确上午或下午。", "三点", "15:00", False),
+        ("上午九点到十点，下午三点再聊。", "九点", "21:00", False),
+    ])
+    def test_range_daypart_inherits_only_within_explicit_source_range(text, quote, value, valid):
+        state = {"fields": {}, "last_user_text": text, "turn_index": 1,
+                 "reference_clock": "2026-10-28T09:00:00+08:00"}
+        patch = FieldPatch(end_time=value, source_quotes={"end_time": quote})
+        if valid:
+>           assert patch_fields(state, patch)[0]["end_time"]["value"] == value
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend\tests\test_metamorphic.py:191: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+state = {'fields': {}, 'last_user_text': '下午两点到三点', 'turn_index': 1, 'reference_clock': '2026-10-28T09:00:00+08:00'}
+patch = FieldPatch(date=None, start_time=None, end_time='15:00', duration_minutes=None, attendees=None, room_code=None, source_quotes={'end_time': '三点'}, clear_fields=[])
+
+    def patch_fields(state: AgentState, patch: FieldPatch):
+        fields = {key: dict(value) for key, value in state.get("fields", {}).items()}
+        current = state["last_user_text"]
+        reference = datetime.fromisoformat(state["reference_clock"])
+        changed = False
+        for key in patch.clear_fields:
+            quote = patch.source_quotes.get(key, "")
+            if (
+                key not in FieldPatch.model_fields
+                or not quote
+                or quote not in current
+                or not re.search("任意|不限|随便|未定|待定|不确定|不指定", quote)
+            ):
+                raise AgentError("field_source_invalid", "清除字段必须有当前用户输入依据。", 400)
+            changed = changed or key in fields
+            fields.pop(key, None)
+        for key, value in patch.model_dump(exclude={"source_quotes", "clear_fields"}).items():
+            if value is None:
+                continue
+            quote = patch.source_quotes.get(key, "")
+            if not quote or len(quote) > 240 or quote not in current:
+                raise AgentError(
+                    "field_source_invalid",
+                    f"{key}缺少source_quotes.{key}或引用不在当前输入中；仅填写本次有依据的字段。",
+                    400,
+                )
+            valid = False
+            if key == "date":
+                valid = value in dates_from_quote(quote, reference)
+            elif key in ("start_time", "end_time"):
+                valid = value in times_from_quote(quote)
+            elif key == "attendees":
+                nums = re.findall(r"[0-9一二三四五六七八九十两]+", quote)
+                standalone_number = quote.strip() == current.strip() and re.fullmatch(
+                    r"[0-9一二三四五六七八九十两]+", quote.strip()
+                )
+                participant_unit = re.search(r"(?:位|名)(?:参会者|与会者|参与者)", quote)
+                valid = ("人" in quote or participant_unit or standalone_number) and any(
+                    number(item) == value for item in nums
+                )
+            elif key == "duration_minutes":
+                durations = set()
+                for amount, unit in re.findall(
+                    r"([0-9一二三四五六七八九十两]+)(个?小时|分钟|分)", quote
+                ):
+                    parsed = number(amount)
+                    if parsed is not None:
+                        durations.add(parsed * (60 if "小时" in unit else 1))
+                if "半小时" in quote:
+                    durations.add(30)
+                valid = value in durations
+            elif key == "room_code":
+                value = value.upper()
+                valid = value in [match.upper() for match in re.findall(r"[A-Za-z]\d{3}", quote)]
+            if not valid:
+>               raise AgentError(
+                    "field_ambiguous",
+                    f"原文不足以确定{key}。时间字段只填HH:MM；已给起止时间时分别填写，不用duration_minutes。",
+                    400,
+                )
+E               app.agents.errors.AgentError: 原文不足以确定end_time。时间字段只填HH:MM；已给起止时间时分别填写，不用duration_minutes。
+
+backend\app\agents\state.py:177: AgentError
+_ test_range_daypart_inherits_only_within_explicit_source_range[\u4e0b\u5348\u4e24\u70b9\u5230\u4e09\u70b9-\u4e09\u70b9-03:00-False] _
+
+text = '下午两点到三点', quote = '三点', value = '03:00', valid = False
+
+    @pytest.mark.parametrize("text,quote,value,valid", [
+        ("下午两点到三点", "三点", "15:00", True),
+        ("下午两点到三点", "三点", "03:00", False),
+        ("下午2点至3点", "2点", "14:00", True),
+        ("上午九点到十点", "十点", "10:00", True),
+        ("下午两点开会。另外三点这个时刻尚未明确上午或下午。", "三点", "15:00", False),
+        ("上午九点到十点，下午三点再聊。", "九点", "21:00", False),
+    ])
+    def test_range_daypart_inherits_only_within_explicit_source_range(text, quote, value, valid):
+        state = {"fields": {}, "last_user_text": text, "turn_index": 1,
+                 "reference_clock": "2026-10-28T09:00:00+08:00"}
+        patch = FieldPatch(end_time=value, source_quotes={"end_time": quote})
+        if valid:
+            assert patch_fields(state, patch)[0]["end_time"]["value"] == value
+        else:
+>           with pytest.raises(AgentError): patch_fields(state, patch)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE AgentError
+
+backend\tests\test_metamorphic.py:193: Failed
+_ test_range_daypart_inherits_only_within_explicit_source_range[\u4e0b\u53482\u70b9\u81f33\u70b9-2\u70b9-14:00-True] _
+
+text = '下午2点至3点', quote = '2点', value = '14:00', valid = True
+
+    @pytest.mark.parametrize("text,quote,value,valid", [
+        ("下午两点到三点", "三点", "15:00", True),
+        ("下午两点到三点", "三点", "03:00", False),
+        ("下午2点至3点", "2点", "14:00", True),
+        ("上午九点到十点", "十点", "10:00", True),
+        ("下午两点开会。另外三点这个时刻尚未明确上午或下午。", "三点", "15:00", False),
+        ("上午九点到十点，下午三点再聊。", "九点", "21:00", False),
+    ])
+    def test_range_daypart_inherits_only_within_explicit_source_range(text, quote, value, valid):
+        state = {"fields": {}, "last_user_text": text, "turn_index": 1,
+                 "reference_clock": "2026-10-28T09:00:00+08:00"}
+        patch = FieldPatch(end_time=value, source_quotes={"end_time": quote})
+        if valid:
+>           assert patch_fields(state, patch)[0]["end_time"]["value"] == value
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend\tests\test_metamorphic.py:191: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+state = {'fields': {}, 'last_user_text': '下午2点至3点', 'turn_index': 1, 'reference_clock': '2026-10-28T09:00:00+08:00'}
+patch = FieldPatch(date=None, start_time=None, end_time='14:00', duration_minutes=None, attendees=None, room_code=None, source_quotes={'end_time': '2点'}, clear_fields=[])
+
+    def patch_fields(state: AgentState, patch: FieldPatch):
+        fields = {key: dict(value) for key, value in state.get("fields", {}).items()}
+        current = state["last_user_text"]
+        reference = datetime.fromisoformat(state["reference_clock"])
+        changed = False
+        for key in patch.clear_fields:
+            quote = patch.source_quotes.get(key, "")
+            if (
+                key not in FieldPatch.model_fields
+                or not quote
+                or quote not in current
+                or not re.search("任意|不限|随便|未定|待定|不确定|不指定", quote)
+            ):
+                raise AgentError("field_source_invalid", "清除字段必须有当前用户输入依据。", 400)
+            changed = changed or key in fields
+            fields.pop(key, None)
+        for key, value in patch.model_dump(exclude={"source_quotes", "clear_fields"}).items():
+            if value is None:
+                continue
+            quote = patch.source_quotes.get(key, "")
+            if not quote or len(quote) > 240 or quote not in current:
+                raise AgentError(
+                    "field_source_invalid",
+                    f"{key}缺少source_quotes.{key}或引用不在当前输入中；仅填写本次有依据的字段。",
+                    400,
+                )
+            valid = False
+            if key == "date":
+                valid = value in dates_from_quote(quote, reference)
+            elif key in ("start_time", "end_time"):
+                valid = value in times_from_quote(quote)
+            elif key == "attendees":
+                nums = re.findall(r"[0-9一二三四五六七八九十两]+", quote)
+                standalone_number = quote.strip() == current.strip() and re.fullmatch(
+                    r"[0-9一二三四五六七八九十两]+", quote.strip()
+                )
+                participant_unit = re.search(r"(?:位|名)(?:参会者|与会者|参与者)", quote)
+                valid = ("人" in quote or participant_unit or standalone_number) and any(
+                    number(item) == value for item in nums
+                )
+            elif key == "duration_minutes":
+                durations = set()
+                for amount, unit in re.findall(
+                    r"([0-9一二三四五六七八九十两]+)(个?小时|分钟|分)", quote
+                ):
+                    parsed = number(amount)
+                    if parsed is not None:
+                        durations.add(parsed * (60 if "小时" in unit else 1))
+                if "半小时" in quote:
+                    durations.add(30)
+                valid = value in durations
+            elif key == "room_code":
+                value = value.upper()
+                valid = value in [match.upper() for match in re.findall(r"[A-Za-z]\d{3}", quote)]
+            if not valid:
+>               raise AgentError(
+                    "field_ambiguous",
+                    f"原文不足以确定{key}。时间字段只填HH:MM；已给起止时间时分别填写，不用duration_minutes。",
+                    400,
+                )
+E               app.agents.errors.AgentError: 原文不足以确定end_time。时间字段只填HH:MM；已给起止时间时分别填写，不用duration_minutes。
+
+backend\app\agents\state.py:177: AgentError
+=========================== short test summary info ===========================
+FAILED backend\tests\test_metamorphic.py::test_range_daypart_inherits_only_within_explicit_source_range[\u4e0b\u5348\u4e24\u70b9\u5230\u4e09\u70b9-\u4e09\u70b9-15:00-True]
+FAILED backend\tests\test_metamorphic.py::test_range_daypart_inherits_only_within_explicit_source_range[\u4e0b\u5348\u4e24\u70b9\u5230\u4e09\u70b9-\u4e09\u70b9-03:00-False]
+FAILED backend\tests\test_metamorphic.py::test_range_daypart_inherits_only_within_explicit_source_range[\u4e0b\u53482\u70b9\u81f33\u70b9-2\u70b9-14:00-True]
+3 failed, 3 passed, 10 deselected in 2.15s

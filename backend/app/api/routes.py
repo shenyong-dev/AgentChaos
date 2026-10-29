@@ -50,6 +50,10 @@ def public_config(request: Request, settings: SettingsDependency) -> Envelope[Pu
             executor_paid_calls_enabled=settings.executor_allow_paid_model_calls,
             executor_agent_budget_usd=settings.executor_agent_budget_usd,
             executor_agent_budget_unlimited=settings.executor_agent_budget_unlimited,
+            casegen_paid_calls_enabled=settings.casegen_allow_paid_model_calls,
+            judge_paid_calls_enabled=settings.judge_allow_paid_model_calls,
+            judge_budget_unlimited=settings.judge_budget_unlimited,
+            casegen_budget_unlimited=settings.casegen_budget_unlimited,
             roles=[
                 ModelRoleConfig(
                     role="agent",

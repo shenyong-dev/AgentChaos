@@ -1,0 +1,44 @@
+Traceback (most recent call last):
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\redis\connection.py", line 389, in connect_check_health
+    sock = self.retry.call_with_retry(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\redis\retry.py", line 105, in call_with_retry
+    return do()
+           ^^^^
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\redis\connection.py", line 390, in <lambda>
+    lambda: self._connect(), lambda error: self.disconnect(error)
+            ^^^^^^^^^^^^^^^
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\redis\connection.py", line 803, in _connect
+    raise err
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\redis\connection.py", line 787, in _connect
+    sock.connect(socket_address)
+ConnectionRefusedError: [WinError 10061] 由于目标计算机积极拒绝，无法连接。
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\AgentChaos\.local\t13\revision_delivery_audit.py", line 20, in <module>
+    assert {k:ledger(k) for k in old['old_ledgers']}==old['old_ledgers']
+              ^^^^^^^^^
+  File "D:\AgentChaos\.local\t13\revision_delivery_audit.py", line 19, in ledger
+    def ledger(k):return {f.decode():int(v) for f,v in r.hgetall(k).items()}
+                                                       ^^^^^^^^^^^^
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\redis\commands\core.py", line 5021, in hgetall
+    return self.execute_command("HGETALL", name, keys=[name])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\redis\client.py", line 621, in execute_command
+    return self._execute_command(*args, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\redis\client.py", line 627, in _execute_command
+    conn = self.connection or pool.get_connection()
+                              ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\redis\utils.py", line 195, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\redis\connection.py", line 1533, in get_connection
+    connection.connect()
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\redis\connection.py", line 380, in connect
+    self.connect_check_health(check_health=True)
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\redis\connection.py", line 397, in connect_check_health
+    raise ConnectionError(self._error_message(e))
+redis.exceptions.ConnectionError: Error 10061 connecting to 127.0.0.1:16380. 由于目标计算机积极拒绝，无法连接。.

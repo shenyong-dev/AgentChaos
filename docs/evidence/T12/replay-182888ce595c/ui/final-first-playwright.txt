@@ -1,0 +1,42 @@
+
+Running 5 tests using 1 worker
+
+(node:18176) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 tests\judging.spec.ts:34:1 › T12 network failure does not display old successful evaluation (explicit network control) (494ms)
+  x  2 tests\judging.spec.ts:44:1 › T12 sealed real labels, blind scores and assisted reviews remain separate (read only) (7.8s)
+(node:15052) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 3 tests\judging.spec.ts:78:1 › T12 restored operator cannot start paid judge (read only) (2.8s)
+  ok 4 tests\judging.spec.ts:88:1 › T12 review requires deliberate labels and reason (explicit network control; no save) (2.8s)
+  ok 5 tests\judging.spec.ts:110:1 › T12 execution change clears previous review fields (explicit network control; no save) (655ms)
+
+
+  1) tests\judging.spec.ts:44:1 › T12 sealed real labels, blind scores and assisted reviews remain separate (read only) 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByText('人工复核决定（另存）', { exact: true })
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByText('人工复核决定（另存）', { exact: true }) with timeout 5000ms
+      - waiting for getByText('人工复核决定（另存）', { exact: true })
+
+
+      54 |   await expect(page.getByLabel('原始人工标签')).toContainText('解释不合理')
+      55 |   await expect(page.getByLabel('AI辅助评价')).toContainText('解释合理')
+    > 56 |   await expect(page.getByText('人工复核决定（另存）', { exact: true })).toBeVisible()
+         |                                                               ^
+      57 |   await expect(page.getByText(/用户已明确确认的辅助复核/)).toBeVisible()
+      58 |   await expect(page.getByRole('button', { name: '封存30条人工标签' })).toHaveCount(0)
+      59 |   await expect(page.getByRole('button', { name: '保存人工复核' })).toHaveCount(0)
+        at D:\AgentChaos\frontend\tests\judging.spec.ts:56:63
+
+    Error Context: ..\.local\playwright-results\judging-T12-sealed-real-la-b1da2--remain-separate-read-only-\error-context.md
+
+  1 failed
+    tests\judging.spec.ts:44:1 › T12 sealed real labels, blind scores and assisted reviews remain separate (read only) 
+  4 passed (16.0s)

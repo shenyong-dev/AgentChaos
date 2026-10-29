@@ -42,7 +42,7 @@ onMounted(store.refresh)
 
 <template>
   <div class="page-heading">
-    <div><div class="eyebrow">AGENT BASELINE / {{ config?.task ?? 'T09' }}</div><h1>工程环境</h1><p>检查服务连接，确认这次实验从哪里开始。</p></div>
+    <div><div class="eyebrow">AGENT BASELINE / {{ config?.task ?? 'T11' }}</div><h1>工程环境</h1><p>检查服务连接，确认这次实验从哪里开始。</p></div>
     <ElButton type="primary" :loading="loading" @click="store.refresh">重新检测</ElButton>
   </div>
 
@@ -72,9 +72,9 @@ onMounted(store.refresh)
   <section class="model-panel">
     <div class="section-heading"><div><h2>模型角色配置</h2><p>同一服务，独立配置与预算。历史连通记录不代表此刻实时可用。</p></div><ElTag type="info">{{ config?.paid_calls_enabled ? '调用开关已启用 · 受角色预算限制' : '付费调用关闭' }}</ElTag></div>
     <div v-if="!config" class="inline-empty">配置尚未读取成功。</div>
-    <div v-else class="role-grid"><article v-for="role in config.roles" :key="role.role"><span class="role-code">{{ role.role }}</span><h3>{{ roleNames[role.role] }}</h3><p>{{ role.model }}</p><dl><div><dt>思考模式</dt><dd>{{ role.thinking === 'disabled' ? '关闭' : '开启' }}</dd></div><div><dt>输出上限</dt><dd>{{ role.max_output_tokens.toLocaleString() }} tokens</dd></div><div><dt>授权预算</dt><dd>{{ role.budget_usd === 0 ? '未设置' : `$${role.budget_usd}` }}</dd></div></dl></article></div>
+    <div v-else class="role-grid"><article v-for="role in config.roles" :key="role.role"><span class="role-code">{{ role.role }}</span><h3>{{ roleNames[role.role] }}</h3><p>{{ role.model }}</p><dl><div><dt>思考模式</dt><dd>{{ role.thinking === 'disabled' ? '关闭' : '开启' }}</dd></div><div><dt>输出上限</dt><dd>{{ role.max_output_tokens.toLocaleString() }} tokens</dd></div><div><dt>授权预算</dt><dd>{{ (role.role === 'judge' && config.judge_budget_unlimited) || (role.role === 'case_generator' && config.casegen_budget_unlimited) ? '独立授权金额无总上限' : role.budget_usd === 0 ? '未设置' : `$${role.budget_usd}` }}</dd></div></dl></article></div>
   </section>
 
   <p v-if="config" class="card-description">批量调用：{{ config.executor_paid_calls_enabled ? (config.executor_agent_budget_unlimited ? '本项 agent 授权金额无总上限；逐次记账，运行限制继续生效' : `agent 授权上限 $${config.executor_agent_budget_usd}，剩余额度以持久账本为准`) : '付费调用关闭' }}。Worker 当前存活状态未探测。</p>
-  <footer class="page-footer"><span>预约、批量执行、事件与工具故障已接入；断言评价尚未实现，脚本结束不代表通过。</span><a href="/docs" target="_blank" rel="noopener">查看 API 契约 ↗</a><small v-if="requestId">请求 {{ requestId }}</small></footer>
+  <p v-if="config" class="card-description">裁判调用：{{ config.judge_paid_calls_enabled ? '独立授权已启用，每批调用、token和时间上限继续生效' : '关闭；已保存的评价仍可查看' }}。AI辅助结果与规则、人工结论分别保留。</p><footer class="page-footer"><span>预约、故障、规则断言与辅助评价入口已接入；AI结论不代替客观证据或人工复核。</span><a href="/docs" target="_blank" rel="noopener">查看 API 契约 ↗</a><small v-if="requestId">请求 {{ requestId }}</small></footer>
 </template>

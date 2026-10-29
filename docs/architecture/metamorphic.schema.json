@@ -1,0 +1,214 @@
+{
+  "$defs": {
+    "Intent": {
+      "additionalProperties": false,
+      "properties": {
+        "date": {
+          "format": "date",
+          "title": "Date",
+          "type": "string"
+        },
+        "start_time": {
+          "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$",
+          "title": "Start Time",
+          "type": "string"
+        },
+        "end_time": {
+          "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$",
+          "title": "End Time",
+          "type": "string"
+        },
+        "attendees": {
+          "minimum": 1,
+          "title": "Attendees",
+          "type": "integer"
+        },
+        "room_code": {
+          "pattern": "^[A-Z][A-Z0-9]{1,31}$",
+          "title": "Room Code",
+          "type": "string"
+        }
+      },
+      "required": [
+        "date",
+        "start_time",
+        "end_time",
+        "attendees",
+        "room_code"
+      ],
+      "title": "Intent",
+      "type": "object"
+    },
+    "Member": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "pattern": "^[A-Z][A-Z0-9-]{1,39}$",
+          "title": "Key",
+          "type": "string"
+        },
+        "turns": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 50,
+          "minItems": 1,
+          "title": "Turns",
+          "type": "array"
+        },
+        "intent": {
+          "$ref": "#/$defs/Intent"
+        },
+        "booking_count": {
+          "enum": [
+            0,
+            1
+          ],
+          "title": "Booking Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "key",
+        "turns",
+        "intent",
+        "booking_count"
+      ],
+      "title": "Member",
+      "type": "object"
+    },
+    "Relation": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "pattern": "^R-[A-Z0-9-]{1,40}$",
+          "title": "Key",
+          "type": "string"
+        },
+        "title": {
+          "maxLength": 100,
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        },
+        "base": {
+          "title": "Base",
+          "type": "string"
+        },
+        "variant": {
+          "title": "Variant",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "equivalent",
+            "changed"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "changed_fields": {
+          "items": {
+            "enum": [
+              "date",
+              "start_time",
+              "end_time",
+              "attendees",
+              "room_code"
+            ],
+            "type": "string"
+          },
+          "maxItems": 5,
+          "title": "Changed Fields",
+          "type": "array"
+        },
+        "rationale": {
+          "maxLength": 1500,
+          "minLength": 1,
+          "title": "Rationale",
+          "type": "string"
+        }
+      },
+      "required": [
+        "key",
+        "title",
+        "base",
+        "variant",
+        "kind",
+        "changed_fields",
+        "rationale"
+      ],
+      "title": "Relation",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "family_key": {
+      "maxLength": 100,
+      "minLength": 1,
+      "title": "Family Key",
+      "type": "string"
+    },
+    "dataset_split": {
+      "enum": [
+        "dev",
+        "calibration",
+        "holdout"
+      ],
+      "title": "Dataset Split",
+      "type": "string"
+    },
+    "reference_clock": {
+      "format": "date-time",
+      "title": "Reference Clock",
+      "type": "string"
+    },
+    "fixture": {
+      "const": "booking-default-v1",
+      "title": "Fixture",
+      "type": "string"
+    },
+    "source": {
+      "maxLength": 1000,
+      "minLength": 1,
+      "title": "Source",
+      "type": "string"
+    },
+    "members": {
+      "items": {
+        "$ref": "#/$defs/Member"
+      },
+      "maxItems": 30,
+      "minItems": 2,
+      "title": "Members",
+      "type": "array"
+    },
+    "relations": {
+      "items": {
+        "$ref": "#/$defs/Relation"
+      },
+      "maxItems": 60,
+      "minItems": 1,
+      "title": "Relations",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "family_key",
+    "dataset_split",
+    "reference_clock",
+    "fixture",
+    "source",
+    "members",
+    "relations"
+  ],
+  "title": "RelationCatalog",
+  "type": "object"
+}

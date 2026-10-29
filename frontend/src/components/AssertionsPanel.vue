@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
-import { ElButton } from 'element-plus'
+import { ElButton, ElSelect, ElOption } from 'element-plus'
 import { evidenceGet } from '../api/evidence'
 import type { AssertionPage, AssertionResult, EvaluationSummary, Verdict } from '../types/evaluation'
 
-const props = defineProps<{ runId: string; authorization: string; executions: { execution_id: string; status: string }[] }>()
+const props = defineProps<{ runId: string; authorization: string; executionId?: string; executions: { execution_id: string; status: string }[] }>()
 const emit = defineEmits<{ locate: [id: string]; snapshot: [] }>()
 const execution = ref(''), selected = ref<number>(), rows = ref<AssertionResult[]>([])
 const summary = ref<EvaluationSummary | null>(null), versions = ref<string[]>([]), version = ref('')
@@ -70,6 +70,7 @@ function locate(reference: string) {
 }
 watch(() => props.runId, () => { execution.value = props.executions[0]?.execution_id ?? ''; version.value = ''; void load('') }, { immediate: true })
 watch(execution, (next, previous) => { if (previous && next !== previous) { version.value = ''; void load('') } })
+watch(() => props.executionId, value => { if (value && value !== execution.value) { execution.value = value; version.value = ''; void load('') } }, { immediate: true })
 watch(filter, () => { if (!visible.value.some(r => r.id === selected.value)) selected.value = visible.value[0]?.id })
 onBeforeUnmount(() => generation++)
 </script>
@@ -77,8 +78,8 @@ onBeforeUnmount(() => generation++)
 <template>
   <section class="assertions-panel" aria-label="断言评价结果" :aria-busy="busy">
     <div class="assertions-toolbar">
-      <label>执行<select v-model="execution" aria-label="选择执行"><option v-for="(item, i) in executions" :key="item.execution_id" :value="item.execution_id">执行 {{ i + 1 }} · {{ item.execution_id.slice(0, 8) }} · {{ item.status }}</option></select></label>
-      <label v-if="versions.length > 1">评价版本<select v-model="version" aria-label="选择评价版本" @change="load()"><option v-for="item in versions" :key="item" :value="item">{{ item }}</option></select></label>
+      <label>执行<ElSelect class="form-select" popper-class="form-select-dropdown" :fit-input-width="true" :empty-values="[null, undefined]" placeholder="请选择" v-model="execution" aria-label="选择执行"><ElOption v-for="(item, i) in executions" :key="item.execution_id" :value="item.execution_id" :data-value="item.execution_id" :label="`执行 ${i + 1} · ${item.execution_id.slice(0, 8)} · ${item.status}`" /></ElSelect></label>
+      <label v-if="versions.length > 1">评价版本<ElSelect class="form-select" popper-class="form-select-dropdown" :fit-input-width="true" :empty-values="[null, undefined]" placeholder="请选择" v-model="version" aria-label="选择评价版本" @change="load()"><ElOption v-for="item in versions" :key="item" :value="item" :data-value="item" :label="item" /></ElSelect></label>
       <div class="assertions-actions"><ElButton :disabled="busy" @click="load()">刷新结果</ElButton><ElButton :disabled="busy || !executions.some(e => e.execution_id === execution && ['passed','failed','inconclusive','error','cancelled','skipped'].includes(e.status))" @click="evaluate">重新核对</ElButton></div>
     </div>
     <p v-if="error" role="alert" class="evidence-error">{{ error }}</p>
@@ -91,7 +92,7 @@ onBeforeUnmount(() => generation++)
       </div>
       <div class="assertion-filter" role="group" aria-label="筛选判定"><button :class="{active: filter === 'all'}" @click="filter = 'all'">全部 {{ rows.length }}</button><button :class="{active: filter === 'attention'}" @click="filter = 'attention'">需要关注</button><button :class="{active: filter === 'inconclusive'}" @click="filter = 'inconclusive'">证据不足</button><span>{{ summary.code_version }}</span></div>
       <div class="assertion-workspace">
-        <label class="assertion-mobile-select">选择断言<select v-model="selected" aria-label="选择断言" @change="expandedRefs = false"><option v-for="row in visible" :key="row.id" :value="row.id">{{ metrics[row.type] ?? row.type }} · {{ labels[row.verdict] }}</option></select></label>
+        <label class="assertion-mobile-select">选择断言<ElSelect class="form-select" popper-class="form-select-dropdown" :fit-input-width="true" :empty-values="[null, undefined]" placeholder="请选择" v-model="selected" aria-label="选择断言" @change="expandedRefs = false"><ElOption v-for="row in visible" :key="row.id" :value="row.id" :data-value="row.id" :label="`${metrics[row.type] ?? row.type} · ${labels[row.verdict]}`" /></ElSelect></label>
         <div class="assertion-list" aria-label="断言列表">
           <button v-for="row in visible" :key="row.id" :class="{selected: selected === row.id}" :data-verdict="row.verdict" @click="select(row.id)"><span class="assertion-key">{{ row.key }}</span><strong>{{ metrics[row.type] ?? row.type }}</strong><span class="verdict-label" :data-verdict="row.verdict">{{ labels[row.verdict] }}</span></button>
           <p v-if="!visible.length" class="assertion-empty">当前筛选下没有判定。</p>

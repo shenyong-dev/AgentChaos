@@ -1,0 +1,12 @@
+......F.                                                                 [100%]
+================================== FAILURES ===================================
+____________ test_owned_http_reads_downloads_and_no_model_dispatch ____________
+tests\test_reports.py:185: in test_owned_http_reads_downloads_and_no_model_dispatch
+    assert client.get(url, auth=("demo_reviewer", TEST_PASSWORD)).status_code == 403
+E   AssertionError: assert 404 == 403
+E    +  where 404 = <Response [404 Not Found]>.status_code
+E    +    where <Response [404 Not Found]> = get('/api/v1/reports/runs/bf1874ba-4a01-4965-8249-e7499ed7b9d3', auth=('demo_reviewer', 'synthetic-password-only-for-schema-tests'))
+E    +      where get = <starlette.testclient.TestClient object at 0x000002BF6097A0C0>.get
+=========================== short test summary info ===========================
+FAILED tests/test_reports.py::test_owned_http_reads_downloads_and_no_model_dispatch
+1 failed, 7 passed in 9.47s

@@ -1,0 +1,32 @@
+E501 Line too long (102 > 100)
+   --> experiments\labels.py:113:101
+    |
+111 |             self._append(source.owner_id, batch, "judge_label", value, "label",
+112 |                          sample_id=sample_id, request_id=str(request.request_id),
+113 |                          request_hash=canonical_hash(request.model_dump(mode="json")), actor=reviewer)
+    |                                                                                                     ^^
+114 |             return value
+    |
+
+E501 Line too long (138 > 100)
+  --> tests\test_formal_gold.py:52:101
+   |
+50 | …ar"
+51 | …sample["id"], request) == saved
+52 | …quest_id=uuid4(), dataset_hash=dataset["dataset_hash"], independent_from_judge=True))
+   |                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+53 | …
+54 | …
+   |
+
+E501 Line too long (127 > 100)
+  --> tests\test_formal_gold.py:55:101
+   |
+53 |         assert len(sealed["labels"]) == 30
+54 |         with pytest.raises(AgentError) as frozen:
+55 |             service.label_execution(2, batch, "0", ExecutionGoldLabel(request_id=uuid4(), execution_problem="problem", **base))
+   |                                                                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+56 |         assert frozen.value.code == "judge_labels_sealed"
+   |
+
+Found 3 errors.

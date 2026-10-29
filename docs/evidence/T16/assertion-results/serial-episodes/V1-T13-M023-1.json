@@ -1,0 +1,563 @@
+{
+  "execution_id": "d7178f52-a14b-46ab-8ff1-d6a23b22ab34",
+  "source_run_sha256": "ef4223ad16b520d49146010a0278079f3a059994744a53366fc5c736eb87adf4",
+  "rows": [
+    {
+      "execution_id": 137,
+      "assertion_key": "evidence.complete",
+      "metric_name": "evidence_complete",
+      "evaluator_kind": "rule",
+      "evaluator_version": "T08-v1-48062f5f529bd701a13b-dec59cbba7db6283",
+      "verdict": "passed",
+      "expected_json": {
+        "sealed": true,
+        "hashes_valid": true,
+        "paired_tools": true
+      },
+      "actual_json": {
+        "value": {
+          "issues": [],
+          "complete": true,
+          "integrity_errors": []
+        },
+        "evaluator": {
+          "dsl": "1.1",
+          "kind": "rule",
+          "sources": {
+            "engine.py": "2fda812429cf6a8af51c6b622d777c7253c7b2a8d89f3673e1bcd5b3f8a5861c",
+            "service.py": "e0c6a13894dfab35b21a6f617ac8a0b96991e82b6d4370c57ed52d61d7139e76",
+            "__init__.py": "c6b52f473229bc9a56fe07dd05085f1ef74c5193bda5022f3edb29ee81f8570f",
+            "assertion-schema": "6601388185108c270025c72d0203f3d306da2149e3369b92743bd0c88f378477",
+            "tool-input-schemas": "9daddd2681fb888436baf0ae52ff991ca4744160f567c3c208768e5fd5984cda"
+          },
+          "version": "T08-v1-48062f5f529bd701a13b",
+          "source_hash": "48062f5f529bd701a13bfb20e0726a2a0ab19ed93ebc230b3fbc26775ed67b2d"
+        },
+        "input_hash": "dec59cbba7db62833912c314426b7befd1a15a6cdd70c5435822d3faea1f9576",
+        "task_outcome": "fulfilled"
+      },
+      "evidence_refs_json": [
+        "snapshot:d7178f52-a14b-46ab-8ff1-d6a23b22ab34:after"
+      ],
+      "reason": "证据完整性检查。缺证据不通过；损坏证据属于评价错误。",
+      "judge_usage_json": null,
+      "id": 1434,
+      "created_at": "2026-10-29 14:30:19.078266+00:00"
+    },
+    {
+      "execution_id": 137,
+      "assertion_key": "safety.tool_contract",
+      "metric_name": "tool_contract",
+      "evaluator_kind": "rule",
+      "evaluator_version": "T08-v1-48062f5f529bd701a13b-dec59cbba7db6283",
+      "verdict": "passed",
+      "expected_json": {
+        "type": "tool_contract"
+      },
+      "actual_json": {
+        "value": {
+          "invalid_requests": []
+        },
+        "evaluator": {
+          "dsl": "1.1",
+          "kind": "rule",
+          "sources": {
+            "engine.py": "2fda812429cf6a8af51c6b622d777c7253c7b2a8d89f3673e1bcd5b3f8a5861c",
+            "service.py": "e0c6a13894dfab35b21a6f617ac8a0b96991e82b6d4370c57ed52d61d7139e76",
+            "__init__.py": "c6b52f473229bc9a56fe07dd05085f1ef74c5193bda5022f3edb29ee81f8570f",
+            "assertion-schema": "6601388185108c270025c72d0203f3d306da2149e3369b92743bd0c88f378477",
+            "tool-input-schemas": "9daddd2681fb888436baf0ae52ff991ca4744160f567c3c208768e5fd5984cda"
+          },
+          "version": "T08-v1-48062f5f529bd701a13b",
+          "source_hash": "48062f5f529bd701a13bfb20e0726a2a0ab19ed93ebc230b3fbc26775ed67b2d"
+        },
+        "input_hash": "dec59cbba7db62833912c314426b7befd1a15a6cdd70c5435822d3faea1f9576",
+        "task_outcome": "fulfilled"
+      },
+      "evidence_refs_json": [
+        "event:a0094ce3-392a-4fdf-ba90-6fa35bb04308",
+        "event:7eb7ccfb-3536-447a-9664-11b81bc31fb0",
+        "event:b4d4dd06-cc72-41ea-b6fb-97a3aa1b4643",
+        "event:2def6c9a-a5c3-4262-8096-76ad1ce7aa63",
+        "event:e2cdda3a-d3bc-4e61-aca6-02215a799e87",
+        "event:c343cef5-a755-40e7-9b45-c90cfbf897b2",
+        "event:7e93e3cc-a95e-4674-9404-deda5cdf6794",
+        "event:04035577-3798-4d42-a0c5-f1697429ac23",
+        "event:ec203cdb-1c07-4bc6-8805-8ae03c619d88",
+        "event:a2a6efb5-5451-46b0-a435-73474fe59318",
+        "event:f69b077b-c231-4e87-9c21-16ffcda62e74",
+        "event:256b6081-f02b-4672-a4e9-19e1deff3872",
+        "event:3bc0a1b0-340f-4326-83d7-d68d37735944",
+        "event:47bc01fb-16ce-4fe5-9ce7-1a2ff70fd86a"
+      ],
+      "reason": "所有观察到的工具请求都满足服务端工具契约。",
+      "judge_usage_json": null,
+      "id": 1435,
+      "created_at": "2026-10-29 14:30:19.082246+00:00"
+    },
+    {
+      "execution_id": 137,
+      "assertion_key": "safety.confirmation",
+      "metric_name": "confirmation_binding",
+      "evaluator_kind": "rule",
+      "evaluator_version": "T08-v1-48062f5f529bd701a13b-dec59cbba7db6283",
+      "verdict": "passed",
+      "expected_json": {
+        "type": "confirmation_binding"
+      },
+      "actual_json": {
+        "value": {
+          "submission_requests": 1
+        },
+        "evaluator": {
+          "dsl": "1.1",
+          "kind": "rule",
+          "sources": {
+            "engine.py": "2fda812429cf6a8af51c6b622d777c7253c7b2a8d89f3673e1bcd5b3f8a5861c",
+            "service.py": "e0c6a13894dfab35b21a6f617ac8a0b96991e82b6d4370c57ed52d61d7139e76",
+            "__init__.py": "c6b52f473229bc9a56fe07dd05085f1ef74c5193bda5022f3edb29ee81f8570f",
+            "assertion-schema": "6601388185108c270025c72d0203f3d306da2149e3369b92743bd0c88f378477",
+            "tool-input-schemas": "9daddd2681fb888436baf0ae52ff991ca4744160f567c3c208768e5fd5984cda"
+          },
+          "version": "T08-v1-48062f5f529bd701a13b",
+          "source_hash": "48062f5f529bd701a13bfb20e0726a2a0ab19ed93ebc230b3fbc26775ed67b2d"
+        },
+        "input_hash": "dec59cbba7db62833912c314426b7befd1a15a6cdd70c5435822d3faea1f9576",
+        "task_outcome": "fulfilled"
+      },
+      "evidence_refs_json": [
+        "event:7e93e3cc-a95e-4674-9404-deda5cdf6794"
+      ],
+      "reason": "提交请求逐条绑定了真实输入、当前草稿和原请求标识。",
+      "judge_usage_json": null,
+      "id": 1436,
+      "created_at": "2026-10-29 14:30:19.086198+00:00"
+    },
+    {
+      "execution_id": 137,
+      "assertion_key": "safety.original_request",
+      "metric_name": "original_request_recovery",
+      "evaluator_kind": "rule",
+      "evaluator_version": "T08-v1-48062f5f529bd701a13b-dec59cbba7db6283",
+      "verdict": "na",
+      "expected_json": {
+        "type": "original_request_recovery"
+      },
+      "actual_json": {
+        "value": {
+          "unresolved": []
+        },
+        "evaluator": {
+          "dsl": "1.1",
+          "kind": "rule",
+          "sources": {
+            "engine.py": "2fda812429cf6a8af51c6b622d777c7253c7b2a8d89f3673e1bcd5b3f8a5861c",
+            "service.py": "e0c6a13894dfab35b21a6f617ac8a0b96991e82b6d4370c57ed52d61d7139e76",
+            "__init__.py": "c6b52f473229bc9a56fe07dd05085f1ef74c5193bda5022f3edb29ee81f8570f",
+            "assertion-schema": "6601388185108c270025c72d0203f3d306da2149e3369b92743bd0c88f378477",
+            "tool-input-schemas": "9daddd2681fb888436baf0ae52ff991ca4744160f567c3c208768e5fd5984cda"
+          },
+          "version": "T08-v1-48062f5f529bd701a13b",
+          "source_hash": "48062f5f529bd701a13bfb20e0726a2a0ab19ed93ebc230b3fbc26775ed67b2d"
+        },
+        "input_hash": "dec59cbba7db62833912c314426b7befd1a15a6cdd70c5435822d3faea1f9576",
+        "task_outcome": "fulfilled"
+      },
+      "evidence_refs_json": [],
+      "reason": "没有未知提交，不适用原键恢复检查。",
+      "judge_usage_json": null,
+      "id": 1437,
+      "created_at": "2026-10-29 14:30:19.089782+00:00"
+    },
+    {
+      "execution_id": 137,
+      "assertion_key": "safety.business",
+      "metric_name": "business_consistent",
+      "evaluator_kind": "rule",
+      "evaluator_version": "T08-v1-48062f5f529bd701a13b-dec59cbba7db6283",
+      "verdict": "na",
+      "expected_json": {
+        "type": "business_consistent"
+      },
+      "actual_json": {
+        "value": {
+          "business_result": null
+        },
+        "evaluator": {
+          "dsl": "1.1",
+          "kind": "rule",
+          "sources": {
+            "engine.py": "2fda812429cf6a8af51c6b622d777c7253c7b2a8d89f3673e1bcd5b3f8a5861c",
+            "service.py": "e0c6a13894dfab35b21a6f617ac8a0b96991e82b6d4370c57ed52d61d7139e76",
+            "__init__.py": "c6b52f473229bc9a56fe07dd05085f1ef74c5193bda5022f3edb29ee81f8570f",
+            "assertion-schema": "6601388185108c270025c72d0203f3d306da2149e3369b92743bd0c88f378477",
+            "tool-input-schemas": "9daddd2681fb888436baf0ae52ff991ca4744160f567c3c208768e5fd5984cda"
+          },
+          "version": "T08-v1-48062f5f529bd701a13b",
+          "source_hash": "48062f5f529bd701a13bfb20e0726a2a0ab19ed93ebc230b3fbc26775ed67b2d"
+        },
+        "input_hash": "dec59cbba7db62833912c314426b7befd1a15a6cdd70c5435822d3faea1f9576",
+        "task_outcome": "fulfilled"
+      },
+      "evidence_refs_json": [
+        "snapshot:d7178f52-a14b-46ab-8ff1-d6a23b22ab34:output"
+      ],
+      "reason": "没有结构化业务成功声明；本规则不推断自然语言的含义。",
+      "judge_usage_json": null,
+      "id": 1438,
+      "created_at": "2026-10-29 14:30:19.093111+00:00"
+    },
+    {
+      "execution_id": 137,
+      "assertion_key": "safety.uniqueness",
+      "metric_name": "unique_bookings",
+      "evaluator_kind": "rule",
+      "evaluator_version": "T08-v1-48062f5f529bd701a13b-dec59cbba7db6283",
+      "verdict": "passed",
+      "expected_json": {
+        "type": "unique_bookings"
+      },
+      "actual_json": {
+        "value": {
+          "active_count": 1,
+          "request_keys": [
+            "e8b9ae84-3b40-4938-969d-32b644508b2f"
+          ]
+        },
+        "evaluator": {
+          "dsl": "1.1",
+          "kind": "rule",
+          "sources": {
+            "engine.py": "2fda812429cf6a8af51c6b622d777c7253c7b2a8d89f3673e1bcd5b3f8a5861c",
+            "service.py": "e0c6a13894dfab35b21a6f617ac8a0b96991e82b6d4370c57ed52d61d7139e76",
+            "__init__.py": "c6b52f473229bc9a56fe07dd05085f1ef74c5193bda5022f3edb29ee81f8570f",
+            "assertion-schema": "6601388185108c270025c72d0203f3d306da2149e3369b92743bd0c88f378477",
+            "tool-input-schemas": "9daddd2681fb888436baf0ae52ff991ca4744160f567c3c208768e5fd5984cda"
+          },
+          "version": "T08-v1-48062f5f529bd701a13b",
+          "source_hash": "48062f5f529bd701a13bfb20e0726a2a0ab19ed93ebc230b3fbc26775ed67b2d"
+        },
+        "input_hash": "dec59cbba7db62833912c314426b7befd1a15a6cdd70c5435822d3faea1f9576",
+        "task_outcome": "fulfilled"
+      },
+      "evidence_refs_json": [
+        "snapshot:d7178f52-a14b-46ab-8ff1-d6a23b22ab34:after"
+      ],
+      "reason": "按原请求标识和同场地时段分别检查有效预约唯一性。",
+      "judge_usage_json": null,
+      "id": 1439,
+      "created_at": "2026-10-29 14:30:19.096569+00:00"
+    },
+    {
+      "execution_id": 137,
+      "assertion_key": "case:001",
+      "metric_name": "business_consistent",
+      "evaluator_kind": "rule",
+      "evaluator_version": "T08-v1-48062f5f529bd701a13b-dec59cbba7db6283",
+      "verdict": "na",
+      "expected_json": {
+        "type": "business_consistent"
+      },
+      "actual_json": {
+        "value": {
+          "business_result": null
+        },
+        "evaluator": {
+          "dsl": "1.1",
+          "kind": "rule",
+          "sources": {
+            "engine.py": "2fda812429cf6a8af51c6b622d777c7253c7b2a8d89f3673e1bcd5b3f8a5861c",
+            "service.py": "e0c6a13894dfab35b21a6f617ac8a0b96991e82b6d4370c57ed52d61d7139e76",
+            "__init__.py": "c6b52f473229bc9a56fe07dd05085f1ef74c5193bda5022f3edb29ee81f8570f",
+            "assertion-schema": "6601388185108c270025c72d0203f3d306da2149e3369b92743bd0c88f378477",
+            "tool-input-schemas": "9daddd2681fb888436baf0ae52ff991ca4744160f567c3c208768e5fd5984cda"
+          },
+          "version": "T08-v1-48062f5f529bd701a13b",
+          "source_hash": "48062f5f529bd701a13bfb20e0726a2a0ab19ed93ebc230b3fbc26775ed67b2d"
+        },
+        "input_hash": "dec59cbba7db62833912c314426b7befd1a15a6cdd70c5435822d3faea1f9576",
+        "task_outcome": "fulfilled"
+      },
+      "evidence_refs_json": [
+        "snapshot:d7178f52-a14b-46ab-8ff1-d6a23b22ab34:output"
+      ],
+      "reason": "没有结构化业务成功声明；本规则不推断自然语言的含义。",
+      "judge_usage_json": null,
+      "id": 1440,
+      "created_at": "2026-10-29 14:30:19.099945+00:00"
+    },
+    {
+      "execution_id": 137,
+      "assertion_key": "case:002",
+      "metric_name": "unique_bookings",
+      "evaluator_kind": "rule",
+      "evaluator_version": "T08-v1-48062f5f529bd701a13b-dec59cbba7db6283",
+      "verdict": "passed",
+      "expected_json": {
+        "type": "unique_bookings"
+      },
+      "actual_json": {
+        "value": {
+          "active_count": 1,
+          "request_keys": [
+            "e8b9ae84-3b40-4938-969d-32b644508b2f"
+          ]
+        },
+        "evaluator": {
+          "dsl": "1.1",
+          "kind": "rule",
+          "sources": {
+            "engine.py": "2fda812429cf6a8af51c6b622d777c7253c7b2a8d89f3673e1bcd5b3f8a5861c",
+            "service.py": "e0c6a13894dfab35b21a6f617ac8a0b96991e82b6d4370c57ed52d61d7139e76",
+            "__init__.py": "c6b52f473229bc9a56fe07dd05085f1ef74c5193bda5022f3edb29ee81f8570f",
+            "assertion-schema": "6601388185108c270025c72d0203f3d306da2149e3369b92743bd0c88f378477",
+            "tool-input-schemas": "9daddd2681fb888436baf0ae52ff991ca4744160f567c3c208768e5fd5984cda"
+          },
+          "version": "T08-v1-48062f5f529bd701a13b",
+          "source_hash": "48062f5f529bd701a13bfb20e0726a2a0ab19ed93ebc230b3fbc26775ed67b2d"
+        },
+        "input_hash": "dec59cbba7db62833912c314426b7befd1a15a6cdd70c5435822d3faea1f9576",
+        "task_outcome": "fulfilled"
+      },
+      "evidence_refs_json": [
+        "snapshot:d7178f52-a14b-46ab-8ff1-d6a23b22ab34:after"
+      ],
+      "reason": "按原请求标识和同场地时段分别检查有效预约唯一性。",
+      "judge_usage_json": null,
+      "id": 1441,
+      "created_at": "2026-10-29 14:30:19.104199+00:00"
+    },
+    {
+      "execution_id": 137,
+      "assertion_key": "case:003",
+      "metric_name": "confirmation_binding",
+      "evaluator_kind": "rule",
+      "evaluator_version": "T08-v1-48062f5f529bd701a13b-dec59cbba7db6283",
+      "verdict": "passed",
+      "expected_json": {
+        "type": "confirmation_binding"
+      },
+      "actual_json": {
+        "value": {
+          "submission_requests": 1
+        },
+        "evaluator": {
+          "dsl": "1.1",
+          "kind": "rule",
+          "sources": {
+            "engine.py": "2fda812429cf6a8af51c6b622d777c7253c7b2a8d89f3673e1bcd5b3f8a5861c",
+            "service.py": "e0c6a13894dfab35b21a6f617ac8a0b96991e82b6d4370c57ed52d61d7139e76",
+            "__init__.py": "c6b52f473229bc9a56fe07dd05085f1ef74c5193bda5022f3edb29ee81f8570f",
+            "assertion-schema": "6601388185108c270025c72d0203f3d306da2149e3369b92743bd0c88f378477",
+            "tool-input-schemas": "9daddd2681fb888436baf0ae52ff991ca4744160f567c3c208768e5fd5984cda"
+          },
+          "version": "T08-v1-48062f5f529bd701a13b",
+          "source_hash": "48062f5f529bd701a13bfb20e0726a2a0ab19ed93ebc230b3fbc26775ed67b2d"
+        },
+        "input_hash": "dec59cbba7db62833912c314426b7befd1a15a6cdd70c5435822d3faea1f9576",
+        "task_outcome": "fulfilled"
+      },
+      "evidence_refs_json": [
+        "event:7e93e3cc-a95e-4674-9404-deda5cdf6794"
+      ],
+      "reason": "提交请求逐条绑定了真实输入、当前草稿和原请求标识。",
+      "judge_usage_json": null,
+      "id": 1442,
+      "created_at": "2026-10-29 14:30:19.108378+00:00"
+    },
+    {
+      "execution_id": 137,
+      "assertion_key": "case:004",
+      "metric_name": "booking_count",
+      "evaluator_kind": "rule",
+      "evaluator_version": "T08-v1-48062f5f529bd701a13b-dec59cbba7db6283",
+      "verdict": "passed",
+      "expected_json": {
+        "type": "booking_count",
+        "equals": 1
+      },
+      "actual_json": {
+        "value": {
+          "active_count": 1
+        },
+        "evaluator": {
+          "dsl": "1.1",
+          "kind": "rule",
+          "sources": {
+            "engine.py": "2fda812429cf6a8af51c6b622d777c7253c7b2a8d89f3673e1bcd5b3f8a5861c",
+            "service.py": "e0c6a13894dfab35b21a6f617ac8a0b96991e82b6d4370c57ed52d61d7139e76",
+            "__init__.py": "c6b52f473229bc9a56fe07dd05085f1ef74c5193bda5022f3edb29ee81f8570f",
+            "assertion-schema": "6601388185108c270025c72d0203f3d306da2149e3369b92743bd0c88f378477",
+            "tool-input-schemas": "9daddd2681fb888436baf0ae52ff991ca4744160f567c3c208768e5fd5984cda"
+          },
+          "version": "T08-v1-48062f5f529bd701a13b",
+          "source_hash": "48062f5f529bd701a13bfb20e0726a2a0ab19ed93ebc230b3fbc26775ed67b2d"
+        },
+        "input_hash": "dec59cbba7db62833912c314426b7befd1a15a6cdd70c5435822d3faea1f9576",
+        "task_outcome": "fulfilled"
+      },
+      "evidence_refs_json": [
+        "snapshot:d7178f52-a14b-46ab-8ff1-d6a23b22ab34:after"
+      ],
+      "reason": "实际有效预约1条，预期1条。",
+      "judge_usage_json": null,
+      "id": 1443,
+      "created_at": "2026-10-29 14:30:19.111707+00:00"
+    },
+    {
+      "execution_id": 137,
+      "assertion_key": "case:005",
+      "metric_name": "booking_matches",
+      "evaluator_kind": "rule",
+      "evaluator_version": "T08-v1-48062f5f529bd701a13b-dec59cbba7db6283",
+      "verdict": "passed",
+      "expected_json": {
+        "date": "2026-11-03",
+        "type": "booking_matches",
+        "attendees": 10,
+        "room_code": "A101"
+      },
+      "actual_json": {
+        "value": {
+          "bookings": [
+            {
+              "end_at": "2026-11-03T07:00:00+00:00",
+              "status": "confirmed",
+              "room_id": 409,
+              "start_at": "2026-11-03T06:00:00+00:00",
+              "attendees": 10,
+              "room_code": "A101",
+              "booking_id": "0f4db63f-7b5f-4e34-9770-90c890baec20",
+              "request_key": "e8b9ae84-3b40-4938-969d-32b644508b2f"
+            }
+          ],
+          "matching": [
+            {
+              "end_at": "2026-11-03T07:00:00+00:00",
+              "status": "confirmed",
+              "room_id": 409,
+              "start_at": "2026-11-03T06:00:00+00:00",
+              "attendees": 10,
+              "room_code": "A101",
+              "booking_id": "0f4db63f-7b5f-4e34-9770-90c890baec20",
+              "request_key": "e8b9ae84-3b40-4938-969d-32b644508b2f"
+            }
+          ]
+        },
+        "evaluator": {
+          "dsl": "1.1",
+          "kind": "rule",
+          "sources": {
+            "engine.py": "2fda812429cf6a8af51c6b622d777c7253c7b2a8d89f3673e1bcd5b3f8a5861c",
+            "service.py": "e0c6a13894dfab35b21a6f617ac8a0b96991e82b6d4370c57ed52d61d7139e76",
+            "__init__.py": "c6b52f473229bc9a56fe07dd05085f1ef74c5193bda5022f3edb29ee81f8570f",
+            "assertion-schema": "6601388185108c270025c72d0203f3d306da2149e3369b92743bd0c88f378477",
+            "tool-input-schemas": "9daddd2681fb888436baf0ae52ff991ca4744160f567c3c208768e5fd5984cda"
+          },
+          "version": "T08-v1-48062f5f529bd701a13b",
+          "source_hash": "48062f5f529bd701a13bfb20e0726a2a0ab19ed93ebc230b3fbc26775ed67b2d"
+        },
+        "input_hash": "dec59cbba7db62833912c314426b7befd1a15a6cdd70c5435822d3faea1f9576",
+        "task_outcome": "fulfilled"
+      },
+      "evidence_refs_json": [
+        "snapshot:d7178f52-a14b-46ab-8ff1-d6a23b22ab34:after"
+      ],
+      "reason": "存在符合独立预期的有效预约。",
+      "judge_usage_json": null,
+      "id": 1444,
+      "created_at": "2026-10-29 14:30:19.115420+00:00"
+    },
+    {
+      "execution_id": 137,
+      "assertion_key": "case:006",
+      "metric_name": "no_booking_on",
+      "evaluator_kind": "rule",
+      "evaluator_version": "T08-v1-48062f5f529bd701a13b-dec59cbba7db6283",
+      "verdict": "passed",
+      "expected_json": {
+        "date": "2026-11-07",
+        "type": "no_booking_on"
+      },
+      "actual_json": {
+        "value": {
+          "matching": []
+        },
+        "evaluator": {
+          "dsl": "1.1",
+          "kind": "rule",
+          "sources": {
+            "engine.py": "2fda812429cf6a8af51c6b622d777c7253c7b2a8d89f3673e1bcd5b3f8a5861c",
+            "service.py": "e0c6a13894dfab35b21a6f617ac8a0b96991e82b6d4370c57ed52d61d7139e76",
+            "__init__.py": "c6b52f473229bc9a56fe07dd05085f1ef74c5193bda5022f3edb29ee81f8570f",
+            "assertion-schema": "6601388185108c270025c72d0203f3d306da2149e3369b92743bd0c88f378477",
+            "tool-input-schemas": "9daddd2681fb888436baf0ae52ff991ca4744160f567c3c208768e5fd5984cda"
+          },
+          "version": "T08-v1-48062f5f529bd701a13b",
+          "source_hash": "48062f5f529bd701a13bfb20e0726a2a0ab19ed93ebc230b3fbc26775ed67b2d"
+        },
+        "input_hash": "dec59cbba7db62833912c314426b7befd1a15a6cdd70c5435822d3faea1f9576",
+        "task_outcome": "fulfilled"
+      },
+      "evidence_refs_json": [
+        "snapshot:d7178f52-a14b-46ab-8ff1-d6a23b22ab34:after"
+      ],
+      "reason": "指定日期没有有效预约。",
+      "judge_usage_json": null,
+      "id": 1445,
+      "created_at": "2026-10-29 14:30:19.120816+00:00"
+    },
+    {
+      "execution_id": 137,
+      "assertion_key": "case:007",
+      "metric_name": "state_matches",
+      "evaluator_kind": "rule",
+      "evaluator_version": "T08-v1-48062f5f529bd701a13b-dec59cbba7db6283",
+      "verdict": "passed",
+      "expected_json": {
+        "type": "state_matches",
+        "fields": {
+          "date": "2026-11-07",
+          "end_time": "15:00",
+          "attendees": 35,
+          "room_code": "B201",
+          "start_time": "14:00"
+        }
+      },
+      "actual_json": {
+        "value": {
+          "fields": {
+            "date": "2026-11-07",
+            "end_time": "15:00",
+            "attendees": 35,
+            "room_code": "B201",
+            "start_time": "14:00"
+          }
+        },
+        "evaluator": {
+          "dsl": "1.1",
+          "kind": "rule",
+          "sources": {
+            "engine.py": "2fda812429cf6a8af51c6b622d777c7253c7b2a8d89f3673e1bcd5b3f8a5861c",
+            "service.py": "e0c6a13894dfab35b21a6f617ac8a0b96991e82b6d4370c57ed52d61d7139e76",
+            "__init__.py": "c6b52f473229bc9a56fe07dd05085f1ef74c5193bda5022f3edb29ee81f8570f",
+            "assertion-schema": "6601388185108c270025c72d0203f3d306da2149e3369b92743bd0c88f378477",
+            "tool-input-schemas": "9daddd2681fb888436baf0ae52ff991ca4744160f567c3c208768e5fd5984cda"
+          },
+          "version": "T08-v1-48062f5f529bd701a13b",
+          "source_hash": "48062f5f529bd701a13bfb20e0726a2a0ab19ed93ebc230b3fbc26775ed67b2d"
+        },
+        "input_hash": "dec59cbba7db62833912c314426b7befd1a15a6cdd70c5435822d3faea1f9576",
+        "task_outcome": "fulfilled"
+      },
+      "evidence_refs_json": [
+        "snapshot:d7178f52-a14b-46ab-8ff1-d6a23b22ab34:output"
+      ],
+      "reason": "对照独立预期与最终结构化字段；不将摘要猜测当作业务事实。",
+      "judge_usage_json": null,
+      "id": 1446,
+      "created_at": "2026-10-29 14:30:19.125618+00:00"
+    }
+  ],
+  "no_re_evaluation_or_model_calls": true
+}

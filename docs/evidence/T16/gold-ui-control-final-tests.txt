@@ -1,0 +1,61 @@
+
+Running 1 test using 1 worker
+
+(node:35940) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  1 tests\formal-gold-control.spec.ts:3:1 › explicit synthetic gold UI control requires three independent choices and never writes labels (30.0s)
+
+
+  1) tests\formal-gold-control.spec.ts:3:1 › explicit synthetic gold UI control requires three independent choices and never writes labels 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Browser logs:
+
+    <launching> D:\AgentChaos\.cache\playwright\chromium_headless_shell-1248\chrome-headless-shell-win64\chrome-headless-shell.exe --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,AvoidCorsURLLoaderRestartOnRedirect,Translate,AutoDeElevate,OptimizationHints,NetworkTimeServiceQuerying,AimEnabled,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --user-data-dir=C:\Users\30665\AppData\Local\Temp\playwright_chromiumdev_profile-LT0j9O --remote-debugging-pipe --no-startup-window
+    <launched> pid=9376
+    [pid=9376][err] [1029/222749.933:INFO:CONSOLE:946] "[vite] connecting...", source: http://127.0.0.1:5183/@vite/client (946)
+    [pid=9376][err] [1029/222749.988:INFO:CONSOLE:1055] "[vite] connected.", source: http://127.0.0.1:5183/@vite/client (1055)
+    [pid=9376] <gracefully close start>
+    Call log:
+      - waiting for getByRole('combobox', { name: '回答支持性', exact: true })
+        - locator resolved to <input readonly value="" type="text" tabindex="0" role="combobox" id="el-id-795-37" autocomplete="off" spellcheck="false" aria-label="回答支持性" aria-expanded="false" aria-haspopup="listbox" class="el-select__input" aria-activedescendant="" aria-autocomplete="none" aria-controls="el-id-795-24"/>
+      - attempting click action
+        2 × waiting for element to be visible, enabled and stable
+          - element is visible, enabled and stable
+          - scrolling into view if needed
+          - done scrolling
+          - <span>请选择，未预填标签</span> from <div class="el-select__selected-item el-select__placeholder">…</div> subtree intercepts pointer events
+        - retrying click action
+        - waiting 20ms
+        2 × waiting for element to be visible, enabled and stable
+          - element is visible, enabled and stable
+          - scrolling into view if needed
+          - done scrolling
+          - <span>请选择，未预填标签</span> from <div class="el-select__selected-item el-select__placeholder">…</div> subtree intercepts pointer events
+        - retrying click action
+          - waiting 100ms
+        56 × waiting for element to be visible, enabled and stable
+           - element is visible, enabled and stable
+           - scrolling into view if needed
+           - done scrolling
+           - <span>请选择，未预填标签</span> from <div class="el-select__selected-item el-select__placeholder">…</div> subtree intercepts pointer events
+         - retrying click action
+           - waiting 500ms
+        - waiting for element to be visible, enabled and stable
+
+
+      21 |   await expect(save).toBeDisabled()
+      22 |   for (const [label, option] of [['回答支持性', '有依据'], ['解释合理性', '解释合理']]) {
+    > 23 |     await page.getByRole('combobox', { name: label, exact: true }).click()
+         |                                                                    ^
+      24 |     await page.getByRole('option', { name: option, exact: true }).click()
+      25 |   }
+      26 |   await expect(save).toBeDisabled()
+        at D:\AgentChaos\frontend\tests\formal-gold-control.spec.ts:23:68
+
+    Error Context: ..\docs\evidence\T16\gold-ui-control-final\results\formal-gold-control-explic-d5c40-ces-and-never-writes-labels\error-context.md
+
+  1 failed
+    tests\formal-gold-control.spec.ts:3:1 › explicit synthetic gold UI control requires three independent choices and never writes labels 

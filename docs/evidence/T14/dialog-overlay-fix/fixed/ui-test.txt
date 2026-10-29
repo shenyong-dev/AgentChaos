@@ -1,0 +1,32 @@
+
+Running 1 test using 1 worker
+
+(node:12184) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  1 tests\workspace.spec.ts:196:1 › waiting input and cancel dialogs cover background controls and fit the viewport (9.9s)
+
+
+  1) tests\workspace.spec.ts:196:1 › waiting input and cancel dialogs cover background controls and fit the viewport 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      224 |       }
+      225 |       return box.top >= 0 && box.bottom <= innerHeight && box.left >= 0 && box.right <= innerWidth && points.every(([x, y]) => element.contains(document.elementFromPoint(x!, y!)))
+    > 226 |     })).toBe(true)
+          |         ^
+      227 |     await dialog.getByRole('textbox', { name: '本轮输入', exact: true }).fill('确认')
+      228 |     await dialog.getByRole('button', { name: '核对本轮输入', exact: true }).click()
+      229 |     await expect(dialog.getByRole('button', { name: '确认发送输入', exact: true })).toBeInViewport()
+        at D:\AgentChaos\frontend\tests\workspace.spec.ts:226:9
+
+    attachment #1: video (video/webm) ──────────────────────────────────────────────────────────────
+    ..\.local\playwright-results\workspace-waiting-input-an-7fb20-ntrols-and-fit-the-viewport\video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ..\.local\playwright-results\workspace-waiting-input-an-7fb20-ntrols-and-fit-the-viewport\error-context.md
+
+  1 failed
+    tests\workspace.spec.ts:196:1 › waiting input and cancel dialogs cover background controls and fit the viewport 

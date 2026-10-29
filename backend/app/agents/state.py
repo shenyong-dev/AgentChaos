@@ -119,6 +119,32 @@ def times_from_quote(quote: str):
     return result
 
 
+def times_from_source(quote: str, current: str):
+    """Resolve a short quote's daypart only from its explicit local time range.
+
+    “下午两点到三点” supports 15:00 for “三点”, not 03:00. A separate
+    afternoon elsewhere in the message cannot silently qualify an unrelated time.
+    """
+    token = re.compile(
+        r"(上午|下午|晚上|早上|中午)?([0-9一二三四五六七八九十两]{1,3})"
+        r"(?::(\d{2})|点([0-9一二三四五六七八九十两]{0,3})(?:分)?)"
+    )
+    quotes = list(re.finditer(re.escape(quote), current))
+    resolved, previous, previous_part = set(), None, None
+    for match in token.finditer(current):
+        part = match.group(1)
+        if (
+            not part
+            and previous is not None
+            and re.fullmatch(r"\s*(?:到|至|—|–|-|~|～)\s*", current[previous.end() : match.start()])
+        ):
+            part = previous_part
+        if any(q.start() <= match.start(2) and match.end() <= q.end() for q in quotes):
+            resolved.update(times_from_quote((part or "") + current[match.start(2) : match.end()]))
+        previous, previous_part = match, part
+    return resolved or times_from_quote(quote)
+
+
 def patch_fields(state: AgentState, patch: FieldPatch):
     fields = {key: dict(value) for key, value in state.get("fields", {}).items()}
     current = state["last_user_text"]
@@ -149,13 +175,14 @@ def patch_fields(state: AgentState, patch: FieldPatch):
         if key == "date":
             valid = value in dates_from_quote(quote, reference)
         elif key in ("start_time", "end_time"):
-            valid = value in times_from_quote(quote)
+            valid = value in times_from_source(quote, current)
         elif key == "attendees":
             nums = re.findall(r"[0-9一二三四五六七八九十两]+", quote)
             standalone_number = quote.strip() == current.strip() and re.fullmatch(
                 r"[0-9一二三四五六七八九十两]+", quote.strip()
             )
-            valid = ("人" in quote or standalone_number) and any(
+            participant_unit = re.search(r"(?:位|名)(?:参会者|与会者|参与者)", quote)
+            valid = ("人" in quote or participant_unit or standalone_number) and any(
                 number(item) == value for item in nums
             )
         elif key == "duration_minutes":

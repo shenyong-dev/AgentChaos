@@ -1,0 +1,38 @@
+E501 Line too long (142 > 100)
+  --> backend\app\cases\service.py:67:101
+   |
+65 | …(),
+66 | …
+67 | … file, authored risk templates and schema. No dataset queries in prompt construction.",
+   |                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+68 | …
+   |
+
+E731 Do not assign a `lambda` expression, use a `def`
+   --> backend\app\cases\service.py:257:17
+    |
+255 |                       },
+256 |                   )
+257 | /                 record = lambda stage, value: self._append(
+258 | |                     owner, batch, "casegen_call", value, {"phase": stage}
+259 | |                 )
+    | |_________________^
+260 |                   budget = GenerationBudget(self.redis, self.settings, batch, record)
+261 |                   if self.gateway_factory:
+    |
+help: Rewrite `record` as a `def`
+    |
+256 |                 )
+    -                 record = lambda stage, value: self._append(
+    -                     owner, batch, "casegen_call", value, {"phase": stage}
+    -                 )
+257 +                 def record(stage, value):
+258 +                     return self._append(
+259 +                                     owner, batch, "casegen_call", value, {"phase": stage}
+260 +                                 )
+261 |                 budget = GenerationBudget(self.redis, self.settings, batch, record)
+    |
+note: This is an unsafe fix and may change runtime behavior
+
+Found 4 errors (2 fixed, 2 remaining).
+1 unsafe fix available with `--fix --unsafe-fixes`.

@@ -1,0 +1,1179 @@
+{
+  "checked_at": "2026-10-28T07:21:15.858152+00:00",
+  "version_id": 11,
+  "manifest": {
+    "baseline": "V0",
+    "provider": "DeepSeek",
+    "role": "agent",
+    "base_url": "https://api.deepseek.com",
+    "model_requested": "deepseek-flash",
+    "thinking": "disabled",
+    "max_output_tokens": 1024,
+    "sampling": "not asserted; temperature/top_p omitted",
+    "sdk_versions": {
+      "langgraph": "1.2.17",
+      "langchain-core": "1.7.0",
+      "langchain-deepseek": "1.1.1",
+      "langgraph-checkpoint-redis": "0.5.2"
+    },
+    "protocol_probe": {
+      "checked_at": "2026-10-25T13:58:00.823481+00:00",
+      "tool_arguments": "passed",
+      "tool_call_id_roundtrip": "passed",
+      "usage_returned": "passed",
+      "stream_content_matches_final": "passed"
+    },
+    "response_model": [
+      "deepseek-flash",
+      "deepseek-flash"
+    ],
+    "underlying_version": "not independently observable; official mapping recorded in pricing",
+    "prompt_hash": "0db5754ab85de312ce138eeb814294e25f8bdc6b2797ba85b80b70aec147b025",
+    "sources": {
+      "backend/app/__init__.py": "2149991a92002abcc24abd0f94bdae85fcf27fe941295aefa75659a77c7f37c6",
+      "backend/app/agents/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "backend/app/agents/budget.py": "a429e3ee7e34a07e8ba53f0d9135fde17c8a68fce4508c2faabcecc3670f5336",
+      "backend/app/agents/checkpoints.py": "217c4e8037103e21d423fec1a89e81bfc4a028a65688efc5ecff9be1b33fe0d5",
+      "backend/app/agents/context.py": "d866cc8ba42ab9a227ab2a188a168d031346bc8f0f420d4686a9dd6d056be785",
+      "backend/app/agents/errors.py": "778fd7e951880cc1fad82dd103ffae8922d7139a2cb77be4dceb5ee2697d87d8",
+      "backend/app/agents/gateway.py": "45d6e72d316df05959ab2e4ce7f40c4ff17ab52af7709ec740af71cf9d79747f",
+      "backend/app/agents/graph.py": "a177d25433eddb5ca88bbf40a206c17fd02a6545bf597b1b8c52cf7fd4c76fab",
+      "backend/app/agents/registry.py": "c11a4c4c25c2c4d16bcd8601822c8c0c5a80f53fa68e14502efbe764dd035730",
+      "backend/app/agents/retrieval.py": "8d15efbc8d4af56feb067e7fa2f069830e0badbc603de41f0d315ec83dbf2d66",
+      "backend/app/agents/runtime.py": "174d95d12a5f3f262e82a4630a32d6f83b6c03dddcc13fb0c12bd5d95bd71d24",
+      "backend/app/agents/state.py": "b5b32f19385129cba7385a2c7dcc27495df0636114256e19b2a2886cbbef2730",
+      "backend/app/agents/versions.py": "e72109d559086ce8e2c5538e156ba4dbe117937180a2a61aa5b95d3182629a4d",
+      "backend/app/api/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "backend/app/api/agent.py": "806131ae95cdc327d7fc411ab01dbb508663e778c8325a31a14dc4be5b8c3086",
+      "backend/app/api/booking.py": "f81d28ebc5f9595d6aea1a8d3c25343ced3ede0a610741ae4e93b16109ac8065",
+      "backend/app/api/evaluation.py": "e56b56ad40adb753bc9c44eea9310fe8e2f24de793a15ce18a06d3676bcc1188",
+      "backend/app/api/evidence.py": "bceb5fe034c86180cd3c53f3b6df768b330ab842d0bd8e5c4d32b6c54a08bd1e",
+      "backend/app/api/faults.py": "cce6f6f0a256dba5dda3553c96bedb47e227bc75e18ea9a9a36213869a085996",
+      "backend/app/api/metamorphic.py": "260007ea335b6bbe6a723453eeae397048071c30a38674156fe1b76aac1d6155",
+      "backend/app/api/routes.py": "4b814d6bb2b7accc9dc6194d9c7c9dd8f7bba9d80827da415b2c6ddc7a306787",
+      "backend/app/api/runs.py": "a78b0d033e8b6e946d3072a5f57bee9e1ec7121dc97e4a8024fba44b5fd79b06",
+      "backend/app/core/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "backend/app/core/config.py": "6f119cf0476edf8f8f68f73185506ebb60c3232b0b59118d2c512355498edcad",
+      "backend/app/core/model_probe.py": "6fcd7876562a4b9b02599dc6fe1d073b77a5bf4b5bc035bd53d3af39fab19220",
+      "backend/app/core/passwords.py": "fdb2d0b0c29e04e5f79c37fa3c057858f6a8a2e230ddfc846d21f51226c11514",
+      "backend/app/db/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "backend/app/db/engine.py": "e64288826d29bf59d0d399d261ac7d18e174bd19c61d646fcaf78269f3e1196b",
+      "backend/app/db/fixtures.py": "67fffd973591006328271fa0428f0f96f0b888855bdb9c1b5ac3b9bc0f7c7a62",
+      "backend/app/db/seeds.py": "9a3a0029f32aebad4e4b22997cc402681838562d535862603b46e947f73c4d58",
+      "backend/app/evaluation/__init__.py": "c6b52f473229bc9a56fe07dd05085f1ef74c5193bda5022f3edb29ee81f8570f",
+      "backend/app/evaluation/engine.py": "2fda812429cf6a8af51c6b622d777c7253c7b2a8d89f3673e1bcd5b3f8a5861c",
+      "backend/app/evaluation/service.py": "2e19eb1f2f7e938f7462dd32d11feb0eee69780093d11ef5146afb01f6d1ba72",
+      "backend/app/evidence/__init__.py": "9d43fcc74282d146f25bc6d219cff2cd1e23415b16030910b6be0bf12be8abf5",
+      "backend/app/evidence/reader.py": "08e78ed8d7c823e5c17d7d090467faeaa108920dc7dfd87b3b928714dcaf25ef",
+      "backend/app/evidence/recorder.py": "fab4fecf859fb45e4e520d0eb204b0c84d25ee25d8476fbc4a86f8881e68b2ba",
+      "backend/app/evidence/streaming.py": "7852886b68e841449d50d7af4dbbe0597489dd46d8ba4625aa30ef2251674228",
+      "backend/app/executors/__init__.py": "358ec8064bf56aa1242b96a3eeee0340b0778e3d5902eaa1b94f967e5d3651b7",
+      "backend/app/executors/budget.py": "2ae721659776f12a0177175550c4d118c725b22b1bc8350716cb0dba6a091a80",
+      "backend/app/executors/control.py": "593f73240c52640cc4669877c0592fa5d6711e4a5c628c7732ff42a450277e3b",
+      "backend/app/executors/dispatch.py": "8eb12eb626a8ae6423b67614a6705e078a6701b6de18d13ed30cb3348d3f55b1",
+      "backend/app/executors/runner.py": "baf0a49d5b18692f58ea4198c60bd8a8ae64cba291c7859c3a6c9b73c2c8ba88",
+      "backend/app/executors/service.py": "ed50b9fd66e59da2b486d85b8f95fba57d5f0e99c3a574aa4aee24f7c6c08e4a",
+      "backend/app/faults/__init__.py": "cbe16aa62a207bf300faf18360ec211d08c56466e074048ff59cb5999fdeacc5",
+      "backend/app/faults/engine.py": "968c61b629e4d60dac5ccb5423761352bab665210b8b06815ba6b37ee6283986",
+      "backend/app/faults/service.py": "f12e2d2b6f1ac0daff93b7452dc77b518304e301caf0a4fdd9e30bc7eb1fce63",
+      "backend/app/main.py": "9ee7eb6474d1915de44b04a6614a0ff6ed314b53da1b23d2a515a3cdd6fcec0f",
+      "backend/app/metamorphic/__init__.py": "47e2e3ac393570474369e5cc808c71c68f0ec4964bbd42c18a8ff578d3a7600c",
+      "backend/app/metamorphic/catalog.py": "fa6094fa19182935680d9ddfd6df246096a043756952cd42dd57faecd4359ea0",
+      "backend/app/metamorphic/engine.py": "69cbcda25c5eabaac13e3e0667696412851c301895072eaa9350d5917c21be7f",
+      "backend/app/metamorphic/registration.py": "d7fc985a188cc33716faa9ef63efd2816e93711fc7338d5047eafc8aa6bcbc0f",
+      "backend/app/metamorphic/service.py": "676d9e95cd1249148fb4919de4423bab80bf3f10ad693625eb0c02172f4df832",
+      "backend/app/models/__init__.py": "cbc22b2b4716a7c52caf2fbe5d5eae840acb230f25c4a6aea799e46b4ad777f1",
+      "backend/app/models/base.py": "1b6806e26cd4841dcd459c62837d398cade117a1d45e4fe324bef5a18bd7285d",
+      "backend/app/models/booking.py": "08f4188c28703b9c2f717a0c1b2eb142b4d58de9136d62e84f5b88c747f31ba6",
+      "backend/app/models/platform.py": "269a0aae0934a2516ded7bc2de19a69e278f9da75fabcd5c462e5a255cec550b",
+      "backend/app/schemas/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "backend/app/schemas/agent.py": "bc77d331d4dec24e9d2bf08606b2e1f9f572f1ecaff182db44744d32e2a5ee69",
+      "backend/app/schemas/assertions.py": "3544bbf5ddff56bcd0d1c9b4c2666b0902c40eb5f5e49bfe629749b1e478a66c",
+      "backend/app/schemas/booking.py": "3ef901757ef1cef21182cc67c1df1f701cec68270acdfa02ab463a666e755756",
+      "backend/app/schemas/common.py": "6b046828032c3c0b7e97d340890c056b7706c93a08478ca61bc7020e7026319f",
+      "backend/app/schemas/contracts.py": "a5563cbf0b89c9567af04a66ded7304380bf58683a44b5c99929ad8df9a29d34",
+      "backend/app/schemas/events.py": "14936189824b449cd9768fd67f24cd6457b1b3c32ee423085760071ed5a14ef0",
+      "backend/app/schemas/faults.py": "9a5a3c721b03c9c7a5dbd2cfbf229379ccda05dcfa7b7bebc5723e281285ef9c",
+      "backend/app/schemas/health.py": "c422a5d705a293f75b77ff35ef104949f0296230d9373ce2a13dc9b3459d2114",
+      "backend/app/schemas/metamorphic.py": "1d3c511ccd981e9cfa3fe31774963ea884ffbab03da4441337c13534e5bd6fa9",
+      "backend/app/schemas/runs.py": "87966db2168532fd116af7ee13c12cac32c1b8449493c8e263be26f1049a702c",
+      "backend/app/services/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "backend/app/services/booking.py": "413d6c6c995f660121300b394facef56446ccf7701648d23b14229bf4c120f81",
+      "backend/app/services/health.py": "9656abb3681f4b7a162cbf15e735eb6091024af11950707e9604d37a86f01d28",
+      "backend/app/tools/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "backend/app/tools/booking.py": "5eef8271563c17ac245dbaa798828374f105b412d30ae5065d7caa9e1f4e2eac",
+      "backend/app/workers/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "backend/app/workers/celery_app.py": "e24e8df902429d3cb5077d68fc13f1feaa5b7f0988e24ae09688edad09b5d9c7",
+      "backend/alembic/versions/20261025_0001_t02_initial_sixteen_table_schema.py": "d1161f0001f5d4ab9660898ff05ef5e632ecc4396aeffe322b1350d67f7c18ea",
+      "backend/alembic/versions/20261025_0002_t04_draft_session.py": "4427509597810f4db3519faa7dd6bbddf294365d575a65d26648bcac1b12274c",
+      "backend/alembic/versions/20261026_0003_t06_run_event_order.py": "1ada1734e97a62a3bd8909716577ab9b8c3480426c5398e26665b45efe524fc2",
+      "backend/app/agents/prompt.txt": "0db5754ab85de312ce138eeb814294e25f8bdc6b2797ba85b80b70aec147b025",
+      "backend/uv.lock": "1a247f9c27e14143ce9c58f4420e5b26097a7ae478f28b59a4f7c0ef52b8a6d6"
+    },
+    "pricing": {
+      "model": "deepseek-flash",
+      "verified_on": "2026-10-25",
+      "documented_version": "DeepSeek-V4.1-Flash-1017",
+      "source": "https://api-docs.deepseek.com/quick_start/pricing/",
+      "currency": "USD",
+      "peak_input_miss_per_million": "0.30",
+      "peak_output_per_million": "1.20",
+      "method": "peak-rate upper estimate, all input charged at cache-miss rate; not a bill"
+    },
+    "retrieval": {
+      "version": "rules-bm25-v2",
+      "nonpositive_idf": "log1p((N-df+0.5)/(df+0.5)); positive IDF unchanged",
+      "jieba": "0.42.1",
+      "rank_bm25": "0.2.2",
+      "k1": 1.5,
+      "b": 0.75,
+      "epsilon": 0.25,
+      "top_k": 3,
+      "minimum_score": 0.01,
+      "chunking": "heading-plus-bullet-v1",
+      "dictionary_sha256": "7197c3211ddd98962b036cdf40324d1ea2bfaa12bd028e68faa70111a88e12a8",
+      "user_dictionary_sha256": "b6776ac5c2c73792d6a09bfb6c01618f390a7f7ae1c245bbe811e3e3011229e2",
+      "terms_sha256": "93a9923c77320f816aeec61a0dcf996e56a8620d04b624516504054b759b528d",
+      "documents": [
+        {
+          "id": 1,
+          "document_key": "booking-rules",
+          "revision": 1,
+          "title": "场地预约实验规则 v1",
+          "source_type": "experiment",
+          "source_ref": "knowledge/booking-rules-v1.md",
+          "valid_from": "2026-01-01T00:00:00+00:00",
+          "valid_to": null,
+          "applicability": {
+            "scenario": "experimental_booking",
+            "rule_version": "v1"
+          },
+          "content_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3"
+        }
+      ],
+      "chunks": [
+        {
+          "chunk_id": "booking-rules:r1:a6a1d61710a23b82",
+          "document_id": 1,
+          "source_ref": "knowledge/booking-rules-v1.md",
+          "document_revision": 1,
+          "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+          "chunk_hash": "a6a1d61710a23b8238708459a7e2ec039e1f3c4b37a79582a042301d8a627cb6"
+        },
+        {
+          "chunk_id": "booking-rules:r1:b4bf4c09e6c75fb1",
+          "document_id": 1,
+          "source_ref": "knowledge/booking-rules-v1.md",
+          "document_revision": 1,
+          "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+          "chunk_hash": "b4bf4c09e6c75fb10f5553e650dbf9febe90096086aac9c97e90b9c4b32fc6dd"
+        },
+        {
+          "chunk_id": "booking-rules:r1:f1ada574c0aaff7c",
+          "document_id": 1,
+          "source_ref": "knowledge/booking-rules-v1.md",
+          "document_revision": 1,
+          "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+          "chunk_hash": "f1ada574c0aaff7cf3398973c5d0f285cf99b9e319a667252a2ecab9074de3a4"
+        },
+        {
+          "chunk_id": "booking-rules:r1:082d1805c712d4c3",
+          "document_id": 1,
+          "source_ref": "knowledge/booking-rules-v1.md",
+          "document_revision": 1,
+          "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+          "chunk_hash": "082d1805c712d4c300059dafc892c0732083b72a970346f087aa3e134f303d2f"
+        },
+        {
+          "chunk_id": "booking-rules:r1:33c2956d0aaa6e9f",
+          "document_id": 1,
+          "source_ref": "knowledge/booking-rules-v1.md",
+          "document_revision": 1,
+          "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+          "chunk_hash": "33c2956d0aaa6e9f9a294cd1bc3889a3e6a4f8e2c57c6e825e471f692391cdef"
+        },
+        {
+          "chunk_id": "booking-rules:r1:3acf254d304fb8d6",
+          "document_id": 1,
+          "source_ref": "knowledge/booking-rules-v1.md",
+          "document_revision": 1,
+          "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+          "chunk_hash": "3acf254d304fb8d603551f8f83ec6b40730618e1c83dbcf8ca8dfdceaa66cdb2"
+        },
+        {
+          "chunk_id": "booking-rules:r1:6244fec99261083b",
+          "document_id": 1,
+          "source_ref": "knowledge/booking-rules-v1.md",
+          "document_revision": 1,
+          "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+          "chunk_hash": "6244fec99261083b40684bed190abf59920594aa1a6af687e4ea17ab0fd69e35"
+        },
+        {
+          "chunk_id": "booking-rules:r1:245245278a2b83a9",
+          "document_id": 1,
+          "source_ref": "knowledge/booking-rules-v1.md",
+          "document_revision": 1,
+          "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+          "chunk_hash": "245245278a2b83a94c7b1892d08353aff39898a9c11e81ce13b66380bd7b2fdb"
+        },
+        {
+          "chunk_id": "booking-rules:r1:d90836b0c00ba2ef",
+          "document_id": 1,
+          "source_ref": "knowledge/booking-rules-v1.md",
+          "document_revision": 1,
+          "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+          "chunk_hash": "d90836b0c00ba2ef329e89ea4a72b6666007de0e0cc87720a203075621f7d3d4"
+        },
+        {
+          "chunk_id": "booking-rules:r1:6ccca76417fbd8b9",
+          "document_id": 1,
+          "source_ref": "knowledge/booking-rules-v1.md",
+          "document_revision": 1,
+          "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+          "chunk_hash": "6ccca76417fbd8b96844119345dce233708a6f56fd84d7817a3995a53f2f74d2"
+        },
+        {
+          "chunk_id": "booking-rules:r1:d88c2ea7f464bc49",
+          "document_id": 1,
+          "source_ref": "knowledge/booking-rules-v1.md",
+          "document_revision": 1,
+          "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+          "chunk_hash": "d88c2ea7f464bc493ea1b866e96bafc11e55081b0b776273b65e2f5301a79425"
+        },
+        {
+          "chunk_id": "booking-rules:r1:6a03011d4e4ba2e8",
+          "document_id": 1,
+          "source_ref": "knowledge/booking-rules-v1.md",
+          "document_revision": 1,
+          "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+          "chunk_hash": "6a03011d4e4ba2e845d33e64b937b9dba8aade519fc6b3afd7269bfb45838bcf"
+        },
+        {
+          "chunk_id": "booking-rules:r1:67c5d1fb17190efb",
+          "document_id": 1,
+          "source_ref": "knowledge/booking-rules-v1.md",
+          "document_revision": 1,
+          "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+          "chunk_hash": "67c5d1fb17190efb520972f2056cc3c25f64f09d2e67e2a05fd4515d6c715e5c"
+        },
+        {
+          "chunk_id": "booking-rules:r1:edb26cf7def90d5d",
+          "document_id": 1,
+          "source_ref": "knowledge/booking-rules-v1.md",
+          "document_revision": 1,
+          "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+          "chunk_hash": "edb26cf7def90d5da44defb843dc498da5034751ed707a4f5bb910d205614c47"
+        },
+        {
+          "chunk_id": "booking-rules:r1:1a47efcce06dd4a6",
+          "document_id": 1,
+          "source_ref": "knowledge/booking-rules-v1.md",
+          "document_revision": 1,
+          "document_hash": "43b712acf1235a22d1e281d5fd9554a725aa2b430cf53bde4a533722f986f5a3",
+          "chunk_hash": "1a47efcce06dd4a630d2a438400d058270ade759d1378599d29d0aedcaedf426"
+        }
+      ],
+      "index_hash": "01595677995f6362558436aaf76c4b51a94e75ffb146ef99c5b2728c62f1689e"
+    },
+    "tools": {
+      "version": "booking-registry-v1",
+      "tools": {
+        "version": "1.0",
+        "tools": [
+          {
+            "name": "query_availability",
+            "version": "1.0",
+            "effect": "read",
+            "input_schema": {
+              "additionalProperties": false,
+              "properties": {
+                "start_at": {
+                  "format": "date-time",
+                  "title": "Start At",
+                  "type": "string"
+                },
+                "end_at": {
+                  "format": "date-time",
+                  "title": "End At",
+                  "type": "string"
+                },
+                "attendees": {
+                  "maximum": 2147483647,
+                  "minimum": 1,
+                  "title": "Attendees",
+                  "type": "integer"
+                },
+                "room_code": {
+                  "anyOf": [
+                    {
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,31}$",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Room Code"
+                }
+              },
+              "required": [
+                "start_at",
+                "end_at",
+                "attendees"
+              ],
+              "title": "AvailabilityQuery",
+              "type": "object"
+            },
+            "output_schema": {
+              "$defs": {
+                "AvailabilityView": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "rooms": {
+                      "items": {
+                        "$ref": "#/$defs/RoomView"
+                      },
+                      "title": "Rooms",
+                      "type": "array"
+                    },
+                    "start_at": {
+                      "format": "date-time",
+                      "title": "Start At",
+                      "type": "string"
+                    },
+                    "end_at": {
+                      "format": "date-time",
+                      "title": "End At",
+                      "type": "string"
+                    },
+                    "attendees": {
+                      "title": "Attendees",
+                      "type": "integer"
+                    },
+                    "truncated": {
+                      "default": false,
+                      "title": "Truncated",
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "rooms",
+                    "start_at",
+                    "end_at",
+                    "attendees"
+                  ],
+                  "title": "AvailabilityView",
+                  "type": "object"
+                },
+                "RoomView": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "room_code": {
+                      "title": "Room Code",
+                      "type": "string"
+                    },
+                    "capacity": {
+                      "title": "Capacity",
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "room_code",
+                    "capacity"
+                  ],
+                  "title": "RoomView",
+                  "type": "object"
+                }
+              },
+              "additionalProperties": false,
+              "properties": {
+                "status": {
+                  "default": "ok",
+                  "enum": [
+                    "ok",
+                    "not_found"
+                  ],
+                  "title": "Status",
+                  "type": "string"
+                },
+                "code": {
+                  "title": "Code",
+                  "type": "string"
+                },
+                "summary": {
+                  "title": "Summary",
+                  "type": "string"
+                },
+                "data": {
+                  "$ref": "#/$defs/AvailabilityView"
+                },
+                "request_key": {
+                  "anyOf": [
+                    {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Request Key"
+                },
+                "retryable": {
+                  "default": false,
+                  "title": "Retryable",
+                  "type": "boolean"
+                },
+                "commit_state": {
+                  "enum": [
+                    "not_applicable",
+                    "not_committed",
+                    "committed",
+                    "unknown"
+                  ],
+                  "title": "Commit State",
+                  "type": "string"
+                },
+                "evidence_refs": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "title": "Evidence Refs",
+                  "type": "array"
+                }
+              },
+              "required": [
+                "code",
+                "summary",
+                "data",
+                "commit_state"
+              ],
+              "title": "BookingToolResult[AvailabilityView]",
+              "type": "object"
+            },
+            "idempotent": false
+          },
+          {
+            "name": "preview_booking",
+            "version": "1.0",
+            "effect": "draft_write",
+            "input_schema": {
+              "additionalProperties": false,
+              "properties": {
+                "start_at": {
+                  "format": "date-time",
+                  "title": "Start At",
+                  "type": "string"
+                },
+                "end_at": {
+                  "format": "date-time",
+                  "title": "End At",
+                  "type": "string"
+                },
+                "attendees": {
+                  "maximum": 2147483647,
+                  "minimum": 1,
+                  "title": "Attendees",
+                  "type": "integer"
+                },
+                "room_code": {
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,31}$",
+                  "title": "Room Code",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "start_at",
+                "end_at",
+                "attendees",
+                "room_code"
+              ],
+              "title": "PreviewBooking",
+              "type": "object"
+            },
+            "output_schema": {
+              "$defs": {
+                "DraftView": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "draft_id": {
+                      "format": "uuid",
+                      "title": "Draft Id",
+                      "type": "string"
+                    },
+                    "draft_hash": {
+                      "pattern": "^[0-9a-f]{64}$",
+                      "title": "Draft Hash",
+                      "type": "string"
+                    },
+                    "suggested_idempotency_key": {
+                      "format": "uuid",
+                      "title": "Suggested Idempotency Key",
+                      "type": "string"
+                    },
+                    "room_code": {
+                      "title": "Room Code",
+                      "type": "string"
+                    },
+                    "start_at": {
+                      "format": "date-time",
+                      "title": "Start At",
+                      "type": "string"
+                    },
+                    "end_at": {
+                      "format": "date-time",
+                      "title": "End At",
+                      "type": "string"
+                    },
+                    "attendees": {
+                      "title": "Attendees",
+                      "type": "integer"
+                    },
+                    "status": {
+                      "enum": [
+                        "pending",
+                        "confirmed",
+                        "expired",
+                        "superseded",
+                        "rejected"
+                      ],
+                      "title": "Status",
+                      "type": "string"
+                    },
+                    "expires_at": {
+                      "format": "date-time",
+                      "title": "Expires At",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "draft_id",
+                    "draft_hash",
+                    "suggested_idempotency_key",
+                    "room_code",
+                    "start_at",
+                    "end_at",
+                    "attendees",
+                    "status",
+                    "expires_at"
+                  ],
+                  "title": "DraftView",
+                  "type": "object"
+                }
+              },
+              "additionalProperties": false,
+              "properties": {
+                "status": {
+                  "default": "ok",
+                  "enum": [
+                    "ok",
+                    "not_found"
+                  ],
+                  "title": "Status",
+                  "type": "string"
+                },
+                "code": {
+                  "title": "Code",
+                  "type": "string"
+                },
+                "summary": {
+                  "title": "Summary",
+                  "type": "string"
+                },
+                "data": {
+                  "$ref": "#/$defs/DraftView"
+                },
+                "request_key": {
+                  "anyOf": [
+                    {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Request Key"
+                },
+                "retryable": {
+                  "default": false,
+                  "title": "Retryable",
+                  "type": "boolean"
+                },
+                "commit_state": {
+                  "enum": [
+                    "not_applicable",
+                    "not_committed",
+                    "committed",
+                    "unknown"
+                  ],
+                  "title": "Commit State",
+                  "type": "string"
+                },
+                "evidence_refs": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "title": "Evidence Refs",
+                  "type": "array"
+                }
+              },
+              "required": [
+                "code",
+                "summary",
+                "data",
+                "commit_state"
+              ],
+              "title": "BookingToolResult[DraftView]",
+              "type": "object"
+            },
+            "idempotent": false
+          },
+          {
+            "name": "confirm_booking",
+            "version": "1.0",
+            "effect": "booking_write",
+            "input_schema": {
+              "additionalProperties": false,
+              "properties": {
+                "draft_id": {
+                  "format": "uuid",
+                  "title": "Draft Id",
+                  "type": "string"
+                },
+                "draft_hash": {
+                  "pattern": "^[0-9a-f]{64}$",
+                  "title": "Draft Hash",
+                  "type": "string"
+                },
+                "idempotency_key": {
+                  "format": "uuid",
+                  "title": "Idempotency Key",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "draft_id",
+                "draft_hash",
+                "idempotency_key"
+              ],
+              "title": "ConfirmBookingToolInput",
+              "type": "object"
+            },
+            "output_schema": {
+              "$defs": {
+                "BookingView": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "booking_id": {
+                      "format": "uuid",
+                      "title": "Booking Id",
+                      "type": "string"
+                    },
+                    "draft_id": {
+                      "format": "uuid",
+                      "title": "Draft Id",
+                      "type": "string"
+                    },
+                    "idempotency_key": {
+                      "format": "uuid",
+                      "title": "Idempotency Key",
+                      "type": "string"
+                    },
+                    "room_code": {
+                      "title": "Room Code",
+                      "type": "string"
+                    },
+                    "start_at": {
+                      "format": "date-time",
+                      "title": "Start At",
+                      "type": "string"
+                    },
+                    "end_at": {
+                      "format": "date-time",
+                      "title": "End At",
+                      "type": "string"
+                    },
+                    "attendees": {
+                      "title": "Attendees",
+                      "type": "integer"
+                    },
+                    "status": {
+                      "enum": [
+                        "confirmed",
+                        "cancelled"
+                      ],
+                      "title": "Status",
+                      "type": "string"
+                    },
+                    "created_at": {
+                      "format": "date-time",
+                      "title": "Created At",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "booking_id",
+                    "draft_id",
+                    "idempotency_key",
+                    "room_code",
+                    "start_at",
+                    "end_at",
+                    "attendees",
+                    "status",
+                    "created_at"
+                  ],
+                  "title": "BookingView",
+                  "type": "object"
+                }
+              },
+              "additionalProperties": false,
+              "properties": {
+                "status": {
+                  "default": "ok",
+                  "enum": [
+                    "ok",
+                    "not_found"
+                  ],
+                  "title": "Status",
+                  "type": "string"
+                },
+                "code": {
+                  "title": "Code",
+                  "type": "string"
+                },
+                "summary": {
+                  "title": "Summary",
+                  "type": "string"
+                },
+                "data": {
+                  "$ref": "#/$defs/BookingView"
+                },
+                "request_key": {
+                  "anyOf": [
+                    {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Request Key"
+                },
+                "retryable": {
+                  "default": false,
+                  "title": "Retryable",
+                  "type": "boolean"
+                },
+                "commit_state": {
+                  "enum": [
+                    "not_applicable",
+                    "not_committed",
+                    "committed",
+                    "unknown"
+                  ],
+                  "title": "Commit State",
+                  "type": "string"
+                },
+                "evidence_refs": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "title": "Evidence Refs",
+                  "type": "array"
+                }
+              },
+              "required": [
+                "code",
+                "summary",
+                "data",
+                "commit_state"
+              ],
+              "title": "BookingToolResult[BookingView]",
+              "type": "object"
+            },
+            "idempotent": true
+          },
+          {
+            "name": "lookup_booking_by_request",
+            "version": "1.0",
+            "effect": "read",
+            "input_schema": {
+              "type": "object",
+              "properties": {
+                "idempotency_key": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              },
+              "required": [
+                "idempotency_key"
+              ],
+              "additionalProperties": false
+            },
+            "output_schema": {
+              "$defs": {
+                "BookingView": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "booking_id": {
+                      "format": "uuid",
+                      "title": "Booking Id",
+                      "type": "string"
+                    },
+                    "draft_id": {
+                      "format": "uuid",
+                      "title": "Draft Id",
+                      "type": "string"
+                    },
+                    "idempotency_key": {
+                      "format": "uuid",
+                      "title": "Idempotency Key",
+                      "type": "string"
+                    },
+                    "room_code": {
+                      "title": "Room Code",
+                      "type": "string"
+                    },
+                    "start_at": {
+                      "format": "date-time",
+                      "title": "Start At",
+                      "type": "string"
+                    },
+                    "end_at": {
+                      "format": "date-time",
+                      "title": "End At",
+                      "type": "string"
+                    },
+                    "attendees": {
+                      "title": "Attendees",
+                      "type": "integer"
+                    },
+                    "status": {
+                      "enum": [
+                        "confirmed",
+                        "cancelled"
+                      ],
+                      "title": "Status",
+                      "type": "string"
+                    },
+                    "created_at": {
+                      "format": "date-time",
+                      "title": "Created At",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "booking_id",
+                    "draft_id",
+                    "idempotency_key",
+                    "room_code",
+                    "start_at",
+                    "end_at",
+                    "attendees",
+                    "status",
+                    "created_at"
+                  ],
+                  "title": "BookingView",
+                  "type": "object"
+                }
+              },
+              "additionalProperties": false,
+              "properties": {
+                "status": {
+                  "default": "ok",
+                  "enum": [
+                    "ok",
+                    "not_found"
+                  ],
+                  "title": "Status",
+                  "type": "string"
+                },
+                "code": {
+                  "title": "Code",
+                  "type": "string"
+                },
+                "summary": {
+                  "title": "Summary",
+                  "type": "string"
+                },
+                "data": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/$defs/BookingView"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "request_key": {
+                  "anyOf": [
+                    {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Request Key"
+                },
+                "retryable": {
+                  "default": false,
+                  "title": "Retryable",
+                  "type": "boolean"
+                },
+                "commit_state": {
+                  "enum": [
+                    "not_applicable",
+                    "not_committed",
+                    "committed",
+                    "unknown"
+                  ],
+                  "title": "Commit State",
+                  "type": "string"
+                },
+                "evidence_refs": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "title": "Evidence Refs",
+                  "type": "array"
+                }
+              },
+              "required": [
+                "code",
+                "summary",
+                "data",
+                "commit_state"
+              ],
+              "title": "BookingToolResult[Union[BookingView, NoneType]]",
+              "type": "object"
+            },
+            "idempotent": true
+          }
+        ],
+        "error_schema": {
+          "$defs": {
+            "ErrorBody": {
+              "properties": {
+                "code": {
+                  "title": "Code",
+                  "type": "string"
+                },
+                "message": {
+                  "title": "Message",
+                  "type": "string"
+                },
+                "details": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "title": "Details",
+                  "type": "array"
+                }
+              },
+              "required": [
+                "code",
+                "message"
+              ],
+              "title": "ErrorBody",
+              "type": "object"
+            }
+          },
+          "properties": {
+            "error": {
+              "$ref": "#/$defs/ErrorBody"
+            },
+            "request_id": {
+              "title": "Request Id",
+              "type": "string"
+            }
+          },
+          "required": [
+            "error",
+            "request_id"
+          ],
+          "title": "ErrorEnvelope",
+          "type": "object"
+        },
+        "trusted_context": [
+          "actor_key",
+          "scope_id",
+          "reference_clock",
+          "confirmed"
+        ],
+        "permission": "authenticated operator; confirmation requires explicit user action",
+        "implemented_limits": {
+          "actor_lock_wait_seconds": 3,
+          "innodb_lock_wait_seconds": 5,
+          "db_socket_seconds": 15,
+          "candidate_rooms": 50
+        },
+        "automatic_retries": 0,
+        "unknown_commit": "lookup original idempotency key; never replace key",
+        "adapter_limits_for_T04": {
+          "max_response_bytes": 16384,
+          "wall_timeout_and_confirmation_gate": "implemented in T04"
+        }
+      },
+      "state_tool": {
+        "additionalProperties": false,
+        "properties": {
+          "date": {
+            "anyOf": [
+              {
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "当地日期YYYY-MM-DD；相对日期按服务端参考时钟解析。",
+            "title": "Date"
+          },
+          "start_time": {
+            "anyOf": [
+              {
+                "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "当地钟表时间HH:MM，例如14:00；不含日期、秒或时区。",
+            "title": "Start Time"
+          },
+          "end_time": {
+            "anyOf": [
+              {
+                "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "当地钟表时间HH:MM，例如15:00；不含日期、秒或时区。",
+            "title": "End Time"
+          },
+          "duration_minutes": {
+            "anyOf": [
+              {
+                "maximum": 120,
+                "minimum": 30,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "仅当用户明确说时长时填写；已给起止时间就分别填写start_time和end_time。",
+            "title": "Duration Minutes"
+          },
+          "attendees": {
+            "anyOf": [
+              {
+                "maximum": 2147483647,
+                "minimum": 1,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Attendees"
+          },
+          "room_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Room Code"
+          },
+          "source_quotes": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "每个本次填写的字段都要有同名键，对应当前用户输入的原文片段；保留的旧字段不要重复填写。",
+            "title": "Source Quotes",
+            "type": "object"
+          },
+          "clear_fields": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 6,
+            "title": "Clear Fields",
+            "type": "array"
+          }
+        },
+        "title": "FieldPatch",
+        "type": "object"
+      },
+      "retrieval_tool": {
+        "additionalProperties": false,
+        "properties": {
+          "query": {
+            "maxLength": 1000,
+            "minLength": 1,
+            "title": "Query",
+            "type": "string"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "RuleQuery",
+        "type": "object"
+      },
+      "max_response_bytes": 16384,
+      "automatic_write_retries": 0
+    },
+    "context": {
+      "version": "structured-facts-v2",
+      "input_upper_tokens": 48000,
+      "estimator": "UTF-8 bytes plus message serialization; conservative token upper bound",
+      "selection": "complete human/tool blocks, newest first; never truncate one block",
+      "overflow": "reject before provider call; retain original history",
+      "external_data": "retrieval/tool/user text never grants identity or confirmation"
+    },
+    "validation_boundary": "protocol evidence here; dialogue outcomes recorded separately",
+    "config_hash": "80fe14134f54f16d51f61514a521708dea013bdd6193e9dffc8b41ce8d4a6842"
+  },
+  "relation_comparator": {
+    "version": "T10-v1-e8fca92454a835800645",
+    "source_hash": "e8fca92454a83580064550ce635068cbea138910a0d5810ae89953794f020377",
+    "sources": {
+      "__init__.py": "47e2e3ac393570474369e5cc808c71c68f0ec4964bbd42c18a8ff578d3a7600c",
+      "catalog.py": "fa6094fa19182935680d9ddfd6df246096a043756952cd42dd57faecd4359ea0",
+      "engine.py": "69cbcda25c5eabaac13e3e0667696412851c301895072eaa9350d5917c21be7f",
+      "registration.py": "d7fc985a188cc33716faa9ef63efd2816e93711fc7338d5047eafc8aa6bcbc0f",
+      "service.py": "676d9e95cd1249148fb4919de4423bab80bf3f10ad693625eb0c02172f4df832",
+      "schema": "1d3c511ccd981e9cfa3fe31774963ea884ffbab03da4441337c13534e5bd6fa9"
+    }
+  },
+  "evidence": "docs/evidence/T10/real-d8b84a109a9a",
+  "team_acceptance": "pending",
+  "boundary": "12 related development relations, one human-reviewed family; no holdout score or new dual-Linux-worker experiment."
+}

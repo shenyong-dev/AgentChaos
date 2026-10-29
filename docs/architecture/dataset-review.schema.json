@@ -1,0 +1,56 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "request_id": {
+      "format": "uuid",
+      "title": "Request Id",
+      "type": "string"
+    },
+    "package_hash": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Package Hash",
+      "type": "string"
+    },
+    "critical_cases": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 20,
+      "minItems": 20,
+      "title": "Critical Cases",
+      "type": "array"
+    },
+    "reviewed_all_cases": {
+      "const": true,
+      "title": "Reviewed All Cases",
+      "type": "boolean"
+    },
+    "reviewed_critical_expectations": {
+      "const": true,
+      "title": "Reviewed Critical Expectations",
+      "type": "boolean"
+    },
+    "approved_experiment_scale": {
+      "const": true,
+      "title": "Approved Experiment Scale",
+      "type": "boolean"
+    },
+    "note": {
+      "maxLength": 4000,
+      "minLength": 10,
+      "title": "Note",
+      "type": "string"
+    }
+  },
+  "required": [
+    "request_id",
+    "package_hash",
+    "critical_cases",
+    "reviewed_all_cases",
+    "reviewed_critical_expectations",
+    "approved_experiment_scale",
+    "note"
+  ],
+  "title": "DatasetReview",
+  "type": "object"
+}

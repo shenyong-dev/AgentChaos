@@ -321,8 +321,19 @@ class Defect(Row, Base):
 
 class Artifact(Row, Base):
     __tablename__ = "ac_artifacts"
-    __table_args__ = table_args(CheckConstraint("size_bytes >= 0", name="ck_artifact_size"))
-    run_id: Mapped[int] = mapped_column(BIGINT(unsigned=True), ForeignKey("ac_test_runs.id"))
+    __table_args__ = table_args(
+        CheckConstraint("size_bytes >= 0", name="ck_artifact_size"),
+        CheckConstraint(
+            "(run_id IS NOT NULL AND owner_id IS NULL) OR "
+            "(run_id IS NULL AND owner_id IS NOT NULL AND kind IN "
+            "('casegen_request','casegen_result','casegen_call','case_review',"
+            "'judge_request','judge_result','judge_call','judge_label','judge_review','dataset_manifest'))",
+            name="ck_artifact_owner",
+        ),
+        Index("ix_artifact_owner", "owner_id", "id"),
+    )
+    run_id: Mapped[int | None] = mapped_column(BIGINT(unsigned=True), ForeignKey("ac_test_runs.id"))
+    owner_id: Mapped[int | None] = mapped_column(BIGINT(unsigned=True), ForeignKey("ac_users.id"))
     kind: Mapped[str] = mapped_column(key_string())
     relative_path: Mapped[str] = mapped_column(String(512))
     sha256: Mapped[str] = mapped_column(key_string())

@@ -1,0 +1,82 @@
+
+Running 7 tests using 1 worker
+
+(node:2512) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 tests\environment.spec.ts:7:1 › real services show infrastructure and the configured model observation status (801ms)
+  ok 2 tests\environment.spec.ts:37:1 › mobile view fits and refresh makes another real health request (568ms)
+  ok 3 tests\environment.spec.ts:51:1 › a simulated network failure shows an error and no fake health result (434ms)
+  ok 4 tests\evidence.spec.ts:5:1 › SSE parser keeps chunk boundaries, multiline data and ignores partial frames (2ms)
+  ok 5 tests\evidence.spec.ts:14:1 › empty evidence page has no invented run and handles invalid identifiers (437ms)
+(node:40380) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  6 tests\reports.spec.ts:119:1 › leaving a review preview requires fresh input and never writes automatically (5.7s)
+(node:23996) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  7 tests\reports.spec.ts:148:1 › expired foreign and unfinished boundaries plus linked execution stay read-only (5.6s)
+
+
+  1) tests\reports.spec.ts:119:1 › leaving a review preview requires fresh input and never writes automatically 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: locator('.report-summary')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" locator('.report-summary') with timeout 5000ms
+      - waiting for locator('.report-summary')
+
+
+      16 |   await page.getByRole('textbox', { name: '工作区密码', exact: true }).fill(password)
+      17 |   await page.getByRole('button', { name: '进入工作区', exact: true }).click()
+    > 18 |   await expect(page.locator('.report-summary')).toBeVisible()
+         |                                                 ^
+      19 |   await expect(page.locator('.workspace-loading')).toHaveCount(0)
+      20 | }
+      21 | async function selectRun(page: import('@playwright/test').Page, name: string, run: string) {
+        at login (D:\AgentChaos\frontend\tests\reports.spec.ts:18:49)
+        at D:\AgentChaos\frontend\tests\reports.spec.ts:120:3
+
+    attachment #1: video (video/webm) ──────────────────────────────────────────────────────────────
+    ..\docs\evidence\T15\frontend-redesign\regression\playwright-results\reports-leaving-a-review-p-beb05--never-writes-automatically\video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ..\docs\evidence\T15\frontend-redesign\regression\playwright-results\reports-leaving-a-review-p-beb05--never-writes-automatically\error-context.md
+
+  2) tests\reports.spec.ts:148:1 › expired foreign and unfinished boundaries plus linked execution stay read-only 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: locator('.report-summary')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" locator('.report-summary') with timeout 5000ms
+      - waiting for locator('.report-summary')
+
+
+      16 |   await page.getByRole('textbox', { name: '工作区密码', exact: true }).fill(password)
+      17 |   await page.getByRole('button', { name: '进入工作区', exact: true }).click()
+    > 18 |   await expect(page.locator('.report-summary')).toBeVisible()
+         |                                                 ^
+      19 |   await expect(page.locator('.workspace-loading')).toHaveCount(0)
+      20 | }
+      21 | async function selectRun(page: import('@playwright/test').Page, name: string, run: string) {
+        at login (D:\AgentChaos\frontend\tests\reports.spec.ts:18:49)
+        at D:\AgentChaos\frontend\tests\reports.spec.ts:149:3
+
+    attachment #1: video (video/webm) ──────────────────────────────────────────────────────────────
+    ..\docs\evidence\T15\frontend-redesign\regression\playwright-results\reports-expired-foreign-an-9fbd5-ed-execution-stay-read-only\video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ..\docs\evidence\T15\frontend-redesign\regression\playwright-results\reports-expired-foreign-an-9fbd5-ed-execution-stay-read-only\error-context.md
+
+  2 failed
+    tests\reports.spec.ts:119:1 › leaving a review preview requires fresh input and never writes automatically 
+    tests\reports.spec.ts:148:1 › expired foreign and unfinished boundaries plus linked execution stay read-only 
+  5 passed (15.6s)

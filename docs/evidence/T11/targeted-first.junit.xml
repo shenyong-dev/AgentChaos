@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="8" time="8.862" timestamp="2026-10-28T19:04:04.200715+08:00" hostname="深拥"><testcase classname="tests.test_case_generation" name="test_proposals_cannot_import_approval_identity_partition_or_arbitrary_assertions" time="0.002" /><testcase classname="tests.test_case_generation" name="test_valid_json_can_have_wrong_expected_and_is_not_semantically_approved" time="0.013" /><testcase classname="tests.test_case_generation" name="test_generation_drafts_idempotency_duplicate_order_and_role_bound_review" time="4.531"><failure message="AssertionError: assert 403 == 200&#10; +  where 403 = &lt;Response [403 Forbidden]&gt;.status_code&#10; +    where &lt;Response [403 Forbidden]&gt; = get('/api/v1/case-generation/ce811da9-1084-4838-97d9-c81aadcc375d', auth=('demo_reviewer', 'synthetic-password-only-for-schema-tests'))&#10; +      where get = &lt;starlette.testclient.TestClient object at 0x0000021558E2E6C0&gt;.get">lab = (Engine(mysql+pymysql://root:***@127.0.0.1:3306/agentchaos_t11_verify_264e161585c1?charset=utf8mb4), &lt;redis.client.Red...espace='ac:t07', executor_lease_seconds=45, sse_max_seconds=30, sse_send_timeout_seconds=5.0, sse_max_backlog=1000), 3)
+
+    def test_generation_drafts_idempotency_duplicate_order_and_role_bound_review(lab):
+        svc, gateway = service(lab, [{"candidates": [proposal(), proposal("capacity")]}])
+        req = GenerateCandidates(request_id=uuid4(), profiles=["normal", "capacity"])
+        first = svc.generate(1, req)
+        assert first["status"] == "completed" and first["metrics"]["valid_before_review"] == 2
+        assert all(c["case_revisions"][0]["status"] == "draft" for c in first["candidates"])
+        assert svc.generate(1, req) == first and len(gateway.calls) == 1
+        repeated, _ = service(lab, [{"candidates": [proposal(), proposal("capacity")]}])
+        second = repeated.generate(
+            1, GenerateCandidates(request_id=uuid4(), profiles=["normal", "capacity"])
+        )
+        assert second["metrics"]["counts"]["duplicate"] == 2
+        normal = first["candidates"][0]
+        approve = decision(normal)
+        with pytest.raises(AgentError) as err:
+            svc.review(1, normal["id"], approve)
+        assert err.value.status_code == 403
+        receipt = svc.review(2, normal["id"], approve)
+        assert receipt["approved_case_revision_id"] and receipt["reviewer_id"] == 2
+        assert svc.review(2, normal["id"], approve) == receipt
+        with pytest.raises(AgentError):
+            svc.review(2, normal["id"], decision(normal, "reject"))
+        duplicate = second["candidates"][0]
+        with pytest.raises(AgentError):
+            repeated.review(2, duplicate["id"], decision(duplicate))
+        rejected = repeated.review(2, duplicate["id"], decision(duplicate, "reject"))
+        assert rejected["approved_case_revision_id"] is None
+        with Session(lab[0]) as session:
+            approved = session.get(TestCase, receipt["approved_case_revision_id"])
+            assert approved.review_status == "approved" and approved.revision == 2
+        app = create_app()
+        app.dependency_overrides[get_case_service] = lambda: svc
+        app.dependency_overrides[get_booking_service] = lambda: BookingService(lab[0])
+        with TestClient(app) as client:
+            path = "/api/v1/case-generation/" + first["generation_id"]
+            assert client.get(path).status_code == 401
+            assert client.get(path, auth=("demo_operator", TEST_PASSWORD)).status_code == 200
+            assert client.get(path, auth=("other_generator_operator", TEST_PASSWORD)).status_code == 404
+&gt;           assert client.get(path, auth=("demo_reviewer", TEST_PASSWORD)).status_code == 200
+E           AssertionError: assert 403 == 200
+E            +  where 403 = &lt;Response [403 Forbidden]&gt;.status_code
+E            +    where &lt;Response [403 Forbidden]&gt; = get('/api/v1/case-generation/ce811da9-1084-4838-97d9-c81aadcc375d', auth=('demo_reviewer', 'synthetic-password-only-for-schema-tests'))
+E            +      where get = &lt;starlette.testclient.TestClient object at 0x0000021558E2E6C0&gt;.get
+
+backend\tests\test_case_generation.py:150: AssertionError</failure></testcase><testcase classname="tests.test_case_generation" name="test_wrong_expected_requires_explicit_edit_new_revision_and_preserves_raw" time="0.077" /><testcase classname="tests.test_case_generation" name="test_format_repairs_are_finite_and_bad_schema_is_separate[first_error0]" time="0.062" /><testcase classname="tests.test_case_generation" name="test_format_repairs_are_finite_and_bad_schema_is_separate[first_error1]" time="0.049" /><testcase classname="tests.test_case_generation" name="test_format_repairs_are_finite_and_bad_schema_is_separate[first_error2]" time="0.045" /><testcase classname="tests.test_case_generation" name="test_budget_atomic_global_missing_fail_closed_and_repairs_count" time="0.655" /></testsuite></testsuites>

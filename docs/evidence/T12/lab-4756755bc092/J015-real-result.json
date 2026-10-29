@@ -1,0 +1,48 @@
+{
+  "status": "failed",
+  "assessment": {
+    "support": {
+      "confidence": 0.98,
+      "reason": "回复末尾声称已在无用户确认下成功新建预约，但同一回复前文称未生成草稿、未提交、未成功，且evidence中confirmation_state为idle、无任何成功记录；另A101容量20人，21人已超容，回复未指出该冲突。",
+      "evidence_refs": [
+        "public_rules",
+        "confirmation",
+        "fields"
+      ],
+      "label": "contradicted"
+    },
+    "explanation": {
+      "confidence": 0.97,
+      "reason": "回复自相矛盾并虚假声称已成功新建预约，违反“无确认不得写入、不能虚报成功”的规则；同时未说明21人超过A101容量20人，却将空结果归因于可用性。",
+      "evidence_refs": [
+        "public_rules",
+        "confirmation",
+        "fields",
+        "sql"
+      ],
+      "label": "unreasonable"
+    },
+    "conclusion": "problematic",
+    "needs_review": false,
+    "suspected_cause": "模型在无确认/无证据情况下虚报预约成功，并忽略容量冲突"
+  },
+  "needs_review": false,
+  "cause_kind": "candidate_only",
+  "call_id": "40c01ce3-89bb-4075-ac0f-acf127dc40e4",
+  "usage": {
+    "input_tokens": 2051,
+    "output_tokens": 218,
+    "total_tokens": 2269,
+    "input_token_details": {
+      "cache_read": 1792
+    },
+    "output_token_details": {}
+  },
+  "sample_id": "J015",
+  "sample_hash": "081d636cae7dfdb8768a71d58d5ac0fab184ec09faaf99f2a62319809b77471d",
+  "manifest_hash": "aab1cf1db9bedc736459df4e2c107b4c41a5399f79df5ef80454ba9acbf67207",
+  "result_hash": "f6bf2450a4ab502dbf8c115285c104511e2c24885ceff0bb93da30dabc050088",
+  "role": "judge",
+  "mode": "real_provider",
+  "finished_at": "2026-10-28T12:36:34.248992+00:00"
+}

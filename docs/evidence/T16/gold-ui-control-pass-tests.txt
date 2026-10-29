@@ -1,0 +1,28 @@
+
+Running 1 test using 1 worker
+
+(node:15532) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  1 tests\formal-gold-control.spec.ts:3:1 › explicit synthetic gold UI control requires three independent choices and never writes labels (2.1s)
+
+
+  1) tests\formal-gold-control.spec.ts:3:1 › explicit synthetic gold UI control requires three independent choices and never writes labels 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      34 |   for (const width of [1440, 390, 320]) {
+      35 |     await page.setViewportSize({ width, height: 900 })
+    > 36 |     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
+         |                                                                                           ^
+      37 |     if (process.env.AC_T16_UI_EVIDENCE) await page.screenshot({ path: `${process.env.AC_T16_UI_EVIDENCE}/synthetic-gold-${width}.png`, fullPage: true })
+      38 |   }
+      39 |   expect(writes).toEqual([])
+        at D:\AgentChaos\frontend\tests\formal-gold-control.spec.ts:36:91
+
+    Error Context: ..\docs\evidence\T16\gold-ui-control-pass\results\formal-gold-control-explic-d5c40-ces-and-never-writes-labels\error-context.md
+
+  1 failed
+    tests\formal-gold-control.spec.ts:3:1 › explicit synthetic gold UI control requires three independent choices and never writes labels 

@@ -36,7 +36,8 @@ def build_manifest(settings, retriever, registry):
     probe_path = PROJECT_ROOT / "docs/evidence/T04/model-probe.json"
     probe = json.loads(probe_path.read_text(encoding="utf-8")) if probe_path.exists() else {}
     manifest = {
-        "baseline": "V0",
+        "baseline": "V1" if settings.agent_tool_policy == "single_call_v1" else "V0",
+        "execution_policy": settings.agent_tool_policy,
         "provider": "DeepSeek",
         "role": "agent",
         "base_url": settings.deepseek_base_url,

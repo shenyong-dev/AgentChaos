@@ -1,0 +1,33 @@
+
+Running 1 test using 1 worker
+
+(node:34508) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  1 tests\workspace.spec.ts:196:1 › waiting input and cancel dialogs cover background controls and fit the viewport (351ms)
+
+
+  1) tests\workspace.spec.ts:196:1 › waiting input and cancel dialogs cover background controls and fit the viewport 
+
+    Error: Requires an existing waiting-input fault run; this check never creates or submits a run
+
+    expect(received).not.toBe(expected) // Object.is equality
+
+    Expected: not ""
+
+      204 |     if (state.manifest.fault_profile && state.executions.some((e: { status: string }) => e.status === 'waiting_input')) { run = item.run_id; break }
+      205 |   }
+    > 206 |   expect(run, 'Requires an existing waiting-input fault run; this check never creates or submits a run').not.toBe('')
+          |                                                                                                              ^
+      207 |   const before = await snapshot(page, run)
+      208 |   const mutations: string[] = []
+      209 |   page.on('request', request => { if (request.method() !== 'GET') mutations.push(request.method() + ' ' + new URL(request.url()).pathname) })
+        at D:\AgentChaos\frontend\tests\workspace.spec.ts:206:110
+
+    attachment #1: video (video/webm) ──────────────────────────────────────────────────────────────
+    ..\.local\playwright-results\workspace-waiting-input-an-7fb20-ntrols-and-fit-the-viewport\video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ..\.local\playwright-results\workspace-waiting-input-an-7fb20-ntrols-and-fit-the-viewport\error-context.md
+
+  1 failed
+    tests\workspace.spec.ts:196:1 › waiting input and cancel dialogs cover background controls and fit the viewport 

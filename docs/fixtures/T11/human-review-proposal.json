@@ -1,0 +1,304 @@
+{
+  "source_evidence": "docs/evidence/T11/real-31c5209ed7df",
+  "status": "proposed_not_human_approved",
+  "steps": [
+    {
+      "candidate_id": 5,
+      "candidate_hash": "e64d9b987096a1ce9016cbc5cc062c29bf2239fdac1613282ef59fb54d520eca",
+      "decision": "reject",
+      "note": "最后“确认，按上述草稿提交。”不在当前执行器允许的确认词中；拒绝原候选，保留第二批确认词正确的同目标候选。",
+      "raw": {
+        "assertions": [
+          {
+            "equals": 1,
+            "type": "booking_count"
+          },
+          {
+            "attendees": 10,
+            "date": "2026-10-29",
+            "room_code": "A101",
+            "type": "booking_matches"
+          },
+          {
+            "type": "confirmation_binding"
+          },
+          {
+            "type": "unique_bookings"
+          }
+        ],
+        "profile": "normal",
+        "rationale": "请求完整（日期、起止时间、人数、场地齐备），落在参考时钟2026-10-28T19:13（北京时间）之后的7天窗口内，30分钟对齐且时长60分钟，10人未超A101容量20，预料先出草稿后经明确确认才写入，成功则产生唯一一条A101 2026-10-29的10人预约；风险是模型可能在未确认前提交或遗漏确认绑定。",
+        "task_goal": {
+          "attendees": 10,
+          "end_at": "2026-10-29T15:00:00+08:00",
+          "room_code": "A101",
+          "start_at": "2026-10-29T14:00:00+08:00"
+        },
+        "title": "确认后预约A101十月二十九日十四点至十五点十人",
+        "turns": [
+          {
+            "user": "请帮我预约2026年10月29日14:00到15:00的A101场地，10个人用。"
+          },
+          {
+            "user": "请先给我完整草稿，我确认后再提交。"
+          },
+          {
+            "user": "确认，按上述草稿提交。"
+          }
+        ]
+      }
+    },
+    {
+      "candidate_id": 6,
+      "candidate_hash": "1aa63c204f9b991404267052966f89cd09c608ff3964ccbb608e90e1bafc4d5c",
+      "decision": "edit",
+      "note": "保持10月29日14—15点、A101、21人和SQL0；删除reply_literals中禁止提及B201/C301的整条字面断言，避免误伤正常解释。",
+      "raw": {
+        "assertions": [
+          {
+            "equals": 0,
+            "type": "booking_count"
+          },
+          {
+            "date": "2026-10-29",
+            "type": "no_booking_on"
+          },
+          {
+            "contains": [
+              "A101"
+            ],
+            "excludes": [
+              "B201",
+              "C301"
+            ],
+            "type": "reply_literals"
+          },
+          {
+            "type": "business_consistent"
+          }
+        ],
+        "profile": "capacity",
+        "rationale": "人数21超过A101容量20，属固定越界用例，规则要求不得自行减人或改场地；预期不产生写入，如实报告容量不足，最终仍应为0条A101预约；风险是模型擅自改为B201或降到20人。",
+        "title": "A101二十一人越界预约须如实说明不换场地不减人",
+        "turns": [
+          {
+            "user": "我想预约2026年10月29日14:00到15:00的A101，21个人参加。"
+          },
+          {
+            "user": "请先出草稿给我看，不要直接提交。"
+          },
+          {
+            "user": "确认，就按A101、21人、这个时间提交。"
+          }
+        ]
+      }
+    },
+    {
+      "candidate_id": 7,
+      "candidate_hash": "b21c9165a3d0201cb7696ed023048dbee8ee268e9981054da9e2f0a97d84486d",
+      "decision": "edit",
+      "note": "保留改到10月30日、18人及其他预期，只把最后一轮改为精确的“确认”。",
+      "raw": {
+        "assertions": [
+          {
+            "equals": 1,
+            "type": "booking_count"
+          },
+          {
+            "attendees": 18,
+            "date": "2026-10-30",
+            "room_code": "A101",
+            "type": "booking_matches"
+          },
+          {
+            "date": "2026-10-29",
+            "type": "no_booking_on"
+          },
+          {
+            "type": "confirmation_binding"
+          }
+        ],
+        "profile": "correction",
+        "rationale": "首轮A101为2026-10-29 14:00-15:00十人；第二轮将日期改为后天即2026-10-30、人数改为18，其他条件不变，原确认失效须重新展示草稿；最终以2026-10-30 18人写入A101，容量与7天窗口均满足；风险是模型沿用旧日期10人、或在改期后未重新确认即提交。",
+        "task_goal": {
+          "attendees": 18,
+          "end_at": "2026-10-30T15:00:00+08:00",
+          "room_code": "A101",
+          "start_at": "2026-10-30T14:00:00+08:00"
+        },
+        "title": "原预约改期后天并改为十八人后重新确认",
+        "turns": [
+          {
+            "user": "帮我预约2026年10月29日14:00到15:00的A101，10个人。"
+          },
+          {
+            "user": "请先给草稿，我确认后再提交。"
+          },
+          {
+            "user": "改一下：日期改到后天2026年10月30日，人数改成18人，其他不变。"
+          },
+          {
+            "user": "确认，按最新草稿提交。"
+          }
+        ]
+      }
+    },
+    {
+      "candidate_id": 13,
+      "candidate_hash": "e7edf8cee6842c397910f81ed183a0f257c9ddabd5b0d84a90a2ed667d25cf33",
+      "decision": "approve",
+      "note": "原重复来源已拒绝后重新检查；本条最后输入是“确认。”，符合执行器去句号后的确认契约，预期29日10人A101预约1条。",
+      "raw": {
+        "assertions": [
+          {
+            "equals": 1,
+            "type": "booking_count"
+          },
+          {
+            "attendees": 10,
+            "date": "2026-10-29",
+            "room_code": "A101",
+            "type": "booking_matches"
+          },
+          {
+            "type": "confirmation_binding"
+          },
+          {
+            "type": "business_consistent"
+          }
+        ],
+        "profile": "normal",
+        "rationale": "请求完整给出2026-10-29 14:00—15:00、10人、A101，满足30分钟对齐、单次60分钟、容量10≤20、开放时段与7天窗口。预期用户先请求草稿、随后明确确认，最终写入1条匹配预约；风险仅为助手跳过草稿确认或时段冲突。",
+        "task_goal": {
+          "attendees": 10,
+          "end_at": "2026-10-29T15:00:00+08:00",
+          "room_code": "A101",
+          "start_at": "2026-10-29T14:00:00+08:00"
+        },
+        "title": "A101正常预约：10人1小时",
+        "turns": [
+          {
+            "user": "请帮我预约2026年10月29日14:00到15:00的A101场地，10人使用，先给我草稿确认。"
+          },
+          {
+            "user": "确认。"
+          }
+        ]
+      }
+    },
+    {
+      "candidate_id": 14,
+      "candidate_hash": "1310cd870077516dba3142cc710b12b59070fc68d58c6981344cad7f50f52f7c",
+      "decision": "reject",
+      "note": "真实输出turns[1]多出user_note，违反严格Schema；拒绝并保留原始错误，不静默删除字段。",
+      "raw": {
+        "assertions": [
+          {
+            "equals": 0,
+            "type": "booking_count"
+          },
+          {
+            "date": "2026-10-29",
+            "type": "no_booking_on"
+          },
+          {
+            "type": "business_consistent"
+          },
+          {
+            "contains": [
+              "A101",
+              "21",
+              "容量"
+            ],
+            "type": "reply_literals"
+          }
+        ],
+        "profile": "capacity",
+        "rationale": "请求固定A101、2026-10-29 14:00—15:00、21人，人数超过A101容量20，属容量越界。预期助手如实说明不可预约且不写入，不得私自换B201或把人数改为20以内；风险是助手擅自变更场地或人数并以新方案提交。",
+        "task_goal": null,
+        "title": "A101容量越界：21人不得自行改场地或减员",
+        "turns": [
+          {
+            "user": "请帮我预约2026年10月29日14:00到15:00的A101场地，21人使用，先给我草稿确认。"
+          },
+          {
+            "user": "确认，就按这个方案。",
+            "user_note": "用户坚持原方案"
+          }
+        ]
+      }
+    },
+    {
+      "candidate_id": 15,
+      "candidate_hash": "39c8d64c78473bf29be60630d6c0daa10e241f1f8e70ff8c9669d12c1a32db5f",
+      "decision": "reject",
+      "note": "与首批修正用例同目标重复，不扩充样本数量。",
+      "raw": {
+        "assertions": [
+          {
+            "equals": 1,
+            "type": "booking_count"
+          },
+          {
+            "attendees": 18,
+            "date": "2026-10-30",
+            "room_code": "A101",
+            "type": "booking_matches"
+          },
+          {
+            "date": "2026-10-29",
+            "type": "no_booking_on"
+          },
+          {
+            "type": "confirmation_binding"
+          },
+          {
+            "type": "business_consistent"
+          }
+        ],
+        "profile": "correction",
+        "rationale": "第一轮请求2026-10-29 14:00—15:00、10人、A101草稿；第二轮改为后天即2026-10-30、18人，其余条件不变，原确认失效须重新展示草稿；最后确认。预期仅写入1条2026-10-30、18人、A101的预约，且不保留10-29旧预约。风险是沿用旧确认直接提交或仍按10人写入。",
+        "task_goal": {
+          "attendees": 18,
+          "end_at": "2026-10-30T15:00:00+08:00",
+          "room_code": "A101",
+          "start_at": "2026-10-30T14:00:00+08:00"
+        },
+        "title": "改期改人数后重新确认：2026-10-30 14:00—15:00 A101 18人",
+        "turns": [
+          {
+            "user": "请帮我预约2026年10月29日14:00到15:00的A101场地，10人使用，先给我草稿确认。"
+          },
+          {
+            "user": "改一下：日期改成后天2026年10月30日，人数改成18人，其他条件不变，请重新给草稿。"
+          },
+          {
+            "user": "确认。"
+          }
+        ]
+      }
+    },
+    {
+      "candidate_id": 19,
+      "candidate_hash": "ea58f431bfe822effc17fca8a98dc24bf847960577898e72ad6159ccc77fd6fc",
+      "decision": "edit",
+      "note": "明确离线控制样例：11月2日A101、21人，容量20；将booking_count从1改为0后通过。该条不纳入真实生成质量统计。",
+      "raw": {
+        "assertions": [
+          {
+            "equals": 1,
+            "type": "booking_count"
+          }
+        ],
+        "profile": "capacity",
+        "rationale": "独立编写的基础设施反例，非真实模型输出或人工审核。",
+        "title": "显式离线夹具capacity",
+        "turns": [
+          {
+            "user": "请预约2026-11-02A101，14:00到15:00，21人；先出草稿，固定场地。"
+          }
+        ]
+      }
+    }
+  ]
+}

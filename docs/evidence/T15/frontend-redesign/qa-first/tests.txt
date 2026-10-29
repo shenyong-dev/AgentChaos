@@ -1,0 +1,62 @@
+
+Running 8 tests using 1 worker
+
+(node:2792) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 tests\design-system.spec.ts:37:1 › all navigation pages render at desktop tablet and phone sizes without fake data (3.6s)
+  ok 2 tests\design-system.spec.ts:53:1 › quick navigation searches routes by keyboard and restores focus (1.9s)
+  x  3 tests\design-system.spec.ts:70:1 › real overview and library preserve counts search option values and read-only case details (16.5s)
+(node:22896) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 4 tests\design-system.spec.ts:93:1 › responsive sidebar handles collapse drawer keyboard and route changes (3.7s)
+  ok 5 tests\design-system.spec.ts:109:1 › real report evidence and review dialog remain readable and do not submit (9.4s)
+  ok 6 tests\design-system.spec.ts:140:1 › actual generator access stays disabled and empty without fabricated candidates (1.8s)
+  x  7 tests\design-system.spec.ts:150:1 › explicit historical calibration replay keeps labels blank and selects actual enum values without saving (1.2m)
+(node:39776) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 8 tests\design-system.spec.ts:178:1 › reduced motion readable type and focus contrast work with keyboard (558ms)
+
+
+  1) tests\design-system.spec.ts:70:1 › real overview and library preserve counts search option values and read-only case details 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: getByRole('dialog', { name: '用例输入与独立预期', exact: true })
+    Expected substring: "schema_version"
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toContainText" getByRole('dialog', { name: '用例输入与独立预期', exact: true }) with timeout 5000ms
+      - waiting for getByRole('dialog', { name: '用例输入与独立预期', exact: true })
+
+
+      83 |   await expect(page.locator('.workspace-table tbody tr')).toHaveCount(1)
+      84 |   await page.getByRole('button',{name:'查看用例',exact:true}).click()
+    > 85 |   await expect(page.getByRole('dialog',{name:'用例输入与独立预期',exact:true})).toContainText('schema_version')
+         |                                                                        ^
+      86 |   await page.keyboard.press('Escape')
+      87 |   await shot(page,'library-desktop')
+      88 |   await page.getByRole('link',{name:'对象与版本',exact:true}).click()
+        at D:\AgentChaos\frontend\tests\design-system.spec.ts:85:72
+
+    attachment #1: video (video/webm) ──────────────────────────────────────────────────────────────
+    ..\docs\evidence\T15\frontend-redesign\qa-first\playwright-results\design-system-real-overvie-37296--and-read-only-case-details\video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ..\docs\evidence\T15\frontend-redesign\qa-first\playwright-results\design-system-real-overvie-37296--and-read-only-case-details\error-context.md
+
+  2) tests\design-system.spec.ts:150:1 › explicit historical calibration replay keeps labels blank and selects actual enum values without saving 
+
+    Test timeout of 60000ms exceeded.
+
+    attachment #1: video (video/webm) ──────────────────────────────────────────────────────────────
+    ..\docs\evidence\T15\frontend-redesign\qa-first\playwright-results\design-system-explicit-his-c9fb0--enum-values-without-saving\video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ..\docs\evidence\T15\frontend-redesign\qa-first\playwright-results\design-system-explicit-his-c9fb0--enum-values-without-saving\error-context.md
+
+  2 failed
+    tests\design-system.spec.ts:70:1 › real overview and library preserve counts search option values and read-only case details 
+    tests\design-system.spec.ts:150:1 › explicit historical calibration replay keeps labels blank and selects actual enum values without saving 
+  6 passed (1.8m)

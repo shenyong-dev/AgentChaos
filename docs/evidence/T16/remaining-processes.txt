@@ -1,0 +1,22 @@
+{"episode": "V0-T13-B001-1", "outcome": {"claimed": true, "status": "passed"}}
+{"episode": "V1-T13-B001-1", "outcome": {"claimed": true, "status": "passed"}}
+{"episode": "V0-T13-B002-1", "outcome": {"claimed": true, "status": "failed"}}
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "D:\AgentChaos\backend\experiments\launch.py", line 103, in <module>
+    main()
+  File "D:\AgentChaos\backend\experiments\launch.py", line 97, in main
+    print(__import__("json").dumps(future.result()), flush=True)
+                                   ^^^^^^^^^^^^^^^
+  File "E:\python3\Lib\concurrent\futures\_base.py", line 449, in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+  File "E:\python3\Lib\concurrent\futures\_base.py", line 401, in __get_result
+    raise self._exception
+  File "E:\python3\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AgentChaos\backend\experiments\launch.py", line 54, in invoke
+    raise RuntimeError("Episode failed to export; preserve and audit: " + label)
+RuntimeError: Episode failed to export; preserve and audit: V0-T13-B003-1

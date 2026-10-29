@@ -28,8 +28,16 @@ class ModelGateway:
         *,
         audit_directory: Path | None = None,
         control=None,
+        role="agent",
     ):
+        if role not in ("agent", "case_generator", "judge"):
+            raise ValueError("Unsupported role")
         self.settings, self.budget = settings, budget
+        self.role = role
+        prefix = {"agent": "agent", "case_generator": "casegen", "judge": "judge"}[role]
+        self.model = getattr(settings, prefix + "_model")
+        self.thinking = getattr(settings, prefix + "_thinking")
+        self.max_output = getattr(settings, prefix + "_max_output_tokens")
         self.audit_directory = audit_directory or PROJECT_ROOT / ".local/t04/model-calls"
         self.control = control
 
@@ -44,7 +52,7 @@ class ModelGateway:
         s = self.settings
         if not s.deepseek_api_key.get_secret_value():
             raise AgentError("model_key_missing", "本地模型密钥未配置。", 503)
-        if s.agent_thinking != "disabled":
+        if self.thinking != "disabled":
             raise AgentError("model_mode_unverified", "T04基线只开放已验证的非思考模式。", 400)
         remaining = min(
             s.model_timeout_seconds, (deadline or time.monotonic() + 120) - time.monotonic()
@@ -53,11 +61,11 @@ class ModelGateway:
             raise AgentError("agent_deadline", "本轮对话达到总时限。", 504)
         request = {"messages": messages_to_dict(messages), "tools": tools}
         request_bytes = len(json.dumps(request, ensure_ascii=False, default=str).encode())
-        ticket = self.budget.reserve(request_bytes, s.agent_max_output_tokens)
+        ticket = self.budget.reserve(request_bytes, self.max_output)
         record = {
             "call_id": ticket["call_id"],
-            "role": "agent",
-            "model_requested": s.agent_model,
+            "role": self.role,
+            "model_requested": self.model,
             "started_at": datetime.now(UTC).isoformat(),
             "thinking": "disabled",
             "request": request,
@@ -71,14 +79,14 @@ class ModelGateway:
             if self.control:
                 self.control.check()
             model = ChatDeepSeek(
-                model=s.agent_model,
+                model=self.model,
                 api_key=s.deepseek_api_key.get_secret_value(),
                 api_base=s.deepseek_base_url,
                 temperature=None,
                 extra_body={"thinking": {"type": "disabled"}},
                 timeout=remaining,
                 max_retries=0,
-                max_tokens=s.agent_max_output_tokens,
+                max_tokens=self.max_output,
             )
             bound = (
                 model.bind_tools(tools, **({"tool_choice": tool_choice} if tool_choice else {}))
@@ -131,10 +139,11 @@ class ModelGateway:
             if not message.content and not message.tool_calls and not message.invalid_tool_calls:
                 raise AgentError("model_empty_response", "模型没有返回内容或工具调用。", 503)
             record["status"] = "completed"
-            try:
-                remember_success(s, record)
-            except OSError:
-                record["local_observation_write"] = "unavailable"
+            if self.role == "agent":
+                try:
+                    remember_success(s, record)
+                except OSError:
+                    record["local_observation_write"] = "unavailable"
             return message, record
         except Exception as exc:
             self.budget.unknown(ticket)

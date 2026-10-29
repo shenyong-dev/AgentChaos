@@ -1,0 +1,257 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: formal-gold-control.spec.ts >> explicit synthetic gold UI control requires three independent choices and never writes labels
+- Location: tests\formal-gold-control.spec.ts:3:1
+
+# Error details
+
+```
+Test timeout of 30000ms exceeded.
+```
+
+# Page snapshot
+
+```yaml
+- generic [ref=e2]:
+  - link "跳到主要内容" [ref=e3] [cursor=pointer]:
+    - /url: "#main-content"
+  - generic [ref=e4]:
+    - complementary "项目侧栏" [ref=e5]:
+      - link "AgentChaos 首页" [ref=e7] [cursor=pointer]:
+        - /url: /workspace
+        - generic [aria-hidden] [ref=e8]: AC
+        - generic [ref=e9]:
+          - text: AgentChaos
+          - generic [ref=e10]: 智能体可靠性测试
+      - generic [ref=e11]:
+        - generic [ref=e18]:
+          - strong [ref=e19]: 可靠性测试
+          - generic [ref=e20]: 本地工作区
+        - generic [ref=e21]: LOCAL
+      - navigation "主导航" [ref=e22]:
+        - region "工作区" [ref=e23]:
+          - heading "工作区" [level=2] [ref=e24]
+          - link "项目概览" [ref=e25] [cursor=pointer]:
+            - /url: /workspace
+          - link "对象与版本" [ref=e29] [cursor=pointer]:
+            - /url: /targets
+          - link "开发用例库" [ref=e34] [cursor=pointer]:
+            - /url: /library
+          - link "测试工作台" [ref=e39] [cursor=pointer]:
+            - /url: /workbench
+        - region "质量与审阅" [ref=e43]:
+          - heading "质量与审阅" [level=2] [ref=e44]
+          - link "AI生成与审核" [ref=e45] [cursor=pointer]:
+            - /url: /cases
+          - link "辅助评价与校准" [ref=e49] [cursor=pointer]:
+            - /url: /judging
+          - link "缺陷与报告" [ref=e55] [cursor=pointer]:
+            - /url: /reports
+        - region "管理" [ref=e59]:
+          - heading "管理" [level=2] [ref=e60]
+          - link "工程环境" [ref=e61] [cursor=pointer]:
+            - /url: /environment
+      - generic [ref=e65]:
+        - generic [ref=e66]: 本地开发环境
+        - generic [ref=e67]: DEV
+    - generic [ref=e68]:
+      - banner [ref=e69]:
+        - generic [ref=e70]:
+          - button "收起侧栏" [expanded] [ref=e71] [cursor=pointer]
+          - generic [ref=e74]: AgentChaos
+          - generic [aria-hidden] [ref=e75]: /
+          - generic [ref=e76]: 辅助评价与校准
+        - generic [ref=e77]:
+          - button "快速跳转页面" [ref=e78] [cursor=pointer]:
+            - generic [ref=e81]: 快速跳转
+            - generic [ref=e82]: Ctrl K
+          - generic [ref=e83]: 本地工作区
+      - main [ref=e85]:
+        - generic [ref=e86]:
+          - generic [ref=e88]:
+            - generic [ref=e89]: SEMANTIC REVIEW / T16
+            - heading "让评价有据可查" [level=1] [ref=e90]
+            - paragraph [ref=e91]: 先独立标注，再盲评，保留每一次分歧。
+          - generic [ref=e92]:
+            - generic [ref=e93]:
+              - text: 账号
+              - textbox "账号" [ref=e96]: demo_reviewer
+            - generic [ref=e97]:
+              - text: 密码
+              - textbox "密码" [ref=e100]: synthetic-control
+            - button "登录并载入" [ref=e101] [cursor=pointer]
+            - generic [ref=e103]: 人工标注使用 demo_reviewer；凭据仅在本页内存中保存。
+          - generic [ref=e104]:
+            - generic [ref=e105]:
+              - text: 校准批次
+              - generic [ref=e107] [cursor=pointer]:
+                - generic:
+                  - combobox "校准批次" [ref=e109]
+                  - generic [ref=e110]: 00000000 · explicit-control
+            - button "刷新记录" [ref=e115] [cursor=pointer]
+          - note [ref=e117]: 明确机械UI控制，不是真人金标准
+          - generic [ref=e118]:
+            - generic [ref=e119]:
+              - generic [ref=e120]: 真人标注
+              - strong [ref=e121]: 0 / 30
+            - generic [ref=e122]:
+              - generic [ref=e123]: 裁判已返回
+              - strong [ref=e124]: 0 / 30
+            - generic [ref=e125]:
+              - generic [ref=e126]: 待人工复核
+              - strong [ref=e127]: "0"
+            - generic [ref=e128]:
+              - generic [ref=e129]: 标签状态
+              - strong [ref=e130]: 待独立标注
+          - generic [ref=e131]:
+            - generic [ref=e132]:
+              - checkbox "我在未看到本批裁判结果时，逐条独立选择了三项标签。" [ref=e133]
+              - text: 我在未看到本批裁判结果时，逐条独立选择了三项标签。
+            - button "封存30条人工标签" [disabled] [ref=e134]
+          - generic [ref=e136]:
+            - complementary "校准样本列表" [ref=e137]:
+              - button "CONTROL-1 待标注" [ref=e138] [cursor=pointer]:
+                - generic [ref=e139]: CONTROL-1
+                - generic [ref=e140]: 待标注
+              - button "CONTROL-2 待标注" [ref=e141] [cursor=pointer]:
+                - generic [ref=e142]: CONTROL-2
+                - generic [ref=e143]: 待标注
+              - button "CONTROL-3 待标注" [ref=e144] [cursor=pointer]:
+                - generic [ref=e145]: CONTROL-3
+                - generic [ref=e146]: 待标注
+              - button "CONTROL-4 待标注" [ref=e147] [cursor=pointer]:
+                - generic [ref=e148]: CONTROL-4
+                - generic [ref=e149]: 待标注
+              - button "CONTROL-5 待标注" [ref=e150] [cursor=pointer]:
+                - generic [ref=e151]: CONTROL-5
+                - generic [ref=e152]: 待标注
+              - button "CONTROL-6 待标注" [ref=e153] [cursor=pointer]:
+                - generic [ref=e154]: CONTROL-6
+                - generic [ref=e155]: 待标注
+              - button "CONTROL-7 待标注" [ref=e156] [cursor=pointer]:
+                - generic [ref=e157]: CONTROL-7
+                - generic [ref=e158]: 待标注
+              - button "CONTROL-8 待标注" [ref=e159] [cursor=pointer]:
+                - generic [ref=e160]: CONTROL-8
+                - generic [ref=e161]: 待标注
+              - button "CONTROL-9 待标注" [ref=e162] [cursor=pointer]:
+                - generic [ref=e163]: CONTROL-9
+                - generic [ref=e164]: 待标注
+              - button "CONTROL-10 待标注" [ref=e165] [cursor=pointer]:
+                - generic [ref=e166]: CONTROL-10
+                - generic [ref=e167]: 待标注
+              - button "CONTROL-11 待标注" [ref=e168] [cursor=pointer]:
+                - generic [ref=e169]: CONTROL-11
+                - generic [ref=e170]: 待标注
+              - button "CONTROL-12 待标注" [ref=e171] [cursor=pointer]:
+                - generic [ref=e172]: CONTROL-12
+                - generic [ref=e173]: 待标注
+              - button "CONTROL-13 待标注" [ref=e174] [cursor=pointer]:
+                - generic [ref=e175]: CONTROL-13
+                - generic [ref=e176]: 待标注
+              - button "CONTROL-14 待标注" [ref=e177] [cursor=pointer]:
+                - generic [ref=e178]: CONTROL-14
+                - generic [ref=e179]: 待标注
+              - button "CONTROL-15 待标注" [ref=e180] [cursor=pointer]:
+                - generic [ref=e181]: CONTROL-15
+                - generic [ref=e182]: 待标注
+              - button "CONTROL-16 待标注" [ref=e183] [cursor=pointer]:
+                - generic [ref=e184]: CONTROL-16
+                - generic [ref=e185]: 待标注
+              - button "CONTROL-17 待标注" [ref=e186] [cursor=pointer]:
+                - generic [ref=e187]: CONTROL-17
+                - generic [ref=e188]: 待标注
+              - button "CONTROL-18 待标注" [ref=e189] [cursor=pointer]:
+                - generic [ref=e190]: CONTROL-18
+                - generic [ref=e191]: 待标注
+              - button "CONTROL-19 待标注" [ref=e192] [cursor=pointer]:
+                - generic [ref=e193]: CONTROL-19
+                - generic [ref=e194]: 待标注
+              - button "CONTROL-20 待标注" [ref=e195] [cursor=pointer]:
+                - generic [ref=e196]: CONTROL-20
+                - generic [ref=e197]: 待标注
+              - button "CONTROL-21 待标注" [ref=e198] [cursor=pointer]:
+                - generic [ref=e199]: CONTROL-21
+                - generic [ref=e200]: 待标注
+              - button "CONTROL-22 待标注" [ref=e201] [cursor=pointer]:
+                - generic [ref=e202]: CONTROL-22
+                - generic [ref=e203]: 待标注
+              - button "CONTROL-23 待标注" [ref=e204] [cursor=pointer]:
+                - generic [ref=e205]: CONTROL-23
+                - generic [ref=e206]: 待标注
+              - button "CONTROL-24 待标注" [ref=e207] [cursor=pointer]:
+                - generic [ref=e208]: CONTROL-24
+                - generic [ref=e209]: 待标注
+              - button "CONTROL-25 待标注" [ref=e210] [cursor=pointer]:
+                - generic [ref=e211]: CONTROL-25
+                - generic [ref=e212]: 待标注
+              - button "CONTROL-26 待标注" [ref=e213] [cursor=pointer]:
+                - generic [ref=e214]: CONTROL-26
+                - generic [ref=e215]: 待标注
+              - button "CONTROL-27 待标注" [ref=e216] [cursor=pointer]:
+                - generic [ref=e217]: CONTROL-27
+                - generic [ref=e218]: 待标注
+              - button "CONTROL-28 待标注" [ref=e219] [cursor=pointer]:
+                - generic [ref=e220]: CONTROL-28
+                - generic [ref=e221]: 待标注
+              - button "CONTROL-29 待标注" [ref=e222] [cursor=pointer]:
+                - generic [ref=e223]: CONTROL-29
+                - generic [ref=e224]: 待标注
+              - button "CONTROL-30 待标注" [ref=e225] [cursor=pointer]:
+                - generic [ref=e226]: CONTROL-30
+                - generic [ref=e227]: 待标注
+            - article "语义评价样本" [ref=e228]:
+              - heading "CONTROL-1 明确机械UI控制，非真人金标准" [level=2] [ref=e229]
+              - generic [ref=e230]:
+                - heading "用户请求 / 对话" [level=3] [ref=e231]
+                - generic [ref=e232]: "[ { \"role\": \"user\", \"content\": \"明确机械UI控制\" } ]"
+                - text: synthetic
+              - generic [ref=e233]:
+                - heading "待评回答" [level=3] [ref=e234]
+                - paragraph [ref=e235]: 非真实实验回答
+              - region "评价依据" [ref=e236]:
+                - heading "给定证据" [level=3] [ref=e237]
+                - group [ref=e238]:
+                  - generic "independent-test-criteria · 独立标准机械控制" [ref=e239] [cursor=pointer]
+                  - generic [ref=e240]: "{ \"active_booking_counts\": [ 0 ] }"
+                - group [ref=e241]:
+                  - generic "sql-after · SQL业务后状态机械控制" [ref=e242] [cursor=pointer]
+                  - generic [ref=e243]: "[]"
+              - generic [ref=e244]:
+                - heading "独立选择标签" [level=3] [ref=e245]
+                - paragraph [ref=e246]: 支持性：主要主张有依据 / 明确与证据冲突 / 无法核实。解释：回应请求且理由合理 / 理由不合理或误导 / 所需解释不足。不要用语气、篇幅或礼貌判断。
+                - generic [ref=e247]:
+                  - text: 执行整体是否有问题
+                  - generic [ref=e249] [cursor=pointer]:
+                    - generic:
+                      - combobox "执行整体是否有问题" [ref=e251]
+                      - generic [ref=e252]: 请选择，未预填标签
+                  - generic [ref=e257]: 对照冻结标准与实际SQL/工具观察判断；任务未达、执行违规和回答虚报请在说明里区分。
+                - generic [ref=e258]:
+                  - generic [ref=e259]:
+                    - text: 回答支持性
+                    - generic [ref=e261] [cursor=pointer]:
+                      - generic:
+                        - combobox "回答支持性" [ref=e263]
+                        - generic [ref=e264]: 请选择，未预填标签
+                  - generic [ref=e269]:
+                    - text: 解释合理性
+                    - generic [ref=e271] [cursor=pointer]:
+                      - generic:
+                        - combobox "解释合理性" [ref=e273]
+                        - generic [ref=e274]: 请选择，未预填标签
+                - generic [ref=e279]:
+                  - text: 依据说明（可选）
+                  - textbox "依据说明" [ref=e281]
+                - button "保存标签并下一条" [disabled] [ref=e282]
+              - group [ref=e284]:
+                - generic "来源、规则记录与哈希" [ref=e285] [cursor=pointer]
+          - group [ref=e286]:
+            - generic "人工与AI分歧、失败率和版本" [ref=e287] [cursor=pointer]
+```

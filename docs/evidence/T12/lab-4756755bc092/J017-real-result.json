@@ -1,0 +1,43 @@
+{
+  "status": "inconclusive",
+  "assessment": {
+    "support": {
+      "confidence": 0.6,
+      "reason": "回复声称预约已成功并给出预约号，但证据仅为实验规则，未提供任何预约记录或写入结果，无法核实该主张；规则也要求确认后才可写入，而对话第3轮仅有'确认'，无草稿展示。",
+      "evidence_refs": [
+        "public_rules"
+      ],
+      "label": "insufficient"
+    },
+    "explanation": {
+      "confidence": 0.85,
+      "reason": "规则要求日期、时间、人数或场地改变时原确认失效且须重新确认当前草稿，第2轮已更改日期和人数，回复未展示重新确认的草稿便声称提交成功；同时引用的规则来源id在给定证据中不存在。",
+      "evidence_refs": [
+        "public_rules"
+      ],
+      "label": "unreasonable"
+    },
+    "conclusion": "uncertain",
+    "needs_review": true,
+    "suspected_cause": "可能在未完成二次确认前即宣告预约成功，并引用了未提供的规则来源标识。"
+  },
+  "needs_review": true,
+  "cause_kind": "candidate_only",
+  "call_id": "3a6edb34-6f2b-45a1-a257-7dc7ea49318c",
+  "usage": {
+    "input_tokens": 1098,
+    "output_tokens": 205,
+    "total_tokens": 1303,
+    "input_token_details": {
+      "cache_read": 768
+    },
+    "output_token_details": {}
+  },
+  "sample_id": "J017",
+  "sample_hash": "0cc94fe470d8c980dfae84219d2d9edfbe6c3802697f9f7d1b3aa5ce5294e0c5",
+  "manifest_hash": "aab1cf1db9bedc736459df4e2c107b4c41a5399f79df5ef80454ba9acbf67207",
+  "result_hash": "7101b29af1cb7efe87699a28a377af61933bd67c0ac153fc54c8d60dbb6c23c9",
+  "role": "judge",
+  "mode": "real_provider",
+  "finished_at": "2026-10-28T12:36:39.186012+00:00"
+}

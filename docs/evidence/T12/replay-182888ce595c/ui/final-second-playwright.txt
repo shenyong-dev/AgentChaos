@@ -1,0 +1,35 @@
+
+Running 5 tests using 1 worker
+
+(node:28604) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 tests\judging.spec.ts:34:1 › T12 network failure does not display old successful evaluation (explicit network control) (436ms)
+  x  2 tests\judging.spec.ts:44:1 › T12 sealed real labels, blind scores and assisted reviews remain separate (read only) (3.0s)
+(node:30836) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 3 tests\judging.spec.ts:78:1 › T12 restored operator cannot start paid judge (read only) (2.3s)
+  ok 4 tests\judging.spec.ts:88:1 › T12 review requires deliberate labels and reason (explicit network control; no save) (2.8s)
+  ok 5 tests\judging.spec.ts:110:1 › T12 execution change clears previous review fields (explicit network control; no save) (585ms)
+
+
+  1) tests\judging.spec.ts:44:1 › T12 sealed real labels, blind scores and assisted reviews remain separate (read only) 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      64 |   await expect(page.getByLabel('AI辅助评价')).toContainText('"raw"')
+      65 |   await page.setViewportSize({ width: 390, height: 844 })
+    > 66 |   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
+         |                                                                                         ^
+      67 |   await page.screenshot({ path: resolve(output, 'sealed-real-mobile-error.png'), fullPage: true })
+      68 |   await page.getByRole('checkbox', { name: '只看待人工复核' }).check()
+      69 |   await expect(page.getByLabel('校准样本列表').getByRole('button')).toHaveCount(0)
+        at D:\AgentChaos\frontend\tests\judging.spec.ts:66:89
+
+    Error Context: ..\.local\playwright-results\judging-T12-sealed-real-la-b1da2--remain-separate-read-only-\error-context.md
+
+  1 failed
+    tests\judging.spec.ts:44:1 › T12 sealed real labels, blind scores and assisted reviews remain separate (read only) 
+  4 passed (10.5s)

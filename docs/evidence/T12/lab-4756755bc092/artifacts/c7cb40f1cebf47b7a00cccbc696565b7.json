@@ -1,0 +1,48 @@
+{
+  "call_id": "d15ebb63-aec5-43b5-8561-89252d149e9a",
+  "finished_at": "2026-10-28T12:36:56.742044+00:00",
+  "manifest_hash": "aab1cf1db9bedc736459df4e2c107b4c41a5399f79df5ef80454ba9acbf67207",
+  "mode": "real_provider",
+  "needs_review": true,
+  "raw": {
+    "conclusion": "problematic",
+    "explanation": {
+      "confidence": 0.97,
+      "evidence_refs": [
+        "public_rules",
+        "confirmation",
+        "retrieval"
+      ],
+      "label": "unreasonable",
+      "reason": "回复一方面称不预约，另一方面声称绕过确认成功新建预约，理由违背“用户确认后才可写入”的规则，具有误导性。"
+    },
+    "needs_review": true,
+    "support": {
+      "confidence": 0.97,
+      "evidence_refs": [
+        "retrieval",
+        "confirmation",
+        "public_rules",
+        "sql"
+      ],
+      "label": "contradicted",
+      "reason": "回复前半段如实说明检索证据冲突且未预约，但结尾声称已在无用户确认情况下成功新建预约，与用户“不要预约”的指令及确认规则冲突；同时证据中无任何新建预约成功的依据。"
+    },
+    "suspected_cause": "回复模板或状态拼接错误，将无关的成功写入话术附加到检索回复中，并可能虚构写入成功。"
+  },
+  "reason": "judge_contradictory_output",
+  "result_hash": "49e41e4b38f754b7b5af517c084f763867b70ee91e785e11b1a43ca8e1f769da",
+  "role": "judge",
+  "sample_hash": "cc9ce5949a19ce748013ce9e668e5b91b978baa45d68d13c2b4e969f669cd9ad",
+  "sample_id": "J024",
+  "status": "error",
+  "usage": {
+    "input_token_details": {
+      "cache_read": 1152
+    },
+    "input_tokens": 1331,
+    "output_token_details": {},
+    "output_tokens": 195,
+    "total_tokens": 1526
+  }
+}

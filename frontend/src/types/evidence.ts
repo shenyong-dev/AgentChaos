@@ -15,14 +15,14 @@ export interface EventPage {
 export interface RunSnapshot {
   run_id: string; status: string; cursor: string; tail_cursor: string; event_count: number
   pending_model_observations: number; manifest_hash: string
-  manifest?: { fault_profile?: { id: number; config_hash: string; config: {
+  manifest?: { target_version_id?: number; metamorphic?: unknown; fault_profile?: { id: number; config_hash: string; config: {
     profile_key: string; revision: number; fault_type: string; trigger_stage: string
     target_tool: string; seed: number; max_triggers: number
   } } | null }
   budget: Record<string, unknown>; summary: Record<string, unknown>
-  executions: { execution_id: string; status: string; attempt: number; after: unknown;
+  executions: { execution_id: string; case_key?: string; case_revision_id?: number; repeat_no?: number; status: string; attempt: number; after: unknown; before?: unknown; output?: unknown;
     usage: Record<string, unknown>; error: unknown; timing?: {
-    gateway_mode?: string; faults?: { injected: number; reserved: number; not_applied: number }
+    revision?: number; gateway_mode?: string; faults?: { injected: number; reserved: number; not_applied: number }
     evaluation?: { verdict: string; counts: Record<string, number>; task_outcome: string }
     } }[]
 }

@@ -1,0 +1,48 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "request_id": {
+      "format": "uuid",
+      "title": "Request Id",
+      "type": "string"
+    },
+    "support": {
+      "enum": [
+        "supported",
+        "contradicted",
+        "insufficient"
+      ],
+      "title": "Support",
+      "type": "string"
+    },
+    "explanation": {
+      "enum": [
+        "reasonable",
+        "unreasonable",
+        "insufficient"
+      ],
+      "title": "Explanation",
+      "type": "string"
+    },
+    "note": {
+      "maxLength": 2000,
+      "minLength": 1,
+      "title": "Note",
+      "type": "string"
+    },
+    "ai_result_hash": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Ai Result Hash",
+      "type": "string"
+    }
+  },
+  "required": [
+    "request_id",
+    "support",
+    "explanation",
+    "note",
+    "ai_result_hash"
+  ],
+  "title": "ExecutionJudgeReview",
+  "type": "object"
+}

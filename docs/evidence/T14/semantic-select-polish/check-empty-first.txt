@@ -1,0 +1,50 @@
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+ExpectError: expect(locator).toContainText(expected) failed
+
+Locator: locator('.el-popper.semantic-execution-dropdown:visible')
+Expected substring: "未找到匹配的执行"
+Received string:    "暂无可选执行"
+Timeout: 5000ms
+
+Call log:
+  - Expect "toContainText" locator('.el-popper.semantic-execution-dropdown:visible') with timeout 5000ms
+  - waiting for locator('.el-popper.semantic-execution-dropdown:visible')
+    14 × locator resolved to <div tabindex="-1" role="tooltip" id="el-id-1102-6" aria-hidden="false" data-popper-escaped="false" data-popper-reference-hidden="false" data-popper-placement="bottom-start" class="el-popper is-pure is-light el-tooltip el-select__popper semantic-execution-dropdown">…</div>
+       - unexpected value "暂无可选执行"
+
+    at captureRawStack (D:\AgentChaos\frontend\node_modules\playwright-core\lib\coreBundle.js:9282:17)
+    at callMatcherAsStep (D:\AgentChaos\frontend\node_modules\playwright\lib\matchers\expect.js:13316:57)
+    at Object.toContainText (D:\AgentChaos\frontend\node_modules\playwright\lib\matchers\expect.js:13308:23)
+    at D:\AgentChaos\.local\t14\select-check.mjs:39:28 {
+  matcherResult: {
+    name: 'toContainText',
+    expected: '未找到匹配的执行',
+    message: 'expect(locator).toContainText(expected) failed\n' +
+      '\n' +
+      "Locator: locator('.el-popper.semantic-execution-dropdown:visible')\n" +
+      'Expected substring: "未找到匹配的执行"\n' +
+      'Received string:    "暂无可选执行"\n' +
+      'Timeout: 5000ms\n' +
+      '\n' +
+      'Call log:\n' +
+      `  - Expect "toContainText" locator('.el-popper.semantic-execution-dropdown:visible') with timeout 5000ms\n` +
+      "  - waiting for locator('.el-popper.semantic-execution-dropdown:visible')\n" +
+      '    14 × locator resolved to <div tabindex="-1" role="tooltip" id="el-id-1102-6" aria-hidden="false" data-popper-escaped="false" data-popper-reference-hidden="false" data-popper-placement="bottom-start" class="el-popper is-pure is-light el-tooltip el-select__popper semantic-execution-dropdown">…</div>\n' +
+      '       - unexpected value "暂无可选执行"\n',
+    pass: false,
+    actual: '暂无可选执行',
+    log: [
+      `  - Expect "toContainText" locator('.el-popper.semantic-execution-dropdown:visible') with timeout 5000ms`,
+      "  - waiting for locator('.el-popper.semantic-execution-dropdown:visible')",
+      '    14 × locator resolved to <div tabindex="-1" role="tooltip" id="el-id-1102-6" aria-hidden="false" data-popper-escaped="false" data-popper-reference-hidden="false" data-popper-placement="bottom-start" class="el-popper is-pure is-light el-tooltip el-select__popper semantic-execution-dropdown">…</div>',
+      '       - unexpected value "暂无可选执行"'
+    ],
+    timeout: 5000,
+    ariaSnapshot: '- tooltip "暂无可选执行"'
+  }
+}
+
+Node.js v24.11.0

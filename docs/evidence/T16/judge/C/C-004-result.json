@@ -1,0 +1,30 @@
+{
+  "status": "error",
+  "reason": "judge_schema_invalid",
+  "raw": {
+    "support": {
+      "label": "insufficient",
+      "confidence": 0.55,
+      "reason": "reply包含多个可核对字段（如A101容量20人、时间、attendees=10、pending状态、draft_id/draft_hash、idempotency key、expires_at等），但本次未提供任何证据，无法核实这些具体取值和含义；也未发现明确与给定证据冲突之处。",
+      "evidence_refs": []
+    },
+    "explanation": {
+      "label": "insufficient",
+      "confidence": 0.6,
+      "reason": "reply直接逐字段解释草稿含义，并说明未确认、未提交、不改变条件，但缺少证据验证其解释与系统实际字段定义一致。",
+      "evidence_refs": []
+    },
+    "conclusion": "uncertain",
+    "needs_review": true,
+    "suspected_cause": "证据缺失导致无法核实草稿字段定义与取值，非已证明的Agent缺陷。"
+  },
+  "needs_review": true,
+  "sample_id": "C-004",
+  "sample_hash": "ce1eb80c69022717163346545cf8ef8a651332aac8992064899800c3ba16a0e4",
+  "manifest_hash": "ef6ea4561e482cd35fe7b06cfc00f5183d96a10e1f356eebcaf2d57202a0ecd4",
+  "role": "judge",
+  "mode": "real_provider",
+  "judge_view": "final_answer_only",
+  "finished_at": "2026-10-29T13:02:00.301342+00:00",
+  "result_hash": "670078838a408d55b31f0543083d602f75a4db0fd28977fd524ac72796b83d2c"
+}

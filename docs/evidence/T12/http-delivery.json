@@ -1,0 +1,77 @@
+{
+  "checks": [
+    {
+      "path": "/api/v1/health/live",
+      "status": 200,
+      "sha256": "20fe6c3856c8886299d877e68ebca795aab37acab28707dac4222891a405427d"
+    },
+    {
+      "path": "/api/v1/health",
+      "status": 200,
+      "sha256": "5cd7bb4b5a3457e75551b336af9c016df4ccea7348c3db3d94d91c036dda41af"
+    },
+    {
+      "path": "/api/v1/system/config",
+      "status": 200,
+      "sha256": "369e958001fe701bebbbfd59ee7a4774bfc74223d4d21f757ba64b7298c10a69"
+    },
+    {
+      "path": "/openapi.json",
+      "status": 200,
+      "sha256": "0a05a3bd9a72a8e12fde8c7aca03f5861ab4034b679d7fce5650f5d865899033"
+    }
+  ],
+  "main_config": {
+    "app_version": "0.1.0",
+    "environment": "development",
+    "task": "T12",
+    "api_prefix": "/api/v1",
+    "model_provider": "DeepSeek 官方 API",
+    "model_key_configured": true,
+    "model_connectivity": "historically_verified",
+    "paid_calls_enabled": false,
+    "run_concurrency": 1,
+    "roles": [
+      {
+        "role": "agent",
+        "model": "deepseek-flash",
+        "thinking": "disabled",
+        "max_output_tokens": 1024,
+        "budget_usd": 1.0
+      },
+      {
+        "role": "case_generator",
+        "model": "deepseek-flash",
+        "thinking": "disabled",
+        "max_output_tokens": 4096,
+        "budget_usd": 0.0
+      },
+      {
+        "role": "judge",
+        "model": "deepseek-flash",
+        "thinking": "disabled",
+        "max_output_tokens": 1024,
+        "budget_usd": 0.0
+      }
+    ],
+    "test_execution_available": true,
+    "assertion_evaluation_available": true,
+    "executor_paid_calls_enabled": false,
+    "executor_agent_budget_usd": 0.0,
+    "executor_agent_budget_unlimited": true,
+    "event_replay_available": true,
+    "executor_liveness": "not_probed",
+    "agent_demo_available": true,
+    "case_generation_available": true,
+    "casegen_paid_calls_enabled": false,
+    "semantic_judging_available": true,
+    "judge_paid_calls_enabled": false,
+    "judge_budget_unlimited": true,
+    "casegen_budget_unlimited": true
+  },
+  "lab_unauthenticated": 401,
+  "other_operator": 404,
+  "original_labels_ai_reviews_statistics_restored_unchanged": true,
+  "restored_artifacts": 204,
+  "paid_calls_added": 0
+}

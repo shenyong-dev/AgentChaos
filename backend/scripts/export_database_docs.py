@@ -22,7 +22,7 @@ PURPOSES = {
     "ac_trace_events": "T06追加式类型化事件、真实run归属与事务提交序列",
     "ac_assertion_results": "追加式规则/AI/人工判定；T08实现断言引擎",
     "ac_defects": "缺陷归并与人工复核，不覆盖原始判定",
-    "ac_artifacts": "不可变证据/报告清单；T06按运行归属校验哈希后下载证据",
+    "ac_artifacts": "不可变清单；运行归属run，T11—T13生成/校准/冻结归属owner，二者互斥",
     "sb_rooms": "按scope隔离的场地和开放时间",
     "sb_booking_drafts": "绑定身份/场地/参数哈希的确认草稿",
     "sb_bookings": "预约事实、稳定幂等键和草稿唯一性",
@@ -103,12 +103,12 @@ def main():
         json.dumps(schema, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
     lines = [
-        "# T02—T06 数据库字段字典与关系",
+        "# T02—T13 数据库字段字典与关系",
         "",
         f"迁移：`{schema['revision']}`。12张平台表+4张实验业务表；另有Alembic自身的版本表。",
         "",
         "由 backend/scripts/export_database_docs.py 生成；约束/索引为应用显式声明。"
-        "MySQL可能自动建立外键支持索引；session见T04，run事件序列及可空execution见T06验收记录。",
+        "MySQL可能自动建立外键支持索引；session见T04，run事件序列及可空execution见T06，owner证据见T11/T12/T13验收记录。",
         "",
         "所有表为InnoDB/utf8mb4；符号标识使用区分大小写的utf8mb4_bin。UTCDateTime要求带时区输入，转UTC存DATETIME(6)，读取时补UTC。JSON赋值复制并拒绝NaN；修改可变JSON字段应赋新值。",
         "",

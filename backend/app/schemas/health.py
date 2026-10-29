@@ -31,7 +31,7 @@ class ModelRoleConfig(BaseModel):
 class PublicConfig(BaseModel):
     app_version: str
     environment: str
-    task: Literal["T09"] = "T09"
+    task: Literal["T15"] = "T15"
     api_prefix: str = "/api/v1"
     model_provider: str = "DeepSeek 官方 API"
     model_key_configured: bool
@@ -47,3 +47,9 @@ class PublicConfig(BaseModel):
     event_replay_available: bool = True
     executor_liveness: Literal["not_probed"] = "not_probed"
     agent_demo_available: bool = True
+    case_generation_available: bool = True
+    casegen_paid_calls_enabled: bool = False
+    semantic_judging_available: bool = True
+    judge_paid_calls_enabled: bool = False
+    judge_budget_unlimited: bool = False
+    casegen_budget_unlimited: bool = False

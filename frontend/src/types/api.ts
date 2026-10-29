@@ -19,7 +19,7 @@ export interface HealthReport {
 export interface PublicConfig {
   app_version: string
   environment: string
-  task: 'T08'
+  task: 'T15'
   model_key_configured: boolean
   model_connectivity: 'not_probed' | 'historically_verified'
   paid_calls_enabled: boolean
@@ -32,6 +32,9 @@ export interface PublicConfig {
   executor_agent_budget_unlimited: boolean
   event_replay_available: boolean
   agent_demo_available: boolean
+  judge_paid_calls_enabled: boolean
+  judge_budget_unlimited: boolean
+  casegen_budget_unlimited: boolean
   roles: {
     role: 'agent' | 'case_generator' | 'judge'
     model: string

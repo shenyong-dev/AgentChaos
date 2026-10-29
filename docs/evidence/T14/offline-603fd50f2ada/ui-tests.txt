@@ -1,0 +1,95 @@
+
+Running 4 tests using 1 worker
+
+(node:5388) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  1 tests\workspace.spec.ts:40:1 › owned workspace, development pagination, detail, version and mobile layout (12.9s)
+(node:1588) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  2 tests\workspace.spec.ts:67:1 › UI creates actual fault run, receives SSE, reconnects, confirms once and locates raw evidence (37.5s)
+(node:34052) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 3 tests\workspace.spec.ts:103:1 › cancel dialog really cancels waiting execution without a booking (9.0s)
+  x  4 tests\workspace.spec.ts:114:1 › failed control assertion leads to SQL snapshot, terminal event and downloadable artifact (7.8s)
+
+
+  1) tests\workspace.spec.ts:40:1 › owned workspace, development pagination, detail, version and mobile layout 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByText('历史冻结版本', { exact: true }).first()
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByText('历史冻结版本', { exact: true }).first() with timeout 5000ms
+      - waiting for getByText('历史冻结版本', { exact: true }).first()
+
+
+      54 |   await page.getByRole('link', { name: '对象与版本', exact: true }).click()
+      55 |   await expect(page.getByText('当前源码可执行', { exact: true })).toBeVisible()
+    > 56 |   await expect(page.getByText('历史冻结版本', { exact: true }).first()).toBeVisible()
+         |                                                                   ^
+      57 |   await page.screenshot({ path: resolve(output, 'workspace-versions.png'), fullPage: true })
+      58 |   await page.setViewportSize({ width: 390, height: 844 })
+      59 |   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
+        at D:\AgentChaos\frontend\tests\workspace.spec.ts:56:67
+
+    Error Context: ..\.local\playwright-results\workspace-owned-workspace--7e5d1-l-version-and-mobile-layout\error-context.md
+
+  2) tests\workspace.spec.ts:67:1 › UI creates actual fault run, receives SSE, reconnects, confirms once and locates raw evidence 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('button', { name: '处理等待输入' })
+    Expected: visible
+    Timeout: 30000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('button', { name: '处理等待输入' }) with timeout 30000ms
+      - waiting for getByRole('button', { name: '处理等待输入' })
+
+
+      69 |   await page.setViewportSize({ width: 1440, height: 960 }); await login(page)
+      70 |   const run = await create(page, true)
+    > 71 |   await expect(page.getByRole('button', { name: '处理等待输入' })).toBeVisible({ timeout: 30000 })
+         |                                                              ^
+      72 |   await expect(page.getByText(/离线模型复验：真实数据库/)).toBeVisible()
+      73 |   await expect(page.getByRole('button', { name: /查看 \d+ 条新事件/ })).toBeVisible()
+      74 |   const connection = page.locator('.page-heading [role=status]')
+        at D:\AgentChaos\frontend\tests\workspace.spec.ts:71:62
+
+    Error Context: ..\.local\playwright-results\workspace-UI-creates-actua-f610a-ce-and-locates-raw-evidence\error-context.md
+
+  3) tests\workspace.spec.ts:114:1 › failed control assertion leads to SQL snapshot, terminal event and downloadable artifact 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('button', { name: '下载完整证据与哈希', exact: true }).first()
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('button', { name: '下载完整证据与哈希', exact: true }).first() with timeout 5000ms
+      - waiting for getByRole('button', { name: '下载完整证据与哈希', exact: true }).first()
+
+
+      128 |   await events.last().getByRole('button').click()
+      129 |   const downloads = page.getByRole('button', { name: '下载完整证据与哈希', exact: true })
+    > 130 |   await expect(downloads.first()).toBeVisible()
+          |                                   ^
+      131 |   const downloaded = page.waitForEvent('download'); await downloads.first().click()
+      132 |   expect((await downloaded).suggestedFilename()).toMatch(/^evidence-\d+\.json$/)
+      133 |   await page.screenshot({ path: resolve(output, 'workspace-failure-evidence.png'), fullPage: true })
+        at D:\AgentChaos\frontend\tests\workspace.spec.ts:130:35
+
+    Error Context: ..\.local\playwright-results\workspace-failed-control-a-8f022-t-and-downloadable-artifact\error-context.md
+
+  3 failed
+    tests\workspace.spec.ts:40:1 › owned workspace, development pagination, detail, version and mobile layout 
+    tests\workspace.spec.ts:67:1 › UI creates actual fault run, receives SSE, reconnects, confirms once and locates raw evidence 
+    tests\workspace.spec.ts:114:1 › failed control assertion leads to SQL snapshot, terminal event and downloadable artifact 
+  1 passed (1.2m)

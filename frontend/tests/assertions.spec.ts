@@ -1,3 +1,4 @@
+import { selectControl } from './select-control'
 import { expect, test } from '@playwright/test'
 import { resolve } from 'node:path'
 
@@ -47,7 +48,7 @@ for (const kind of kinds) {
     if (kind === 'wrong_date') {
       await page.setViewportSize({ width: 390, height: 844 })
       await expect(panel.getByLabel('选择断言', { exact: true })).toBeVisible()
-      await panel.getByLabel('选择断言', { exact: true }).selectOption({ label: '预约回复与事实 · 未通过' })
+      await selectControl(page, panel.getByLabel('选择断言', { exact: true }), { label: '预约回复与事实 · 未通过' })
       await expect(panel.getByRole('heading', { name: '预约回复与事实', exact: true })).toBeVisible()
       await page.evaluate(() => scrollTo(0, 0))
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)

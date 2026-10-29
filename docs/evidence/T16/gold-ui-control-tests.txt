@@ -1,0 +1,36 @@
+
+Running 1 test using 1 worker
+
+(node:39872) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  1 tests\formal-gold-control.spec.ts:3:1 › explicit synthetic gold UI control requires three independent choices and never writes labels (736ms)
+
+
+  1) tests\formal-gold-control.spec.ts:3:1 › explicit synthetic gold UI control requires three independent choices and never writes labels 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByLabel('执行整体是否有问题')
+    Expected: visible
+    Error: strict mode violation: getByLabel('执行整体是否有问题') resolved to 2 elements:
+        1) <input readonly value="" type="text" tabindex="0" role="combobox" autocomplete="off" spellcheck="false" id="el-id-4373-36" aria-expanded="false" aria-label="执行整体是否有问题" aria-haspopup="listbox" class="el-select__input" aria-activedescendant="" aria-autocomplete="none" aria-controls="el-id-4373-18"/> aka getByRole('combobox', { name: '执行整体是否有问题' })
+        2) <ul role="listbox" id="el-id-4373-18" aria-label="执行整体是否有问题" aria-orientation="vertical" class="el-scrollbar__view el-select-dropdown__list">…</ul> aka getByText('请选择，未预填标签执行有问题未发现执行问题证据不足')
+
+    Call log:
+      - Expect "toBeVisible" getByLabel('执行整体是否有问题') with timeout 5000ms
+      - waiting for getByLabel('执行整体是否有问题')
+
+
+      18 |   const save = page.getByRole('button', { name: '保存标签并下一条' })
+      19 |   await expect(page.getByLabel('校准样本列表').getByRole('button')).toHaveCount(30)
+    > 20 |   await expect(page.getByLabel('执行整体是否有问题')).toBeVisible()
+         |                                              ^
+      21 |   await expect(save).toBeDisabled()
+      22 |   for (const [label, option] of [['回答支持性', '有依据'], ['解释合理性', '解释合理']]) {
+      23 |     await page.getByLabel(label).click()
+        at D:\AgentChaos\frontend\tests\formal-gold-control.spec.ts:20:46
+
+    Error Context: ..\docs\evidence\T16\gold-ui-control\results\formal-gold-control-explic-d5c40-ces-and-never-writes-labels\error-context.md
+
+  1 failed
+    tests\formal-gold-control.spec.ts:3:1 › explicit synthetic gold UI control requires three independent choices and never writes labels 

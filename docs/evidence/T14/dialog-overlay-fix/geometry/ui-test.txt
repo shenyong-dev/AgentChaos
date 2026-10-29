@@ -1,0 +1,23 @@
+SyntaxError: D:\AgentChaos\frontend\tests\workspace.spec.ts: Unexpected token, expected "," (215:606)
+
+  213 |     await expect(overlay).toHaveCSS('position', 'fixed')
+  214 |     expect(await overlay.evaluate(e => getComputedStyle(e).backgroundColor)).not.toBe('rgba(0, 0, 0, 0)')
+> 215 |     console.log('Dialog geometry', await dialog.evaluate(e => ({ viewport: [innerWidth, innerHeight], rect: e.getBoundingClientRect().toJSON(), parents: [e, e.parentElement!, e.parentElement!.parentElement!].map(n => ({ classes: n.className, display: getComputedStyle(n).display, position: getComputedStyle(n).position, margin: getComputedStyle(n).margin, height: getComputedStyle(n).height, top: n.getBoundingClientRect().top, hit: document.elementFromPoint(Math.min(innerWidth - 1, Math.max(0, e.getBoundingClientRect().x + 100)), Math.min(innerHeight - 1, Math.max(0, e.getBoundingClientRect().y + 30))))?.className })) })))
+      |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               ^
+  216 |     expect(await dialog.evaluate(element => {
+  217 |       const box = element.getBoundingClientRect()
+  218 |       const points = [[box.left + box.width / 2, box.top + 30], [box.left + box.width / 2, box.bottom - 24]]
+
+   at workspace.spec.ts:215
+
+  213 |     await expect(overlay).toHaveCSS('position', 'fixed')
+  214 |     expect(await overlay.evaluate(e => getComputedStyle(e).backgroundColor)).not.toBe('rgba(0, 0, 0, 0)')
+> 215 |     console.log('Dialog geometry', await dialog.evaluate(e => ({ viewport: [innerWidth, innerHeight], rect: e.getBoundingClientRect().toJSON(), parents: [e, e.parentElement!, e.parentElement!.parentElement!].map(n => ({ classes: n.className, display: getComputedStyle(n).display, position: getComputedStyle(n).position, margin: getComputedStyle(n).margin, height: getComputedStyle(n).height, top: n.getBoundingClientRect().top, hit: document.elementFromPoint(Math.min(innerWidth - 1, Math.max(0, e.getBoundingClientRect().x + 100)), Math.min(innerHeight - 1, Math.max(0, e.getBoundingClientRect().y + 30))))?.className })) })))
+      |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              ^
+  216 |     expect(await dialog.evaluate(element => {
+  217 |       const box = element.getBoundingClientRect()
+  218 |       const points = [[box.left + box.width / 2, box.top + 30], [box.left + box.width / 2, box.bottom - 24]]
+Error: No tests found.
+Make sure that arguments are regular expressions matching test files.
+You may need to escape symbols like "$" or "*" and quote the arguments.
+

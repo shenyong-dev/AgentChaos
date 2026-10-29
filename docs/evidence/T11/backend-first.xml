@@ -1,0 +1,591 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="216" time="256.440" timestamp="2026-10-28T19:27:41.882244+08:00" hostname="深拥"><testcase classname="tests.test_agent_integration" name="test_real_checkpoint_pause_new_runtime_restore_resume_and_input_deduplication" time="5.999" /><testcase classname="tests.test_agent_integration" name="test_stale_checkpoint_hint_does_not_hide_a_durable_interrupt" time="2.495" /><testcase classname="tests.test_agent_integration" name="test_model_cannot_self_authorize_or_override_trusted_context" time="1.630" /><testcase classname="tests.test_agent_integration" name="test_refusal_revokes_draft_and_stale_resume_is_rejected" time="2.760" /><testcase classname="tests.test_agent_integration" name="test_sessions_same_user_keep_separate_pending_drafts_and_reject_cross_resume" time="3.056" /><testcase classname="tests.test_agent_integration" name="test_concurrent_input_has_session_lock_and_revision_conflicts" time="1.034" /><testcase classname="tests.test_agent_integration" name="test_model_service_error_preserves_checkpoint_and_manual_retry" time="1.891" /><testcase classname="tests.test_agent_integration" name="test_retrieval_pinned_old_revision_no_answer_validity_and_conflict" time="1.814" /><testcase classname="tests.test_agent_integration" name="test_budget_reservations_are_atomic_and_unknown_is_not_refunded" time="0.835" /><testcase classname="tests.test_agent_integration" name="test_gateway_merges_stream_and_records_real_usage_shape_without_paid_call" time="0.593" /><testcase classname="tests.test_agent_integration" name="test_gateway_service_failures_keep_unknown_reservation[failure0-model_timeout-504]" time="0.630" /><testcase classname="tests.test_agent_integration" name="test_gateway_service_failures_keep_unknown_reservation[failure1-model_service_error-503]" time="0.576" /><testcase classname="tests.test_agent_integration" name="test_gateway_429_is_distinct_and_preserves_reservation" time="0.320" /><testcase classname="tests.test_agent_integration" name="test_gateway_missing_usage_does_not_refund_unknown_cost" time="0.581" /><testcase classname="tests.test_agent_integration" name="test_api_uses_authenticated_session_owner_and_rejects_scope_injection" time="3.570" /><testcase classname="tests.test_agent_values" name="test_ambiguous_afternoon_and_room_number_do_not_become_time_or_attendees" time="0.001" /><testcase classname="tests.test_agent_values" name="test_partial_change_preserves_other_field_sources_and_chinese_duration" time="0.001" /><testcase classname="tests.test_agent_values" name="test_source_quotes_must_be_from_current_input_and_fields_must_be_complete" time="0.001" /><testcase classname="tests.test_agent_values" name="test_duration_correction_replaces_old_end_time_without_changing_other_sources" time="0.001" /><testcase classname="tests.test_agent_values" name="test_end_correction_replaces_old_duration" time="0.001" /><testcase classname="tests.test_agent_values" name="test_explicit_inconsistent_time_and_duration_need_clarification" time="0.005" /><testcase classname="tests.test_agent_values" name="test_compaction_keeps_tool_pairs_and_preserves_corrections_and_refusals" time="0.002" /><testcase classname="tests.test_booking" name="test_input_cannot_override_context_or_use_ambiguous_types[attendees-True]" time="0.001" /><testcase classname="tests.test_booking" name="test_input_cannot_override_context_or_use_ambiguous_types[attendees-10]" time="0.001" /><testcase classname="tests.test_booking" name="test_input_cannot_override_context_or_use_ambiguous_types[attendees-0]" time="0.001" /><testcase classname="tests.test_booking" name="test_input_cannot_override_context_or_use_ambiguous_types[start_at-2026-10-25T14:00:00]" time="0.001" /><testcase classname="tests.test_booking" name="test_input_cannot_override_context_or_use_ambiguous_types[actor_key-someone-else]" time="0.001" /><testcase classname="tests.test_booking" name="test_input_cannot_override_context_or_use_ambiguous_types[scope_id-demo]" time="0.001" /><testcase classname="tests.test_booking" name="test_input_cannot_override_context_or_use_ambiguous_types[reference_clock-2026-10-25T01:00:00+00:00]" time="0.001" /><testcase classname="tests.test_booking" name="test_time_rejections_leave_no_draft[1-60-time_alignment]" time="3.749" /><testcase classname="tests.test_booking" name="test_time_rejections_leave_no_draft[0-0-invalid_duration]" time="0.020" /><testcase classname="tests.test_booking" name="test_time_rejections_leave_no_draft[0-150-invalid_duration]" time="0.028" /><testcase classname="tests.test_booking" name="test_time_rejections_leave_no_draft[-330-30-outside_booking_window]" time="0.012" /><testcase classname="tests.test_booking" name="test_time_rejections_leave_no_draft[10080-60-outside_booking_window]" time="0.012" /><testcase classname="tests.test_booking" name="test_exact_window_duration_and_opening_boundaries" time="0.049" /><testcase classname="tests.test_booking" name="test_availability_capacity_and_room_rules" time="0.022" /><testcase classname="tests.test_booking" name="test_preview_is_not_a_booking_and_requires_real_confirmation" time="0.024" /><testcase classname="tests.test_booking" name="test_adjacent_intervals_succeed_and_overlaps_fail" time="0.075" /><testcase classname="tests.test_booking" name="test_new_preview_invalidates_old_confirmation[date]" time="0.056" /><testcase classname="tests.test_booking" name="test_new_preview_invalidates_old_confirmation[attendees]" time="0.064" /><testcase classname="tests.test_booking" name="test_new_preview_invalidates_old_confirmation[room]" time="0.049" /><testcase classname="tests.test_booking" name="test_expiry_is_wall_clock_and_reference_clock_still_controls_booking" time="0.047" /><testcase classname="tests.test_booking" name="test_confirmation_hash_and_persisted_payload_cannot_be_changed" time="0.048" /><testcase classname="tests.test_booking" name="test_invalid_replacement_also_revokes_old_confirmation" time="0.039" /><testcase classname="tests.test_booking" name="test_bad_room_configuration_is_reported_as_platform_error" time="0.018" /><testcase classname="tests.test_booking" name="test_identity_and_scope_cannot_reuse_confirm_lookup_or_cancel" time="0.047" /><testcase classname="tests.test_booking" name="test_same_request_replays_original_and_changed_parameters_are_rejected" time="0.085" /><testcase classname="tests.test_booking" name="test_resource_occupied_after_preview_is_rechecked" time="0.052" /><testcase classname="tests.test_booking" name="test_room_capacity_and_enabled_status_are_rechecked" time="0.038" /><testcase classname="tests.test_booking" name="test_concurrent_identical_submissions_commit_only_one_booking" time="0.299" /><testcase classname="tests.test_booking" name="test_concurrent_competing_actors_cannot_double_book" time="0.070" /><testcase classname="tests.test_booking" name="test_partial_slot_write_rolls_back_booking_draft_and_slots" time="0.043" /><testcase classname="tests.test_booking" name="test_missing_lookup_during_inflight_commit_remains_unknown" time="3.041" /><testcase classname="tests.test_booking" name="test_lost_commit_acknowledgment_can_be_looked_up_and_replayed" time="0.152" /><testcase classname="tests.test_booking" name="test_cancel_is_idempotent_retains_history_and_frees_slots" time="0.366" /><testcase classname="tests.test_booking" name="test_api_authentication_permissions_and_context_injection" time="2.649" /><testcase classname="tests.test_booking" name="test_api_real_database_roundtrip_and_cross_identity_access" time="3.584" /><testcase classname="tests.test_booking" name="test_tool_contracts_keep_identity_out_of_model_arguments" time="0.238" /><testcase classname="tests.test_case_generation" name="test_proposals_cannot_import_approval_identity_partition_or_arbitrary_assertions" time="0.001" /><testcase classname="tests.test_case_generation" name="test_valid_json_can_have_wrong_expected_and_is_not_semantically_approved" time="0.021" /><testcase classname="tests.test_case_generation" name="test_generation_drafts_idempotency_duplicate_order_and_role_bound_review" time="6.515" /><testcase classname="tests.test_case_generation" name="test_wrong_expected_requires_explicit_edit_new_revision_and_preserves_raw" time="0.088" /><testcase classname="tests.test_case_generation" name="test_current_dedup_recheck_preserves_initial_metrics_after_rejection" time="3.087" /><testcase classname="tests.test_case_generation" name="test_invalid_null_candidate_and_tampered_evidence_fail_safely" time="0.067" /><testcase classname="tests.test_case_generation" name="test_format_repairs_are_finite_and_bad_schema_is_separate[first_error0]" time="0.055" /><testcase classname="tests.test_case_generation" name="test_format_repairs_are_finite_and_bad_schema_is_separate[first_error1]" time="0.056" /><testcase classname="tests.test_case_generation" name="test_format_repairs_are_finite_and_bad_schema_is_separate[first_error2]" time="0.106" /><testcase classname="tests.test_case_generation" name="test_budget_atomic_global_missing_fail_closed_and_repairs_count" time="0.560" /><testcase classname="tests.test_contracts" name="test_multiturn_example_roundtrips_without_claiming_execution" time="0.002" /><testcase classname="tests.test_contracts" name="test_reference_clock_requires_explicit_timezone" time="0.001" /><testcase classname="tests.test_contracts" name="test_contract_rejects_unrecognized_assertions_and_identity_injection" time="0.001" /><testcase classname="tests.test_database" name="test_upgrade_downgrade_upgrade_and_metadata_drift" time="2.669"><failure message="sqlalchemy.exc.OperationalError: (pymysql.err.OperationalError) (1553, &quot;Cannot drop index 'ix_artifact_owner': needed in a foreign key constraint&quot;)&#10;[SQL: &#10;DROP INDEX ix_artifact_owner ON ac_artifacts]&#10;(Background on this error at: https://sqlalche.me/e/21/e3q8)">self = &lt;sqlalchemy.engine.base.Connection object at 0x000001BAD41C49B0&gt;
+dialect = &lt;sqlalchemy.dialects.mysql.pymysql.MySQLDialect_pymysql object at 0x000001BACF7EAD20&gt;
+context = &lt;sqlalchemy.dialects.mysql.mysqldb.MySQLExecutionContext_mysqldb object at 0x000001BAD02D85F0&gt;
+statement = &lt;sqlalchemy.dialects.mysql.base.MySQLDDLCompiler object at 0x000001BAD038B2C0&gt;
+parameters = [immutabledict({})]
+
+    def _exec_single_context(
+        self,
+        dialect: Dialect,
+        context: ExecutionContext,
+        statement: Union[str, Compiled],
+        parameters: Optional[_AnyMultiExecuteParams],
+    ) -&gt; CursorResult[Unpack[TupleAny]]:
+        """continue the _execute_context() method for a single DBAPI
+        cursor.execute() or cursor.executemany() call.
+    
+        """
+        if dialect.bind_typing is BindTyping.SETINPUTSIZES:
+            generic_setinputsizes = context._prepare_set_input_sizes()
+    
+            if generic_setinputsizes:
+                try:
+                    dialect.do_set_input_sizes(
+                        context.cursor, generic_setinputsizes, context
+                    )
+                except BaseException as e:
+                    self._handle_dbapi_exception(
+                        e, str(statement), parameters, None, context
+                    )
+    
+        cursor, str_statement, parameters = (
+            context.cursor,
+            context.statement,
+            context.parameters,
+        )
+    
+        effective_parameters: Optional[_AnyExecuteParams]
+    
+        if not context.executemany:
+            effective_parameters = parameters[0]
+        else:
+            effective_parameters = parameters
+    
+        evt_handled: bool = False
+        try:
+            if self._has_events or self.engine._has_events:
+                for fn in self.dispatch.before_cursor_execute:
+                    str_statement, effective_parameters = fn(
+                        self,
+                        cursor,
+                        str_statement,
+                        effective_parameters,
+                        context,
+                        context.executemany,
+                    )
+    
+            if self._echo:
+                self._log_info(str_statement)
+    
+                stats = context._get_cache_stats()
+    
+                if not self.engine.hide_parameters:
+                    self._log_info(
+                        "[%s] %r",
+                        stats,
+                        sql_util._repr_params(
+                            effective_parameters,
+                            batches=10,
+                            ismulti=context.executemany,
+                        ),
+                    )
+                else:
+                    self._log_info(
+                        "[%s] [SQL parameters hidden due to "
+                        "hide_parameters=True]",
+                        stats,
+                    )
+            if context.execute_style is ExecuteStyle.EXECUTEMANY:
+                effective_parameters = cast(
+                    "_CoreMultiExecuteParams", effective_parameters
+                )
+                if self.dialect._has_events:
+                    for fn in self.dialect.dispatch.do_executemany:
+                        if fn(
+                            cursor,
+                            str_statement,
+                            effective_parameters,
+                            context,
+                        ):
+                            evt_handled = True
+                            break
+                if not evt_handled:
+                    self.dialect.do_executemany(
+                        cursor,
+                        str_statement,
+                        effective_parameters,
+                        context,
+                    )
+            elif not effective_parameters and context.no_parameters:
+                if self.dialect._has_events:
+                    for fn in self.dialect.dispatch.do_execute_no_params:
+                        if fn(cursor, str_statement, context):
+                            evt_handled = True
+                            break
+                if not evt_handled:
+                    self.dialect.do_execute_no_params(
+                        cursor, str_statement, context
+                    )
+            else:
+                effective_parameters = cast(
+                    "_CoreSingleExecuteParams", effective_parameters
+                )
+                if self.dialect._has_events:
+                    for fn in self.dialect.dispatch.do_execute:
+                        if fn(
+                            cursor,
+                            str_statement,
+                            effective_parameters,
+                            context,
+                        ):
+                            evt_handled = True
+                            break
+                if not evt_handled:
+&gt;                   self.dialect.do_execute(
+                        cursor, str_statement, effective_parameters, context
+                    )
+
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1958: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\.venv\Lib\site-packages\sqlalchemy\engine\default.py:1192: in do_execute
+    cursor.execute(statement, parameters)
+backend\.venv\Lib\site-packages\pymysql\cursors.py:170: in execute
+    result = self._query(query)
+             ^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\pymysql\cursors.py:335: in _query
+    conn.query(q)
+backend\.venv\Lib\site-packages\pymysql\connections.py:581: in query
+    self._affected_rows = self._read_query_result(unbuffered=unbuffered)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\pymysql\connections.py:857: in _read_query_result
+    result.read()
+backend\.venv\Lib\site-packages\pymysql\connections.py:1290: in read
+    first_packet = self.connection._read_packet()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\pymysql\connections.py:810: in _read_packet
+    packet.raise_for_error()
+backend\.venv\Lib\site-packages\pymysql\protocol.py:219: in raise_for_error
+    err.raise_mysql_exception(self._data)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+data = b"\xff\x11\x06#HY000Cannot drop index 'ix_artifact_owner': needed in a foreign key constraint"
+
+    def raise_mysql_exception(data):
+        errno = struct.unpack("&lt;h", data[1:3])[0]
+        # https://dev.mysql.com/doc/dev/mysql-server/latest/page_protocol_basic_err_packet.html
+        # Error packet has optional sqlstate that is 5 bytes and starts with '#'.
+        sqlstate = None
+        if data[3] == 0x23:  # '#'
+            sqlstate = data[4:9].decode()
+            errval = data[9:].decode("utf-8", "replace")
+        else:
+            errval = data[3:].decode("utf-8", "replace")
+        errorclass = error_map.get(errno)
+        if errorclass is None:
+            errorclass = InternalError if errno &lt; 1000 else OperationalError
+&gt;       raise errorclass(errno, errval, sqlstate=sqlstate)
+E       pymysql.err.OperationalError: (1553, "Cannot drop index 'ix_artifact_owner': needed in a foreign key constraint")
+
+backend\.venv\Lib\site-packages\pymysql\err.py:154: OperationalError
+
+The above exception was the direct cause of the following exception:
+
+    def test_upgrade_downgrade_upgrade_and_metadata_drift():
+        with disposable_database() as engine:
+            migrate(engine)
+            tables = inspect(engine).get_table_names()
+            assert set(tables) == set(Base.metadata.tables) | {"alembic_version"}
+            with engine.connect() as connection:
+                assert (
+                    connection.scalar(
+                        text(
+                            "SELECT COUNT(*) FROM information_schema.triggers "
+                            "WHERE trigger_schema=DATABASE()"
+                        )
+                    )
+                    == 23
+                )
+                config = Config(str(PROJECT_ROOT / "backend" / "alembic.ini"))
+                config.attributes["connection"] = connection
+                command.check(config)
+&gt;           migrate(engine, "downgrade", "base")
+
+backend\tests\test_database.py:265: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\tests\test_database.py:112: in migrate
+    getattr(command, direction)(config, revision)
+backend\.venv\Lib\site-packages\alembic\command.py:534: in downgrade
+    script.run_env()
+backend\.venv\Lib\site-packages\alembic\script\base.py:550: in run_env
+    util.load_python_file(self.dir, "env.py")
+backend\.venv\Lib\site-packages\alembic\util\pyfiles.py:114: in load_python_file
+    module = load_module_py(module_id, path)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\alembic\util\pyfiles.py:132: in load_module_py
+    spec.loader.exec_module(module)  # type: ignore
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+&lt;frozen importlib._bootstrap_external&gt;:995: in exec_module
+    ???
+&lt;frozen importlib._bootstrap&gt;:488: in _call_with_frames_removed
+    ???
+backend\alembic\env.py:45: in &lt;module&gt;
+    run(config.attributes["connection"])
+backend\alembic\env.py:32: in run
+    context.run_migrations()
+&lt;string&gt;:8: in run_migrations
+    ???
+backend\.venv\Lib\site-packages\alembic\runtime\environment.py:970: in run_migrations
+    self.get_context().run_migrations(**kw)
+backend\.venv\Lib\site-packages\alembic\runtime\migration.py:616: in run_migrations
+    step.migration_fn(**kw)
+backend\alembic\versions\20261028_0004_t11_generation_evidence.py:43: in downgrade
+    op.drop_index("ix_artifact_owner", "ac_artifacts")
+&lt;string&gt;:8: in drop_index
+    ???
+&lt;string&gt;:3: in drop_index
+    ???
+backend\.venv\Lib\site-packages\alembic\operations\ops.py:1133: in drop_index
+    return operations.invoke(op)
+           ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\alembic\operations\base.py:448: in invoke
+    return fn(self, operation)
+           ^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\alembic\operations\toimpl.py:125: in drop_index
+    operations.impl.drop_index(
+backend\.venv\Lib\site-packages\alembic\ddl\impl.py:475: in drop_index
+    self._exec(schema.DropIndex(index, **kw))
+backend\.venv\Lib\site-packages\alembic\ddl\impl.py:252: in _exec
+    return conn.execute(construct, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1463: in execute
+    return meth(
+backend\.venv\Lib\site-packages\sqlalchemy\sql\ddl.py:203: in _execute_on_connection
+    return connection._execute_ddl(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1572: in _execute_ddl
+    ret = self._execute_context(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1837: in _execute_context
+    return self._exec_single_context(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1977: in _exec_single_context
+    self._handle_dbapi_exception(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:2347: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1958: in _exec_single_context
+    self.dialect.do_execute(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\default.py:1192: in do_execute
+    cursor.execute(statement, parameters)
+backend\.venv\Lib\site-packages\pymysql\cursors.py:170: in execute
+    result = self._query(query)
+             ^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\pymysql\cursors.py:335: in _query
+    conn.query(q)
+backend\.venv\Lib\site-packages\pymysql\connections.py:581: in query
+    self._affected_rows = self._read_query_result(unbuffered=unbuffered)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\pymysql\connections.py:857: in _read_query_result
+    result.read()
+backend\.venv\Lib\site-packages\pymysql\connections.py:1290: in read
+    first_packet = self.connection._read_packet()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\pymysql\connections.py:810: in _read_packet
+    packet.raise_for_error()
+backend\.venv\Lib\site-packages\pymysql\protocol.py:219: in raise_for_error
+    err.raise_mysql_exception(self._data)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+data = b"\xff\x11\x06#HY000Cannot drop index 'ix_artifact_owner': needed in a foreign key constraint"
+
+    def raise_mysql_exception(data):
+        errno = struct.unpack("&lt;h", data[1:3])[0]
+        # https://dev.mysql.com/doc/dev/mysql-server/latest/page_protocol_basic_err_packet.html
+        # Error packet has optional sqlstate that is 5 bytes and starts with '#'.
+        sqlstate = None
+        if data[3] == 0x23:  # '#'
+            sqlstate = data[4:9].decode()
+            errval = data[9:].decode("utf-8", "replace")
+        else:
+            errval = data[3:].decode("utf-8", "replace")
+        errorclass = error_map.get(errno)
+        if errorclass is None:
+            errorclass = InternalError if errno &lt; 1000 else OperationalError
+&gt;       raise errorclass(errno, errval, sqlstate=sqlstate)
+E       sqlalchemy.exc.OperationalError: (pymysql.err.OperationalError) (1553, "Cannot drop index 'ix_artifact_owner': needed in a foreign key constraint")
+E       [SQL: 
+E       DROP INDEX ix_artifact_owner ON ac_artifacts]
+E       (Background on this error at: https://sqlalche.me/e/21/e3q8)
+
+backend\.venv\Lib\site-packages\pymysql\err.py:154: OperationalError</failure></testcase><testcase classname="tests.test_database" name="test_seed_idempotency_and_no_password_reset" time="4.706" /><testcase classname="tests.test_database" name="test_json_snapshot_copies_input_and_preserves_chinese" time="0.052" /><testcase classname="tests.test_database" name="test_json_input_is_copied_before_first_flush" time="0.007" /><testcase classname="tests.test_database" name="test_utc_microseconds_roundtrip_and_naive_rejection" time="0.013" /><testcase classname="tests.test_database" name="test_duplicate_keys_and_missing_foreign_key_are_rejected" time="0.010" /><testcase classname="tests.test_database" name="test_draft_cannot_reference_room_from_another_scope" time="0.017" /><testcase classname="tests.test_database" name="test_booking_cannot_reuse_draft_of_another_scope_actor_or_room[scope]" time="0.015" /><testcase classname="tests.test_database" name="test_booking_cannot_reuse_draft_of_another_scope_actor_or_room[actor]" time="0.012" /><testcase classname="tests.test_database" name="test_booking_cannot_reuse_draft_of_another_scope_actor_or_room[room]" time="0.011" /><testcase classname="tests.test_database" name="test_slot_cannot_reference_booking_in_another_room" time="0.012" /><testcase classname="tests.test_database" name="test_draft_can_only_create_one_booking_even_with_a_new_idempotency_key" time="0.010" /><testcase classname="tests.test_database" name="test_demo_and_other_test_scope_survive_scoped_cleanup" time="0.062" /><testcase classname="tests.test_database" name="test_fixture_cleanup_requires_a_narrow_explicit_test_scope[demo]" time="0.001" /><testcase classname="tests.test_database" name="test_fixture_cleanup_requires_a_narrow_explicit_test_scope[]" time="0.001" /><testcase classname="tests.test_database" name="test_fixture_cleanup_requires_a_narrow_explicit_test_scope[test:]" time="0.001" /><testcase classname="tests.test_database" name="test_fixture_cleanup_requires_a_narrow_explicit_test_scope[%]" time="0.001" /><testcase classname="tests.test_database" name="test_fixture_cleanup_requires_a_narrow_explicit_test_scope[test:x' OR 1=1]" time="0.001" /><testcase classname="tests.test_database" name="test_fixture_cleanup_requires_a_narrow_explicit_test_scope[test:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx]" time="0.001" /><testcase classname="tests.test_database" name="test_fixture_used_by_recorded_execution_cannot_be_cleared" time="0.085" /><testcase classname="tests.test_database" name="test_review_approval_requires_reviewer_and_keeps_families_together" time="0.053" /><testcase classname="tests.test_database" name="test_execution_requires_an_approved_case" time="0.032" /><testcase classname="tests.test_database" name="test_frozen_versions_run_inputs_and_attempt_monotonicity" time="0.020" /><testcase classname="tests.test_database" name="test_knowledge_and_fault_revisions_are_insert_only" time="0.010" /><testcase classname="tests.test_database" name="test_parent_events_cannot_cross_execution_and_evidence_cannot_be_overwritten" time="0.022" /><testcase classname="tests.test_database" name="test_defect_cannot_claim_execution_from_another_target" time="0.362" /><testcase classname="tests.test_database_values" name="test_salted_passwords_verify_without_storing_plaintext" time="1.421" /><testcase classname="tests.test_database_values" name="test_snapshot_and_time_reject_ambiguous_or_invalid_values" time="0.001" /><testcase classname="tests.test_dependencies" name="test_ping_alone_cannot_mark_redis_checkpoint_capability_ready" time="0.002" /><testcase classname="tests.test_dependencies" name="test_configured_services_are_reachable_with_required_capabilities" time="0.099" /><testcase classname="tests.test_dialogue" name="test_date_people_correction_invalidates_old_draft_and_preserves_sources" time="4.720" /><testcase classname="tests.test_dialogue" name="test_long_conversation_keeps_denial_and_isolates_new_session" time="4.721" /><testcase classname="tests.test_dialogue" name="test_cross_operator_read_history_mutation_and_forged_json_are_denied" time="1.690" /><testcase classname="tests.test_dialogue" name="test_refusal_without_pending_draft_retains_its_source" time="0.571" /><testcase classname="tests.test_dialogue" name="test_retrieved_instructions_do_not_grant_model_confirmation" time="0.630" /><testcase classname="tests.test_dialogue" name="test_frozen_rules_missing_revision_empty_chunks_and_half_open_validity" time="2.541" /><testcase classname="tests.test_dialogue_values" name="test_compaction_preserves_source_correction_denial_original_key_and_business[rejected]" time="0.002" /><testcase classname="tests.test_dialogue_values" name="test_compaction_preserves_source_correction_denial_original_key_and_business[authorized]" time="0.002" /><testcase classname="tests.test_dialogue_values" name="test_compaction_preserves_source_correction_denial_original_key_and_business[consumed]" time="0.002" /><testcase classname="tests.test_dialogue_values" name="test_latest_block_and_structured_fact_overflow_fail_before_model" time="0.001" /><testcase classname="tests.test_dialogue_values" name="test_external_knowledge_is_data_and_cannot_replace_server_binding" time="0.000" /><testcase classname="tests.test_evaluation" name="test_auto_evaluation_persists_and_api_is_readonly_paginated_owned" time="5.750" /><testcase classname="tests.test_evaluation" name="test_failed_independent_expectation_is_not_a_platform_error" time="1.403" /><testcase classname="tests.test_evaluation" name="test_waiting_confirmation_is_not_evaluated_until_actual_submission" time="3.259" /><testcase classname="tests.test_evaluation" name="test_large_artifact_is_verified_and_late_damage_appends_error_without_rewriting" time="1.311" /><testcase classname="tests.test_evaluation" name="test_legacy_evaluation_appends_results_without_changing_manifest_or_events" time="1.203" /><testcase classname="tests.test_evaluation" name="test_full_event_wrapper_boundary_is_offloaded_before_row_limit" time="0.936" /><testcase classname="tests.test_evaluation_unit" name="test_wrong_sql_date_fails_even_when_reply_contains_expected_date" time="0.001" /><testcase classname="tests.test_evaluation_unit" name="test_date_is_asia_shanghai_and_matches_require_an_active_booking" time="0.000" /><testcase classname="tests.test_evaluation_unit" name="test_zero_is_observed_but_missing_sql_is_inconclusive" time="0.000" /><testcase classname="tests.test_evaluation_unit" name="test_blocked_tool_request_is_still_a_violation" time="0.006" /><testcase classname="tests.test_evaluation_unit" name="test_all_requests_are_checked_not_only_matching_arguments" time="0.000" /><testcase classname="tests.test_evaluation_unit" name="test_confirmation_has_input_and_current_draft_binding[valid-passed]" time="0.001" /><testcase classname="tests.test_evaluation_unit" name="test_confirmation_has_input_and_current_draft_binding[stale-failed]" time="0.000" /><testcase classname="tests.test_evaluation_unit" name="test_confirmation_has_input_and_current_draft_binding[missing-failed]" time="0.001" /><testcase classname="tests.test_evaluation_unit" name="test_confirmation_with_unobservable_input_cannot_be_proven" time="0.000" /><testcase classname="tests.test_evaluation_unit" name="test_receipt_reread_is_distinct_from_a_second_agent_submission[True-passed]" time="0.001" /><testcase classname="tests.test_evaluation_unit" name="test_receipt_reread_is_distinct_from_a_second_agent_submission[False-failed]" time="0.001" /><testcase classname="tests.test_evaluation_unit" name="test_post_commit_loss_lookup_uses_original_key_and_sql" time="0.000" /><testcase classname="tests.test_evaluation_unit" name="test_unknown_submission_cannot_change_key_or_resubmit[lookup_booking_by_request]" time="0.000" /><testcase classname="tests.test_evaluation_unit" name="test_unknown_submission_cannot_change_key_or_resubmit[confirm_booking]" time="0.000" /><testcase classname="tests.test_evaluation_unit" name="test_not_found_does_not_mean_not_committed" time="0.000" /><testcase classname="tests.test_evaluation_unit" name="test_readonly_not_found_does_not_invent_an_unknown_submission" time="0.000" /><testcase classname="tests.test_evaluation_unit" name="test_uniqueness_checks_requests_and_logical_booking_even_with_other_ids" time="0.000" /><testcase classname="tests.test_evaluation_unit" name="test_structured_business_result_cannot_disagree_with_sql" time="0.000" /><testcase classname="tests.test_evaluation_unit" name="test_state_and_reply_checks_do_not_infer_unsupported_meaning" time="0.001" /><testcase classname="tests.test_evaluation_unit" name="test_unknown_assertion_and_bad_integrity_never_pass" time="0.005" /><testcase classname="tests.test_evaluation_unit" name="test_task_fulfilment_is_independent_from_reliability" time="0.011" /><testcase classname="tests.test_evaluation_unit" name="test_dsl_extensions_require_version_and_unknown_fields_are_rejected" time="0.000" /><testcase classname="tests.test_evidence" name="test_run_events_order_rollback_and_idempotency" time="4.148" /><testcase classname="tests.test_evidence" name="test_actual_graph_events_tools_confirmation_and_readonly_replay" time="3.624" /><testcase classname="tests.test_evidence" name="test_large_artifact_redaction_hash_and_owner" time="0.596" /><testcase classname="tests.test_evidence" name="test_cursor_validation_and_authenticated_native_sse" time="8.325" /><testcase classname="tests.test_evidence" name="test_slow_send_deadline_unwinds_producer" time="0.025" /><testcase classname="tests.test_evidence" name="test_unlimited_is_explicit_role_scoped_and_not_a_silent_cap_override" time="0.007" /><testcase classname="tests.test_evidence" name="test_open_ledger_keeps_finite_run_limits_and_late_usage" time="1.870" /><testcase classname="tests.test_evidence" name="test_model_error_is_observed_and_readonly_replay_does_not_retry" time="1.816" /><testcase classname="tests.test_evidence" name="test_native_route_slow_send_cancels_all_response_tasks" time="1.284" /><testcase classname="tests.test_evidence" name="test_legacy_backfill_and_run_evidence_downgrade_guard" time="3.887"><failure message="sqlalchemy.exc.OperationalError: (pymysql.err.OperationalError) (1553, &quot;Cannot drop index 'ix_artifact_owner': needed in a foreign key constraint&quot;)&#10;[SQL: &#10;DROP INDEX ix_artifact_owner ON ac_artifacts]&#10;(Background on this error at: https://sqlalche.me/e/21/e3q8)">self = &lt;sqlalchemy.engine.base.Connection object at 0x000001BACB54D760&gt;
+dialect = &lt;sqlalchemy.dialects.mysql.pymysql.MySQLDialect_pymysql object at 0x000001BAD067CE90&gt;
+context = &lt;sqlalchemy.dialects.mysql.mysqldb.MySQLExecutionContext_mysqldb object at 0x000001BAD3F61D90&gt;
+statement = &lt;sqlalchemy.dialects.mysql.base.MySQLDDLCompiler object at 0x000001BAD0582E10&gt;
+parameters = [immutabledict({})]
+
+    def _exec_single_context(
+        self,
+        dialect: Dialect,
+        context: ExecutionContext,
+        statement: Union[str, Compiled],
+        parameters: Optional[_AnyMultiExecuteParams],
+    ) -&gt; CursorResult[Unpack[TupleAny]]:
+        """continue the _execute_context() method for a single DBAPI
+        cursor.execute() or cursor.executemany() call.
+    
+        """
+        if dialect.bind_typing is BindTyping.SETINPUTSIZES:
+            generic_setinputsizes = context._prepare_set_input_sizes()
+    
+            if generic_setinputsizes:
+                try:
+                    dialect.do_set_input_sizes(
+                        context.cursor, generic_setinputsizes, context
+                    )
+                except BaseException as e:
+                    self._handle_dbapi_exception(
+                        e, str(statement), parameters, None, context
+                    )
+    
+        cursor, str_statement, parameters = (
+            context.cursor,
+            context.statement,
+            context.parameters,
+        )
+    
+        effective_parameters: Optional[_AnyExecuteParams]
+    
+        if not context.executemany:
+            effective_parameters = parameters[0]
+        else:
+            effective_parameters = parameters
+    
+        evt_handled: bool = False
+        try:
+            if self._has_events or self.engine._has_events:
+                for fn in self.dispatch.before_cursor_execute:
+                    str_statement, effective_parameters = fn(
+                        self,
+                        cursor,
+                        str_statement,
+                        effective_parameters,
+                        context,
+                        context.executemany,
+                    )
+    
+            if self._echo:
+                self._log_info(str_statement)
+    
+                stats = context._get_cache_stats()
+    
+                if not self.engine.hide_parameters:
+                    self._log_info(
+                        "[%s] %r",
+                        stats,
+                        sql_util._repr_params(
+                            effective_parameters,
+                            batches=10,
+                            ismulti=context.executemany,
+                        ),
+                    )
+                else:
+                    self._log_info(
+                        "[%s] [SQL parameters hidden due to "
+                        "hide_parameters=True]",
+                        stats,
+                    )
+            if context.execute_style is ExecuteStyle.EXECUTEMANY:
+                effective_parameters = cast(
+                    "_CoreMultiExecuteParams", effective_parameters
+                )
+                if self.dialect._has_events:
+                    for fn in self.dialect.dispatch.do_executemany:
+                        if fn(
+                            cursor,
+                            str_statement,
+                            effective_parameters,
+                            context,
+                        ):
+                            evt_handled = True
+                            break
+                if not evt_handled:
+                    self.dialect.do_executemany(
+                        cursor,
+                        str_statement,
+                        effective_parameters,
+                        context,
+                    )
+            elif not effective_parameters and context.no_parameters:
+                if self.dialect._has_events:
+                    for fn in self.dialect.dispatch.do_execute_no_params:
+                        if fn(cursor, str_statement, context):
+                            evt_handled = True
+                            break
+                if not evt_handled:
+                    self.dialect.do_execute_no_params(
+                        cursor, str_statement, context
+                    )
+            else:
+                effective_parameters = cast(
+                    "_CoreSingleExecuteParams", effective_parameters
+                )
+                if self.dialect._has_events:
+                    for fn in self.dialect.dispatch.do_execute:
+                        if fn(
+                            cursor,
+                            str_statement,
+                            effective_parameters,
+                            context,
+                        ):
+                            evt_handled = True
+                            break
+                if not evt_handled:
+&gt;                   self.dialect.do_execute(
+                        cursor, str_statement, effective_parameters, context
+                    )
+
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1958: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\.venv\Lib\site-packages\sqlalchemy\engine\default.py:1192: in do_execute
+    cursor.execute(statement, parameters)
+backend\.venv\Lib\site-packages\pymysql\cursors.py:170: in execute
+    result = self._query(query)
+             ^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\pymysql\cursors.py:335: in _query
+    conn.query(q)
+backend\.venv\Lib\site-packages\pymysql\connections.py:581: in query
+    self._affected_rows = self._read_query_result(unbuffered=unbuffered)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\pymysql\connections.py:857: in _read_query_result
+    result.read()
+backend\.venv\Lib\site-packages\pymysql\connections.py:1290: in read
+    first_packet = self.connection._read_packet()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\pymysql\connections.py:810: in _read_packet
+    packet.raise_for_error()
+backend\.venv\Lib\site-packages\pymysql\protocol.py:219: in raise_for_error
+    err.raise_mysql_exception(self._data)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+data = b"\xff\x11\x06#HY000Cannot drop index 'ix_artifact_owner': needed in a foreign key constraint"
+
+    def raise_mysql_exception(data):
+        errno = struct.unpack("&lt;h", data[1:3])[0]
+        # https://dev.mysql.com/doc/dev/mysql-server/latest/page_protocol_basic_err_packet.html
+        # Error packet has optional sqlstate that is 5 bytes and starts with '#'.
+        sqlstate = None
+        if data[3] == 0x23:  # '#'
+            sqlstate = data[4:9].decode()
+            errval = data[9:].decode("utf-8", "replace")
+        else:
+            errval = data[3:].decode("utf-8", "replace")
+        errorclass = error_map.get(errno)
+        if errorclass is None:
+            errorclass = InternalError if errno &lt; 1000 else OperationalError
+&gt;       raise errorclass(errno, errval, sqlstate=sqlstate)
+E       pymysql.err.OperationalError: (1553, "Cannot drop index 'ix_artifact_owner': needed in a foreign key constraint")
+
+backend\.venv\Lib\site-packages\pymysql\err.py:154: OperationalError
+
+The above exception was the direct cause of the following exception:
+
+    def test_legacy_backfill_and_run_evidence_downgrade_guard():
+        with disposable_database("T06") as engine:
+            migrate(engine)
+            seed_database(engine, TEST_PASSWORD)
+            with Session(engine) as session, session.begin():
+                e = schema_execution(session)
+                run_id = e.run_id
+                row = TraceEvent(
+                    event_uuid=str(uuid4()),
+                    execution_id=e.id,
+                    attempt_no=1,
+                    seq_no=1,
+                    event_type="schema.test",
+                    occurred_at=datetime.now(UTC),
+                    payload_json={"old": True},
+                    payload_hash="0" * 64,
+                )
+                session.add(row)
+&gt;           migrate(engine, "downgrade", "20261025_0002")
+
+backend\tests\test_evidence.py:497: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\tests\test_database.py:112: in migrate
+    getattr(command, direction)(config, revision)
+backend\.venv\Lib\site-packages\alembic\command.py:534: in downgrade
+    script.run_env()
+backend\.venv\Lib\site-packages\alembic\script\base.py:550: in run_env
+    util.load_python_file(self.dir, "env.py")
+backend\.venv\Lib\site-packages\alembic\util\pyfiles.py:114: in load_python_file
+    module = load_module_py(module_id, path)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\alembic\util\pyfiles.py:132: in load_module_py
+    spec.loader.exec_module(module)  # type: ignore
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+&lt;frozen importlib._bootstrap_external&gt;:995: in exec_module
+    ???
+&lt;frozen importlib._bootstrap&gt;:488: in _call_with_frames_removed
+    ???
+backend\alembic\env.py:45: in &lt;module&gt;
+    run(config.attributes["connection"])
+backend\alembic\env.py:32: in run
+    context.run_migrations()
+&lt;string&gt;:8: in run_migrations
+    ???
+backend\.venv\Lib\site-packages\alembic\runtime\environment.py:970: in run_migrations
+    self.get_context().run_migrations(**kw)
+backend\.venv\Lib\site-packages\alembic\runtime\migration.py:616: in run_migrations
+    step.migration_fn(**kw)
+backend\alembic\versions\20261028_0004_t11_generation_evidence.py:43: in downgrade
+    op.drop_index("ix_artifact_owner", "ac_artifacts")
+&lt;string&gt;:8: in drop_index
+    ???
+&lt;string&gt;:3: in drop_index
+    ???
+backend\.venv\Lib\site-packages\alembic\operations\ops.py:1133: in drop_index
+    return operations.invoke(op)
+           ^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\alembic\operations\base.py:448: in invoke
+    return fn(self, operation)
+           ^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\alembic\operations\toimpl.py:125: in drop_index
+    operations.impl.drop_index(
+backend\.venv\Lib\site-packages\alembic\ddl\impl.py:475: in drop_index
+    self._exec(schema.DropIndex(index, **kw))
+backend\.venv\Lib\site-packages\alembic\ddl\impl.py:252: in _exec
+    return conn.execute(construct, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1463: in execute
+    return meth(
+backend\.venv\Lib\site-packages\sqlalchemy\sql\ddl.py:203: in _execute_on_connection
+    return connection._execute_ddl(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1572: in _execute_ddl
+    ret = self._execute_context(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1837: in _execute_context
+    return self._exec_single_context(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1977: in _exec_single_context
+    self._handle_dbapi_exception(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:2347: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1958: in _exec_single_context
+    self.dialect.do_execute(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\default.py:1192: in do_execute
+    cursor.execute(statement, parameters)
+backend\.venv\Lib\site-packages\pymysql\cursors.py:170: in execute
+    result = self._query(query)
+             ^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\pymysql\cursors.py:335: in _query
+    conn.query(q)
+backend\.venv\Lib\site-packages\pymysql\connections.py:581: in query
+    self._affected_rows = self._read_query_result(unbuffered=unbuffered)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\pymysql\connections.py:857: in _read_query_result
+    result.read()
+backend\.venv\Lib\site-packages\pymysql\connections.py:1290: in read
+    first_packet = self.connection._read_packet()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\pymysql\connections.py:810: in _read_packet
+    packet.raise_for_error()
+backend\.venv\Lib\site-packages\pymysql\protocol.py:219: in raise_for_error
+    err.raise_mysql_exception(self._data)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+data = b"\xff\x11\x06#HY000Cannot drop index 'ix_artifact_owner': needed in a foreign key constraint"
+
+    def raise_mysql_exception(data):
+        errno = struct.unpack("&lt;h", data[1:3])[0]
+        # https://dev.mysql.com/doc/dev/mysql-server/latest/page_protocol_basic_err_packet.html
+        # Error packet has optional sqlstate that is 5 bytes and starts with '#'.
+        sqlstate = None
+        if data[3] == 0x23:  # '#'
+            sqlstate = data[4:9].decode()
+            errval = data[9:].decode("utf-8", "replace")
+        else:
+            errval = data[3:].decode("utf-8", "replace")
+        errorclass = error_map.get(errno)
+        if errorclass is None:
+            errorclass = InternalError if errno &lt; 1000 else OperationalError
+&gt;       raise errorclass(errno, errval, sqlstate=sqlstate)
+E       sqlalchemy.exc.OperationalError: (pymysql.err.OperationalError) (1553, "Cannot drop index 'ix_artifact_owner': needed in a foreign key constraint")
+E       [SQL: 
+E       DROP INDEX ix_artifact_owner ON ac_artifacts]
+E       (Background on this error at: https://sqlalche.me/e/21/e3q8)
+
+backend\.venv\Lib\site-packages\pymysql\err.py:154: OperationalError</failure></testcase><testcase classname="tests.test_executor" name="test_manifest_idempotency_review_and_isolation" time="4.804" /><testcase classname="tests.test_executor" name="test_invalid_frozen_input_rejected[draft]" time="1.847" /><testcase classname="tests.test_executor" name="test_invalid_frozen_input_rejected[hash]" time="1.966" /><testcase classname="tests.test_executor" name="test_invalid_frozen_input_rejected[version]" time="1.053" /><testcase classname="tests.test_executor" name="test_invalid_frozen_input_rejected[budget]" time="1.957" /><testcase classname="tests.test_executor" name="test_publish_failure_is_durable_and_scan_retries" time="1.323" /><testcase classname="tests.test_executor" name="test_claim_race_and_stale_token_cannot_write_business" time="1.336" /><testcase classname="tests.test_executor" name="test_lease_expiring_inside_business_transaction_rolls_back" time="0.914" /><testcase classname="tests.test_executor" name="test_offline_completion_is_evaluated_from_facts_and_duplicate_noop" time="2.652" /><testcase classname="tests.test_executor" name="test_wait_releases_worker_and_legitimate_input_resumes_same_session" time="7.077" /><testcase classname="tests.test_executor" name="test_cancellation_revokes_active_lease_and_preserves_booking" time="1.283" /><testcase classname="tests.test_executor" name="test_atomic_budget_reservations_unknown_and_idempotent_settlement" time="1.201" /><testcase classname="tests.test_executor" name="test_api_auth_validation_creation_is_nonblocking_and_owner_scoped" time="3.034" /><testcase classname="tests.test_executor" name="test_explicit_recovery_preserves_cursor_scope_and_attempts" time="5.445" /><testcase classname="tests.test_executor" name="test_hard_execution_limits_are_enforced[max_steps]" time="3.085" /><testcase classname="tests.test_executor" name="test_hard_execution_limits_are_enforced[max_tokens]" time="0.845" /><testcase classname="tests.test_executor" name="test_hard_execution_limits_are_enforced[max_model_calls]" time="1.148" /><testcase classname="tests.test_executor" name="test_deadline_does_not_reset_on_recovery_and_heartbeat_cannot_revive_it" time="1.190" /><testcase classname="tests.test_executor" name="test_partial_action_without_receipt_is_not_automatically_replayed" time="1.948" /><testcase classname="tests.test_executor" name="test_authorization_cap_is_shared_across_different_run_locks" time="1.933" /><testcase classname="tests.test_executor" name="test_last_finisher_uses_current_statuses_despite_repeatable_read_snapshot" time="1.185" /><testcase classname="tests.test_executor" name="test_waiting_input_expires_without_new_user_input_or_model_request" time="1.533" /><testcase classname="tests.test_faults" name="test_real_tool_matrix_control_vs_four_effects[None]" time="8.622" /><testcase classname="tests.test_faults" name="test_real_tool_matrix_control_vs_four_effects[F01]" time="5.576" /><testcase classname="tests.test_faults" name="test_real_tool_matrix_control_vs_four_effects[F02]" time="5.481" /><testcase classname="tests.test_faults" name="test_real_tool_matrix_control_vs_four_effects[F03]" time="7.065" /><testcase classname="tests.test_faults" name="test_real_tool_matrix_control_vs_four_effects[F04]" time="7.503" /><testcase classname="tests.test_faults" name="test_fault_configuration_rejects_unsafe_or_unsupported_values[F01-change0]" time="0.001" /><testcase classname="tests.test_faults" name="test_fault_configuration_rejects_unsafe_or_unsupported_values[F02-change1]" time="0.000" /><testcase classname="tests.test_faults" name="test_fault_configuration_rejects_unsafe_or_unsupported_values[F03-change2]" time="0.000" /><testcase classname="tests.test_faults" name="test_fault_configuration_rejects_unsafe_or_unsupported_values[F03-change3]" time="0.000" /><testcase classname="tests.test_faults" name="test_fault_configuration_rejects_unsafe_or_unsupported_values[F04-change4]" time="0.000" /><testcase classname="tests.test_faults" name="test_fault_configuration_rejects_unsafe_or_unsupported_values[F04-change5]" time="0.000" /><testcase classname="tests.test_faults" name="test_fault_configuration_rejects_unsafe_or_unsupported_values[F01-change6]" time="0.000" /><testcase classname="tests.test_faults" name="test_fault_configuration_rejects_unsafe_or_unsupported_values[F01-change7]" time="0.000" /><testcase classname="tests.test_faults" name="test_fault_configuration_rejects_unsafe_or_unsupported_values[F01-change8]" time="0.000" /><testcase classname="tests.test_faults" name="test_fault_configuration_rejects_unsafe_or_unsupported_values[F01-change9]" time="0.000" /><testcase classname="tests.test_faults" name="test_profile_api_auth_idempotent_revision_and_immutable_storage" time="3.470" /><testcase classname="tests.test_faults" name="test_persistent_counts_receipts_seed_and_run_isolation" time="2.417" /><testcase classname="tests.test_faults" name="test_unresolved_injection_cannot_blindly_reexecute_and_failed_original_not_claimed" time="2.687" /><testcase classname="tests.test_faults" name="test_seeded_window_repeats_across_independent_executions" time="5.077" /><testcase classname="tests.test_health" name="test_liveness_is_independent_of_dependencies_and_correlates_requests" time="0.025" /><testcase classname="tests.test_health" name="test_readiness_fails_when_a_required_dependency_is_unavailable" time="0.029" /><testcase classname="tests.test_health" name="test_public_config_never_exposes_credentials_or_claims_connectivity" time="0.026" /><testcase classname="tests.test_health" name="test_run_endpoint_requires_authentication_and_has_uniform_error" time="0.254" /><testcase classname="tests.test_health" name="test_unexpected_failure_does_not_echo_sensitive_exception" time="0.011" /><testcase classname="tests.test_metamorphic" name="test_catalog_exact_human_confirmed_delta_and_no_automatic_equivalence" time="0.003" /><testcase classname="tests.test_metamorphic" name="test_shared_wrong_answer_missing_condition_and_corrupt_evidence_never_pass" time="0.002" /><testcase classname="tests.test_metamorphic" name="test_normalization_equates_duration_and_timezone_without_erasing_true_change" time="0.105" /><testcase classname="tests.test_metamorphic" name="test_independent_lanes_detect_plausible_but_wrong_observations[fields]" time="0.014" /><testcase classname="tests.test_metamorphic" name="test_independent_lanes_detect_plausible_but_wrong_observations[tools]" time="0.034" /><testcase classname="tests.test_metamorphic" name="test_independent_lanes_detect_plausible_but_wrong_observations[business]" time="0.054" /><testcase classname="tests.test_metamorphic" name="test_independent_lanes_detect_plausible_but_wrong_observations[missing_query]" time="0.020" /><testcase classname="tests.test_metamorphic" name="test_paraphrase_participant_unit_is_validated_without_guessing_count" time="0.039" /><testcase classname="tests.test_metamorphic" name="test_range_daypart_inherits_only_within_explicit_source_range[\u4e0b\u5348\u4e24\u70b9\u5230\u4e09\u70b9-\u4e09\u70b9-15:00-True]" time="0.001" /><testcase classname="tests.test_metamorphic" name="test_range_daypart_inherits_only_within_explicit_source_range[\u4e0b\u5348\u4e24\u70b9\u5230\u4e09\u70b9-\u4e09\u70b9-03:00-False]" time="0.001" /><testcase classname="tests.test_metamorphic" name="test_range_daypart_inherits_only_within_explicit_source_range[\u4e0b\u53482\u70b9\u81f33\u70b9-2\u70b9-14:00-True]" time="0.001" /><testcase classname="tests.test_metamorphic" name="test_range_daypart_inherits_only_within_explicit_source_range[\u4e0a\u5348\u4e5d\u70b9\u5230\u5341\u70b9-\u5341\u70b9-10:00-True]" time="0.001" /><testcase classname="tests.test_metamorphic" name="test_range_daypart_inherits_only_within_explicit_source_range[\u4e0b\u5348\u4e24\u70b9\u5f00\u4f1a\u3002\u53e6\u5916\u4e09\u70b9\u8fd9\u4e2a\u65f6\u523b\u5c1a\u672a\u660e\u786e\u4e0a\u5348\u6216\u4e0b\u5348\u3002-\u4e09\u70b9-15:00-False]" time="0.001" /><testcase classname="tests.test_metamorphic" name="test_range_daypart_inherits_only_within_explicit_source_range[\u4e0a\u5348\u4e5d\u70b9\u5230\u5341\u70b9\uff0c\u4e0b\u5348\u4e09\u70b9\u518d\u804a\u3002-\u4e5d\u70b9-21:00-False]" time="0.026" /><testcase classname="tests.test_metamorphic" name="test_t10_approval_is_separate_and_retains_closed_switch" time="0.008" /><testcase classname="tests.test_metamorphic" name="test_capacity_refusal_needs_applicable_source_not_model_self_assurance[supported-A101 \u5bb9\u91cf 20 \u4eba\uff0c09:00\u201421:00 \u5f00\u653e\u3002-True]" time="0.001" /><testcase classname="tests.test_metamorphic" name="test_capacity_refusal_needs_applicable_source_not_model_self_assurance[evidence_conflict-A101 \u5bb9\u91cf 20 \u4eba-False]" time="0.004" /><testcase classname="tests.test_metamorphic" name="test_capacity_refusal_needs_applicable_source_not_model_self_assurance[supported-B201 \u5bb9\u91cf 40 \u4eba-False]" time="0.001" /><testcase classname="tests.test_metamorphic" name="test_capacity_refusal_needs_applicable_source_not_model_self_assurance[supported-A101 \u5bb9\u91cf 40 \u4eba-False]" time="0.008" /><testcase classname="tests.test_metamorphic" name="test_sql_catalog_atomic_family_gate_owner_and_derived_read_only" time="37.057" /></testsuite></testsuites>

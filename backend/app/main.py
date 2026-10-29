@@ -10,11 +10,17 @@ from app import __version__
 from app.agents.errors import AgentError
 from app.api.agent import router as agent_router
 from app.api.booking import router as booking_router
+from app.api.cases import router as cases_router
+from app.api.datasets import router as datasets_router
 from app.api.evaluation import router as evaluation_router
 from app.api.evidence import router as evidence_router
 from app.api.faults import router as faults_router
+from app.api.judging import router as judging_router
+from app.api.metamorphic import router as metamorphic_router
+from app.api.reports import router as reports_router
 from app.api.routes import router
 from app.api.runs import router as runs_router
+from app.api.workbench import router as workbench_router
 from app.core.config import get_settings
 from app.evidence.streaming import SSESendDeadlineMiddleware
 from app.services.booking import BookingError
@@ -28,6 +34,10 @@ def create_app() -> FastAPI:
         version=__version__,
         description="预约Agent、持久批量执行、故障注入、只读证据与独立规则断言。",
     )
+    app.include_router(judging_router)
+    app.include_router(datasets_router)
+    app.include_router(workbench_router)
+    app.include_router(reports_router)
 
     @app.middleware("http")
     async def request_context(request: Request, call_next):
@@ -107,6 +117,8 @@ def create_app() -> FastAPI:
     app.include_router(evidence_router)
     app.include_router(faults_router)
     app.include_router(evaluation_router)
+    app.include_router(metamorphic_router)
+    app.include_router(cases_router)
 
     @app.exception_handler(AgentError)
     async def agent_error(request: Request, exc: AgentError):

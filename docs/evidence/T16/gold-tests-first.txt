@@ -1,0 +1,66 @@
+F...                                                                     [100%]
+================================== FAILURES ===================================
+__ test_gold_requires_distinct_execution_label_auth_hash_and_immutable_seal ___
+
+    @pytest.mark.skipif(os.getenv("AC_INTEGRATION") != "1", reason="Disposable T16 MySQL control")
+    def test_gold_requires_distinct_execution_label_auth_hash_and_immutable_seal():
+        s = Settings()
+        with disposable_database("T16") as engine:
+            migrate(engine)
+            seed_database(engine, TEST_PASSWORD)
+            service = LabelService(engine, None, s)
+            batch = uuid4()
+            observed = {"dialogue": [], "reply": "明确离线机械控制，不是真实金标准", "evidence": []}
+            samples = [
+                {
+                    "id": str(i),
+                    "sample_hash": canonical_hash(observed),
+                    "payload": observed,
+                    "provenance": {"kind": "synthetic infrastructure control"},
+                }
+                for i in range(30)
+            ]
+            dataset = {"samples": samples, "view": "full_observations"}
+            dataset["dataset_hash"] = canonical_hash(dataset)
+            service._append(
+                1,
+                str(batch),
+                "judge_request",
+                {
+                    "dataset": dataset,
+                    "manifest": manifest(s),
+                    "mode": "offline_double",
+                },
+                "request",
+            )
+            base = {
+                "support": "supported",
+                "explanation": "reasonable",
+                "sample_hash": canonical_hash(observed),
+                "note": "机械测试，非实际人工标签",
+            }
+            with pytest.raises(ValidationError):
+                ExecutionGoldLabel(request_id=uuid4(), **base)
+            with pytest.raises(AgentError) as missing:
+                service.label(2, batch, "0", HumanLabel(request_id=uuid4(), **base))
+            assert missing.value.code == "execution_gold_required"
+            request = ExecutionGoldLabel(request_id=uuid4(), execution_problem="clear", **base)
+            with pytest.raises(AgentError) as wrong_role:
+                service.label_execution(1, batch, "0", request)
+>           assert wrong_role.value.status == 403
+                   ^^^^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: 'AgentError' object has no attribute 'status'
+
+tests\test_formal_gold.py:65: AttributeError
+---------------------------- Captured stderr call -----------------------------
+INFO  [alembic.runtime.migration] Context impl MySQLImpl.
+INFO  [alembic.runtime.migration] Will assume non-transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 20261025_0001, T02 initial sixteen-table schema
+INFO  [alembic.runtime.migration] Running upgrade 20261025_0001 -> 20261025_0002, T04 bind pending drafts to a trusted conversation without adding tables.
+INFO  [alembic.runtime.migration] Running upgrade 20261025_0002 -> 20261026_0003, T06 real run-level events and transactionally allocated per-run order.
+INFO  [alembic.runtime.migration] Running upgrade 20261026_0003 -> 20261028_0004, T11 owner-bound immutable evidence without inventing Agent test runs.
+INFO  [alembic.runtime.migration] Running upgrade 20261028_0004 -> 20261028_0005, T12 allow owner-bound semantic calibration evidence, preserving sixteen tables.
+INFO  [alembic.runtime.migration] Running upgrade 20261028_0005 -> 20261028_0006, T13 immutable owner-bound dataset approval; same sixteen domain tables.
+=========================== short test summary info ===========================
+FAILED tests/test_formal_gold.py::test_gold_requires_distinct_execution_label_auth_hash_and_immutable_seal
+1 failed, 3 passed in 4.74s

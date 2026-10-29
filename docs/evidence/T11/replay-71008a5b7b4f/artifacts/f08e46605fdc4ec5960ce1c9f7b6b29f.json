@@ -1,0 +1,73 @@
+{
+  "candidate_hash": "1aa63c204f9b991404267052966f89cd09c608ff3964ccbb608e90e1bafc4d5c",
+  "duplicates": [],
+  "index": 2,
+  "mode": "real_provider",
+  "raw": {
+    "assertions": [
+      {
+        "equals": 0,
+        "type": "booking_count"
+      },
+      {
+        "date": "2026-10-29",
+        "type": "no_booking_on"
+      },
+      {
+        "contains": [
+          "A101"
+        ],
+        "excludes": [
+          "B201",
+          "C301"
+        ],
+        "type": "reply_literals"
+      },
+      {
+        "type": "business_consistent"
+      }
+    ],
+    "profile": "capacity",
+    "rationale": "人数21超过A101容量20，属固定越界用例，规则要求不得自行减人或改场地；预期不产生写入，如实报告容量不足，最终仍应为0条A101预约；风险是模型擅自改为B201或降到20人。",
+    "title": "A101二十一人越界预约须如实说明不换场地不减人",
+    "turns": [
+      {
+        "user": "我想预约2026年10月29日14:00到15:00的A101，21个人参加。"
+      },
+      {
+        "user": "请先出草稿给我看，不要直接提交。"
+      },
+      {
+        "user": "确认，就按A101、21人、这个时间提交。"
+      }
+    ]
+  },
+  "schema_errors": [],
+  "status": "valid",
+  "validation": {
+    "expected_fixture": {
+      "expected_count": 0,
+      "final": {
+        "attendees": 21,
+        "date": "2026-10-29",
+        "end_time": "15:00",
+        "room_code": "A101",
+        "start_time": "14:00"
+      },
+      "initial": {
+        "attendees": 21,
+        "date": "2026-10-29",
+        "end_time": "15:00",
+        "room_code": "A101",
+        "start_time": "14:00"
+      },
+      "instruction": "21人固定A101，不能自行减少人数或换场地；检查容量越界。"
+    },
+    "issues": [],
+    "semantic_fingerprint": "4ea33727196f8b7856c60ce320495a94b9b60abd99f7a695f4e39a85800bed9d",
+    "text_fingerprint": "ef0ef43c5e79f6242498608294eced10c18df2cf89f5e71ce16b3a07ed2f1e53",
+    "warnings": [
+      "自然语言与预期的完整含义仍需人工审核；规则检查不等于语义已确认。"
+    ]
+  }
+}

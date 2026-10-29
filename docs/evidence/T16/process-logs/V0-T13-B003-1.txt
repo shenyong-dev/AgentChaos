@@ -1,0 +1,108 @@
+Traceback (most recent call last):
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1958, in _exec_single_context
+    self.dialect.do_execute(
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\sqlalchemy\engine\default.py", line 1192, in do_execute
+    cursor.execute(statement, parameters)
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\pymysql\cursors.py", line 170, in execute
+    result = self._query(query)
+             ^^^^^^^^^^^^^^^^^^
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\pymysql\cursors.py", line 335, in _query
+    conn.query(q)
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\pymysql\connections.py", line 581, in query
+    self._affected_rows = self._read_query_result(unbuffered=unbuffered)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\pymysql\connections.py", line 857, in _read_query_result
+    result.read()
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\pymysql\connections.py", line 1290, in read
+    first_packet = self.connection._read_packet()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\pymysql\connections.py", line 810, in _read_packet
+    packet.raise_for_error()
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\pymysql\protocol.py", line 219, in raise_for_error
+    err.raise_mysql_exception(self._data)
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\pymysql\err.py", line 154, in raise_mysql_exception
+    raise errorclass(errno, errval, sqlstate=sqlstate)
+pymysql.err.OperationalError: (1213, 'Deadlock found when trying to get lock; try restarting transaction')
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "D:\AgentChaos\backend\experiments\episodes.py", line 269, in <module>
+    main()
+  File "D:\AgentChaos\backend\experiments\episodes.py", line 249, in main
+    result = run(engine, redis, s, execution_uuid)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AgentChaos\.local\t16\formal-v0\backend\app\executors\runner.py", line 32, in run_execution
+    claim = service.claim(execution_uuid)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AgentChaos\.local\t16\formal-v0\backend\app\executors\service.py", line 622, in claim
+    append_event(
+  File "D:\AgentChaos\.local\t16\formal-v0\backend\app\evidence\recorder.py", line 206, in append_event
+    session.flush()
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4543, in flush
+    self._flush(objects)
+  File "<sqlalchemy generated warned() wrapper for sqlalchemy.orm.session.Session._flush>", line 2, in _flush
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\sqlalchemy\util\deprecations.py", line 281, in warned
+    return fn(*args, **kwargs)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4686, in _flush
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 166, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4647, in _flush
+    flush_context.execute()
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py", line 467, in execute
+    rec.execute(self)
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py", line 643, in execute
+    util.preloaded.orm_persistence._save_obj(
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\sqlalchemy\orm\persistence.py", line 92, in _save_obj
+    _emit_insert_statements(
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\sqlalchemy\orm\persistence.py", line 1237, in _emit_insert_statements
+    result = connection.execute(
+             ^^^^^^^^^^^^^^^^^^^
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1463, in execute
+    return meth(
+           ^^^^^
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\sqlalchemy\sql\elements.py", line 533, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1683, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1837, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1977, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2347, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1958, in _exec_single_context
+    self.dialect.do_execute(
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\sqlalchemy\engine\default.py", line 1192, in do_execute
+    cursor.execute(statement, parameters)
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\pymysql\cursors.py", line 170, in execute
+    result = self._query(query)
+             ^^^^^^^^^^^^^^^^^^
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\pymysql\cursors.py", line 335, in _query
+    conn.query(q)
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\pymysql\connections.py", line 581, in query
+    self._affected_rows = self._read_query_result(unbuffered=unbuffered)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\pymysql\connections.py", line 857, in _read_query_result
+    result.read()
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\pymysql\connections.py", line 1290, in read
+    first_packet = self.connection._read_packet()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\pymysql\connections.py", line 810, in _read_packet
+    packet.raise_for_error()
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\pymysql\protocol.py", line 219, in raise_for_error
+    err.raise_mysql_exception(self._data)
+  File "D:\AgentChaos\backend\.venv\Lib\site-packages\pymysql\err.py", line 154, in raise_mysql_exception
+    raise errorclass(errno, errval, sqlstate=sqlstate)
+sqlalchemy.exc.OperationalError: (pymysql.err.OperationalError) (1213, 'Deadlock found when trying to get lock; try restarting transaction')
+[SQL: INSERT INTO ac_trace_events (event_uuid, run_id, run_seq_no, execution_id, attempt_no, seq_no, event_type, node_name, node_visit_no, tool_call_id, parent_event_uuid, occurred_at, payload_json, payload_hash) VALUES (%(event_uuid)s, %(run_id)s, %(run_seq_no)s, %(execution_id)s, %(attempt_no)s, %(seq_no)s, %(event_type)s, %(node_name)s, %(node_visit_no)s, %(tool_call_id)s, %(parent_event_uuid)s, %(occurred_at)s, %(payload_json)s, %(payload_hash)s)]
+[parameters: {'event_uuid': 'af89acf1-a1d0-4ff7-9972-f574358b2004', 'run_id': 37, 'run_seq_no': 0, 'execution_id': 37, 'attempt_no': 1, 'seq_no': 1, 'event_type': 'execution.started', 'node_name': None, 'node_visit_no': None, 'tool_call_id': None, 'parent_event_uuid': None, 'occurred_at': datetime.datetime(2026, 10, 29, 12, 53, 37, 437760), 'payload_json': '{"content_hash": "c6583d5f474acf03b8bac7e647ff10c774483fbb1ea23a245b6fca93fffe82f0", "evidence_refs": [], "payload": {"after": null, "artifact": null ... (24 characters truncated) ... : [], "counts": null, "kind": "execution.started", "output": null, "reason": "claimed", "status": "running", "usage": null}, "schema_version": "1.3"}', 'payload_hash': '870611fde4567ae063021b17911cf4d1765b492ef17c8d68050d40b2a7352836'}]
+(Background on this error at: https://sqlalche.me/e/21/e3q8)
