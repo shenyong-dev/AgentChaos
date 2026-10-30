@@ -11,8 +11,10 @@ from app.executors.budget import (
     AUTHORIZATION,
     DIALOGUE_AUTHORIZATION,
     FAULT_AUTHORIZATION,
+    FIELD_SOURCE_AUTHORIZATION,
     METAMORPHIC_AUTHORIZATION,
     OPEN_AUTHORIZATION,
+    PLATFORM_AUTHORIZATION,
     authorization_limit,
 )
 
@@ -28,6 +30,8 @@ def main():
             FAULT_AUTHORIZATION,
             DIALOGUE_AUTHORIZATION,
             METAMORPHIC_AUTHORIZATION,
+            PLATFORM_AUTHORIZATION,
+            FIELD_SOURCE_AUTHORIZATION,
         ],
     )
     args = parser.parse_args()

@@ -1,0 +1,16 @@
+{
+  "schema": "t17a-development-v1",
+  "source": "assistant_designed_development_cases_not_independent_human_gold_or_holdout",
+  "reference_clock": "2026-10-30T09:00:00+08:00",
+  "family": "T17A-explicit-count-boundaries",
+  "cases": [
+    {"key":"negative","turns":["明天A101，14:00到15:00，-2人，请预约。","确认"],"bookings":0},
+    {"key":"decimal","turns":["明天A101，14:00到15:00，2.5人，请预约。","确认"],"bookings":0},
+    {"key":"range","turns":["明天A101，14:00到15:00，8到12人，请预约。","确认"],"bookings":0},
+    {"key":"chinese","turns":["明天A101，14:00到15:00，十二人，请预约并给我草稿。","确认"],"bookings":1,"attendees":12},
+    {"key":"arabic","turns":["明天A101，14:00到15:00，12人，请预约并给我草稿。","确认"],"bookings":1,"attendees":12},
+    {"key":"correction","turns":["明天A101，14:00到15:00，8人，请先给预约草稿。","人数改为12人，请更新草稿。","确认"],"bookings":1,"attendees":12},
+    {"key":"recovery","turns":["明天A101，14:00到15:00，8人，请先给预约草稿。","人数改为-2人，先不要提交。","人数更正为12人，请重新给出草稿。","确认"],"bookings":1,"attendees":12},
+    {"key":"negation","turns":["明天A101，14:00到15:00，不是8人，改为12人。请给预约草稿。","确认"],"bookings":1,"attendees":12}
+  ]
+}

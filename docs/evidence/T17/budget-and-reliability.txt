@@ -1,0 +1,89 @@
+.....FF                                                                  [100%]
+================================== FAILURES ===================================
+_______________ test_t17_run_cap_and_missing_ledger_fail_closed _______________
+
+run = (<app.executors.service.RunService object at 0x00000153CE6CCA40>, <function run.<locals>.make at 0x00000153CFCAE3E0>, ...eb801e5c21d4e1d3f', executor_lease_seconds=45, sse_max_seconds=30, sse_send_timeout_seconds=5.0, sse_max_backlog=1000))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x00000153CE6CDF40>
+
+    def test_t17_run_cap_and_missing_ledger_fail_closed(run, monkeypatch):
+        budget, redis = platform_budget(run, monkeypatch, amount=500_000)
+        with pytest.raises(AgentError) as missing:
+            budget.reserve(100, 100)
+>       assert missing.value.code == "budget_ledger_unavailable" and not redis.exists(budget.key)
+E       AssertionError: assert ('model_budget_exhausted' == 'budget_ledger_unavailable'
+E         
+E         - budget_ledger_unavailable
+E         + model_budget_exhausted)
+
+backend\tests\test_reliability.py:200: AssertionError
+_____________ test_redis_reservation_survives_sql_mirror_rollback _____________
+
+run = (<app.executors.service.RunService object at 0x00000153CFDB61E0>, <function run.<locals>.make at 0x00000153CE7FF7E0>, ...eb801e5c21d4e1d3f', executor_lease_seconds=45, sse_max_seconds=30, sse_send_timeout_seconds=5.0, sse_max_backlog=1000))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x00000153CFD479B0>
+
+    def test_redis_reservation_survives_sql_mirror_rollback(run, monkeypatch):
+        budget, redis = platform_budget(run, monkeypatch)
+        redis.hset(budget.key, "limit", 1_000_000)
+    
+        def broken_mirror(*_):
+            raise RuntimeError("explicit SQL mirror failure after Redis reservation")
+    
+        monkeypatch.setattr(budget, "_mirror", broken_mirror)
+        with pytest.raises(RuntimeError):
+>           budget.reserve(100, 100)
+
+backend\tests\test_reliability.py:218: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <app.executors.budget.ExecutorBudget object at 0x00000153CC57E6F0>
+prompt_bytes = 100, max_output = 100
+
+    def reserve(self, prompt_bytes, max_output):
+        s = self.settings
+        platform = s.executor_budget_authorization_id == PLATFORM_AUTHORIZATION
+        if (
+            not s.executor_allow_paid_model_calls
+            or authorization_limit(s) == 0
+            or s.agent_model != "deepseek-flash"
+        ):
+            raise AgentError("model_not_authorized", "当前任务的模型调用未获准。", 403)
+        if prompt_bytes > 65_536 or not 1 <= max_output <= 4096:
+            raise AgentError("model_input_limit", "请求超过模型输入或输出限制。", 400)
+        input_upper = prompt_bytes * 2 + 8192
+        ticket = {
+            "call_id": str(uuid4()),
+            "input_token_upper": input_upper,
+            "max_output_tokens": max_output,
+            "upper_microusd": peak_estimate_microusd(input_upper, max_output),
+        }
+        ticket["key"] = f"{self.execution_key}:call:{ticket['call_id']}"
+        with self.control.transaction() as (_, run, e):
+            limits = run.manifest_json["limits"]
+            if run.budget_json["authorization_id"] != s.executor_budget_authorization_id:
+                raise AgentError(
+                    "budget_authorization_changed", "运行预算授权与当前配置不一致。", 403
+                )
+            result = self.redis.eval(
+                RESERVE,
+                4,
+                *self.keys(ticket),
+                ticket["upper_microusd"],
+                input_upper + max_output,
+                authorization_limit(s),
+                min(run.budget_json["agent_microusd"], 100_000)
+                if platform
+                else run.budget_json["agent_microusd"],
+                limits["max_model_calls"],
+                limits["max_tokens"],
+                60 if platform else 400,
+            )
+            if result != 1:
+                code = "budget_ledger_unavailable" if result == -1 else "model_budget_exhausted"
+>               raise AgentError(code, "预算账本缺失或预算/调用/token上限已到，未发送请求。", 429)
+E               app.agents.errors.AgentError: 预算账本缺失或预算/调用/token上限已到，未发送请求。
+
+backend\app\executors\budget.py:143: AgentError
+=========================== short test summary info ===========================
+FAILED backend\tests\test_reliability.py::test_t17_run_cap_and_missing_ledger_fail_closed
+FAILED backend\tests\test_reliability.py::test_redis_reservation_survives_sql_mirror_rollback
+2 failed, 5 passed in 11.03s

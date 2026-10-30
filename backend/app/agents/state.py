@@ -9,6 +9,7 @@ from langgraph.graph.message import add_messages
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.agents.errors import AgentError
+from app.agents.participants import supports
 from app.schemas.booking import AvailabilityQuery
 from app.services.booking import LOCAL_ZONE
 
@@ -177,14 +178,7 @@ def patch_fields(state: AgentState, patch: FieldPatch):
         elif key in ("start_time", "end_time"):
             valid = value in times_from_source(quote, current)
         elif key == "attendees":
-            nums = re.findall(r"[0-9一二三四五六七八九十两]+", quote)
-            standalone_number = quote.strip() == current.strip() and re.fullmatch(
-                r"[0-9一二三四五六七八九十两]+", quote.strip()
-            )
-            participant_unit = re.search(r"(?:位|名)(?:参会者|与会者|参与者)", quote)
-            valid = ("人" in quote or participant_unit or standalone_number) and any(
-                number(item) == value for item in nums
-            )
+            valid = supports(current, quote, value)
         elif key == "duration_minutes":
             durations = set()
             for amount, unit in re.findall(

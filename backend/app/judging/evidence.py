@@ -34,7 +34,7 @@ def append(session, settings, owner, batch, kind, value, metadata, *, run_id=Non
         relative_path=path.relative_to(PROJECT_ROOT).as_posix(),
         sha256=hashlib.sha256(data).hexdigest(),
         size_bytes=len(data),
-        generated_by_revision="T12-v1",
+        generated_by_revision="T17B-v2",
         metadata_json={"generation_id": str(batch), **metadata},
     )
     session.add(row)

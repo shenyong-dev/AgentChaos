@@ -66,7 +66,7 @@ def save_evidence(name, data, *, task="T02"):
 @contextmanager
 def disposable_database(task="T02"):
     settings = Settings()
-    assert task in tuple(f"T{i:02}" for i in range(2, 17))
+    assert task in (*tuple(f"T{i:02}" for i in range(2, 18)), "T17A", "T17B")
     prefix = f"agentchaos_{task.lower()}_verify_"
     database = prefix + uuid4().hex[:12]
     assert database.startswith(prefix) and database != settings.mysql_database
@@ -352,7 +352,7 @@ def test_utc_microseconds_roundtrip_and_naive_rejection(session):
     )
     assert raw == NOW.replace(tzinfo=None)
     assert session.scalar(text("SELECT @@session.time_zone")) == "+00:00"
-    assert session.scalar(text("SELECT @@transaction_isolation")) == "REPEATABLE-READ"
+    assert session.scalar(text("SELECT @@transaction_isolation")) == "READ-COMMITTED"
     with pytest.raises(StatementError), session.begin_nested():
         insert(
             session,

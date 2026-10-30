@@ -13,6 +13,7 @@ from langgraph.types import interrupt
 
 from app.agents.context import compose_context
 from app.agents.errors import AgentError
+from app.agents.participants import fields_for_input
 from app.agents.state import AgentState
 from app.evidence.recorder import semantic
 
@@ -309,6 +310,7 @@ def build_agent_graph(gateway, registry, checkpointer, *, control=None, recorder
                 ]
             current.update(
                 {
+                    "fields": fields_for_input(state, text),
                     "confirmation_state": "rejected" if rejected else "idle",
                     "grant": None,
                     "pending_draft": None,

@@ -34,7 +34,12 @@ router = APIRouter(
 @lru_cache
 def get_judge_service():
     s = get_settings()
-    return JudgeService(get_booking_engine(), Redis.from_url(s.redis_url, socket_timeout=15), s)
+    return JudgeService(
+        get_booking_engine(),
+        Redis.from_url(s.redis_url, socket_timeout=15),
+        s,
+        dataset_task="T17B",
+    )
 
 
 Service = Annotated[JudgeService, Depends(get_judge_service)]

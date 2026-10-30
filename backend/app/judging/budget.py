@@ -8,6 +8,7 @@ from app.agents.errors import AgentError
 from app.executors.budget import RESERVE, SETTLE, UNKNOWN
 
 AUTHORIZATION = "T12-20261028-judge-open"
+PROTOCOL_AUTHORIZATION = "T17B-20261030-judge-050"
 
 
 class JudgeBudget:
@@ -22,14 +23,19 @@ class JudgeBudget:
 
     def reserve(self, prompt_bytes, max_output):
         s = self.settings
+        finite = (
+            s.judge_budget_authorization_id == PROTOCOL_AUTHORIZATION
+            and not s.judge_budget_unlimited
+            and 0 < s.judge_budget_usd <= 0.50
+        )
+        legacy = s.judge_budget_unlimited and s.judge_budget_authorization_id == AUTHORIZATION
         if (
             not s.judge_allow_paid_model_calls
-            or not s.judge_budget_unlimited
-            or s.judge_budget_authorization_id != AUTHORIZATION
+            or not (finite or legacy)
             or s.judge_model != "deepseek-flash"
         ):
-            raise AgentError("judge_not_authorized", "T12裁判独立开关或授权尚未匹配。", 403)
-        if prompt_bytes > 32_768 or not 1 <= max_output <= 2048:
+            raise AgentError("judge_not_authorized", "裁判独立开关或本项授权尚未匹配。", 403)
+        if prompt_bytes > 32_768 or not 1 <= max_output <= (1536 if finite else 2048):
             raise AgentError("judge_input_limit", "评价输入或输出超过受控大小。", 400)
         tokens = prompt_bytes * 2 + 8192
         ticket = {
@@ -45,10 +51,11 @@ class JudgeBudget:
             *self.keys(ticket),
             ticket["upper_microusd"],
             tokens + max_output,
-            -1,
+            int(s.judge_budget_usd * 1_000_000) if finite else -1,
             500_000,
-            30,
-            2_000_000,
+            12 if finite else 30,
+            1_000_000 if finite else 2_000_000,
+            *([12] if finite else []),
         )
         if result != 1:
             raise AgentError(

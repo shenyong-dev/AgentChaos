@@ -1,0 +1,373 @@
+{
+  "mode": "real_DeepSeek_production_in_process_executor_SQL_Redis",
+  "marker": "8f55564fd4fb",
+  "authorization": "[REDACTED]",
+  "catalog_sha256": "dbfade3eed3c58570c02076a44d63869bf941c0033c1d909f4306610afd3ea9d",
+  "ledger_before": {
+    "limit": 1000000
+  },
+  "source": "assistant_designed_development_cases_not_independent_human_gold_or_holdout",
+  "fixture_review_boundary": "seeded reviewer role for mechanical fixtures, not human labels",
+  "scenarios": [
+    {
+      "case": "negative",
+      "run_id": "c1e9baf8-adee-49da-a5fc-54f8e18a06b2",
+      "execution_id": "c7606330-a5b0-4e3e-b7c8-76813abc63d4",
+      "outcome": {
+        "claimed": true,
+        "status": "passed"
+      },
+      "bookings": 0,
+      "expected_bookings": 0,
+      "count_matches": true,
+      "people_match": true,
+      "invalid_has_no_pending": true,
+      "fields": {},
+      "reply": "「确认」不能替代人数。请明确告知实际参会人数，例如“2人”，我再继续查询空闲并生成待确认草稿。",
+      "all_turns_observed_without_infrastructure_error": true,
+      "matches_declared_business_checks": true
+    },
+    {
+      "case": "decimal",
+      "run_id": "eee004c3-b416-461f-bfea-23178b13ab62",
+      "execution_id": "fb07acdc-d61e-41cc-a243-cea1290579cf",
+      "outcome": {
+        "claimed": true,
+        "status": "passed"
+      },
+      "bookings": 0,
+      "expected_bookings": 0,
+      "count_matches": true,
+      "people_match": true,
+      "invalid_has_no_pending": true,
+      "fields": {
+        "date": {
+          "value": "2026-10-31",
+          "source_turn": 1,
+          "source_quote": "明天",
+          "source_kind": "validated_model_extraction"
+        },
+        "start_time": {
+          "value": "14:00",
+          "source_turn": 1,
+          "source_quote": "14:00",
+          "source_kind": "validated_model_extraction"
+        },
+        "end_time": {
+          "value": "15:00",
+          "source_turn": 1,
+          "source_quote": "15:00",
+          "source_kind": "validated_model_extraction"
+        },
+        "room_code": {
+          "value": "A101",
+          "source_turn": 1,
+          "source_quote": "A101",
+          "source_kind": "validated_model_extraction"
+        }
+      },
+      "reply": "您说“确认”，但人数仍未明确（“2.5人”无法作为有效人数），预约草稿尚未生成，也没有可确认的预约。\n\n请告知确切人数（例如 2 人或 3 人）；补齐后我会查询 A101 在 2026-10-31 14:00–15:00 的空闲并生成待确认草稿。",
+      "all_turns_observed_without_infrastructure_error": true,
+      "matches_declared_business_checks": true
+    },
+    {
+      "case": "range",
+      "run_id": "23d27cae-56d4-42fb-89fd-315cefbdf2ba",
+      "execution_id": "35b221cd-53a3-4c06-b85e-c543007b1966",
+      "outcome": {
+        "claimed": true,
+        "status": "passed"
+      },
+      "bookings": 0,
+      "expected_bookings": 0,
+      "count_matches": true,
+      "people_match": true,
+      "invalid_has_no_pending": true,
+      "fields": {
+        "date": {
+          "value": "2026-10-31",
+          "source_turn": 1,
+          "source_quote": "明天",
+          "source_kind": "validated_model_extraction"
+        },
+        "start_time": {
+          "value": "14:00",
+          "source_turn": 1,
+          "source_quote": "14:00",
+          "source_kind": "validated_model_extraction"
+        },
+        "end_time": {
+          "value": "15:00",
+          "source_turn": 1,
+          "source_quote": "15:00",
+          "source_kind": "validated_model_extraction"
+        },
+        "room_code": {
+          "value": "A101",
+          "source_turn": 1,
+          "source_quote": "A101",
+          "source_kind": "validated_model_extraction"
+        }
+      },
+      "reply": "你说“确认”，但我不能以此代替服务端确认。而且目前还没有生成草稿，也仍然缺具体人数。请先告诉我具体人数（8到12之间的一个数）。\n\n已记录：2026-10-31（明天）14:00–15:00，A101，人数待确认。",
+      "all_turns_observed_without_infrastructure_error": true,
+      "matches_declared_business_checks": true
+    },
+    {
+      "case": "chinese",
+      "run_id": "8b72987f-4c5f-4972-b8be-53b1518b3eef",
+      "execution_id": "18ff194a-ff04-439c-bc78-ab4af5becd6f",
+      "outcome": {
+        "claimed": true,
+        "status": "passed"
+      },
+      "bookings": 1,
+      "expected_bookings": 1,
+      "count_matches": true,
+      "people_match": true,
+      "invalid_has_no_pending": true,
+      "fields": {
+        "date": {
+          "value": "2026-10-31",
+          "source_turn": 1,
+          "source_quote": "明天",
+          "source_kind": "validated_model_extraction"
+        },
+        "start_time": {
+          "value": "14:00",
+          "source_turn": 1,
+          "source_quote": "14:00",
+          "source_kind": "validated_model_extraction"
+        },
+        "end_time": {
+          "value": "15:00",
+          "source_turn": 1,
+          "source_quote": "15:00",
+          "source_kind": "validated_model_extraction"
+        },
+        "attendees": {
+          "value": 12,
+          "source_turn": 1,
+          "source_quote": "十二人",
+          "source_kind": "validated_model_extraction"
+        },
+        "room_code": {
+          "value": "A101",
+          "source_turn": 1,
+          "source_quote": "A101",
+          "source_kind": "validated_model_extraction"
+        }
+      },
+      "reply": "**预约已成功提交（confirmed）**\n\n- 场地：A101\n- 日期：2026-10-31（明天）\n- 时间：14:00–15:00（+08:00）\n- 人数：12人\n- 状态：confirmed\n- 预约号：f8975005-2f56-4a1b-b5b0-1bc0d06d0d8f\n\n规则依据（document_revision 1，knowledge/booking-rules-v1.md）：时长条款 chunk `booking-rules:r1:33c2956d0aaa6e9f`、人数条款 chunk `booking-rules:r1:6244fec99261083b`、A101开放与容量条款 chunk `booking-rules:r1:a6a1d61710a23b82`。",
+      "all_turns_observed_without_infrastructure_error": true,
+      "matches_declared_business_checks": true
+    },
+    {
+      "case": "arabic",
+      "run_id": "5c9d48bd-4e97-466b-9324-ecbd19fae864",
+      "execution_id": "0a8b1ae2-3dd7-40c8-9089-c3b2d0f1230f",
+      "outcome": {
+        "claimed": true,
+        "status": "passed"
+      },
+      "bookings": 1,
+      "expected_bookings": 1,
+      "count_matches": true,
+      "people_match": true,
+      "invalid_has_no_pending": true,
+      "fields": {
+        "date": {
+          "value": "2026-10-31",
+          "source_turn": 1,
+          "source_quote": "明天",
+          "source_kind": "validated_model_extraction"
+        },
+        "start_time": {
+          "value": "14:00",
+          "source_turn": 1,
+          "source_quote": "14:00到15:00",
+          "source_kind": "validated_model_extraction"
+        },
+        "end_time": {
+          "value": "15:00",
+          "source_turn": 1,
+          "source_quote": "14:00到15:00",
+          "source_kind": "validated_model_extraction"
+        },
+        "attendees": {
+          "value": 12,
+          "source_turn": 1,
+          "source_quote": "12人",
+          "source_kind": "validated_model_extraction"
+        },
+        "room_code": {
+          "value": "A101",
+          "source_turn": 1,
+          "source_quote": "A101",
+          "source_kind": "validated_model_extraction"
+        }
+      },
+      "reply": "**预约已提交成功**：\n\n- 预约号：`8b9e372d-9069-43d5-bd3f-5ad95fd68c12`\n- 场地：A101\n- 日期时间：2026-10-31 14:00–15:00（+08:00）\n- 人数：12 人\n- 状态：confirmed\n\n依据：`booking-rules:r1:a6a1d61710a23b82`（A101 容量 20 人、09:00—21:00 开放）、`booking-rules:r1:6244fec99261083b`（人数不超过容量），文档 revision 1。",
+      "all_turns_observed_without_infrastructure_error": true,
+      "matches_declared_business_checks": true
+    },
+    {
+      "case": "correction",
+      "run_id": "209258af-9d97-4776-80b4-4d2b668f0ebf",
+      "execution_id": "03fdebf6-6be2-4313-8ef5-42d74ebfbff7",
+      "outcome": {
+        "claimed": true,
+        "status": "passed"
+      },
+      "bookings": 1,
+      "expected_bookings": 1,
+      "count_matches": true,
+      "people_match": true,
+      "invalid_has_no_pending": true,
+      "fields": {
+        "date": {
+          "value": "2026-10-31",
+          "source_turn": 1,
+          "source_quote": "明天",
+          "source_kind": "validated_model_extraction"
+        },
+        "start_time": {
+          "value": "14:00",
+          "source_turn": 1,
+          "source_quote": "14:00",
+          "source_kind": "validated_model_extraction"
+        },
+        "end_time": {
+          "value": "15:00",
+          "source_turn": 1,
+          "source_quote": "15:00",
+          "source_kind": "validated_model_extraction"
+        },
+        "room_code": {
+          "value": "A101",
+          "source_turn": 1,
+          "source_quote": "A101",
+          "source_kind": "validated_model_extraction"
+        },
+        "attendees": {
+          "value": 12,
+          "source_turn": 2,
+          "source_quote": "12人",
+          "source_kind": "validated_model_extraction"
+        }
+      },
+      "reply": "预约已提交成功（状态：confirmed）：\n\n- 场地：A101\n- 日期与时间：2026-10-31 14:00–15:00（+08:00）\n- 人数：12 人\n- 预约号：a3a3a558-524e-4bf9-b983-1cf4e82fdd65\n\n规则依据：A101 容量 20 人、09:00—21:00 开放（chunk_id: booking-rules:r1:a6a1d61710a23b82）；时长 30—120 分钟（chunk_id: booking-rules:r1:33c2956d0aaa6e9f）；人数不超过容量（chunk_id: booking-rules:r1:6244fec99261083b）；来源 knowledge/booking-rules-v1.md，document_revision 1。",
+      "all_turns_observed_without_infrastructure_error": true,
+      "matches_declared_business_checks": true
+    },
+    {
+      "case": "recovery",
+      "run_id": "84595a2e-cd2a-4017-81ad-35929c739372",
+      "execution_id": "1c7a6fc9-11f6-4f1c-9482-2a91b320e153",
+      "outcome": {
+        "claimed": true,
+        "status": "failed"
+      },
+      "bookings": 0,
+      "expected_bookings": 1,
+      "count_matches": false,
+      "people_match": true,
+      "invalid_has_no_pending": true,
+      "fields": {
+        "date": {
+          "value": "2026-10-31",
+          "source_turn": 1,
+          "source_quote": "明天",
+          "source_kind": "validated_model_extraction"
+        },
+        "start_time": {
+          "value": "14:00",
+          "source_turn": 1,
+          "source_quote": "14:00",
+          "source_kind": "validated_model_extraction"
+        },
+        "end_time": {
+          "value": "15:00",
+          "source_turn": 1,
+          "source_quote": "15:00",
+          "source_kind": "validated_model_extraction"
+        },
+        "room_code": {
+          "value": "A101",
+          "source_turn": 1,
+          "source_quote": "A101",
+          "source_kind": "validated_model_extraction"
+        },
+        "attendees": {
+          "value": 12,
+          "source_turn": 3,
+          "source_quote": "12人",
+          "source_kind": "validated_model_extraction"
+        }
+      },
+      "reply": "这次尝试后仍被系统拒绝，所以我无法生成新草稿，也无法继续提交。\n\n- 状态：未提交，当前没有待确认草稿。\n- 原因：系统将你此前“先不要提交”记录为拒绝确认状态，据此不允许自动生成新草稿；这个限制我无法在对话中解除。\n\n建议：\n- 重新发起一个新的预约需求（例如直接说“我要预约 A101，2026-10-31 14:00–15:00，12 人”），或\n- 联系场地管理员，在真实入口重置本次预约状态。\n\n已校验的规格供参考：A101（容量 20 人），2026-10-31 14:00–15:00+08:00，12 人；依据 booking-rules:r1:a6a1d61710a23b82、booking-rules:r1:6244fec99261083b（document_revision 1）。",
+      "all_turns_observed_without_infrastructure_error": true,
+      "matches_declared_business_checks": false
+    },
+    {
+      "case": "negation",
+      "run_id": "c9945aee-87f9-4937-942d-35b3d0c192a2",
+      "execution_id": "d1f002f1-1156-4c87-80f1-ca8f62f46576",
+      "outcome": {
+        "claimed": true,
+        "status": "passed"
+      },
+      "bookings": 1,
+      "expected_bookings": 1,
+      "count_matches": true,
+      "people_match": true,
+      "invalid_has_no_pending": true,
+      "fields": {
+        "date": {
+          "value": "2026-10-31",
+          "source_turn": 1,
+          "source_quote": "明天",
+          "source_kind": "validated_model_extraction"
+        },
+        "start_time": {
+          "value": "14:00",
+          "source_turn": 1,
+          "source_quote": "14:00",
+          "source_kind": "validated_model_extraction"
+        },
+        "end_time": {
+          "value": "15:00",
+          "source_turn": 1,
+          "source_quote": "15:00",
+          "source_kind": "validated_model_extraction"
+        },
+        "attendees": {
+          "value": 12,
+          "source_turn": 1,
+          "source_quote": "不是8人，改为12人",
+          "source_kind": "validated_model_extraction"
+        },
+        "room_code": {
+          "value": "A101",
+          "source_turn": 1,
+          "source_quote": "A101",
+          "source_kind": "validated_model_extraction"
+        }
+      },
+      "reply": "预约已提交成功：\n\n- 预约号：3f08a2bc-525e-41ac-a9e1-46c6bed42be1\n- 场地：A101\n- 日期与时间：2026-10-31 14:00–15:00（+08:00）\n- 人数：12 人\n- 状态：已确认（confirmed）",
+      "all_turns_observed_without_infrastructure_error": true,
+      "matches_declared_business_checks": true
+    }
+  ],
+  "price_checked_on": "2026-10-30",
+  "price_source": "https://api-docs.deepseek.com/quick_start/pricing/",
+  "ledger_after": {
+    "limit": 1000000,
+    "held_upper": 0,
+    "calls_started": 53,
+    "token_upper": 269916,
+    "charged_estimate": 87610,
+    "calls_completed": 53
+  },
+  "old_ledgers_unchanged": true
+}

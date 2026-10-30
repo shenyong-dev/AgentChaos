@@ -4,7 +4,8 @@ import hashlib
 from pathlib import Path
 
 from app.agents.versions import canonical_hash
-from app.schemas.judging import Judgment
+from app.judging.protocol import VERSION
+from app.schemas.judging import Judgment, JudgmentV2
 
 THRESHOLD = 0.8
 
@@ -13,7 +14,7 @@ def manifest(settings):
     root = Path(__file__).parent
     prompt = (root / "prompt.txt").read_text(encoding="utf-8")
     return {
-        "version": "T12-v1",
+        "version": VERSION,
         "role": "judge",
         "model": settings.judge_model,
         "thinking": settings.judge_thinking,
@@ -22,16 +23,25 @@ def manifest(settings):
         "prompt": prompt,
         "prompt_hash": hashlib.sha256(prompt.encode()).hexdigest(),
         "sources": {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in root.glob("*.py")},
-        "schema_hash": canonical_hash(Judgment.model_json_schema()),
+        "schema_hash": canonical_hash(JudgmentV2.model_json_schema()),
+        "schema": JudgmentV2.model_json_schema(),
+        "response_format": {"type": "json_object"},
         "automatic_retries": 0,
-        "limits": {"calls": 30, "tokens": 2_000_000, "microusd": 500_000, "per_sample_seconds": 45},
+        "repair_requests": 0,
+        "gateway_hash": hashlib.sha256(
+            (root.parent / "agents/gateway.py").read_bytes()
+        ).hexdigest(),
+        "limits": {"calls": 12, "tokens": 1_000_000, "microusd": 500_000, "per_sample_seconds": 45},
         "boundary": "Semantic assistance only; rule and human decisions remain separate.",
     }
 
 
-def interpret(raw, payload):
+def interpret(raw, payload, *, protocol_version=VERSION):
+    if protocol_version not in ("T12-v1", VERSION):
+        return {"status": "error", "reason": "judge_protocol_unknown", "needs_review": True}
     try:
-        value = Judgment.model_validate(raw).model_dump(mode="json")
+        model = Judgment if protocol_version == "T12-v1" else JudgmentV2
+        value = model.model_validate(raw).model_dump(mode="json")
     except ValueError:
         return {
             "status": "error",
@@ -40,6 +50,23 @@ def interpret(raw, payload):
             "needs_review": True,
         }
     available = {"reply", "dialogue"} | {e["id"] for e in payload["evidence"]}
+    if protocol_version == VERSION:
+        available = {k for k in ("reply", "dialogue") if payload.get(k)} | {
+            e["id"] for e in payload["evidence"] if e.get("content") is not None
+        }
+        if any(
+            not value[k]["reason"].strip()
+            or len(value[k]["evidence_refs"]) != len(set(value[k]["evidence_refs"]))
+            or value[k]["label"] != "insufficient"
+            and not value[k]["evidence_refs"]
+            for k in ("support", "explanation")
+        ):
+            return {
+                "status": "error",
+                "reason": "judge_invalid_citations",
+                "raw": raw,
+                "needs_review": True,
+            }
     if any(
         ref not in available
         for k in ("support", "explanation")
@@ -64,7 +91,9 @@ def interpret(raw, payload):
         if ("contradicted" in labels or "unreasonable" in labels)
         else "acceptable"
     )
-    if value["conclusion"] != conclusion:
+    if value["conclusion"] != conclusion or (
+        protocol_version == VERSION and uncertain and not value["needs_review"]
+    ):
         return {
             "status": "error",
             "reason": "judge_contradictory_output",

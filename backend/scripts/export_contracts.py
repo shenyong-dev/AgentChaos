@@ -12,7 +12,13 @@ from app.schemas.contracts import TraceEvent as LegacyTraceEvent
 from app.schemas.datasets import DatasetReview
 from app.schemas.events import TraceEvent
 from app.schemas.faults import FaultSpec
-from app.schemas.judging import DisagreementReview, ExecutionJudgeReview, HumanLabel, Judgment
+from app.schemas.judging import (
+    DisagreementReview,
+    ExecutionJudgeReview,
+    HumanLabel,
+    Judgment,
+    JudgmentV2,
+)
 from app.schemas.metamorphic import RelationCatalog
 from app.tools.booking import booking_tool_contracts
 
@@ -28,6 +34,7 @@ for name, schema in (
     ("case-candidate.schema.json", Candidate.model_json_schema()),
     ("case-review.schema.json", CandidateReview.model_json_schema()),
     ("semantic-judgment.schema.json", Judgment.model_json_schema()),
+    ("semantic-judgment-v2.schema.json", JudgmentV2.model_json_schema()),
     ("semantic-human-label.schema.json", HumanLabel.model_json_schema()),
     ("semantic-review.schema.json", DisagreementReview.model_json_schema()),
     ("execution-semantic-review.schema.json", ExecutionJudgeReview.model_json_schema()),

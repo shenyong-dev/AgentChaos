@@ -1,0 +1,19 @@
+F                                                                        [100%]
+================================== FAILURES ===================================
+_____ test_event_page_keeps_one_snapshot_while_another_run_event_commits ______
+tests\test_reliability.py:63: in test_event_page_keeps_one_snapshot_while_another_run_event_commits
+    assert max(item["event"]["run_seq"] for item in page["items"]) <= page["high_watermark"]
+E   assert 2 <= 1
+E    +  where 2 = max(<generator object test_event_page_keeps_one_snapshot_while_another_run_event_commits.<locals>.<genexpr> at 0x0000023B9C0145F0>)
+---------------------------- Captured stderr setup ----------------------------
+INFO  [alembic.runtime.migration] Context impl MySQLImpl.
+INFO  [alembic.runtime.migration] Will assume non-transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 20261025_0001, T02 initial sixteen-table schema
+INFO  [alembic.runtime.migration] Running upgrade 20261025_0001 -> 20261025_0002, T04 bind pending drafts to a trusted conversation without adding tables.
+INFO  [alembic.runtime.migration] Running upgrade 20261025_0002 -> 20261026_0003, T06 real run-level events and transactionally allocated per-run order.
+INFO  [alembic.runtime.migration] Running upgrade 20261026_0003 -> 20261028_0004, T11 owner-bound immutable evidence without inventing Agent test runs.
+INFO  [alembic.runtime.migration] Running upgrade 20261028_0004 -> 20261028_0005, T12 allow owner-bound semantic calibration evidence, preserving sixteen tables.
+INFO  [alembic.runtime.migration] Running upgrade 20261028_0005 -> 20261028_0006, T13 immutable owner-bound dataset approval; same sixteen domain tables.
+=========================== short test summary info ===========================
+FAILED tests/test_reliability.py::test_event_page_keeps_one_snapshot_while_another_run_event_commits
+1 failed in 7.51s

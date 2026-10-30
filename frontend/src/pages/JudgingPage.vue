@@ -15,10 +15,12 @@ type Protocol = { threshold: number; model: string; prompt_hash: string }
 type Batch = { batch_id: string; frozen: { mode: string; dataset: { dataset_hash: string; samples: Sample[]; families: number; schema_version?: string; boundary?: string; view?: string }; manifest: Protocol }; evaluation_protocol: Protocol | null; seal: { labels_hash: string; sealed_at: string } | null; labels: Record<string, Labels>; label_hashes: Record<string, string>; results: Record<string, Result>; reviews: Record<string, Labels>; statistics: { dimensions: Record<string, unknown>; failure_rate: number | null; needs_review: string[] }; pending_reviews: string[] }
 
 const route = useRoute(), router = useRouter()
-const username = ref('demo_reviewer'), password = ref(''), access = ref<{ role: string; username: string; judge_enabled: boolean }>()
+const username = ref('demo_reviewer'), password = ref(''), access = ref<{ role: string; username: string; judge_enabled: boolean; read_only?: boolean }>()
 const batches = ref<{ batch_id: string; created_at: string }[]>([]), batchId = ref(String(route.params.batchId ?? ''))
 const batch = ref<Batch>(), selectedId = ref(''), support = ref(''), explanation = ref(''), note = ref('')
 const executionProblem = ref('')
+const sampleCount = computed(() => batch.value?.frozen.dataset.samples.length ?? 0)
+const calibrationTask = computed(() => batch.value?.frozen.dataset.schema_version?.split('-')[0] ?? 'T12')
 const fullGold = computed(() => batch.value?.frozen.dataset.view === 'full_observations')
 const busy = ref(false), error = ref(''), notice = ref(''), independent = ref(false), evaluating = ref(false), pendingOnly = ref(false)
 let auth = '', active = true
@@ -29,8 +31,8 @@ const currentLabel = computed(() => batch.value?.labels[selectedId.value])
 const currentResult = computed(() => batch.value?.results[selectedId.value])
 const reviewed = computed(() => batch.value?.reviews[selectedId.value])
 const assisted = computed(() => (batch.value as (Batch & { assistant_reviews?: Record<string, AssistedReview> }) | undefined)?.assistant_reviews?.[selectedId.value])
-const canLabel = computed(() => access.value?.role === 'reviewer' && !batch.value?.seal)
-const canReview = computed(() => access.value?.role === 'reviewer' && batch.value?.seal && currentResult.value && !reviewed.value)
+const canLabel = computed(() => access.value?.role === 'reviewer' && !access.value.read_only && !batch.value?.seal)
+const canReview = computed(() => access.value?.role === 'reviewer' && !access.value.read_only && batch.value?.seal && currentResult.value && !reviewed.value)
 
 async function api<T>(path: string, body?: unknown): Promise<T> {
   const response = await fetch(`/api/v1/judging${path}`, { method: body ? 'POST' : 'GET', headers: { Authorization: auth, ...(body ? { 'Content-Type': 'application/json' } : {}) }, body: body ? JSON.stringify(body) : undefined, cache: 'no-store', signal: AbortSignal.timeout(body ? 60000 : 20000) })
@@ -71,7 +73,7 @@ async function saveLabel() {
     notice.value = '人工标签已保存；尚未运行裁判。'
   })
 }
-async function seal() { await act(async () => { await api(`/calibrations/${batchId.value}/seal`, { request_id: crypto.randomUUID(), dataset_hash: batch.value!.frozen.dataset.dataset_hash, independent_from_judge: true }); await load(); notice.value = '30条独立标签已封存，后续分歧复核会另存。' }) }
+async function seal() { await act(async () => { await api(`/calibrations/${batchId.value}/seal`, { request_id: crypto.randomUUID(), dataset_hash: batch.value!.frozen.dataset.dataset_hash, independent_from_judge: true }); await load(); notice.value = `${sampleCount.value}条独立标签已封存，后续分歧复核会另存。` }) }
 async function evaluateAll() {
   await act(async () => {
     evaluating.value = true
@@ -98,16 +100,17 @@ onBeforeUnmount(() => { active = false; auth = '' })
 
 <template>
   <div class="judging-page">
-    <div class="page-heading"><div><div class="eyebrow">SEMANTIC REVIEW / {{ batch?.frozen.dataset.schema_version?.startsWith('T16') ? 'T16' : 'T12' }}</div><h1>让评价有据可查</h1><p>先独立标注，再盲评，保留每一次分歧。</p></div></div>
+    <div class="page-heading"><div><div class="eyebrow">SEMANTIC REVIEW / {{ calibrationTask }}</div><h1>让评价有据可查</h1><p>先独立标注，再盲评，保留每一次分歧。</p></div></div>
     <form class="judge-login" @submit.prevent="login"><label>账号<ElInput v-model="username" aria-label="账号" :disabled="busy" /></label><label>密码<ElInput v-model="password" type="password" aria-label="密码" autocomplete="off" :disabled="busy" /></label><ElButton type="primary" native-type="submit" :loading="busy">登录并载入</ElButton><small>人工标注使用 demo_reviewer；凭据仅在本页内存中保存。</small></form>
     <p v-if="error" role="alert" class="judge-error">{{ error }}</p>
     <template v-if="access">
-      <div class="judge-toolbar"><label>校准批次<ElSelect class="form-select" popper-class="form-select-dropdown" :fit-input-width="true" :empty-values="[null, undefined, '']" placeholder="请选择" v-model="batchId" aria-label="校准批次" :disabled="busy" @change="act(load)"><ElOption v-for="item in batches" :key="item.batch_id" :value="item.batch_id" :data-value="item.batch_id" :label="`${item.batch_id.slice(0, 8)} · ${item.created_at}`" /></ElSelect></label><ElButton :disabled="busy" @click="act(load)">刷新记录</ElButton><ElButton v-if="access.role === 'operator'" :disabled="busy" @click="create">新建待标注批次</ElButton></div>
+      <div class="judge-toolbar"><label>校准批次<ElSelect class="form-select" popper-class="form-select-dropdown" :fit-input-width="true" :empty-values="[null, undefined, '']" placeholder="请选择" v-model="batchId" aria-label="校准批次" :disabled="busy" @change="act(load)"><ElOption v-for="item in batches" :key="item.batch_id" :value="item.batch_id" :data-value="item.batch_id" :label="`${item.batch_id.slice(0, 8)} · ${item.created_at}`" /></ElSelect></label><ElButton :disabled="busy" @click="act(load)">刷新记录</ElButton><ElButton v-if="access.role === 'operator' && !access.read_only" :disabled="busy" @click="create">新建待标注批次</ElButton></div>
       <template v-if="batch">
-        <p class="judge-boundary" role="note">{{ batch.frozen.dataset.schema_version?.startsWith('T16') ? batch.frozen.dataset.boundary : '校准专用：10个来源家族、30条相关样本，含真实回复与明确受控衍生。以本页给出的证据判断；缺少SQL证据不等于SQL为0。此处不产生正式保留集成绩。' }}</p>
-        <div class="judge-metrics"><div><small>真人标注</small><strong>{{ Object.keys(batch.labels).length }}<span> / 30</span></strong></div><div><small>裁判已返回</small><strong>{{ Object.keys(batch.results).length }}<span> / 30</span></strong></div><div><small>待人工复核</small><strong>{{ batch.pending_reviews.length }}</strong></div><div><small>标签状态</small><strong class="word">{{ batch.seal ? '已封存' : '待独立标注' }}</strong></div></div>
-        <div v-if="canLabel" class="seal-controls"><label><input v-model="independent" type="checkbox" :disabled="busy" />我在未看到本批裁判结果时，逐条独立选择了{{ fullGold ? '三' : '两' }}项标签。</label><ElButton type="primary" :disabled="busy || !independent || Object.keys(batch.labels).length !== 30" @click="seal">封存30条人工标签</ElButton></div>
-        <div v-if="access.role === 'operator' && batch.seal" class="seal-controls"><p>裁判看不到人工标签和原规则结论。逐条调用，最多30次，每条45秒；刷新后可读取已保存结果。</p><ElButton type="primary" :loading="evaluating" :disabled="busy || !access.judge_enabled || Object.keys(batch.results).length === 30" @click="evaluateAll">运行独立裁判</ElButton></div>
+        <p v-if="access.read_only" class="judge-boundary">原结果只读复看：人工标签、AI结果和分歧保持，不新增调用或保存复核。</p>
+        <p class="judge-boundary" role="note">{{ batch.frozen.dataset.boundary ?? '校准专用：10个来源家族、30条相关样本，含真实回复与明确受控衍生。以本页给出的证据判断；缺少SQL证据不等于SQL为0。此处不产生正式保留集成绩。' }}</p>
+        <div class="judge-metrics"><div><small>真人标注</small><strong>{{ Object.keys(batch.labels).length }}<span> / {{ sampleCount }}</span></strong></div><div><small>裁判已返回</small><strong>{{ Object.keys(batch.results).length }}<span> / {{ sampleCount }}</span></strong></div><div><small>待人工复核</small><strong>{{ batch.pending_reviews.length }}</strong></div><div><small>标签状态</small><strong class="word">{{ batch.seal ? '已封存' : '待独立标注' }}</strong></div></div>
+        <div v-if="canLabel" class="seal-controls"><label><input v-model="independent" type="checkbox" :disabled="busy" />我在未看到本批裁判结果时，逐条独立选择了{{ fullGold ? '三' : '两' }}项标签。</label><ElButton type="primary" :disabled="busy || !independent || Object.keys(batch.labels).length !== sampleCount" @click="seal">封存{{ sampleCount }}条人工标签</ElButton></div>
+        <div v-if="access.role === 'operator' && !access.read_only && batch.seal" class="seal-controls"><p>裁判看不到人工标签和原规则结论。本批{{ sampleCount }}条逐条调用，每条45秒；刷新后可读取已保存结果。</p><ElButton type="primary" :loading="evaluating" :disabled="busy || !access.judge_enabled || Object.keys(batch.results).length === sampleCount" @click="evaluateAll">运行独立裁判</ElButton></div>
         <div v-if="batch.seal" class="seal-controls"><label><input v-model="pendingOnly" type="checkbox" />只看待人工复核</label><ElButton :disabled="busy || !batch.pending_reviews.length" @click="nextPending">下一条待复核</ElButton><small>分歧复核另存；一致率仍按封存前的原始标签计算。</small></div>
         <div class="judge-workbench">
           <aside class="judge-list" aria-label="校准样本列表"><button v-for="item in visibleSamples" :key="item.id" :class="{ active: selectedId === item.id }" :disabled="busy" @click="choose(item.id)"><b>{{ item.id }}</b><span>{{ batch.labels[item.id] ? '已标注' : '待标注' }}</span><small v-if="batch.results[item.id]">{{ names[batch.results[item.id]!.status] }}</small></button></aside>

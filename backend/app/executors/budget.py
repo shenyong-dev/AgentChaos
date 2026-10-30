@@ -19,6 +19,8 @@ OPEN_AUTHORIZATION = "T06-20261026-agent-open"
 FAULT_AUTHORIZATION = "T07-20261027-agent-open"
 DIALOGUE_AUTHORIZATION = "T09-20261028-agent-open"
 METAMORPHIC_AUTHORIZATION = "T10-20261028-agent-open"
+PLATFORM_AUTHORIZATION = "T17-20261030-agent-1"
+FIELD_SOURCE_AUTHORIZATION = "T17A-20261030-agent-1"
 
 
 def authorization_limit(settings):
@@ -31,7 +33,8 @@ def authorization_limit(settings):
     ):
         return -1 if settings.executor_agent_budget_unlimited else 0
     if (
-        settings.executor_budget_authorization_id == AUTHORIZATION
+        settings.executor_budget_authorization_id
+        in (AUTHORIZATION, PLATFORM_AUTHORIZATION, FIELD_SOURCE_AUTHORIZATION)
         and not settings.executor_agent_budget_unlimited
         and 0 < settings.executor_agent_budget_usd <= 1
     ):
@@ -53,7 +56,9 @@ if (cap>0 and used(KEYS[1])+upper>math.min(cap,requested)) or
    used(KEYS[2])+upper>tonumber(ARGV[4]) or
    tonumber(redis.call('HGET',KEYS[3],'calls_started') or '0')>=tonumber(ARGV[5]) or
    tonumber(redis.call('HGET',KEYS[3],'token_upper') or '0')+tokens>tonumber(ARGV[6]) or
-   (cap>0 and tonumber(redis.call('HGET',KEYS[1],'calls_started') or '0')>=400) then return 0 end
+   (cap>0 and tonumber(redis.call('HGET',KEYS[1],'calls_started') or '0')>=400) or
+   (cap>0 and ARGV[7] and tonumber(redis.call('HGET',KEYS[1],'calls_started') or '0')>=
+    tonumber(ARGV[7])) then return 0 end
 for i=1,3 do
  redis.call('HINCRBY',KEYS[i],'held_upper',upper)
  redis.call('HINCRBY',KEYS[i],'calls_started',1)
@@ -100,6 +105,10 @@ class ExecutorBudget:
 
     def reserve(self, prompt_bytes, max_output):
         s = self.settings
+        platform = s.executor_budget_authorization_id in (
+            PLATFORM_AUTHORIZATION,
+            FIELD_SOURCE_AUTHORIZATION,
+        )
         if (
             not s.executor_allow_paid_model_calls
             or authorization_limit(s) == 0
@@ -129,9 +138,14 @@ class ExecutorBudget:
                 ticket["upper_microusd"],
                 input_upper + max_output,
                 authorization_limit(s),
-                run.budget_json["agent_microusd"],
+                min(run.budget_json["agent_microusd"], 100_000)
+                if platform
+                else run.budget_json["agent_microusd"],
                 limits["max_model_calls"],
                 limits["max_tokens"],
+                80
+                if s.executor_budget_authorization_id == FIELD_SOURCE_AUTHORIZATION
+                else (60 if platform else 400),
             )
             if result != 1:
                 code = "budget_ledger_unavailable" if result == -1 else "model_budget_exhausted"

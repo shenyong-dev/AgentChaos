@@ -4,11 +4,12 @@ import hashlib
 from uuid import UUID
 
 from sqlalchemy import func, select
-from sqlalchemy.orm import Session, aliased
+from sqlalchemy.orm import aliased
 
 from app.agents.errors import AgentError
 from app.agents.versions import canonical_hash
 from app.core.config import PROJECT_ROOT
+from app.db.engine import read_session
 from app.evidence.recorder import EVIDENCE_ROOT
 from app.executors.service import RunService
 from app.models import Artifact, TestExecution, TestRun, TraceEvent
@@ -99,7 +100,7 @@ class TraceReader:
         self.engine, self.settings = engine, settings
 
     def event(self, user_id, run_uuid, event_uuid):
-        with Session(self.engine) as session:
+        with read_session(self.engine) as session:
             run = RunService.owned_run(session, user_id, run_uuid)
             found = session.execute(
                 select(TraceEvent, TestExecution.execution_uuid)
@@ -111,7 +112,7 @@ class TraceReader:
             return item(found[0], run, found[1])
 
     def snapshot(self, user_id, run_uuid):
-        with Session(self.engine) as session:
+        with read_session(self.engine) as session:
             run = RunService.owned_run(session, user_id, run_uuid)
             rows = list(
                 session.scalars(
@@ -154,7 +155,7 @@ class TraceReader:
             }
 
     def page(self, user_id, run_uuid, *, after=None, limit=100, execution_uuid=None):
-        with Session(self.engine) as session:
+        with read_session(self.engine) as session:
             run = RunService.owned_run(session, user_id, run_uuid)
             sequence = checked_cursor(session, run, after)
             query = (
@@ -184,7 +185,7 @@ class TraceReader:
             }
 
     def execution(self, user_id, execution_uuid):
-        with Session(self.engine) as session:
+        with read_session(self.engine) as session:
             found = session.execute(
                 select(TestExecution, TestRun.run_uuid)
                 .join(TestRun)
@@ -199,7 +200,7 @@ class TraceReader:
             return {**RunService.execution_view(row), "run_id": run_uuid}
 
     def artifact(self, user_id, run_uuid, artifact_id):
-        with Session(self.engine) as session:
+        with read_session(self.engine) as session:
             run = RunService.owned_run(session, user_id, run_uuid)
             row = session.scalar(
                 select(Artifact).where(

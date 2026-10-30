@@ -1,12 +1,10 @@
 """Explicit semantic assistance on sealed executions, separate from objective verdicts."""
 
 import hashlib
-import json
 import time
 from datetime import UTC, datetime
 from uuid import UUID, uuid5
 
-from langchain_core.messages import HumanMessage, SystemMessage
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -18,6 +16,8 @@ from app.executors.control import advisory
 from app.judging import evidence
 from app.judging.budget import JudgeBudget
 from app.judging.engine import interpret, manifest
+from app.judging.protocol import messages as judge_messages
+from app.judging.protocol import parse_response
 from app.judging.service import JudgeService
 from app.models import Artifact, AssertionResult, KnowledgeDocument, TestExecution, TestRun
 
@@ -189,16 +189,13 @@ class ExecutionJudgeService:
             )
             try:
                 message, raw = gateway.invoke(
-                    [
-                        SystemMessage(content=protocol["prompt"]),
-                        HumanMessage(content=json.dumps(payload, ensure_ascii=False)),
-                    ],
+                    judge_messages(protocol, payload),
                     [],
                     deadline=time.monotonic() + 45,
                 )
                 record("provider", raw)
                 try:
-                    result = interpret(json.loads(message.content), payload)
+                    result = interpret(parse_response(message.content), payload)
                 except (ValueError, TypeError):
                     result = {
                         "status": "error",

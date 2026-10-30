@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 from app.agents.budget import PRICING
 from app.agents.errors import AgentError
 from app.agents.versions import build_manifest, canonical_hash
+from app.db.engine import read_session
 from app.db.fixtures import ensure_rooms
 from app.evaluation.engine import evaluator_manifest
 from app.evidence.recorder import append_event
@@ -288,7 +289,7 @@ class RunService:
         return run
 
     def read(self, user_id, run_uuid):
-        with Session(self.engine) as session:
+        with read_session(self.engine) as session:
             run = self.owned_run(session, user_id, run_uuid)
             executions = list(
                 session.scalars(
@@ -555,6 +556,14 @@ class RunService:
                     total >= self.settings.run_concurrency
                     or count >= run.manifest_json["limits"]["concurrency"]
                 ):
+                    # The message is acknowledged without a lease when capacity
+                    # is full. Let the durable scanner retry once a slot opens,
+                    # instead of retaining the last publish's 15-second cooldown.
+                    e.timing_json = {
+                        **e.timing_json,
+                        "dispatch_at": None,
+                        "capacity_deferred_at": now.isoformat(),
+                    }
                     return None
                 timing = dict(e.timing_json or {})
                 if timing.get("deadline") and now >= datetime.fromisoformat(timing["deadline"]):

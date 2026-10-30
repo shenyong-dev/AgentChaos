@@ -1,0 +1,265 @@
+{
+  "loads": [
+    {
+      "concurrency_cap": 1,
+      "run_id": "cd41176d-c418-4a7f-9658-94193474f3e4",
+      "samples": 15,
+      "observed_peak": 1,
+      "claim_to_finish_p50_seconds": 3.000445,
+      "claim_to_finish_p95_seconds": 5.592075,
+      "create_to_observe_batch_seconds": 67.735,
+      "passed": 15,
+      "bookings": 0,
+      "duplicate_messages_added": 15,
+      "boundary": "Same host; explicit offline gateway; 15 related controls, not provider capacity or statistical independence"
+    },
+    {
+      "concurrency_cap": 3,
+      "run_id": "a79f3ae4-bef9-4561-af7f-e330568df78d",
+      "samples": 15,
+      "observed_peak": 3,
+      "claim_to_finish_p50_seconds": 3.681574,
+      "claim_to_finish_p95_seconds": 4.713974,
+      "create_to_observe_batch_seconds": 24.718,
+      "passed": 15,
+      "bookings": 0,
+      "duplicate_messages_added": 15,
+      "boundary": "Same host; explicit offline gateway; 15 related controls, not provider capacity or statistical independence"
+    },
+    {
+      "concurrency_cap": 5,
+      "run_id": "ffb6d49d-a1bf-45e7-ae80-59464b5a5098",
+      "samples": 15,
+      "observed_peak": 5,
+      "claim_to_finish_p50_seconds": 4.288641,
+      "claim_to_finish_p95_seconds": 5.210395,
+      "create_to_observe_batch_seconds": 14.735,
+      "passed": 15,
+      "bookings": 0,
+      "duplicate_messages_added": 15,
+      "boundary": "Same host; explicit offline gateway; 15 related controls, not provider capacity or statistical independence"
+    }
+  ],
+  "controls": {
+    "cancel-queued": {
+      "run_id": "10e40934-0c4a-40eb-8cf1-95898ee9b4c6",
+      "run_status": "cancelled",
+      "execution_id": "55892a01-87d5-48a1-a279-c5645eeb81a7",
+      "status": "cancelled",
+      "attempt": 1,
+      "repeat_no": 1,
+      "scope_id": "test:55892a01-87d5-48a1-a279-c5645eeb81a7",
+      "session_id": "c158948b-8d73-430b-b1ce-5c2a9df21b19",
+      "error": {
+        "code": "execution_cancelled",
+        "category": "control"
+      },
+      "bookings": 0
+    },
+    "native-redis-checkpoint-restart": {
+      "run_id": "5c1874cc-6f22-4ae0-bb5a-31dbe2046348",
+      "run_status": "completed",
+      "execution_id": "dec677f5-9c31-4fca-8909-a13e1b11f7f9",
+      "status": "passed",
+      "attempt": 1,
+      "repeat_no": 1,
+      "scope_id": "test:dec677f5-9c31-4fca-8909-a13e1b11f7f9",
+      "session_id": "843578cb-3b3d-4749-adc4-f22d196f1160",
+      "error": null,
+      "bookings": 1,
+      "unavailable": {
+        "http_status": 503,
+        "checked_at": "2026-10-30T06:17:46.873905Z",
+        "component": {
+          "name": "redis",
+          "status": "error",
+          "code": "redis_unreachable",
+          "message": "Redis 连接失败，请检查本地配置与服务。",
+          "latency_ms": 2006.92,
+          "version": null,
+          "capabilities": {}
+        }
+      },
+      "recovered": {
+        "http_status": 200,
+        "checked_at": "2026-10-30T06:17:47.807131Z",
+        "component": {
+          "name": "redis",
+          "status": "ok",
+          "code": "redis_connected",
+          "message": "PING、JSON 与 Search 已验证。",
+          "latency_ms": 20.38,
+          "version": "8.2.10",
+          "capabilities": {
+            "json": true,
+            "search": true
+          }
+        }
+      }
+    },
+    "redis-unavailable-inflight": {
+      "run_id": "cc1f7756-6515-4cdc-ae47-6f23c689189b",
+      "run_status": "completed",
+      "execution_id": "7218577f-b886-43f8-8735-b65ed2865e07",
+      "status": "error",
+      "attempt": 1,
+      "repeat_no": 1,
+      "scope_id": "test:7218577f-b886-43f8-8735-b65ed2865e07",
+      "session_id": "1d06a16f-0cc7-41a2-adff-8fef3beb2974",
+      "error": {
+        "code": "executor_error",
+        "category": "platform",
+        "exception_type": "ConnectionError"
+      },
+      "bookings": 0,
+      "health": {
+        "http_status": 503,
+        "checked_at": "2026-10-30T06:18:17.222950Z",
+        "component": {
+          "name": "redis",
+          "status": "error",
+          "code": "redis_unreachable",
+          "message": "Redis 连接失败，请检查本地配置与服务。",
+          "latency_ms": 2014.9,
+          "version": null,
+          "capabilities": {}
+        }
+      }
+    },
+    "expired-worker-late-return": {
+      "run_id": "b9df4d69-621f-41da-972b-fb7240613576",
+      "run_status": "completed",
+      "execution_id": "00abbb35-5143-4b5c-87dd-de70c405aef2",
+      "status": "error",
+      "attempt": 2,
+      "repeat_no": 1,
+      "scope_id": "test:00abbb35-5143-4b5c-87dd-de70c405aef2",
+      "session_id": "a71cd065-c459-45da-98fc-c5302450c95a",
+      "error": {
+        "code": "recovery_uncertain",
+        "message": "上次输入未形成完整回执，保留检查点与业务事实，需人工核对恢复。",
+        "category": "platform"
+      },
+      "bookings": 0,
+      "old_return_refused": true,
+      "paused_SQL_lock_timeout": false,
+      "owned_worker_resumed_to_release_SQL": false
+    },
+    "cancel-inflight": {
+      "run_id": "8fdf58c7-232f-4c06-8c76-9dcc47f9c9cf",
+      "run_status": "cancelled",
+      "execution_id": "7f2c7131-045d-4ef1-8c11-1ae987a94297",
+      "status": "cancelled",
+      "attempt": 1,
+      "repeat_no": 1,
+      "scope_id": "test:7f2c7131-045d-4ef1-8c11-1ae987a94297",
+      "session_id": "a58ab6a9-10dc-47f5-b3cc-7db6ba705445",
+      "error": {
+        "code": "execution_cancelled",
+        "category": "control"
+      },
+      "bookings": 0
+    },
+    "cancel-after-sql-commit": {
+      "run_id": "73506728-b1b0-43fe-9dc3-e359a5cada33",
+      "run_status": "cancelled",
+      "execution_id": "0f12cc04-b807-4d35-bc98-875ca8fc0035",
+      "status": "cancelled",
+      "attempt": 1,
+      "repeat_no": 1,
+      "scope_id": "test:0f12cc04-b807-4d35-bc98-875ca8fc0035",
+      "session_id": "317022e9-7a6e-4931-8c82-05eccfd9f25a",
+      "error": {
+        "code": "execution_cancelled",
+        "category": "control"
+      },
+      "bookings": 1,
+      "observed_commit_before_cancel": true
+    },
+    "missing-session-metadata": {
+      "run_id": "ad4958dc-8596-4e54-a475-40adcf4ab91c",
+      "run_status": "completed",
+      "execution_id": "a431d656-3a00-4749-8f8a-e8a60c01f3bb",
+      "status": "error",
+      "attempt": 1,
+      "repeat_no": 1,
+      "scope_id": "test:a431d656-3a00-4749-8f8a-e8a60c01f3bb",
+      "session_id": "cc2d42c8-7def-42b6-9cdf-667104aaee33",
+      "error": {
+        "code": "recovery_uncertain",
+        "message": "原会话元数据缺失，保留业务数据并等待人工恢复。",
+        "category": "platform"
+      },
+      "bookings": 0,
+      "deliberate_own_key_loss": true
+    },
+    "owned-mysql-connection-outage": {
+      "run_id": "3e5cb466-32d4-471f-ab85-cba79ec03778",
+      "run_status": "completed",
+      "execution_id": "7684f7db-855f-422b-b64d-40b3c0c0c45a",
+      "status": "error",
+      "attempt": 2,
+      "repeat_no": 1,
+      "scope_id": "test:7684f7db-855f-422b-b64d-40b3c0c0c45a",
+      "session_id": "03cb6728-ca97-4b20-9160-b74219a40624",
+      "error": {
+        "code": "recovery_uncertain",
+        "message": "上次输入未形成完整回执，保留检查点与业务事实，需人工核对恢复。",
+        "category": "platform"
+      },
+      "bookings": 0,
+      "health": {
+        "http_status": 503,
+        "checked_at": "2026-10-30T06:19:26.829596Z",
+        "component": {
+          "name": "mysql",
+          "status": "error",
+          "code": "mysql_unreachable",
+          "message": "数据库连接失败，请检查本地配置、服务与授权。",
+          "latency_ms": 17.53,
+          "version": null,
+          "capabilities": {}
+        }
+      }
+    },
+    "broker-publish-rescan": {
+      "run_id": "cee5ea30-1424-42fc-bc8b-3cd6ffa3b36a",
+      "run_status": "completed",
+      "execution_id": "8e151fa7-be98-4b35-bda4-ebbf5d5f9ea0",
+      "status": "passed",
+      "attempt": 1,
+      "repeat_no": 1,
+      "scope_id": "test:8e151fa7-be98-4b35-bda4-ebbf5d5f9ea0",
+      "session_id": "11be80ee-40e4-4815-aaac-4b3f32e85a40",
+      "error": null,
+      "bookings": 0,
+      "original_publish": {
+        "published": 0,
+        "failed": 1,
+        "deferred": 0,
+        "expired": 0
+      }
+    },
+    "sse": {
+      "run_id": "4cb6b3e2-2dac-4b84-bda8-cf024124b6e7",
+      "api_restarted": true,
+      "disconnected_after": 5,
+      "observed_frames_equal_SQL": 54,
+      "duplicates": 0,
+      "invalid_cursor": 400,
+      "cross_run_cursor": 409,
+      "unavailable_cursor": 410,
+      "foreign_operator": 404,
+      "rotation_events": [
+        "stream.ready",
+        "stream.ready"
+      ],
+      "client_delay_per_trace_seconds": 0.03,
+      "boundary": "Actual slow read/reconnect; send timeout is a separate ASGI control",
+      "recorded_at": "2026-10-30T06:20:02.426822+00:00"
+    }
+  },
+  "paid_calls": 0,
+  "checks_complete": true,
+  "scope": "full"
+}

@@ -1,0 +1,119 @@
+........................................................................ [ 27%]
+...F.................................................................... [ 55%]
+......F................................................................. [ 83%]
+............................................                             [100%]
+================================== FAILURES ===================================
+_____________ test_utc_microseconds_roundtrip_and_naive_rejection _____________
+
+session = <sqlalchemy.orm.session.Session object at 0x00000271412B7EC0>
+
+    def test_utc_microseconds_roundtrip_and_naive_rejection(session):
+        room = session.scalar(select(Room).where(Room.scope_id == "demo"))
+        local = datetime(2026, 10, 25, 9, 0, 0, 123456, tzinfo=timezone(timedelta(hours=8)))
+        draft = insert(
+            session,
+            BookingDraft,
+            draft_uuid=str(uuid4()),
+            scope_id="demo",
+            actor_key="time-test",
+            room_id=room.id,
+            start_at=local,
+            end_at=local + timedelta(hours=1),
+            attendees=1,
+            payload_hash=HASH,
+            expires_at=local + timedelta(minutes=5),
+        )
+        session.expire(draft)
+        assert draft.start_at == NOW
+        raw = session.scalar(
+            text("SELECT start_at FROM sb_booking_drafts WHERE id=:id"), {"id": draft.id}
+        )
+        assert raw == NOW.replace(tzinfo=None)
+        assert session.scalar(text("SELECT @@session.time_zone")) == "+00:00"
+>       assert session.scalar(text("SELECT @@transaction_isolation")) == "REPEATABLE-READ"
+E       AssertionError: assert 'READ-COMMITTED' == 'REPEATABLE-READ'
+E         
+E         - REPEATABLE-READ
+E         + READ-COMMITTED
+
+backend\tests\test_database.py:355: AssertionError
+___________ test_open_ledger_keeps_finite_run_limits_and_late_usage ___________
+
+trace = (<app.executors.service.RunService object at 0x000002711EE3D820>, <app.evidence.reader.TraceReader object at 0x0000027...sPath('D:/AgentChaos/.local/evidence/8012e13b-dd66-48f4-b183-5f2e71b77a3d/3aa113c6-05b6-4541-8705-4ccc813c0fa4.json')])
+
+    def test_open_ledger_keeps_finite_run_limits_and_late_usage(trace):
+        service, reader, redis, settings, make, _ = trace
+        identifier, execution_uuid = make()
+        claim = service.claim(execution_uuid)
+        control = ExecutionControl(service.engine, claim["id"], claim["token"])
+        budget = ExecutorBudget(
+            redis,
+            settings,
+            control,
+            identifier,
+            execution_uuid,
+            prefix=settings.executor_namespace + ":open",
+        )
+        redis.hset(
+            budget.key, mapping={"limit": -1, "calls_started": 500, "charged_estimate": 2_000_000}
+        )
+        recorder = EvidenceRecorder(control, settings, claim)
+        started = recorder.emit("model.started", **recorder.model_metadata)
+>       ticket = budget.reserve(100, 10)
+                 ^^^^^^^^^^^^^^^^^^^^^^^
+
+backend\tests\test_evidence.py:379: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <app.executors.budget.ExecutorBudget object at 0x0000027156B9E540>
+prompt_bytes = 100, max_output = 10
+
+    def reserve(self, prompt_bytes, max_output):
+        s = self.settings
+        platform = s.executor_budget_authorization_id == PLATFORM_AUTHORIZATION
+        if (
+            not s.executor_allow_paid_model_calls
+            or authorization_limit(s) == 0
+            or s.agent_model != "deepseek-flash"
+        ):
+            raise AgentError("model_not_authorized", "当前任务的模型调用未获准。", 403)
+        if prompt_bytes > 65_536 or not 1 <= max_output <= 4096:
+            raise AgentError("model_input_limit", "请求超过模型输入或输出限制。", 400)
+        input_upper = prompt_bytes * 2 + 8192
+        ticket = {
+            "call_id": str(uuid4()),
+            "input_token_upper": input_upper,
+            "max_output_tokens": max_output,
+            "upper_microusd": peak_estimate_microusd(input_upper, max_output),
+        }
+        ticket["key"] = f"{self.execution_key}:call:{ticket['call_id']}"
+        with self.control.transaction() as (_, run, e):
+            limits = run.manifest_json["limits"]
+            if run.budget_json["authorization_id"] != s.executor_budget_authorization_id:
+                raise AgentError(
+                    "budget_authorization_changed", "运行预算授权与当前配置不一致。", 403
+                )
+            result = self.redis.eval(
+                RESERVE,
+                4,
+                *self.keys(ticket),
+                ticket["upper_microusd"],
+                input_upper + max_output,
+                authorization_limit(s),
+                min(run.budget_json["agent_microusd"], 100_000)
+                if platform
+                else run.budget_json["agent_microusd"],
+                limits["max_model_calls"],
+                limits["max_tokens"],
+                60 if platform else 400,
+            )
+            if result != 1:
+                code = "budget_ledger_unavailable" if result == -1 else "model_budget_exhausted"
+>               raise AgentError(code, "预算账本缺失或预算/调用/token上限已到，未发送请求。", 429)
+E               app.agents.errors.AgentError: 预算账本缺失或预算/调用/token上限已到，未发送请求。
+
+backend\app\executors\budget.py:145: AgentError
+=========================== short test summary info ===========================
+FAILED backend\tests\test_database.py::test_utc_microseconds_roundtrip_and_naive_rejection
+FAILED backend\tests\test_evidence.py::test_open_ledger_keeps_finite_run_limits_and_late_usage
+2 failed, 258 passed in 422.96s (0:07:02)

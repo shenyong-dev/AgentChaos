@@ -21,6 +21,7 @@ from app.agents.checkpoints import FencedRedisSaver, SessionRedisSaver
 from app.agents.errors import AgentError
 from app.agents.gateway import ModelGateway
 from app.agents.graph import build_agent_graph, looks_like_decline
+from app.agents.participants import fields_for_input
 from app.agents.registry import ToolRegistry
 from app.agents.retrieval import KnowledgeRetriever
 from app.agents.versions import build_manifest, canonical_hash, register_version
@@ -300,13 +301,18 @@ class AgentRuntime:
                     prior_confirmation = state.get("confirmation_state", "idle")
                     declined = looks_like_decline(text)
                     reopens_booking = bool(
-                        re.search("重新预约|继续预约|现在(?:想|要)预约|还是预约|可以预约了", text)
+                        re.search(
+                            "重新预约|继续预约|现在(?:想|要)预约|还是预约|可以预约了|"
+                            "重新(?:给出|生成|创建)(?:完整|预约|确认|待确认)?草稿",
+                            text,
+                        )
                     )
                     invoke_input = {
                         **(self.initial(metadata) if not snapshot.values else {}),
                         "messages": [HumanMessage(content=text, id=request_id)],
                         "turn_index": state["turn_index"] + 1,
                         "last_user_text": text,
+                        "fields": fields_for_input(state, text),
                         "denials": state.get("denials", [])
                         + (
                             [

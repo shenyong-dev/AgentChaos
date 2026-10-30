@@ -60,6 +60,8 @@ class ModelGateway:
         if remaining <= 0:
             raise AgentError("agent_deadline", "本轮对话达到总时限。", 504)
         request = {"messages": messages_to_dict(messages), "tools": tools}
+        if self.role == "judge":
+            request["response_format"] = {"type": "json_object"}
         request_bytes = len(json.dumps(request, ensure_ascii=False, default=str).encode())
         ticket = self.budget.reserve(request_bytes, self.max_output)
         record = {
@@ -87,6 +89,7 @@ class ModelGateway:
                 timeout=remaining,
                 max_retries=0,
                 max_tokens=self.max_output,
+                **({"response_format": {"type": "json_object"}} if self.role == "judge" else {}),
             )
             bound = (
                 model.bind_tools(tools, **({"tool_choice": tool_choice} if tool_choice else {}))
@@ -136,6 +139,8 @@ class ModelGateway:
                 raise AgentError(
                     "model_output_truncated", "模型输出达到上限，不能作为完整结果。", 503
                 )
+            if self.role == "judge" and not message.content.strip():
+                raise AgentError("judge_blank_json", "裁判返回空白JSON，不自动重试。", 503)
             if not message.content and not message.tool_calls and not message.invalid_tool_calls:
                 raise AgentError("model_empty_response", "模型没有返回内容或工具调用。", 503)
             record["status"] = "completed"

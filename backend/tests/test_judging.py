@@ -76,8 +76,14 @@ def test_agreement_keeps_failure_denominators_and_does_not_invent_inter_human_re
         "c": {"support": "supported", "explanation": "reasonable"},
     }
     ai = {
-        "a": interpret(answer(), {"evidence": [{"id": "public_rules"}]}),
-        "b": interpret(answer(), {"evidence": [{"id": "public_rules"}]}),
+        "a": interpret(
+            answer(),
+            {"dialogue": ["control"], "evidence": [{"id": "public_rules", "content": "control"}]},
+        ),
+        "b": interpret(
+            answer(),
+            {"dialogue": ["control"], "evidence": [{"id": "public_rules", "content": "control"}]},
+        ),
         "c": {"status": "error"},
     }
     report = agreement(human, ai)
@@ -190,7 +196,7 @@ def test_label_seal_is_required_before_judge_and_no_human_or_rule_labels_cross_b
         and "rule_observation" not in serialized
         and "source_execution_id" not in serialized
     )
-    assert json.loads(messages[1].content) == sample["payload"]
+    assert json.loads(messages[1].content)["observed"] == sample["payload"]
     read = svc.read(1, bid)
     assert read["labels"] == labels and read["evaluation_protocol"]
     review = DisagreementReview(

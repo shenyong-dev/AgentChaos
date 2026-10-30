@@ -33,6 +33,25 @@ class Judgment(ContractModel):
     suspected_cause: str | None = Field(default=None, max_length=1000)
 
 
+class RatingV2(Rating):
+    """T17B permits an honest lack of citations only for an insufficient rating."""
+
+    evidence_refs: list[str] = Field(min_length=0, max_length=10)
+
+
+class SupportRatingV2(RatingV2):
+    label: Support
+
+
+class ExplanationRatingV2(RatingV2):
+    label: Explanation
+
+
+class JudgmentV2(Judgment):
+    support: SupportRatingV2
+    explanation: ExplanationRatingV2
+
+
 class RequestID(ContractModel):
     request_id: UUID
 

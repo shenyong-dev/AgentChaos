@@ -4,7 +4,6 @@ import json
 import time
 from datetime import UTC, datetime
 
-from langchain_core.messages import HumanMessage, SystemMessage
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -15,17 +14,22 @@ from app.cases.service import CaseService
 from app.core.config import PROJECT_ROOT
 from app.executors.control import advisory
 from app.judging import evidence
-from app.judging.budget import JudgeBudget
+from app.judging.budget import PROTOCOL_AUTHORIZATION, JudgeBudget
 from app.judging.engine import agreement, interpret, manifest
+from app.judging.protocol import messages as judge_messages
+from app.judging.protocol import parse_response
 from app.models import Artifact
 
 DATASET = PROJECT_ROOT / "docs/fixtures/T12/samples.json"
 
 
-def load_dataset():
-    value = json.loads(DATASET.read_bytes())
+def load_dataset(task="T12"):
+    path = DATASET if task == "T12" else PROJECT_ROOT / "docs/fixtures/T17B/samples.json"
+    if task not in ("T12", "T17B"):
+        raise ValueError("Unknown calibration dataset")
+    value = json.loads(path.read_bytes())
     digest = value.pop("dataset_hash")
-    if canonical_hash(value) != digest or len(value["samples"]) != 30:
+    if canonical_hash(value) != digest or len(value["samples"]) != (30 if task == "T12" else 12):
         raise AgentError("judge_dataset_invalid", "校准样本清单或哈希不符。", 503)
     value["dataset_hash"] = digest
     for item in value["samples"]:
@@ -38,9 +42,10 @@ class JudgeService:
     authenticate = CaseService.authenticate
     role = staticmethod(CaseService.role)
 
-    def __init__(self, engine, redis, settings, *, gateway_factory=None):
+    def __init__(self, engine, redis, settings, *, gateway_factory=None, dataset_task="T12"):
         self.engine, self.redis, self.settings = engine, redis, settings
         self.gateway_factory = gateway_factory
+        self.dataset_task = dataset_task
 
     def _rows(self, session, owner, batch):
         user = self.role(session, owner)
@@ -99,7 +104,7 @@ class JudgeService:
                 batch,
                 "judge_request",
                 {
-                    "dataset": load_dataset(),
+                    "dataset": load_dataset(self.dataset_task),
                     "manifest": manifest(self.settings),
                     "created_at": datetime.now(UTC).isoformat(),
                     "mode": "offline_double" if self.gateway_factory else "real_provider",
@@ -181,21 +186,11 @@ class JudgeService:
                 x["id"] for x in frozen["dataset"]["samples"]
             }:
                 raise AgentError(
-                    "judge_labels_incomplete", "需先真人标注全部30条并核对样本哈希。", 409
+                    "judge_labels_incomplete", "需先真人标注本批全部样本并核对哈希。", 409
                 )
             # One authenticated annotator in this first calibration, declared honestly.
             protocol = manifest(self.settings)
-            if any(
-                protocol[k] != frozen["manifest"][k]
-                for k in (
-                    "prompt_hash",
-                    "schema_hash",
-                    "threshold",
-                    "model",
-                    "thinking",
-                    "max_output_tokens",
-                )
-            ):
+            if protocol != frozen["manifest"]:
                 raise AgentError(
                     "judge_protocol_changed", "评价定义已变更，需新建批次重新声明。", 409
                 )
@@ -254,17 +249,7 @@ class JudgeService:
             )
             if protocol is None:
                 protocol = manifest(self.settings)
-                if any(
-                    protocol[k] != seal["manifest"][k]
-                    for k in (
-                        "prompt_hash",
-                        "schema_hash",
-                        "threshold",
-                        "model",
-                        "thinking",
-                        "max_output_tokens",
-                    )
-                ):
+                if protocol != seal["manifest"]:
                     raise AgentError(
                         "judge_protocol_changed", "评价定义与人工标注前声明不同。", 409
                     )
@@ -275,6 +260,12 @@ class JudgeService:
                     "judge_version_changed", "当前评价器不同于批次冻结版本，需新建独立批次。", 409
                 )
             payload = sample["payload"]
+            if (
+                not self.gateway_factory
+                and frozen["dataset"]["schema_version"].startswith("T17B")
+                and self.settings.judge_budget_authorization_id != PROTOCOL_AUTHORIZATION
+            ):
+                raise AgentError("judge_task_authorization", "本批需使用T17B独立裁判授权。", 403)
 
             def record(stage, value):
                 self._append(
@@ -294,10 +285,7 @@ class JudgeService:
             )
             # Only the exact allowlisted observed payload crosses the model boundary.
             # No labels/hashes, source type, rule verdict, reviewer or Agent prompt.
-            messages = [
-                SystemMessage(content=protocol["prompt"]),
-                HumanMessage(content=json.dumps(payload, ensure_ascii=False)),
-            ]
+            messages = judge_messages(protocol, payload)
             self._append(
                 source.owner_id,
                 batch,
@@ -314,7 +302,7 @@ class JudgeService:
                 message, raw = gateway.invoke(messages, [], deadline=time.monotonic() + 45)
                 record("provider", raw)
                 try:
-                    result = interpret(json.loads(message.content), payload)
+                    result = interpret(parse_response(message.content), payload)
                 except (ValueError, TypeError):
                     result = {
                         "status": "error",

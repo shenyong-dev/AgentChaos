@@ -1,0 +1,223 @@
+{
+  "loads": [],
+  "controls": {
+    "cancel-queued": {
+      "run_id": "cd9ef3ad-bab3-4e79-bd84-d1fc35ecf246",
+      "run_status": "cancelled",
+      "execution_id": "721c4a0a-f144-47a9-9a5e-4e4e42302006",
+      "status": "cancelled",
+      "attempt": 1,
+      "repeat_no": 1,
+      "scope_id": "test:721c4a0a-f144-47a9-9a5e-4e4e42302006",
+      "session_id": "af0bbba7-f863-4778-9a09-161a6bd6fa7c",
+      "error": {
+        "code": "execution_cancelled",
+        "category": "control"
+      },
+      "bookings": 0
+    },
+    "native-redis-checkpoint-restart": {
+      "run_id": "5a87af8f-4fff-4a46-97cb-47080f964033",
+      "run_status": "completed",
+      "execution_id": "bf5b633c-fad8-4143-b2f6-dbe38dabb586",
+      "status": "passed",
+      "attempt": 1,
+      "repeat_no": 1,
+      "scope_id": "test:bf5b633c-fad8-4143-b2f6-dbe38dabb586",
+      "session_id": "a29993d3-27dd-4a00-a80a-f7f9ae012914",
+      "error": null,
+      "bookings": 1,
+      "unavailable": {
+        "http_status": 503,
+        "checked_at": "2026-10-30T05:57:11.140295Z",
+        "component": {
+          "name": "redis",
+          "status": "error",
+          "code": "redis_unreachable",
+          "message": "Redis 连接失败，请检查本地配置与服务。",
+          "latency_ms": 2002.34,
+          "version": null,
+          "capabilities": {}
+        }
+      },
+      "recovered": {
+        "http_status": 200,
+        "checked_at": "2026-10-30T05:57:12.058946Z",
+        "component": {
+          "name": "redis",
+          "status": "ok",
+          "code": "redis_connected",
+          "message": "PING、JSON 与 Search 已验证。",
+          "latency_ms": 19.43,
+          "version": "8.2.10",
+          "capabilities": {
+            "json": true,
+            "search": true
+          }
+        }
+      }
+    },
+    "redis-unavailable-inflight": {
+      "run_id": "0631d948-2f19-4186-8366-a1b3df3324d0",
+      "run_status": "completed",
+      "execution_id": "35398714-eaa2-4380-a2bf-decf3a9838da",
+      "status": "error",
+      "attempt": 1,
+      "repeat_no": 1,
+      "scope_id": "test:35398714-eaa2-4380-a2bf-decf3a9838da",
+      "session_id": "44e39998-e6d7-46e5-a4fb-826c950e43a9",
+      "error": {
+        "code": "executor_error",
+        "category": "platform",
+        "exception_type": "ConnectionError"
+      },
+      "bookings": 0,
+      "health": {
+        "http_status": 503,
+        "checked_at": "2026-10-30T05:57:31.119394Z",
+        "component": {
+          "name": "redis",
+          "status": "error",
+          "code": "redis_unreachable",
+          "message": "Redis 连接失败，请检查本地配置与服务。",
+          "latency_ms": 2010.12,
+          "version": null,
+          "capabilities": {}
+        }
+      }
+    },
+    "expired-worker-late-return": {
+      "run_id": "bd925c70-ee5a-4f4a-acd6-5a257482b2c3",
+      "run_status": "completed",
+      "execution_id": "532a7775-d8c9-4188-b9ff-3e36743c0203",
+      "status": "error",
+      "attempt": 2,
+      "repeat_no": 1,
+      "scope_id": "test:532a7775-d8c9-4188-b9ff-3e36743c0203",
+      "session_id": "bec28988-5e9a-42f5-9847-3b8743a0656f",
+      "error": {
+        "code": "recovery_uncertain",
+        "message": "上次输入未形成完整回执，保留检查点与业务事实，需人工核对恢复。",
+        "category": "platform"
+      },
+      "bookings": 0,
+      "old_return_refused": true
+    },
+    "cancel-inflight": {
+      "run_id": "8cd9cbe2-e759-40f3-babe-888f9228f638",
+      "run_status": "cancelled",
+      "execution_id": "f2ca5da7-cea1-4f48-abf9-5a1348134868",
+      "status": "cancelled",
+      "attempt": 1,
+      "repeat_no": 1,
+      "scope_id": "test:f2ca5da7-cea1-4f48-abf9-5a1348134868",
+      "session_id": "e9db0d65-f974-445d-89bd-cdc451f5a19a",
+      "error": {
+        "code": "execution_cancelled",
+        "category": "control"
+      },
+      "bookings": 0
+    },
+    "cancel-after-sql-commit": {
+      "run_id": "06ae189e-3537-4f3e-8618-a8acb5fe6c2e",
+      "run_status": "cancelled",
+      "execution_id": "8ff27e45-d5be-4255-b8a3-e7134ed2cace",
+      "status": "cancelled",
+      "attempt": 1,
+      "repeat_no": 1,
+      "scope_id": "test:8ff27e45-d5be-4255-b8a3-e7134ed2cace",
+      "session_id": "fb4f1d3c-ba75-4712-b3d1-4f7d243115d4",
+      "error": {
+        "code": "execution_cancelled",
+        "category": "control"
+      },
+      "bookings": 1,
+      "observed_commit_before_cancel": true
+    },
+    "missing-session-metadata": {
+      "run_id": "a587076c-551f-45ae-ad85-682c70245236",
+      "run_status": "completed",
+      "execution_id": "7b7a99c2-033c-487c-8d12-ef96edbc9974",
+      "status": "error",
+      "attempt": 1,
+      "repeat_no": 1,
+      "scope_id": "test:7b7a99c2-033c-487c-8d12-ef96edbc9974",
+      "session_id": "1c5100c0-2393-4c9c-bee8-741cda425f9a",
+      "error": {
+        "code": "recovery_uncertain",
+        "message": "原会话元数据缺失，保留业务数据并等待人工恢复。",
+        "category": "platform"
+      },
+      "bookings": 0,
+      "deliberate_own_key_loss": true
+    },
+    "owned-mysql-connection-outage": {
+      "run_id": "1c0a5962-74ee-49a4-b992-26daeb58bdf0",
+      "run_status": "completed",
+      "execution_id": "f725e4a0-460a-43cc-9a89-b04242511d0c",
+      "status": "error",
+      "attempt": 2,
+      "repeat_no": 1,
+      "scope_id": "test:f725e4a0-460a-43cc-9a89-b04242511d0c",
+      "session_id": "6ed5a00e-78b1-4efa-ac7e-e518f41e56ea",
+      "error": {
+        "code": "recovery_uncertain",
+        "message": "上次输入未形成完整回执，保留检查点与业务事实，需人工核对恢复。",
+        "category": "platform"
+      },
+      "bookings": 0,
+      "health": {
+        "http_status": 503,
+        "checked_at": "2026-10-30T05:58:33.681155Z",
+        "component": {
+          "name": "mysql",
+          "status": "error",
+          "code": "mysql_unreachable",
+          "message": "数据库连接失败，请检查本地配置、服务与授权。",
+          "latency_ms": 18.22,
+          "version": null,
+          "capabilities": {}
+        }
+      }
+    },
+    "broker-publish-rescan": {
+      "run_id": "774c8d5e-01d8-4936-8dda-faabbd3e9a78",
+      "run_status": "completed",
+      "execution_id": "deb4abd1-3cdd-4c71-bbca-610591ab7275",
+      "status": "passed",
+      "attempt": 1,
+      "repeat_no": 1,
+      "scope_id": "test:deb4abd1-3cdd-4c71-bbca-610591ab7275",
+      "session_id": "84f442f2-e5fe-470a-b78d-ab1f38ea0f84",
+      "error": null,
+      "bookings": 0,
+      "original_publish": {
+        "published": 0,
+        "failed": 1,
+        "deferred": 0,
+        "expired": 0
+      }
+    },
+    "sse": {
+      "run_id": "62017799-8b03-4f6c-9519-5ab16206fc10",
+      "api_restarted": true,
+      "disconnected_after": 5,
+      "observed_frames_equal_SQL": 54,
+      "duplicates": 0,
+      "invalid_cursor": 400,
+      "cross_run_cursor": 409,
+      "unavailable_cursor": 410,
+      "foreign_operator": 404,
+      "rotation_events": [
+        "stream.ready",
+        "stream.ready"
+      ],
+      "client_delay_per_trace_seconds": 0.03,
+      "boundary": "Actual slow read/reconnect; send timeout is a separate ASGI control",
+      "recorded_at": "2026-10-30T05:59:18.230697+00:00"
+    }
+  },
+  "paid_calls": 0,
+  "checks_complete": false,
+  "scope": "controls"
+}
