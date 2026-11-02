@@ -12,6 +12,7 @@ from app.schemas.contracts import TraceEvent as LegacyTraceEvent
 from app.schemas.datasets import DatasetReview
 from app.schemas.events import TraceEvent
 from app.schemas.faults import FaultSpec
+from app.schemas.interactive import InteractionCreate
 from app.schemas.judging import (
     DisagreementReview,
     ExecutionJudgeReview,
@@ -20,12 +21,15 @@ from app.schemas.judging import (
     JudgmentV2,
 )
 from app.schemas.metamorphic import RelationCatalog
+from app.schemas.readiness import ReadinessReport
 from app.tools.booking import booking_tool_contracts
 
 destination = Path(__file__).resolve().parents[2] / "docs" / "architecture"
 destination.mkdir(parents=True, exist_ok=True)
 for name, schema in (
     ("openapi.json", app.openapi()),
+    ("readiness-v1.schema.json", ReadinessReport.model_json_schema()),
+    ("interactive-create.schema.json", InteractionCreate.model_json_schema()),
     ("test-case.schema.json", TestCaseDraft.model_json_schema()),
     ("trace-event.schema.json", TraceEvent.model_json_schema()),
     ("trace-event-v1.0.schema.json", LegacyTraceEvent.model_json_schema()),
@@ -46,7 +50,9 @@ for name, schema in (
         {"version": "booking-registry-v1", "tools": ToolRegistry(None, None).schemas},
     ),
 ):
-    (destination / name).write_text(
-        json.dumps(schema, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    path = destination / name
+    newline = b"\r\n" if path.exists() and b"\r\n" in path.read_bytes() else b"\n"
+    path.write_bytes(
+        (json.dumps(schema, ensure_ascii=False, indent=2) + "\n").encode().replace(b"\n", newline)
     )
     print(f"Exported {name}")

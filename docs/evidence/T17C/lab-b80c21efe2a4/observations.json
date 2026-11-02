@@ -1,0 +1,1064 @@
+{
+  "checked_at": "2026-10-31T12:39:31.261113+00:00",
+  "provenance": "real MySQL and existing native Redis; actual Celery solo inspect only, no task dispatch",
+  "observations": {
+    "source_not_registered": [
+      {
+        "id": "schema",
+        "label": "数据库迁移",
+        "status": "ready",
+        "code": "schema_matches",
+        "message": "迁移版本与必要表匹配。",
+        "next_step": "由维护者核对迁移记录；本页不会执行迁移。",
+        "checked_at": "2026-10-31T12:39:06.588760Z",
+        "expires_at": "2026-10-31T12:40:06.588760Z",
+        "source": "live",
+        "facts": {
+          "missing_tables": 0
+        }
+      },
+      {
+        "id": "version",
+        "label": "当前源码版本",
+        "status": "blocked",
+        "code": "version_not_registered",
+        "message": "当前源码尚无匹配对象版本。",
+        "next_step": "由维护者核对源码与版本登记；不要把旧运行自动切换为新版本。",
+        "checked_at": "2026-10-31T12:39:07.579983Z",
+        "expires_at": "2026-10-31T12:40:07.579983Z",
+        "source": "live",
+        "facts": {
+          "matching_version_found": false
+        }
+      }
+    ],
+    "migration_mismatch": [
+      {
+        "id": "schema",
+        "label": "数据库迁移",
+        "status": "blocked",
+        "code": "schema_mismatch",
+        "message": "迁移版本或必要表不匹配。",
+        "next_step": "由维护者核对迁移记录；本页不会执行迁移。",
+        "checked_at": "2026-10-31T12:39:08.149113Z",
+        "expires_at": "2026-10-31T12:40:08.149113Z",
+        "source": "live",
+        "facts": {
+          "missing_tables": 0
+        }
+      },
+      {
+        "id": "version",
+        "label": "当前源码版本",
+        "status": "unknown",
+        "code": "version_not_checked",
+        "message": "迁移未就绪，未读取对象版本。",
+        "next_step": "先处理数据库迁移。",
+        "checked_at": "2026-10-31T12:39:08.149113Z",
+        "expires_at": "2026-10-31T12:40:08.149113Z",
+        "source": "live",
+        "facts": {}
+      }
+    ],
+    "no_worker_reply": {
+      "id": "worker",
+      "label": "Worker 与执行队列",
+      "status": "unknown",
+      "code": "worker_no_matching_reply",
+      "message": "未收到匹配回执；Worker可能离线、繁忙、版本旧或队列不同，不能由配置推定存活。",
+      "next_step": "核对已启动Worker的源码、数据库、执行配置与队列；无回执不等于已证明进程停止。",
+      "checked_at": "2026-10-31T12:39:10.500666Z",
+      "expires_at": "2026-10-31T12:40:10.500666Z",
+      "source": "live",
+      "facts": {
+        "responders": 0,
+        "matching_workers": 0
+      }
+    },
+    "wrong_queue": {
+      "id": "worker",
+      "label": "Worker 与执行队列",
+      "status": "blocked",
+      "code": "worker_no_matching_reply",
+      "message": "未收到匹配回执；Worker可能离线、繁忙、版本旧或队列不同，不能由配置推定存活。",
+      "next_step": "核对已启动Worker的源码、数据库、执行配置与队列；无回执不等于已证明进程停止。",
+      "checked_at": "2026-10-31T12:39:15.222223Z",
+      "expires_at": "2026-10-31T12:40:15.222223Z",
+      "source": "live",
+      "facts": {
+        "responders": 1,
+        "matching_workers": 0
+      }
+    },
+    "healthy": {
+      "schema_version": "T17C-1",
+      "checked_at": "2026-10-31T12:39:22.165715Z",
+      "expires_at": "2026-10-31T12:40:19.944827Z",
+      "checks": [
+        {
+          "id": "api",
+          "label": "API服务",
+          "status": "ready",
+          "code": "api_running",
+          "message": "连接已验证。",
+          "next_step": "连接正常。",
+          "checked_at": "2026-10-31T12:39:19.944827Z",
+          "expires_at": "2026-10-31T12:40:19.944827Z",
+          "source": "live",
+          "facts": {}
+        },
+        {
+          "id": "mysql",
+          "label": "数据库连接",
+          "status": "ready",
+          "code": "mysql_connected",
+          "message": "连接已验证。",
+          "next_step": "连接正常。",
+          "checked_at": "2026-10-31T12:39:19.944827Z",
+          "expires_at": "2026-10-31T12:40:19.944827Z",
+          "source": "live",
+          "facts": {}
+        },
+        {
+          "id": "redis",
+          "label": "Redis连接",
+          "status": "ready",
+          "code": "redis_connected",
+          "message": "连接已验证。",
+          "next_step": "连接正常。",
+          "checked_at": "2026-10-31T12:39:19.944827Z",
+          "expires_at": "2026-10-31T12:40:19.944827Z",
+          "source": "live",
+          "facts": {}
+        },
+        {
+          "id": "checkpoints",
+          "label": "JSON / Search",
+          "status": "ready",
+          "code": "checkpoint_capabilities_ok",
+          "message": "JSON与Search已实际响应。",
+          "next_step": "核对所连接实例的JSON/Search支持与命令权限。",
+          "checked_at": "2026-10-31T12:39:19.944827Z",
+          "expires_at": "2026-10-31T12:40:19.944827Z",
+          "source": "live",
+          "facts": {}
+        },
+        {
+          "id": "schema",
+          "label": "数据库迁移",
+          "status": "ready",
+          "code": "schema_matches",
+          "message": "迁移版本与必要表匹配。",
+          "next_step": "由维护者核对迁移记录；本页不会执行迁移。",
+          "checked_at": "2026-10-31T12:39:20.060628Z",
+          "expires_at": "2026-10-31T12:40:20.060628Z",
+          "source": "live",
+          "facts": {
+            "missing_tables": 0
+          }
+        },
+        {
+          "id": "version",
+          "label": "当前源码版本",
+          "status": "ready",
+          "code": "version_matches",
+          "message": "存在与当前源码匹配的可用对象版本。",
+          "next_step": "由维护者核对源码与版本登记；不要把旧运行自动切换为新版本。",
+          "checked_at": "2026-10-31T12:39:20.597113Z",
+          "expires_at": "2026-10-31T12:40:20.597113Z",
+          "source": "live",
+          "facts": {
+            "matching_version_found": true
+          }
+        },
+        {
+          "id": "interactive_budget",
+          "label": "交互Agent预算",
+          "status": "blocked",
+          "code": "paid_switch_off",
+          "message": "本角色付费调用已关闭，已存记录仍可查看。",
+          "next_step": "需要新调用时，先确认本项角色预算，再由维护者配置开关。",
+          "checked_at": "2026-10-31T12:39:19.945827Z",
+          "expires_at": "2026-10-31T12:40:19.945827Z",
+          "source": "configuration",
+          "facts": {
+            "paid_switch": false,
+            "authorization_matches": true,
+            "ledger_checked": false,
+            "remaining_microusd": null,
+            "calls_remaining": null
+          }
+        },
+        {
+          "id": "executor_budget",
+          "label": "批量Agent预算",
+          "status": "blocked",
+          "code": "paid_switch_off",
+          "message": "本角色付费调用已关闭，已存记录仍可查看。",
+          "next_step": "需要新调用时，先确认本项角色预算，再由维护者配置开关。",
+          "checked_at": "2026-10-31T12:39:19.945827Z",
+          "expires_at": "2026-10-31T12:40:19.945827Z",
+          "source": "configuration",
+          "facts": {
+            "paid_switch": false,
+            "authorization_matches": true,
+            "ledger_checked": false,
+            "remaining_microusd": null,
+            "calls_remaining": null
+          }
+        },
+        {
+          "id": "casegen_budget",
+          "label": "用例生成预算",
+          "status": "blocked",
+          "code": "paid_switch_off",
+          "message": "本角色付费调用已关闭，已存记录仍可查看。",
+          "next_step": "需要新调用时，先确认本项角色预算，再由维护者配置开关。",
+          "checked_at": "2026-10-31T12:39:19.945827Z",
+          "expires_at": "2026-10-31T12:40:19.945827Z",
+          "source": "configuration",
+          "facts": {
+            "paid_switch": false,
+            "authorization_matches": true,
+            "ledger_checked": false,
+            "remaining_microusd": null,
+            "calls_remaining": null
+          }
+        },
+        {
+          "id": "judge_budget",
+          "label": "辅助裁判预算",
+          "status": "blocked",
+          "code": "paid_switch_off",
+          "message": "本角色付费调用已关闭，已存记录仍可查看。",
+          "next_step": "需要新调用时，先确认本项角色预算，再由维护者配置开关。",
+          "checked_at": "2026-10-31T12:39:19.945827Z",
+          "expires_at": "2026-10-31T12:40:19.945827Z",
+          "source": "configuration",
+          "facts": {
+            "paid_switch": false,
+            "authorization_matches": true,
+            "ledger_checked": false,
+            "remaining_microusd": null,
+            "calls_remaining": null
+          }
+        },
+        {
+          "id": "worker",
+          "label": "Worker 与执行队列",
+          "status": "ready",
+          "code": "worker_matches",
+          "message": "收到当前源码、数据库和队列匹配的实时回执。",
+          "next_step": "核对已启动Worker的源码、数据库、执行配置与队列；无回执不等于已证明进程停止。",
+          "checked_at": "2026-10-31T12:39:22.165715Z",
+          "expires_at": "2026-10-31T12:40:22.165715Z",
+          "source": "live",
+          "facts": {
+            "responders": 1,
+            "matching_workers": 1
+          }
+        },
+        {
+          "id": "credential",
+          "label": "模型凭据",
+          "status": "blocked",
+          "code": "credential_missing",
+          "message": "模型凭据未配置。",
+          "next_step": "由维护者在本地配置；不要在页面、聊天或Git中粘贴密钥。",
+          "checked_at": "2026-10-31T12:39:22.165715Z",
+          "expires_at": "2026-10-31T12:40:22.165715Z",
+          "source": "configuration",
+          "facts": {}
+        },
+        {
+          "id": "copilot",
+          "label": "平台助手服务",
+          "status": "not_available",
+          "code": "copilot_not_implemented",
+          "message": "当前尚未实现，计划T17E。",
+          "next_step": "先完成环境引导与预约调试窗口。",
+          "checked_at": "2026-10-31T12:39:22.165715Z",
+          "expires_at": "2026-10-31T12:40:22.165715Z",
+          "source": "not_implemented",
+          "facts": {}
+        }
+      ],
+      "operations": [
+        {
+          "id": "history",
+          "label": "查看历史与证据",
+          "status": "ready",
+          "required_checks": [
+            "api",
+            "mysql",
+            "schema"
+          ],
+          "blockers": [],
+          "note": "不需要模型付费开关或Worker；可见数据仍按账号权限读取。",
+          "destination": "/runs"
+        },
+        {
+          "id": "offline",
+          "label": "准备离线验证",
+          "status": "ready",
+          "required_checks": [
+            "api",
+            "mysql",
+            "schema",
+            "redis",
+            "checkpoints",
+            "version"
+          ],
+          "blockers": [],
+          "note": "现有独立验证脚本使用明确离线模型；本页未运行演示，不会自动启动实验。",
+          "destination": "/workbench"
+        },
+        {
+          "id": "interactive",
+          "label": "交互调试 · 现有API",
+          "status": "blocked",
+          "required_checks": [
+            "api",
+            "mysql",
+            "schema",
+            "redis",
+            "checkpoints",
+            "version",
+            "credential",
+            "interactive_budget"
+          ],
+          "blockers": [
+            "credential",
+            "interactive_budget"
+          ],
+          "note": "当前为现有会话API；可视化调试窗口在T17D。调用还需登录、合法会话与确认。",
+          "destination": "/docs"
+        },
+        {
+          "id": "batch",
+          "label": "批量真实测试",
+          "status": "blocked",
+          "required_checks": [
+            "api",
+            "mysql",
+            "schema",
+            "redis",
+            "checkpoints",
+            "version",
+            "credential",
+            "worker",
+            "executor_budget"
+          ],
+          "blockers": [
+            "credential",
+            "executor_budget"
+          ],
+          "note": "预检不创建或投递运行，所选用例/版本与每run额度由服务端再次核验。",
+          "destination": "/workspace"
+        },
+        {
+          "id": "casegen",
+          "label": "AI用例生成",
+          "status": "blocked",
+          "required_checks": [
+            "api",
+            "mysql",
+            "schema",
+            "redis",
+            "credential",
+            "casegen_budget"
+          ],
+          "blockers": [
+            "credential",
+            "casegen_budget"
+          ],
+          "note": "生成候选仍需人工审核，不能直接作为已验证用例。",
+          "destination": "/cases"
+        },
+        {
+          "id": "judge",
+          "label": "AI辅助裁判",
+          "status": "blocked",
+          "required_checks": [
+            "api",
+            "mysql",
+            "schema",
+            "redis",
+            "credential",
+            "judge_budget"
+          ],
+          "blockers": [
+            "credential",
+            "judge_budget"
+          ],
+          "note": "还需所选批次独立标签先封存；12条T17B校准不开放执行级自动裁判。",
+          "destination": "/judging"
+        },
+        {
+          "id": "copilot",
+          "label": "平台AI助手",
+          "status": "not_available",
+          "required_checks": [
+            "copilot"
+          ],
+          "blockers": [
+            "copilot"
+          ],
+          "note": "规划于T17E，当前没有可调用助手服务。",
+          "destination": "/environment"
+        }
+      ],
+      "boundary": "本页只检查前置条件，不执行实验或模型探测；实际动作仍由服务端权限、版本、确认及预算守卫决定。"
+    },
+    "actual_missing_modules": {
+      "schema_version": "T17C-1",
+      "checked_at": "2026-10-31T12:39:24.917909Z",
+      "expires_at": "2026-10-31T12:40:22.735432Z",
+      "checks": [
+        {
+          "id": "api",
+          "label": "API服务",
+          "status": "ready",
+          "code": "api_running",
+          "message": "连接已验证。",
+          "next_step": "连接正常。",
+          "checked_at": "2026-10-31T12:39:22.735432Z",
+          "expires_at": "2026-10-31T12:40:22.735432Z",
+          "source": "live",
+          "facts": {}
+        },
+        {
+          "id": "mysql",
+          "label": "数据库连接",
+          "status": "ready",
+          "code": "mysql_connected",
+          "message": "连接已验证。",
+          "next_step": "连接正常。",
+          "checked_at": "2026-10-31T12:39:22.735432Z",
+          "expires_at": "2026-10-31T12:40:22.735432Z",
+          "source": "live",
+          "facts": {}
+        },
+        {
+          "id": "redis",
+          "label": "Redis连接",
+          "status": "ready",
+          "code": "redis_capabilities_missing",
+          "message": "连接已验证。",
+          "next_step": "连接正常。",
+          "checked_at": "2026-10-31T12:39:22.735432Z",
+          "expires_at": "2026-10-31T12:40:22.735432Z",
+          "source": "live",
+          "facts": {}
+        },
+        {
+          "id": "checkpoints",
+          "label": "JSON / Search",
+          "status": "blocked",
+          "code": "checkpoint_capabilities_missing",
+          "message": "会话检查点所需能力尚未验证。",
+          "next_step": "核对所连接实例的JSON/Search支持与命令权限。",
+          "checked_at": "2026-10-31T12:39:22.735432Z",
+          "expires_at": "2026-10-31T12:40:22.735432Z",
+          "source": "live",
+          "facts": {}
+        },
+        {
+          "id": "schema",
+          "label": "数据库迁移",
+          "status": "ready",
+          "code": "schema_matches",
+          "message": "迁移版本与必要表匹配。",
+          "next_step": "由维护者核对迁移记录；本页不会执行迁移。",
+          "checked_at": "2026-10-31T12:39:22.852137Z",
+          "expires_at": "2026-10-31T12:40:22.852137Z",
+          "source": "live",
+          "facts": {
+            "missing_tables": 0
+          }
+        },
+        {
+          "id": "version",
+          "label": "当前源码版本",
+          "status": "ready",
+          "code": "version_matches",
+          "message": "存在与当前源码匹配的可用对象版本。",
+          "next_step": "由维护者核对源码与版本登记；不要把旧运行自动切换为新版本。",
+          "checked_at": "2026-10-31T12:39:23.384286Z",
+          "expires_at": "2026-10-31T12:40:23.384286Z",
+          "source": "live",
+          "facts": {
+            "matching_version_found": true
+          }
+        },
+        {
+          "id": "interactive_budget",
+          "label": "交互Agent预算",
+          "status": "blocked",
+          "code": "paid_switch_off",
+          "message": "本角色付费调用已关闭，已存记录仍可查看。",
+          "next_step": "需要新调用时，先确认本项角色预算，再由维护者配置开关。",
+          "checked_at": "2026-10-31T12:39:22.735432Z",
+          "expires_at": "2026-10-31T12:40:22.735432Z",
+          "source": "configuration",
+          "facts": {
+            "paid_switch": false,
+            "authorization_matches": true,
+            "ledger_checked": false,
+            "remaining_microusd": null,
+            "calls_remaining": null
+          }
+        },
+        {
+          "id": "executor_budget",
+          "label": "批量Agent预算",
+          "status": "blocked",
+          "code": "paid_switch_off",
+          "message": "本角色付费调用已关闭，已存记录仍可查看。",
+          "next_step": "需要新调用时，先确认本项角色预算，再由维护者配置开关。",
+          "checked_at": "2026-10-31T12:39:22.735432Z",
+          "expires_at": "2026-10-31T12:40:22.735432Z",
+          "source": "configuration",
+          "facts": {
+            "paid_switch": false,
+            "authorization_matches": true,
+            "ledger_checked": false,
+            "remaining_microusd": null,
+            "calls_remaining": null
+          }
+        },
+        {
+          "id": "casegen_budget",
+          "label": "用例生成预算",
+          "status": "blocked",
+          "code": "paid_switch_off",
+          "message": "本角色付费调用已关闭，已存记录仍可查看。",
+          "next_step": "需要新调用时，先确认本项角色预算，再由维护者配置开关。",
+          "checked_at": "2026-10-31T12:39:22.735432Z",
+          "expires_at": "2026-10-31T12:40:22.735432Z",
+          "source": "configuration",
+          "facts": {
+            "paid_switch": false,
+            "authorization_matches": true,
+            "ledger_checked": false,
+            "remaining_microusd": null,
+            "calls_remaining": null
+          }
+        },
+        {
+          "id": "judge_budget",
+          "label": "辅助裁判预算",
+          "status": "blocked",
+          "code": "paid_switch_off",
+          "message": "本角色付费调用已关闭，已存记录仍可查看。",
+          "next_step": "需要新调用时，先确认本项角色预算，再由维护者配置开关。",
+          "checked_at": "2026-10-31T12:39:22.735432Z",
+          "expires_at": "2026-10-31T12:40:22.735432Z",
+          "source": "configuration",
+          "facts": {
+            "paid_switch": false,
+            "authorization_matches": true,
+            "ledger_checked": false,
+            "remaining_microusd": null,
+            "calls_remaining": null
+          }
+        },
+        {
+          "id": "worker",
+          "label": "Worker 与执行队列",
+          "status": "unknown",
+          "code": "worker_no_matching_reply",
+          "message": "未收到匹配回执；Worker可能离线、繁忙、版本旧或队列不同，不能由配置推定存活。",
+          "next_step": "核对已启动Worker的源码、数据库、执行配置与队列；无回执不等于已证明进程停止。",
+          "checked_at": "2026-10-31T12:39:24.917909Z",
+          "expires_at": "2026-10-31T12:40:24.917909Z",
+          "source": "live",
+          "facts": {
+            "responders": 0,
+            "matching_workers": 0
+          }
+        },
+        {
+          "id": "credential",
+          "label": "模型凭据",
+          "status": "blocked",
+          "code": "credential_missing",
+          "message": "模型凭据未配置。",
+          "next_step": "由维护者在本地配置；不要在页面、聊天或Git中粘贴密钥。",
+          "checked_at": "2026-10-31T12:39:24.917909Z",
+          "expires_at": "2026-10-31T12:40:24.917909Z",
+          "source": "configuration",
+          "facts": {}
+        },
+        {
+          "id": "copilot",
+          "label": "平台助手服务",
+          "status": "not_available",
+          "code": "copilot_not_implemented",
+          "message": "当前尚未实现，计划T17E。",
+          "next_step": "先完成环境引导与预约调试窗口。",
+          "checked_at": "2026-10-31T12:39:24.917909Z",
+          "expires_at": "2026-10-31T12:40:24.917909Z",
+          "source": "not_implemented",
+          "facts": {}
+        }
+      ],
+      "operations": [
+        {
+          "id": "history",
+          "label": "查看历史与证据",
+          "status": "ready",
+          "required_checks": [
+            "api",
+            "mysql",
+            "schema"
+          ],
+          "blockers": [],
+          "note": "不需要模型付费开关或Worker；可见数据仍按账号权限读取。",
+          "destination": "/runs"
+        },
+        {
+          "id": "offline",
+          "label": "准备离线验证",
+          "status": "blocked",
+          "required_checks": [
+            "api",
+            "mysql",
+            "schema",
+            "redis",
+            "checkpoints",
+            "version"
+          ],
+          "blockers": [
+            "checkpoints"
+          ],
+          "note": "现有独立验证脚本使用明确离线模型；本页未运行演示，不会自动启动实验。",
+          "destination": "/workbench"
+        },
+        {
+          "id": "interactive",
+          "label": "交互调试 · 现有API",
+          "status": "blocked",
+          "required_checks": [
+            "api",
+            "mysql",
+            "schema",
+            "redis",
+            "checkpoints",
+            "version",
+            "credential",
+            "interactive_budget"
+          ],
+          "blockers": [
+            "checkpoints",
+            "credential",
+            "interactive_budget"
+          ],
+          "note": "当前为现有会话API；可视化调试窗口在T17D。调用还需登录、合法会话与确认。",
+          "destination": "/docs"
+        },
+        {
+          "id": "batch",
+          "label": "批量真实测试",
+          "status": "blocked",
+          "required_checks": [
+            "api",
+            "mysql",
+            "schema",
+            "redis",
+            "checkpoints",
+            "version",
+            "credential",
+            "worker",
+            "executor_budget"
+          ],
+          "blockers": [
+            "checkpoints",
+            "credential",
+            "worker",
+            "executor_budget"
+          ],
+          "note": "预检不创建或投递运行，所选用例/版本与每run额度由服务端再次核验。",
+          "destination": "/workspace"
+        },
+        {
+          "id": "casegen",
+          "label": "AI用例生成",
+          "status": "blocked",
+          "required_checks": [
+            "api",
+            "mysql",
+            "schema",
+            "redis",
+            "credential",
+            "casegen_budget"
+          ],
+          "blockers": [
+            "credential",
+            "casegen_budget"
+          ],
+          "note": "生成候选仍需人工审核，不能直接作为已验证用例。",
+          "destination": "/cases"
+        },
+        {
+          "id": "judge",
+          "label": "AI辅助裁判",
+          "status": "blocked",
+          "required_checks": [
+            "api",
+            "mysql",
+            "schema",
+            "redis",
+            "credential",
+            "judge_budget"
+          ],
+          "blockers": [
+            "credential",
+            "judge_budget"
+          ],
+          "note": "还需所选批次独立标签先封存；12条T17B校准不开放执行级自动裁判。",
+          "destination": "/judging"
+        },
+        {
+          "id": "copilot",
+          "label": "平台AI助手",
+          "status": "not_available",
+          "required_checks": [
+            "copilot"
+          ],
+          "blockers": [
+            "copilot"
+          ],
+          "note": "规划于T17E，当前没有可调用助手服务。",
+          "destination": "/environment"
+        }
+      ],
+      "boundary": "本页只检查前置条件，不执行实验或模型探测；实际动作仍由服务端权限、版本、确认及预算守卫决定。"
+    },
+    "http_readiness": {
+      "schema_version": "T17C-1",
+      "checked_at": "2026-10-31T12:39:30.820238Z",
+      "expires_at": "2026-10-31T12:40:28.585979Z",
+      "checks": [
+        {
+          "id": "api",
+          "label": "API服务",
+          "status": "ready",
+          "code": "api_running",
+          "message": "连接已验证。",
+          "next_step": "连接正常。",
+          "checked_at": "2026-10-31T12:39:28.585979Z",
+          "expires_at": "2026-10-31T12:40:28.585979Z",
+          "source": "live",
+          "facts": {}
+        },
+        {
+          "id": "mysql",
+          "label": "数据库连接",
+          "status": "ready",
+          "code": "mysql_connected",
+          "message": "连接已验证。",
+          "next_step": "连接正常。",
+          "checked_at": "2026-10-31T12:39:28.585979Z",
+          "expires_at": "2026-10-31T12:40:28.585979Z",
+          "source": "live",
+          "facts": {}
+        },
+        {
+          "id": "redis",
+          "label": "Redis连接",
+          "status": "ready",
+          "code": "redis_connected",
+          "message": "连接已验证。",
+          "next_step": "连接正常。",
+          "checked_at": "2026-10-31T12:39:28.585979Z",
+          "expires_at": "2026-10-31T12:40:28.585979Z",
+          "source": "live",
+          "facts": {}
+        },
+        {
+          "id": "checkpoints",
+          "label": "JSON / Search",
+          "status": "ready",
+          "code": "checkpoint_capabilities_ok",
+          "message": "JSON与Search已实际响应。",
+          "next_step": "核对所连接实例的JSON/Search支持与命令权限。",
+          "checked_at": "2026-10-31T12:39:28.585979Z",
+          "expires_at": "2026-10-31T12:40:28.585979Z",
+          "source": "live",
+          "facts": {}
+        },
+        {
+          "id": "schema",
+          "label": "数据库迁移",
+          "status": "ready",
+          "code": "schema_matches",
+          "message": "迁移版本与必要表匹配。",
+          "next_step": "由维护者核对迁移记录；本页不会执行迁移。",
+          "checked_at": "2026-10-31T12:39:28.728576Z",
+          "expires_at": "2026-10-31T12:40:28.728576Z",
+          "source": "live",
+          "facts": {
+            "missing_tables": 0
+          }
+        },
+        {
+          "id": "version",
+          "label": "当前源码版本",
+          "status": "ready",
+          "code": "version_matches",
+          "message": "存在与当前源码匹配的可用对象版本。",
+          "next_step": "由维护者核对源码与版本登记；不要把旧运行自动切换为新版本。",
+          "checked_at": "2026-10-31T12:39:29.279970Z",
+          "expires_at": "2026-10-31T12:40:29.279970Z",
+          "source": "live",
+          "facts": {
+            "matching_version_found": true
+          }
+        },
+        {
+          "id": "interactive_budget",
+          "label": "交互Agent预算",
+          "status": "blocked",
+          "code": "paid_switch_off",
+          "message": "本角色付费调用已关闭，已存记录仍可查看。",
+          "next_step": "需要新调用时，先确认本项角色预算，再由维护者配置开关。",
+          "checked_at": "2026-10-31T12:39:28.586979Z",
+          "expires_at": "2026-10-31T12:40:28.586979Z",
+          "source": "configuration",
+          "facts": {
+            "paid_switch": false,
+            "authorization_matches": true,
+            "ledger_checked": false,
+            "remaining_microusd": null,
+            "calls_remaining": null
+          }
+        },
+        {
+          "id": "executor_budget",
+          "label": "批量Agent预算",
+          "status": "blocked",
+          "code": "paid_switch_off",
+          "message": "本角色付费调用已关闭，已存记录仍可查看。",
+          "next_step": "需要新调用时，先确认本项角色预算，再由维护者配置开关。",
+          "checked_at": "2026-10-31T12:39:28.586979Z",
+          "expires_at": "2026-10-31T12:40:28.586979Z",
+          "source": "configuration",
+          "facts": {
+            "paid_switch": false,
+            "authorization_matches": true,
+            "ledger_checked": false,
+            "remaining_microusd": null,
+            "calls_remaining": null
+          }
+        },
+        {
+          "id": "casegen_budget",
+          "label": "用例生成预算",
+          "status": "blocked",
+          "code": "paid_switch_off",
+          "message": "本角色付费调用已关闭，已存记录仍可查看。",
+          "next_step": "需要新调用时，先确认本项角色预算，再由维护者配置开关。",
+          "checked_at": "2026-10-31T12:39:28.586979Z",
+          "expires_at": "2026-10-31T12:40:28.586979Z",
+          "source": "configuration",
+          "facts": {
+            "paid_switch": false,
+            "authorization_matches": true,
+            "ledger_checked": false,
+            "remaining_microusd": null,
+            "calls_remaining": null
+          }
+        },
+        {
+          "id": "judge_budget",
+          "label": "辅助裁判预算",
+          "status": "blocked",
+          "code": "paid_switch_off",
+          "message": "本角色付费调用已关闭，已存记录仍可查看。",
+          "next_step": "需要新调用时，先确认本项角色预算，再由维护者配置开关。",
+          "checked_at": "2026-10-31T12:39:28.586979Z",
+          "expires_at": "2026-10-31T12:40:28.586979Z",
+          "source": "configuration",
+          "facts": {
+            "paid_switch": false,
+            "authorization_matches": true,
+            "ledger_checked": false,
+            "remaining_microusd": null,
+            "calls_remaining": null
+          }
+        },
+        {
+          "id": "worker",
+          "label": "Worker 与执行队列",
+          "status": "ready",
+          "code": "worker_matches",
+          "message": "收到当前源码、数据库和队列匹配的实时回执。",
+          "next_step": "核对已启动Worker的源码、数据库、执行配置与队列；无回执不等于已证明进程停止。",
+          "checked_at": "2026-10-31T12:39:30.820238Z",
+          "expires_at": "2026-10-31T12:40:30.820238Z",
+          "source": "live",
+          "facts": {
+            "responders": 1,
+            "matching_workers": 1
+          }
+        },
+        {
+          "id": "credential",
+          "label": "模型凭据",
+          "status": "blocked",
+          "code": "credential_missing",
+          "message": "模型凭据未配置。",
+          "next_step": "由维护者在本地配置；不要在页面、聊天或Git中粘贴密钥。",
+          "checked_at": "2026-10-31T12:39:30.820238Z",
+          "expires_at": "2026-10-31T12:40:30.820238Z",
+          "source": "configuration",
+          "facts": {}
+        },
+        {
+          "id": "copilot",
+          "label": "平台助手服务",
+          "status": "not_available",
+          "code": "copilot_not_implemented",
+          "message": "当前尚未实现，计划T17E。",
+          "next_step": "先完成环境引导与预约调试窗口。",
+          "checked_at": "2026-10-31T12:39:30.820238Z",
+          "expires_at": "2026-10-31T12:40:30.820238Z",
+          "source": "not_implemented",
+          "facts": {}
+        }
+      ],
+      "operations": [
+        {
+          "id": "history",
+          "label": "查看历史与证据",
+          "status": "ready",
+          "required_checks": [
+            "api",
+            "mysql",
+            "schema"
+          ],
+          "blockers": [],
+          "note": "不需要模型付费开关或Worker；可见数据仍按账号权限读取。",
+          "destination": "/runs"
+        },
+        {
+          "id": "offline",
+          "label": "准备离线验证",
+          "status": "ready",
+          "required_checks": [
+            "api",
+            "mysql",
+            "schema",
+            "redis",
+            "checkpoints",
+            "version"
+          ],
+          "blockers": [],
+          "note": "现有独立验证脚本使用明确离线模型；本页未运行演示，不会自动启动实验。",
+          "destination": "/workbench"
+        },
+        {
+          "id": "interactive",
+          "label": "交互调试 · 现有API",
+          "status": "blocked",
+          "required_checks": [
+            "api",
+            "mysql",
+            "schema",
+            "redis",
+            "checkpoints",
+            "version",
+            "credential",
+            "interactive_budget"
+          ],
+          "blockers": [
+            "credential",
+            "interactive_budget"
+          ],
+          "note": "当前为现有会话API；可视化调试窗口在T17D。调用还需登录、合法会话与确认。",
+          "destination": "/docs"
+        },
+        {
+          "id": "batch",
+          "label": "批量真实测试",
+          "status": "blocked",
+          "required_checks": [
+            "api",
+            "mysql",
+            "schema",
+            "redis",
+            "checkpoints",
+            "version",
+            "credential",
+            "worker",
+            "executor_budget"
+          ],
+          "blockers": [
+            "credential",
+            "executor_budget"
+          ],
+          "note": "预检不创建或投递运行，所选用例/版本与每run额度由服务端再次核验。",
+          "destination": "/workspace"
+        },
+        {
+          "id": "casegen",
+          "label": "AI用例生成",
+          "status": "blocked",
+          "required_checks": [
+            "api",
+            "mysql",
+            "schema",
+            "redis",
+            "credential",
+            "casegen_budget"
+          ],
+          "blockers": [
+            "credential",
+            "casegen_budget"
+          ],
+          "note": "生成候选仍需人工审核，不能直接作为已验证用例。",
+          "destination": "/cases"
+        },
+        {
+          "id": "judge",
+          "label": "AI辅助裁判",
+          "status": "blocked",
+          "required_checks": [
+            "api",
+            "mysql",
+            "schema",
+            "redis",
+            "credential",
+            "judge_budget"
+          ],
+          "blockers": [
+            "credential",
+            "judge_budget"
+          ],
+          "note": "还需所选批次独立标签先封存；12条T17B校准不开放执行级自动裁判。",
+          "destination": "/judging"
+        },
+        {
+          "id": "copilot",
+          "label": "平台AI助手",
+          "status": "not_available",
+          "required_checks": [
+            "copilot"
+          ],
+          "blockers": [
+            "copilot"
+          ],
+          "note": "规划于T17E，当前没有可调用助手服务。",
+          "destination": "/environment"
+        }
+      ],
+      "boundary": "本页只检查前置条件，不执行实验或模型探测；实际动作仍由服务端权限、版本、确认及预算守卫决定。"
+    }
+  },
+  "sql_before_after_identical": true,
+  "thirteen_ledgers_unchanged": true,
+  "new_model_calls": 0,
+  "bare_redis_stopped": true,
+  "linux_prefork_not_retested": true
+}

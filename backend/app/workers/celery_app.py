@@ -1,10 +1,13 @@
 """Linux Celery transport; MySQL leases provide the effective execution boundary."""
 
 from celery import Celery
+from celery.worker.control import inspect_command
 
 from app.core.config import get_settings
+from app.core.deployment import database_binding, execution_fingerprint, source_fingerprint
 
 settings = get_settings()
+IMPORTED_SOURCE = source_fingerprint()
 celery_app = Celery("agentchaos", broker=settings.redis_url)
 celery_app.conf.update(
     task_serializer="json",
@@ -25,6 +28,22 @@ celery_app.conf.update(
     enable_utc=True,
     timezone="UTC",
 )
+
+
+@inspect_command()
+def agentchaos_readiness(state):
+    """Read actual consumer queues and binding; never execute or dispatch a task."""
+    try:
+        binding = database_binding(settings)
+    except Exception:
+        binding = None
+    return {
+        "protocol": "T17C-1",
+        "source_hash": IMPORTED_SOURCE,
+        "database_binding": binding,
+        "execution_hash": execution_fingerprint(settings),
+        "queues": [q.name for q in state.consumer.task_consumer.queues],
+    }
 
 
 @celery_app.task(name="agentchaos.execute", soft_time_limit=920, time_limit=940)

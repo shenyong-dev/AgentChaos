@@ -1,0 +1,14 @@
+{
+  "task": "T17D",
+  "kind": "development validation, not frozen holdout or independent human gold",
+  "cases": [
+    {"id":"D01","name":"normal confirmation","inputs":["请预约明天A101，14:00到15:00，8人。先展示完整草稿，等待我确认。"],"decision":"confirm","expected_bookings":1,"expected_attendees":8},
+    {"id":"D02","name":"clarify missing attendees","inputs":["请预约明天A101，14:00到15:00。人数还未提供，先询问缺失条件，不要猜测。","8人，其余条件不变。请生成草稿等我确认。"],"decision":"confirm","expected_bookings":1,"expected_attendees":8,"first_has_no_draft":true},
+    {"id":"D03","name":"modify attendees invalidates draft","inputs":["请预约明天A101，14:00到15:00，8人。先展示完整草稿，等待我确认。","人数改为12人，其余条件不变。请重新生成草稿等我确认。"],"decision":"confirm","expected_bookings":1,"expected_attendees":12,"supersedes_old_draft":true},
+    {"id":"D04","name":"reject draft","inputs":["请预约明天A101，14:00到15:00，8人。先展示完整草稿，等待我确认。"],"decision":"reject","expected_bookings":0},
+    {"id":"D05","name":"HTTP reply loss and exact request replay","inputs":["请预约明天A101，14:00到15:00，8人。先展示完整草稿，等待我确认。"],"decision":"confirm","expected_bookings":1,"expected_attendees":8,"replay_same_request":true},
+    {"id":"D06","name":"controlled after-commit tool receipt loss","inputs":["请预约明天A101，14:00到15:00，8人。先展示完整草稿，等待我确认。"],"decision":"confirm","expected_bookings":1,"expected_attendees":8,"controlled_tool_fault":true,"boundary":"actual provider plus explicit lab tool-receipt control; not a genuine provider outage"},
+    {"id":"D07","name":"owner role and protocol isolation","model_requests":0,"expectation":"other operator 404 on owned view/history/trace/receipt/action; reviewer403; legacy demo cannot read interactive session"},
+    {"id":"D08","name":"version and trusted-context rejection","model_requests":0,"expectation":"wrong version409; client scope/owner/clock rejected400; original session unchanged"}
+  ]
+}

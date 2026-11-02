@@ -15,6 +15,7 @@ from app.api.datasets import router as datasets_router
 from app.api.evaluation import router as evaluation_router
 from app.api.evidence import router as evidence_router
 from app.api.faults import router as faults_router
+from app.api.interactive import router as interactive_router
 from app.api.judging import router as judging_router
 from app.api.metamorphic import router as metamorphic_router
 from app.api.reports import router as reports_router
@@ -38,6 +39,7 @@ def create_app() -> FastAPI:
     app.include_router(datasets_router)
     app.include_router(workbench_router)
     app.include_router(reports_router)
+    app.include_router(interactive_router)
 
     @app.middleware("http")
     async def request_context(request: Request, call_next):

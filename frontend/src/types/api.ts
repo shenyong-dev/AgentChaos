@@ -19,7 +19,7 @@ export interface HealthReport {
 export interface PublicConfig {
   app_version: string
   environment: string
-  task: 'T15'
+  task: 'T17C'
   model_key_configured: boolean
   model_connectivity: 'not_probed' | 'historically_verified'
   paid_calls_enabled: boolean

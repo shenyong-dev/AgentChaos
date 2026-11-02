@@ -1,4 +1,4 @@
-import { Grid, Connection, Collection, VideoPlay, EditPen, CircleCheck, Monitor, Document } from '@element-plus/icons-vue'
+import { Grid, Connection, Collection, VideoPlay, EditPen, CircleCheck, Monitor, Document, ChatDotRound } from '@element-plus/icons-vue'
 
 export const navigationGroups = [
   { label: '工作区', items: [
@@ -6,6 +6,7 @@ export const navigationGroups = [
     { path: '/targets', label: '对象与版本', hint: '核对冻结版本与配置', icon: Connection },
     { path: '/library', label: '开发用例库', hint: '查找已审核的用例和预期', icon: Collection },
     { path: '/workbench', label: '测试工作台', hint: '配置实验并跟进执行', icon: VideoPlay },
+    { path: '/interactive', label: '预约Agent调试', hint: '真实对话、字段来源与业务查证', icon: ChatDotRound },
   ] },
   { label: '质量与审阅', items: [
     { path: '/cases', label: 'AI生成与审核', hint: '查看候选并逐条审核', icon: EditPen },
@@ -19,6 +20,7 @@ export function navigationPath(path: string) {
   if (path.startsWith('/runs')) return '/workbench'
   if (path.startsWith('/semantic') || path.startsWith('/judging')) return '/judging'
   if (path.startsWith('/cases')) return '/cases'
+  if (path.startsWith('/interactive')) return '/interactive'
   return path
 }
 
@@ -26,5 +28,6 @@ export function pageTitle(path: string) {
   if (path.startsWith('/runs') || path === '/workbench') return '测试工作台'
   if (path.startsWith('/judging') || path.startsWith('/semantic')) return '辅助评价与校准'
   if (path.startsWith('/cases')) return 'AI生成与审核'
+  if (path.startsWith('/interactive')) return '预约Agent调试'
   return ({ '/targets': '对象与版本', '/library': '开发用例库', '/environment': '工程环境', '/reports': '缺陷与报告' } as Record<string,string>)[path] ?? '项目概览'
 }

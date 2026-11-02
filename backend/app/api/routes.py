@@ -7,7 +7,9 @@ from app.core.config import Settings, get_settings
 from app.core.model_probe import historical_observation
 from app.schemas.common import Envelope
 from app.schemas.health import HealthReport, ModelRoleConfig, PublicConfig
+from app.schemas.readiness import ReadinessReport
 from app.services.health import collect_health
+from app.services.readiness import collect_readiness
 
 router = APIRouter(prefix="/api/v1")
 SettingsDependency = Annotated[Settings, Depends(get_settings)]
@@ -33,6 +35,11 @@ async def health(
     if report.status == "degraded":
         response.status_code = 503
     return Envelope(data=report, request_id=request.state.request_id)
+
+
+@router.get("/system/readiness", response_model=Envelope[ReadinessReport], tags=["system"])
+async def readiness(request: Request, settings: SettingsDependency) -> Envelope[ReadinessReport]:
+    return Envelope(data=await collect_readiness(settings), request_id=request.state.request_id)
 
 
 @router.get("/system/config", response_model=Envelope[PublicConfig], tags=["system"])

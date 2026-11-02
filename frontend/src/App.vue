@@ -6,6 +6,7 @@ import 'element-plus/es/components/drawer/style/css'
 import { Fold, Expand, Menu } from '@element-plus/icons-vue'
 import AppSidebar from './components/AppSidebar.vue'
 import QuickNavigate from './components/QuickNavigate.vue'
+import ThemeToggle from './components/ThemeToggle.vue'
 import { pageTitle } from './navigation'
 const route = useRoute()
 const collapsed = ref(false), mobileNavigation = ref(false)
@@ -26,7 +27,7 @@ watch(() => route.path, () => { mobileNavigation.value = false })
           <button type="button" class="navigation-icon-button mobile-navigation-toggle" aria-label="打开导航" :aria-expanded="mobileNavigation" @click="mobileNavigation = true"><Menu aria-hidden="true" /></button>
           <span class="topbar-project">AgentChaos</span><span class="topbar-divider" aria-hidden="true">/</span><span class="topbar-page">{{ pageTitle(route.path) }}</span>
         </div>
-        <div class="topbar-tools"><QuickNavigate /><span class="topbar-context"><span aria-hidden="true" />本地工作区</span></div>
+        <div class="topbar-tools"><QuickNavigate /><ThemeToggle /><span class="topbar-context"><span aria-hidden="true" />本地工作区</span></div>
       </header>
       <main id="main-content" tabindex="-1"><RouterView /></main>
     </div>

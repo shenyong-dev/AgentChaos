@@ -1,0 +1,190 @@
+{
+  "$defs": {
+    "OperationReadiness": {
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "ready",
+            "blocked",
+            "unknown",
+            "not_available"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "required_checks": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Required Checks",
+          "type": "array"
+        },
+        "blockers": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Blockers",
+          "type": "array"
+        },
+        "note": {
+          "title": "Note",
+          "type": "string"
+        },
+        "destination": {
+          "title": "Destination",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "status",
+        "required_checks",
+        "blockers",
+        "note",
+        "destination"
+      ],
+      "title": "OperationReadiness",
+      "type": "object"
+    },
+    "ReadinessCheck": {
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "ready",
+            "blocked",
+            "unknown",
+            "not_available"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "next_step": {
+          "title": "Next Step",
+          "type": "string"
+        },
+        "checked_at": {
+          "format": "date-time",
+          "title": "Checked At",
+          "type": "string"
+        },
+        "expires_at": {
+          "format": "date-time",
+          "title": "Expires At",
+          "type": "string"
+        },
+        "source": {
+          "default": "live",
+          "enum": [
+            "live",
+            "configuration",
+            "not_implemented"
+          ],
+          "title": "Source",
+          "type": "string"
+        },
+        "facts": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "title": "Facts",
+          "type": "object"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "status",
+        "code",
+        "message",
+        "next_step",
+        "checked_at",
+        "expires_at"
+      ],
+      "title": "ReadinessCheck",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "schema_version": {
+      "const": "T17C-1",
+      "default": "T17C-1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "checked_at": {
+      "format": "date-time",
+      "title": "Checked At",
+      "type": "string"
+    },
+    "expires_at": {
+      "format": "date-time",
+      "title": "Expires At",
+      "type": "string"
+    },
+    "checks": {
+      "items": {
+        "$ref": "#/$defs/ReadinessCheck"
+      },
+      "title": "Checks",
+      "type": "array"
+    },
+    "operations": {
+      "items": {
+        "$ref": "#/$defs/OperationReadiness"
+      },
+      "title": "Operations",
+      "type": "array"
+    },
+    "boundary": {
+      "default": "本页只检查前置条件，不执行实验或模型探测；实际动作仍由服务端权限、版本、确认及预算守卫决定。",
+      "title": "Boundary",
+      "type": "string"
+    }
+  },
+  "required": [
+    "checked_at",
+    "expires_at",
+    "checks",
+    "operations"
+  ],
+  "title": "ReadinessReport",
+  "type": "object"
+}

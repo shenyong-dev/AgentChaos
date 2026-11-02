@@ -31,7 +31,7 @@ class ModelRoleConfig(BaseModel):
 class PublicConfig(BaseModel):
     app_version: str
     environment: str
-    task: Literal["T15"] = "T15"
+    task: Literal["T17C"] = "T17C"
     api_prefix: str = "/api/v1"
     model_provider: str = "DeepSeek 官方 API"
     model_key_configured: bool

@@ -1,0 +1,92 @@
+
+Running 27 tests using 1 worker
+
+(node:48740) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   1 frontend\tests\environment.spec.ts:7:1 › real services show infrastructure and the configured model observation status (5.6s)
+(node:35508) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  2 frontend\tests\environment.spec.ts:37:1 › mobile view fits and refresh makes another real health request (7.0s)
+  ok  3 frontend\tests\environment.spec.ts:51:1 › a simulated network failure shows an error and no fake health result (2.9s)
+  ok  4 frontend\tests\surface-interactions.spec.ts:44:1 › colored navigation canvas and white surfaces keep readable text (3.3s)
+  ok  5 frontend\tests\surface-interactions.spec.ts:75:1 › static panels gain depth while clickable links lift and reset without layout change (4.1s)
+  ok  6 frontend\tests\surface-interactions.spec.ts:96:1 › reduced motion removes lift and keyboard focus remains visible (3.4s)
+  ok  7 frontend\tests\surface-interactions.spec.ts:111:3 › touch navigation › touchscreens keep panels stable and retain the colored drawer (3.8s)
+  ok  8 frontend\tests\theme-mode.spec.ts:47:1 › system preference manual override reload and cross-tab synchronization (1.3s)
+  ok  9 frontend\tests\theme-mode.spec.ts:63:40 › saved light is applied before application JavaScript (131ms)
+  ok 10 frontend\tests\theme-mode.spec.ts:63:40 › saved dark is applied before application JavaScript (153ms)
+  x  11 frontend\tests\theme-mode.spec.ts:74:1 › dark desktop pages use layered surfaces without bright legacy panels (12.3s)
+(node:10952) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 12 frontend\tests\theme-mode.spec.ts:91:1 › authenticated generation and original queued execution retain dark surfaces without writes (7.9s)
+  ok 13 frontend\tests\theme-mode.spec.ts:105:1 › dark text tokens remain readable on canvas cards and navigation (457ms)
+  ok 14 frontend\tests\theme-mode.spec.ts:128:1 › dark dropdown and read-only dialog cover underlying content (4.6s)
+  ok 15 frontend\tests\theme-mode.spec.ts:146:1 › clickable cards press then navigate and disclosure animation respects reduced motion (7.6s)
+  ok 16 frontend\tests\theme-mode.spec.ts:164:1 › blocked preference storage keeps theme switch usable in memory (3.5s)
+  ok 17 frontend\tests\theme-mode.spec.ts:182:35 › dark touch layout › theme and drawer fit 390px (4.1s)
+  ok 18 frontend\tests\theme-mode.spec.ts:182:35 › dark touch layout › theme and drawer fit 320px (4.0s)
+  ok 19 frontend\tests\visual-refinement.spec.ts:45:1 › desktop overview keeps real counts and all eight page entrances readable (4.9s)
+  ok 20 frontend\tests\visual-refinement.spec.ts:63:1 › library filtering select and read-only case dialog remain functional (7.9s)
+  ok 21 frontend\tests\visual-refinement.spec.ts:82:1 › collapse keyboard navigation and focus survive the chrome refinement (3.7s)
+  ok 22 frontend\tests\visual-refinement.spec.ts:98:38 › real overview library dialog and mobile drawer fit 768px (5.3s)
+  ok 23 frontend\tests\visual-refinement.spec.ts:98:38 › real overview library dialog and mobile drawer fit 390px (5.5s)
+  ok 24 frontend\tests\visual-refinement.spec.ts:98:38 › real overview library dialog and mobile drawer fit 320px (5.1s)
+  ok 25 frontend\tests\visual-refinement.spec.ts:119:1 › brand and primary text contrast are preserved with reduced motion supported (3.3s)
+  ok 26 frontend\tests\visual-refinement.spec.ts:137:1 › API failure leaves the versioned guide available in the refined layout (519ms)
+  ok 27 frontend\tests\visual-refinement.spec.ts:147:1 › expired observations reset success-panel coloring as well as status labels (4.2s)
+
+
+  1) frontend\tests\environment.spec.ts:7:1 › real services show infrastructure and the configured model observation status 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('heading', { name: '基础服务已连通' })
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('heading', { name: '基础服务已连通' }) with timeout 5000ms
+      - waiting for getByRole('heading', { name: '基础服务已连通' })
+
+
+      18 |   await page.setViewportSize({ width: 1366, height: 900 })
+      19 |   await page.goto('/environment')
+    > 20 |   await expect(page.getByRole('heading', { name: '基础服务已连通' })).toBeVisible()
+         |                                                                ^
+      21 |   await expect(page.getByText('JSON ✓', { exact: true })).toBeVisible()
+      22 |   await expect(page.getByText('SEARCH ✓', { exact: true })).toBeVisible()
+      23 |   await expect(page.getByText(config.paid_calls_enabled
+        at D:\AgentChaos\frontend\tests\environment.spec.ts:20:64
+
+    Error Context: .local\t17d\regression-ui-results\environment-real-services--80bd1-ed-model-observation-status\error-context.md
+
+  2) frontend\tests\theme-mode.spec.ts:74:1 › dark desktop pages use layered surfaces without bright legacy panels 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: locator('.service-card').first()
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" locator('.service-card').first() with timeout 5000ms
+      - waiting for locator('.service-card').first()
+
+
+      85 |   }
+      86 |   writeFileSync(resolve(output, 'dark-surfaces.json'), JSON.stringify(observations, null, 2))
+    > 87 |   await expect(page.locator('.service-card').first()).toBeVisible()
+         |                                                       ^
+      88 |   await shot(page, 'dark-environment-desktop')
+      89 | })
+      90 |
+        at D:\AgentChaos\frontend\tests\theme-mode.spec.ts:87:55
+
+    Error Context: .local\t17d\regression-ui-results\theme-mode-dark-desktop-pa-5a68e-ithout-bright-legacy-panels\error-context.md
+
+  2 failed
+    frontend\tests\environment.spec.ts:7:1 › real services show infrastructure and the configured model observation status 
+    frontend\tests\theme-mode.spec.ts:74:1 › dark desktop pages use layered surfaces without bright legacy panels 
+  25 passed (2.0m)

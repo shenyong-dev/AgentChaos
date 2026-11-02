@@ -1,4 +1,5 @@
 import type { Envelope, HealthReport, PublicConfig } from '../types/api'
+import type { ReadinessReport } from '../types/readiness'
 
 async function get<T>(path: string, acceptUnavailable = false): Promise<Envelope<T>> {
   const response = await fetch(`/api/v1${path}`, {
@@ -14,3 +15,4 @@ async function get<T>(path: string, acceptUnavailable = false): Promise<Envelope
 
 export const getHealth = () => get<HealthReport>('/health', true)
 export const getConfig = () => get<PublicConfig>('/system/config')
+export const getReadiness = () => get<ReadinessReport>('/system/readiness')
