@@ -32,10 +32,16 @@ Service = Annotated[CaseService, Depends(get_case_service)]
 
 
 def case_identity(
-    service: Service, credentials: Annotated[HTTPBasicCredentials | None, Depends(security)]
+    request: Request,
+    service: Service,
+    credentials: Annotated[HTTPBasicCredentials | None, Depends(security)],
 ):
     if credentials is None:
-        raise AgentError("case_authentication_required", "请登录生成或审核账号。", 401)
+        if not request.cookies and not request.headers.get("x-ac-origin"):
+            raise AgentError("case_authentication_required", "请登录生成或审核账号。", 401)
+        from app.auth.service import browser_identity
+
+        return browser_identity(request)
     return service.authenticate(credentials.username, credentials.password)
 
 

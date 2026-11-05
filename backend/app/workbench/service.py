@@ -8,6 +8,19 @@ from app.cases.service import CaseService
 from app.datasets.service import DatasetService
 from app.executors.service import RunService, frozen_case
 from app.models import Target, TargetVersion, TestCase, TestExecution, TestRun
+from app.workbench.guidance import case_guide
+
+
+def reading_summary(row):
+    try:
+        guide = case_guide(frozen_case(row))
+        return {k: guide[k] for k in ("title", "risk", "status", "policy", "guide_hash")}
+    except AgentError:
+        return {
+            "title": "用例内容待核对",
+            "risk": "无法验证该修订的内容。",
+            "status": "unavailable",
+        }
 
 
 class WorkbenchService:
@@ -137,6 +150,7 @@ class WorkbenchService:
                         "content_hash": c.content_hash,
                         "turns": len(c.turns_json),
                         "review_status": c.review_status,
+                        "guidance": reading_summary(c),
                         "knowledge_profile": c.fixture_json.get("dataset", {}).get(
                             "knowledge_profile", "base"
                         ),
@@ -158,7 +172,8 @@ class WorkbenchService:
             row = session.scalar(self._cases(session).where(TestCase.id == identifier))
             if row is None:
                 raise AgentError("case_not_found", "找不到可浏览的已审核开发用例。", 404)
-            return frozen_case(row)
+            snapshot = frozen_case(row)
+            return {**snapshot, "guidance": case_guide(snapshot)}
 
     def runs(self, owner, *, cursor=0, limit=20, status=None, query=""):
         with Session(self.engine) as session:
@@ -183,6 +198,16 @@ class WorkbenchService:
                 if ids
                 else {}
             )
+            modes = {}
+            if ids:
+                for run_id, timing in session.execute(
+                    select(TestExecution.run_id, TestExecution.timing_json).where(
+                        TestExecution.run_id.in_(ids)
+                    )
+                ):
+                    value = (timing or {}).get("gateway_mode")
+                    if isinstance(value, str):
+                        modes.setdefault(run_id, set()).add(value)
             return {
                 "items": [
                     {
@@ -195,6 +220,10 @@ class WorkbenchService:
                         "summary": r.summary_json,
                         "event_count": r.event_seq,
                         "manifest_hash": r.manifest_hash,
+                        "observed_modes": sorted(modes.get(r.id, set())),
+                        "declared_gateway_mode": (r.manifest_json.get("workflow") or {}).get(
+                            "declared_gateway_mode"
+                        ),
                         "fault": (r.manifest_json.get("fault_profile") or {})
                         .get("config", {})
                         .get("fault_type"),

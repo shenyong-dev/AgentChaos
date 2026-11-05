@@ -71,7 +71,7 @@ def test_matrix_requires_only_dependencies_used_by_that_operation(dependency, un
     assert results["batch"].status == "blocked"
 
 
-def test_paid_off_does_not_disable_history_and_copilot_is_unimplemented(monkeypatch):
+def test_paid_off_does_not_disable_history_and_copilot_is_blocked(monkeypatch):
     class NoRedisIO:
         def close(self):
             pass
@@ -81,11 +81,43 @@ def test_paid_off_does_not_disable_history_and_copilot_is_unimplemented(monkeypa
     assert all(c.code == "paid_switch_off" for c in budgets)
     assert all(c.facts["ledger_checked"] is False for c in budgets)
     checks = [c for c in all_checks() if c.id not in {b.id for b in budgets}] + budgets
-    next(c for c in checks if c.id == "copilot").status = "not_available"
     operations = {o.id: o for o in r.operations(checks)}
     assert operations["history"].status == "ready"
     assert operations["judge"].status == "blocked"
-    assert operations["copilot"].status == "not_available"
+    assert operations["copilot"].status == "blocked"
+
+
+@pytest.mark.parametrize("calls,expected", [(34, "ready"), (60, "blocked")])
+def test_copilot_readiness_uses_original_ledger_without_writes(monkeypatch, calls, expected):
+    from app.copilot.budget import AUTHORIZATION
+
+    reads = []
+
+    class ReadOnlyRedis:
+        def hgetall(self, key):
+            reads.append(key)
+            return {
+                b"limit": b"1000000",
+                b"calls_started": str(calls).encode(),
+                b"held_upper": b"0",
+            }
+
+        def close(self):
+            pass
+
+    monkeypatch.setattr(r.Redis, "from_url", lambda *a, **k: ReadOnlyRedis())
+    results = r.budget_checks(
+        settings(
+            copilot_allow_paid_model_calls=True,
+            copilot_budget_authorization_id=AUTHORIZATION,
+            copilot_budget_usd=1,
+        )
+    )
+    value = next(c for c in results if c.id == "copilot")
+    assert value.status == expected
+    assert reads == [f"ac:t17e:budget:{AUTHORIZATION}:copilot"]
+    checks = [c for c in all_checks() if c.id not in {b.id for b in results}] + results
+    assert next(o for o in r.operations(checks) if o.id == "copilot").status == expected
 
 
 @pytest.mark.parametrize(

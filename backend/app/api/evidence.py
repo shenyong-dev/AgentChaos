@@ -114,10 +114,17 @@ async def stream(
         if await request.is_disconnected():
             return
         try:
+            if getattr(request.state, "browser_session", False):
+                from app.auth.service import get_session_service
+
+                await run_in_threadpool(get_session_service().resolve, request, touch=False)
             page = await run_in_threadpool(
                 reader.page, binding["user_id"], binding["run_id"], after=current, limit=50
             )
         except AgentError as exc:
+            if exc.code.startswith("session_"):
+                yield ServerSentEvent(event="session.expired", data={"code": exc.code})
+                return
             yield ServerSentEvent(
                 event="stream.reset",
                 data={

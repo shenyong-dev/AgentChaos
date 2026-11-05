@@ -23,6 +23,7 @@ export interface PublicConfig {
   model_key_configured: boolean
   model_connectivity: 'not_probed' | 'historically_verified'
   paid_calls_enabled: boolean
+  interactive_budget_unlimited?: boolean
   run_concurrency: number
   test_execution_available: boolean
   assertion_evaluation_available: boolean

@@ -46,6 +46,17 @@ def create(
     )
 
 
+@router.get("/sessions")
+def records(
+    request: Request,
+    user: Identity,
+    service: Service,
+    q: Annotated[str, Query(max_length=100)] = "",
+    cursor: Annotated[int, Query(ge=0, le=18446744073709551615)] = 0,
+) -> Envelope[dict]:
+    return Envelope(data=service.records(user, q, cursor), request_id=request.state.request_id)
+
+
 @router.get("/sessions/{session_id}")
 def read(session_id: UUID, request: Request, user: Identity, service: Service) -> Envelope[dict]:
     return Envelope(data=service.view(user, str(session_id)), request_id=request.state.request_id)

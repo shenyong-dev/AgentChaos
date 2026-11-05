@@ -37,6 +37,7 @@ class PublicConfig(BaseModel):
     model_key_configured: bool
     model_connectivity: Literal["not_probed", "historically_verified"] = "not_probed"
     paid_calls_enabled: bool
+    interactive_budget_unlimited: bool = False
     run_concurrency: int
     roles: list[ModelRoleConfig]
     test_execution_available: bool = True

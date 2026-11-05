@@ -42,11 +42,16 @@ ServiceDependency = Annotated[BookingService, Depends(get_booking_service)]
 
 
 def booking_identity(
+    request: Request,
     service: ServiceDependency,
     credentials: Annotated[HTTPBasicCredentials | None, Depends(security)],
 ) -> int:
     if credentials is None:
-        raise BookingError("authentication_required", "请使用演示账号认证。", 401)
+        if not request.cookies and not request.headers.get("x-ac-origin"):
+            raise BookingError("authentication_required", "请使用演示账号认证。", 401)
+        from app.auth.service import browser_identity
+
+        return browser_identity(request, operator=True)
     return service.authenticate(credentials.username, credentials.password)
 
 

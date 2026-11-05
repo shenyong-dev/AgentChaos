@@ -17,11 +17,13 @@ from app.core.config import PROJECT_ROOT
 from app.core.deployment import source_fingerprint
 from app.db.fixtures import initialize_fixture
 from app.interactive.budget import (
+    AUTHORIZATION,
     CALL_LIMIT,
-    SESSION_CALL_LIMIT,
-    SESSION_LIMIT,
+    LOCAL_AUTHORIZATION,
     InteractionBudget,
     authorized,
+    limits,
+    local_unlimited,
 )
 from app.models import Booking, BookingDraft, TargetVersion
 from app.services.booking import utc_now
@@ -93,9 +95,17 @@ class InteractionService:
         available = (
             authorized(self.settings)
             and bool(values)
-            and values.get("limit", 0) > 0
-            and values.get("charged_estimate", 0) + values.get("held_upper", 0) < values["limit"]
-            and values.get("calls_started", 0) < CALL_LIMIT
+            and (
+                values.get("limit") == -1
+                if local_unlimited(self.settings)
+                else values.get("limit", 0) > 0
+                and values.get("charged_estimate", 0) + values.get("held_upper", 0)
+                < values["limit"]
+                and values.get("calls_started", 0) < CALL_LIMIT
+            )
+            and all(
+                values.get(k, 0) >= 0 for k in ("charged_estimate", "held_upper", "calls_started")
+            )
             and not values.get("protocol_overrun")
             and bool(self.settings.deepseek_api_key.get_secret_value())
         )
@@ -107,15 +117,12 @@ class InteractionService:
             "mode": "offline_control" if self.gateway_factory else "real_provider",
             "reason": "当前源码尚未登记，不可创建会话。"
             if runtime.version_id is None
-            else "真实调用需匹配T17D预算、密钥和持久账本；读历史不调用模型。"
+            else "真实调用需匹配交互授权、密钥和持久账本；读历史不调用模型。"
             if not available and not self.gateway_factory
+            else "本地按需调用，无累计次数与金额上限；单次限制与逐次记账保留。"
+            if local_unlimited(self.settings)
             else "请求仍按会话/总预算逐次预留。",
-            "limits": {
-                "session_microusd": SESSION_LIMIT,
-                "session_calls": SESSION_CALL_LIMIT,
-                "total_calls": CALL_LIMIT,
-                "round_seconds": 120,
-            },
+            "limits": limits(self.settings),
         }
 
     def create(self, user_id, body):
@@ -148,11 +155,13 @@ class InteractionService:
 
     def view(self, user_id, session_id):
         runtime = self.runtime(session_id)
-        result = runtime.view(user_id, session_id)
-        metadata, state, _ = runtime.snapshot(user_id, session_id)
+        result = runtime.view(user_id, session_id, read_previous_version=True)
+        metadata, state, _ = runtime.snapshot(user_id, session_id, read_previous_version=True)
         result.update(
             {
                 "kind": "booking_agent",
+                "read_only": metadata["config_hash"] != runtime.manifest["config_hash"],
+                "created_at": metadata["created_at"],
                 "environment_id": self.binding[:12],
                 "scope_id": metadata["scope_id"],
                 "observed_at": datetime.now(UTC).isoformat(),
@@ -167,6 +176,23 @@ class InteractionService:
                 or None,
             }
         )
+        result["usage_available"] = True
+        if result["read_only"]:
+            # Source changes do not migrate a session to today's authorized ledger.
+            # Read both historically supported ledgers by the exact owned session ID.
+            rows = [
+                self.redis.hgetall(f"{namespace}:budget:{authorization}:agent:session:{session_id}")
+                for namespace, authorization in (
+                    ("ac:t17d", AUTHORIZATION),
+                    ("ac:local:interactive", LOCAL_AUTHORIZATION),
+                )
+            ]
+            result["usage"] = {}
+            result["usage_available"] = any(rows)
+            for row in rows:
+                for key, value in row.items():
+                    name = key.decode() if isinstance(key, bytes) else key
+                    result["usage"][name] = result["usage"].get(name, 0) + int(value)
         # A fresh scoped SQL observation is distinct from checkpoint/model statements.
         try:
             with Session(self.engine) as session:
@@ -232,6 +258,60 @@ class InteractionService:
                 result["request_lookup"] = {"status": "unknown", "commit_state": "unknown"}
         return result
 
+    def records(self, user_id, query="", cursor=0):
+        """Incremental discovery of existing metadata, confined to this database and owner.
+
+        SCAN is deliberately incremental: next_cursor means the search is not complete.
+        Neither browsing nor a source upgrade rewrites checkpoints or sends a model request.
+        """
+        items = []
+        pattern = self.prefix + ":????????-????-????-????-????????????"
+        query = query.strip().casefold()
+        for _ in range(4):
+            cursor, keys = self.redis.scan(cursor=cursor, match=pattern, count=5000)
+            for key in keys:
+                raw = self.redis.get(key)
+                if not raw:
+                    continue
+                metadata = json.loads(raw)
+                if metadata.get("owner_id") != user_id:
+                    continue
+                session_id = str(UUID(metadata["session_id"]))
+                if key.decode() != f"{self.prefix}:{session_id}":
+                    continue
+                runtime = self.runtime(session_id)
+                _, state, _ = runtime.snapshot(user_id, session_id, read_previous_version=True)
+                title = state.get("last_user_text") or "未发送消息的会话"
+                fields = state.get("fields", {})
+                searchable = json.dumps(
+                    [session_id, metadata["created_at"], title, fields], ensure_ascii=False
+                ).casefold()
+                if query and query not in searchable:
+                    continue
+                observation = self.view(user_id, session_id)
+                items.append(
+                    {
+                        "session_id": session_id,
+                        "title": title[:160],
+                        "created_at": metadata["created_at"],
+                        "version_id": metadata["version_id"],
+                        "revision": metadata["revision"],
+                        "status": observation["status"],
+                        "processing": observation["processing"],
+                        "read_only": observation["read_only"],
+                        "booking_count": observation["sql_observation"]["booking_count"],
+                        "sql_available": observation["sql_observation"]["available"],
+                        "fields": {k: v.get("value") for k, v in fields.items()},
+                    }
+                )
+            if not cursor:
+                break
+        return {
+            "items": sorted(items, key=lambda item: item["created_at"], reverse=True),
+            "next_cursor": str(cursor) if cursor else None,
+            "observed_at": datetime.now(UTC).isoformat(),
+        }
+
     def act(self, user_id, session_id, body, kind):
         runtime = self.runtime(session_id)
         runtime._metadata(
@@ -272,7 +352,7 @@ class InteractionService:
                     )
             if not self.gateway_factory and not self.access()["model_actions_available"]:
                 raise AgentError(
-                    "interactive_not_authorized", "当前T17D调用条件不具备，原会话仍可读取。", 403
+                    "interactive_not_authorized", "当前交互调用条件不具备，原会话仍可读取。", 403
                 )
             receipt = {
                 "request_id": request_id,
@@ -309,7 +389,9 @@ class InteractionService:
         return self.view(user_id, session_id)
 
     def history(self, user_id, session_id, cursor, limit):
-        return self.runtime(session_id).history(user_id, session_id, cursor, limit)
+        return self.runtime(session_id).history(
+            user_id, session_id, cursor, limit, read_previous_version=True
+        )
 
     def clear_pending(self, key, request_id):
         self.redis.eval(
@@ -322,7 +404,7 @@ class InteractionService:
 
     def receipt(self, user_id, session_id, request_id):
         runtime = self.runtime(session_id)
-        runtime._metadata(user_id, session_id)
+        runtime._metadata(user_id, session_id, read_previous_version=True)
         key = runtime._key(session_id)
         raw = self.redis.get(key + ":receipt:" + str(request_id))
         receipt = (
@@ -338,7 +420,9 @@ class InteractionService:
         return receipt
 
     def trace(self, user_id, session_id, cursor, limit):
-        _, state, _ = self.runtime(session_id).snapshot(user_id, session_id)
+        _, state, _ = self.runtime(session_id).snapshot(
+            user_id, session_id, read_previous_version=True
+        )
         items = state.get("audit", [])
         return {
             "items": items[cursor : cursor + limit],

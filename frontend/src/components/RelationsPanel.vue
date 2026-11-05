@@ -31,7 +31,7 @@ onBeforeUnmount(() => generation++)
 <template>
   <section class="relations-panel" aria-label="变形关系对照">
     <header class="relation-header">
-      <div><span class="eyebrow">语义与业务条件</span><h2>改写之后，条件是否仍然成立</h2></div>
+      <div><h2>等价改写与条件变更</h2></div>
       <ElButton :loading="busy" @click="load">刷新关系</ElButton>
     </header>
     <p v-if="error" role="alert" class="evidence-error">{{ error }}</p>

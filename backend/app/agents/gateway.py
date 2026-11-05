@@ -1,5 +1,6 @@
 """One DeepSeek streaming boundary with real usage and sanitized observable evidence."""
 
+import asyncio
 import json
 import time
 from datetime import UTC, datetime
@@ -30,11 +31,16 @@ class ModelGateway:
         control=None,
         role="agent",
     ):
-        if role not in ("agent", "case_generator", "judge"):
+        if role not in ("agent", "case_generator", "judge", "copilot"):
             raise ValueError("Unsupported role")
         self.settings, self.budget = settings, budget
         self.role = role
-        prefix = {"agent": "agent", "case_generator": "casegen", "judge": "judge"}[role]
+        prefix = {
+            "agent": "agent",
+            "case_generator": "casegen",
+            "judge": "judge",
+            "copilot": "copilot",
+        }[role]
         self.model = getattr(settings, prefix + "_model")
         self.thinking = getattr(settings, prefix + "_thinking")
         self.max_output = getattr(settings, prefix + "_max_output_tokens")
@@ -50,6 +56,8 @@ class ModelGateway:
         tool_choice=None,
     ) -> tuple[AIMessage, dict]:
         s = self.settings
+        if self.role == "copilot":
+            deadline = min(deadline or float("inf"), time.monotonic() + 45)
         if not s.deepseek_api_key.get_secret_value():
             raise AgentError("model_key_missing", "本地模型密钥未配置。", 503)
         if self.thinking != "disabled":
@@ -60,7 +68,7 @@ class ModelGateway:
         if remaining <= 0:
             raise AgentError("agent_deadline", "本轮对话达到总时限。", 504)
         request = {"messages": messages_to_dict(messages), "tools": tools}
-        if self.role == "judge":
+        if self.role == "judge" or self.role == "copilot" and not tools:
             request["response_format"] = {"type": "json_object"}
         request_bytes = len(json.dumps(request, ensure_ascii=False, default=str).encode())
         ticket = self.budget.reserve(request_bytes, self.max_output)
@@ -89,33 +97,44 @@ class ModelGateway:
                 timeout=remaining,
                 max_retries=0,
                 max_tokens=self.max_output,
-                **({"response_format": {"type": "json_object"}} if self.role == "judge" else {}),
+                **(
+                    {"response_format": {"type": "json_object"}}
+                    if self.role == "judge" or self.role == "copilot" and not tools
+                    else {}
+                ),
             )
             bound = (
                 model.bind_tools(tools, **({"tool_choice": tool_choice} if tool_choice else {}))
                 if tools
                 else model
             )
-            combined = None
-            stream = bound.stream(messages, stream_usage=True)
-            last_checked = 0.0
-            try:
-                for chunk in stream:
-                    if self.control and time.monotonic() - last_checked >= 0.25:
-                        self.control.check()
-                        last_checked = time.monotonic()
-                    if deadline is not None and time.monotonic() > deadline:
-                        raise AgentError("agent_deadline", "本轮对话达到总时限。", 504)
-                    record["chunks"].append(
-                        {
-                            "content": chunk.content,
-                            "tool_call_chunks": chunk.tool_call_chunks,
-                            "usage": chunk.usage_metadata,
-                        }
+            if self.role == "copilot":
+                combined = asyncio.run(
+                    self._copilot_stream(
+                        bound, messages, record, deadline, getattr(model, "root_async_client", None)
                     )
-                    combined = chunk if combined is None else combined + chunk
-            finally:
-                stream.close()
+                )
+            else:
+                combined = None
+                stream = bound.stream(messages, stream_usage=True)
+                last_checked = 0.0
+                try:
+                    for chunk in stream:
+                        if self.control and time.monotonic() - last_checked >= 0.25:
+                            self.control.check()
+                            last_checked = time.monotonic()
+                        if deadline is not None and time.monotonic() > deadline:
+                            raise AgentError("agent_deadline", "本轮对话达到总时限。", 504)
+                        record["chunks"].append(
+                            {
+                                "content": chunk.content,
+                                "tool_call_chunks": chunk.tool_call_chunks,
+                                "usage": chunk.usage_metadata,
+                            }
+                        )
+                        combined = chunk if combined is None else combined + chunk
+                finally:
+                    stream.close()
             if combined is None:
                 raise AgentError("model_empty_stream", "模型未返回可观察输出。", 503)
             message = message_chunk_to_message(combined)
@@ -183,3 +202,29 @@ class ModelGateway:
             (self.audit_directory / f"{ticket['call_id']}.json").write_text(
                 serialized + "\n", encoding="utf-8"
             )
+
+    async def _copilot_stream(self, bound, messages, record, deadline, client=None):
+        # Cancel pending network reads and close this call's client before its loop ends.
+        combined = None
+        remaining = max(0, min(45, deadline - time.monotonic()))
+        try:
+            async with asyncio.timeout(remaining):
+                stream = bound.astream(messages, stream_usage=True)
+                try:
+                    async for chunk in stream:
+                        if self.control:
+                            self.control.check()
+                        record["chunks"].append(
+                            {
+                                "content": chunk.content,
+                                "tool_call_chunks": chunk.tool_call_chunks,
+                                "usage": chunk.usage_metadata,
+                            }
+                        )
+                        combined = chunk if combined is None else combined + chunk
+                finally:
+                    await stream.aclose()
+        finally:
+            if client is not None:
+                await client.close()
+        return combined

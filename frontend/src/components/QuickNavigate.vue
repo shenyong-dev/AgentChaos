@@ -30,7 +30,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', keydown))
 
 <template>
   <button class="quick-nav-trigger" type="button" aria-label="快速跳转页面" aria-haspopup="dialog" @click="show"><Search aria-hidden="true" /><span>快速跳转</span><kbd>Ctrl K</kbd></button>
-  <ElDialog v-model="open" title="快速跳转" class="quick-nav-dialog" width="min(560px,92vw)" :close-on-click-modal="true" @opened="search?.focus()">
+  <ElDialog v-model="open" title="快速跳转" class="quick-nav-dialog" append-to-body width="min(560px,92vw)" :close-on-click-modal="true" @opened="search?.focus()">
     <div ref="panel" class="quick-nav-panel">
       <ElInput ref="search" v-model="query" aria-label="搜索页面" placeholder="搜索页面、功能或路径…" :prefix-icon="Search" clearable @keydown.down.prevent="move(-1,1)" @keydown.enter.prevent="matches[0] && navigate(matches[0].path)" />
       <p class="quick-nav-caption" aria-live="polite">{{ matches.length ? `${matches.length} 个可访问页面` : '没有匹配的页面，试试“报告”或“用例”。' }}</p>

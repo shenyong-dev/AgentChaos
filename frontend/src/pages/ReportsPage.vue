@@ -1,10 +1,13 @@
 <script setup lang="ts">
+import InfoHint from '../components/InfoHint.vue'
+import { useGuideSelection } from '../guidance'
+import { useCopilotComparison } from '../copilot'
+import { sessionFetch } from '../api/session'
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElButton, ElCheckbox, ElDialog, ElInput, ElOption, ElSelect, ElTag } from 'element-plus'
 import 'element-plus/es/components/select/style/css'
 import 'element-plus/es/components/checkbox/style/css'
-import WorkspaceAccess from '../components/WorkspaceAccess.vue'
 import { workspace, workspacePost } from '../api/workspace'
 import { evidenceGet } from '../api/evidence'
 import { statuses } from '../types/workbench'
@@ -16,6 +19,8 @@ const view = ref(String(route.query.tab ?? 'report'))
 const selectedRun = ref(String(route.query.run ?? '')), rightRun = ref('')
 const runs = ref<RunRow[]>([]), versions = ref<VersionRow[]>([])
 const report = ref<RunReport>(), comparison = ref<RunComparison>(), exports = ref<ReportExport[]>([])
+useGuideSelection(() => view.value === 'report' && report.value ? { kind: 'run', id: report.value.run.run_id } : view.value === 'compare' && selectedRun.value ? { kind: 'run', id: selectedRun.value } : undefined)
+useCopilotComparison(() => view.value === 'compare' && selectedRun.value && rightRun.value ? rightRun.value : undefined)
 const defects = ref<Defect[]>([]), defectCursor = ref<number | null>(null), defectStatus = ref('')
 const selectedDefect = ref<Defect>(), busy = ref(false), error = ref(''), notice = ref('')
 const reviewOpen = ref(false), decision = ref('confirmed'), severity = ref('medium'), note = ref(''), attestation = ref(false)
@@ -81,7 +86,7 @@ async function generate() {
 }
 async function download(item: ReportExport) {
   await perform(async (auth, valid) => {
-    const response = await fetch(item.download, { headers: { Authorization: auth }, cache: 'no-store' })
+    const response = await sessionFetch(item.download, { headers: { Authorization: auth }, cache: 'no-store' })
     if (!response.ok) { const body = await response.json(); throw new Error(`${body.error?.message ?? '下载失败'}（HTTP ${response.status}）`) }
     const bytes = await response.arrayBuffer()
     const digest = [...new Uint8Array(await crypto.subtle.digest('SHA-256', bytes))].map(value => value.toString(16).padStart(2,'0')).join('')
@@ -148,13 +153,13 @@ onBeforeUnmount(() => { epoch++; searchSequence++; exportRequests.clear() })
 
 <template>
   <section class="reports-page workspace-page">
-    <div class="page-heading"><div><span class="eyebrow">EVIDENCE / REVIEW / REPORT</span><h1>缺陷与报告</h1><p>把判定留在事实里，把复核和结论说清楚。</p></div></div>
-    <WorkspaceAccess />
+    <div class="page-heading"><div><h1>缺陷与报告</h1></div></div>
+
     <template v-if="workspace.authorization.value">
       <div class="report-tabs" role="tablist" aria-label="报告视图"><button v-for="item in [{id:'report',label:'运行报告'},{id:'defects',label:'缺陷复核'},{id:'compare',label:'版本对比'}]" :key="item.id" role="tab" :aria-selected="view === item.id" @click="tab(item.id)">{{ item.label }}</button></div>
       <p v-if="error" role="alert" class="evidence-error">{{ error }}<span v-if="exportPending"> 原导出标识已保留，再次点击将重试同一请求。</span></p>
       <p v-if="notice" role="status" class="report-notice">{{ notice }}</p>
-      <div v-if="view !== 'defects'" class="report-run-picker"><label>选择运行<ElSelect v-model="selectedRun" aria-label="选择报告运行" popper-class="report-run-dropdown" :fit-input-width="true" placeholder="选择已结束的运行" filterable remote :remote-method="searchRuns" :disabled="busy" @change="loadReport"><ElOption v-for="item in runs" :key="item.run_id" :value="item.run_id" :label="`${item.run_id.slice(0,8)} · ${names[item.status] ?? item.status} · 版本ID ${item.target_version_id}`" :disabled="!['completed','cancelled','failed'].includes(item.status)"><span class="report-run-option">{{ item.run_id }}<small>{{ names[item.status] ?? item.status }} · 版本ID {{ item.target_version_id }}</small></span></ElOption></ElSelect></label><ElButton :disabled="busy || !selectedRun" @click="loadReport">刷新报告</ElButton><small>搜索运行UUID可查找更早记录；浏览不执行模型。</small></div>
+      <div v-if="view !== 'defects'" class="report-run-picker"><label>选择运行<ElSelect v-model="selectedRun" aria-label="选择报告运行" popper-class="report-run-dropdown" :fit-input-width="true" placeholder="选择已结束的运行" filterable remote :remote-method="searchRuns" :disabled="busy" @change="loadReport"><ElOption v-for="item in runs" :key="item.run_id" :value="item.run_id" :label="`${item.run_id.slice(0,8)} · ${names[item.status] ?? item.status} · 版本ID ${item.target_version_id}`" :disabled="!['completed','cancelled','failed'].includes(item.status)"><span class="report-run-option">{{ item.run_id }}<small>{{ names[item.status] ?? item.status }} · 版本ID {{ item.target_version_id }}</small></span></ElOption></ElSelect></label><ElButton :disabled="busy || !selectedRun" @click="loadReport">刷新报告</ElButton><InfoHint label="查找报告" text="支持搜索完整运行UUID以查找更早记录。浏览报告不执行模型；导出保存当前快照，不重跑任务。" /></div>
       <p v-if="busy" class="workspace-loading" role="status">正在读取或保存实际记录…</p>
       <template v-if="view === 'report'">
         <div v-if="!selectedRun && !busy" class="workspace-empty"><h2>还没有可生成报告的运行</h2><p>完成一次测试后，在这里核对结果、复核候选并导出证据。</p><RouterLink to="/workbench">前往测试工作台 →</RouterLink></div>
@@ -163,7 +168,7 @@ onBeforeUnmount(() => { epoch++; searchSequence++; exportRequests.clear() })
           <p v-if="missingKnowledge" class="evidence-error">冻结知识缺失或哈希不符，当前不能导出完整证据包。请先核对来源。</p><div class="report-summary"><div><small>计划执行 / 不同用例</small><strong>{{ report.statistics.planned_executions }} / {{ report.statistics.unique_cases }}</strong></div><div><small>有效规则通过 / 分母</small><strong>{{ report.statistics.reliability.numerator }} / {{ report.statistics.reliability.denominator }}</strong></div><div><small>任务达成 / 有效分母</small><strong>{{ report.statistics.task_fulfilment.numerator }} / {{ report.statistics.task_fulfilment.denominator }}</strong></div><div><small>持久事件 / 含恢复尝试</small><strong>{{ report.source_event_count }} / {{ report.statistics.attempts_including_recovery }}</strong></div></div>
           <div class="report-actions"><ElButton :disabled="busy" @click="collect">归并缺陷候选</ElButton><span class="workspace-note">规则失败与AI信号分别保留，需人工确认；取消和证据不足不自动算缺陷。</span></div>
           <div class="table-scroll"><table class="workspace-table report-executions"><thead><tr><th>用例与执行</th><th>实际状态</th><th>证据完整性</th><th>原始依据</th></tr></thead><tbody><tr v-for="item in report.executions" :key="item.execution_id"><td><strong>{{ item.case_key }}</strong><small>{{ item.execution_id }} · 重复 {{ item.repeat_no }} / 尝试 {{ item.attempt }}</small></td><td>{{ names[item.status] ?? item.status }}</td><td>{{ item.evidence_integrity.complete ? '完整' : '存在缺口' }}<small v-if="!item.evidence_integrity.complete">{{ [...item.evidence_integrity.issues,...item.evidence_integrity.errors].join(' / ') }}</small></td><td><RouterLink :to="`/runs/${report.run.run_id}?view=assertions&execution=${item.execution_id}`">查看断言与业务快照 →</RouterLink></td></tr></tbody></table></div>
-          <div class="report-export-panel"><div><h2>导出与离线追溯</h2><p>包含原始判定、业务快照、冻结配置与知识、事件及SHA256清单；导出不会重跑。</p></div><div class="report-export-controls"><label>下载有效期<ElSelect v-model="expiresHours" aria-label="报告有效期" :disabled="busy || exportPending"><ElOption :value="1" label="1小时" /><ElOption :value="24" label="24小时" /><ElOption :value="168" label="7天" /></ElSelect></label><ElButton type="primary" :disabled="busy || missingKnowledge" @click="generate">{{ exportPending ? '按原请求重试导出' : '生成报告与证据包' }}</ElButton></div><ul v-if="exports.length" class="report-downloads"><li v-for="item in exports" :key="item.artifact_id"><ElButton :disabled="busy" @click="download(item)">下载{{ names[item.kind] }}</ElButton><div><small>{{ item.bytes.toLocaleString() }} 字节 · 有效至 {{ item.expires_at }}</small><code>{{ item.sha256 }}</code></div></li></ul><p v-if="exports.length" class="workspace-note">这是一份冻结快照，后续复核不改写旧报告。ZIP内含verify.py，下载后可离线核对清单。</p></div>
+          <div class="report-export-panel"><div class="heading-with-info"><h2>报告导出</h2><InfoHint label="证据包内容" text="含原始判定、SQL快照、冻结配置与知识、事件及SHA256清单。ZIP中的verify.py可离线核对清单。" /></div><div class="report-export-controls"><label>下载有效期<ElSelect v-model="expiresHours" aria-label="报告有效期" :disabled="busy || exportPending"><ElOption :value="1" label="1小时" /><ElOption :value="24" label="24小时" /><ElOption :value="168" label="7天" /></ElSelect></label><ElButton type="primary" :disabled="busy || missingKnowledge" @click="generate">{{ exportPending ? '按原请求重试导出' : '生成报告与证据包' }}</ElButton></div><ul v-if="exports.length" class="report-downloads"><li v-for="item in exports" :key="item.artifact_id"><ElButton :disabled="busy" @click="download(item)">下载{{ names[item.kind] }}</ElButton><div><small>{{ item.bytes.toLocaleString() }} 字节 · 有效至 {{ item.expires_at }}</small><code>{{ item.sha256 }}</code></div></li></ul><p v-if="exports.length" class="workspace-note">导出为冻结快照，后续复核不改写旧报告。</p></div>
           <details class="report-details"><summary>完整来源、分母、排除项与版本</summary><pre class="workspace-json">{{ JSON.stringify(report, null, 2) }}</pre></details>
         </template>
       </template>

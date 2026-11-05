@@ -29,7 +29,7 @@ async function submit() {
 }
 </script>
 <template>
-  <div class="execution-controls"><ElButton v-if="waiting" type="primary" @click="begin('input')">处理等待输入</ElButton><ElButton v-if="['queued','running'].includes(snapshot.status)" @click="begin('cancel')">取消运行</ElButton><ElButton @click="emit('refresh')">刷新状态</ElButton><p v-if="notice" role="status">{{ notice }}</p></div>
+  <div id="execution-controls" class="execution-controls"><ElButton v-if="waiting" type="primary" @click="begin('input')">处理等待输入</ElButton><ElButton v-if="['queued','running'].includes(snapshot.status)" @click="begin('cancel')">取消运行</ElButton><ElButton @click="emit('refresh')">刷新状态</ElButton><p v-if="notice" role="status">{{ notice }}</p></div>
   <ElDialog v-model="open" class="execution-control-dialog" :title="action === 'cancel' ? '确认取消运行' : '核对本轮输入与预约参数'" width="min(720px,94vw)" :close-on-click-modal="false" :close-on-press-escape="!busy" :show-close="!busy">
     <template v-if="action === 'cancel'"><p>取消尚未完成的执行，并停止继续调度。已发生的工具副作用会保留，需要在业务快照中查证。</p><p class="workspace-note">运行 {{ snapshot.run_id }}</p></template>
     <template v-else><p class="workspace-note">核对当前执行实际请求的参数。输入会发送给本轮智能体，不直接调用预约接口。</p><pre v-if="confirmation" class="workspace-json" aria-label="待确认的实际参数">{{ JSON.stringify(confirmation, null, 2) }}</pre><label v-if="!preview">本轮输入<ElInput v-model="text" type="textarea" :rows="3" :maxlength="12000" aria-label="本轮输入" placeholder="例如：确认、不要预约，或补充需要修改的条件" /></label><div v-else class="input-preview"><h3>即将发送</h3><p>{{ text }}</p></div><details><summary>幂等标识与执行修订</summary><pre class="workspace-json">{{ JSON.stringify(body, null, 2) }}</pre></details></template>

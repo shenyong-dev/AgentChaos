@@ -22,10 +22,12 @@ def canonical_hash(data):
 
 def build_manifest(settings, retriever, registry):
     source_paths = sorted((PROJECT_ROOT / "backend/app").rglob("*.py"))
+    source_paths += sorted((PROJECT_ROOT / "backend/app").rglob("*.json"))
     source_paths += sorted((PROJECT_ROOT / "backend/alembic/versions").glob("*.py"))
     source_paths += [
         PROJECT_ROOT / path for path in ("backend/app/agents/prompt.txt", "backend/uv.lock")
     ]
+    source_paths += sorted((PROJECT_ROOT / "backend/app/copilot").glob("*.txt"))
     sources = {
         path.relative_to(PROJECT_ROOT).as_posix(): hashlib.sha256(
             path.read_text(encoding="utf-8").encode()

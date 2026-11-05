@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import InfoHint from './InfoHint.vue'
+import { sessionFetch } from '../api/session'
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { ElButton, ElSelect, ElOption } from 'element-plus'
 import { evidenceGet } from '../api/evidence'
@@ -53,7 +55,7 @@ async function evaluate() {
   const current = ++generation, target = execution.value
   busy.value = true; error.value = ''
   try {
-    const response = await fetch(`/api/v1/executions/${target}/evaluate`, {
+    const response = await sessionFetch(`/api/v1/executions/${target}/evaluate`, {
       method: 'POST', headers: { Authorization: props.authorization, 'Content-Type': 'application/json' },
       body: '{}', cache: 'no-store', signal: AbortSignal.timeout(30000),
     })
@@ -86,7 +88,7 @@ onBeforeUnmount(() => generation++)
     <div v-if="busy && !rows.length" class="assertion-empty" role="status">正在读取持久化判定与证据…</div>
     <template v-else-if="summary">
       <div class="evaluation-overview" :data-verdict="summary.verdict">
-        <div><span class="verdict-label" :data-verdict="summary.verdict">{{ labels[summary.verdict] }}</span><h2>可靠性判定</h2><p>按独立预期核对事实，规则失败需要结合证据复核。</p></div>
+        <div><span class="verdict-label" :data-verdict="summary.verdict">{{ labels[summary.verdict] }}</span><div class="heading-with-info"><h2>可靠性判定</h2><InfoHint label="判定依据" text="按独立预期核对事实；规则失败仍需结合原始证据复核，任务是否达成另外记录。" /></div></div>
         <div class="evaluation-totals"><strong>{{ summary.counts.passed }}<small>通过</small></strong><strong>{{ summary.counts.failed }}<small>未通过</small></strong><strong>{{ summary.counts.inconclusive + summary.counts.error }}<small>待复核</small></strong></div>
         <div class="task-outcome"><span>{{ outcomes[summary.task_outcome] }}</span><small>任务是否达成，与可靠性判定分开记录</small></div>
       </div>

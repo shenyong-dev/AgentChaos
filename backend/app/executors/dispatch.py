@@ -25,7 +25,14 @@ def dispatch_pending(engine, settings, *, publisher=None, force=False, only_run=
             )
 
     service = RunService(engine, settings)
-    counts = {"published": 0, "failed": 0, "deferred": 0, "expired": service.expire_deadlines()}
+    counts = {
+        "published": 0,
+        "failed": 0,
+        "deferred": 0,
+        "expired": service.expire_deadlines(compatible_only=True),
+    }
+    counts["incompatible"] = 0
+    compatibility = {}
     for identifier in service.candidates():
         # Reserve one dispatch slot, commit, then publish without holding SQL locks.
         dispatch_token = str(uuid4())
@@ -40,6 +47,9 @@ def dispatch_pending(engine, settings, *, publisher=None, force=False, only_run=
                 "queued",
                 "running",
             ):
+                continue
+            if not service.configuration_matches(run.manifest_json, cache=compatibility):
+                counts["incompatible"] += 1
                 continue
             if e.status != "queued" and not (
                 e.status == "running" and e.lease_until and e.lease_until < now
@@ -79,14 +89,20 @@ def main():
     args = parser.parse_args()
     settings = get_settings()
     engine = create_database_engine(settings)
-    while True:
-        try:
-            print(dispatch_pending(engine, settings), flush=True)
-        except Exception as exc:
-            print({"dispatch_scan_error": type(exc).__name__}, flush=True)
-        if args.once:
-            break
-        time.sleep(3)
+    from app.workers.presence import DispatcherPresence
+
+    with DispatcherPresence(settings) as presence:
+        while True:
+            try:
+                result = dispatch_pending(engine, settings)
+                presence.scanned(True)
+                print(result, flush=True)
+            except Exception as exc:
+                presence.scanned(False)
+                print({"dispatch_scan_error": type(exc).__name__}, flush=True)
+            if args.once:
+                break
+            time.sleep(3)
 
 
 if __name__ == "__main__":

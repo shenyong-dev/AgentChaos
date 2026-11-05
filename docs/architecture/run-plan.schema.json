@@ -1,0 +1,179 @@
+{
+  "$defs": {
+    "CreateRun": {
+      "additionalProperties": false,
+      "properties": {
+        "request_id": {
+          "format": "uuid",
+          "title": "Request Id",
+          "type": "string"
+        },
+        "target_version_id": {
+          "minimum": 1,
+          "title": "Target Version Id",
+          "type": "integer"
+        },
+        "case_revision_ids": {
+          "items": {
+            "type": "integer"
+          },
+          "maxItems": 120,
+          "minItems": 1,
+          "title": "Case Revision Ids",
+          "type": "array"
+        },
+        "repetitions": {
+          "default": 1,
+          "maximum": 5,
+          "minimum": 1,
+          "title": "Repetitions",
+          "type": "integer"
+        },
+        "seed": {
+          "default": 0,
+          "maximum": 2000000000,
+          "minimum": 0,
+          "title": "Seed",
+          "type": "integer"
+        },
+        "limits": {
+          "$ref": "#/$defs/Limits"
+        },
+        "budgets": {
+          "$ref": "#/$defs/RoleBudgets"
+        },
+        "fault_profile_id": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fault Profile Id"
+        }
+      },
+      "required": [
+        "request_id",
+        "target_version_id",
+        "case_revision_ids"
+      ],
+      "title": "CreateRun",
+      "type": "object"
+    },
+    "Limits": {
+      "additionalProperties": false,
+      "properties": {
+        "concurrency": {
+          "default": 1,
+          "maximum": 5,
+          "minimum": 1,
+          "title": "Concurrency",
+          "type": "integer"
+        },
+        "timeout_seconds": {
+          "default": 300,
+          "maximum": 900,
+          "minimum": 10,
+          "title": "Timeout Seconds",
+          "type": "integer"
+        },
+        "max_steps": {
+          "default": 100,
+          "maximum": 500,
+          "minimum": 1,
+          "title": "Max Steps",
+          "type": "integer"
+        },
+        "max_model_calls": {
+          "default": 20,
+          "maximum": 100,
+          "minimum": 1,
+          "title": "Max Model Calls",
+          "type": "integer"
+        },
+        "max_tokens": {
+          "default": 500000,
+          "maximum": 2000000,
+          "minimum": 1,
+          "title": "Max Tokens",
+          "type": "integer"
+        }
+      },
+      "title": "Limits",
+      "type": "object"
+    },
+    "RoleBudgets": {
+      "additionalProperties": false,
+      "properties": {
+        "agent_microusd": {
+          "default": 100000,
+          "maximum": 1000000,
+          "minimum": 0,
+          "title": "Agent Microusd",
+          "type": "integer"
+        },
+        "case_generator_microusd": {
+          "const": 0,
+          "default": 0,
+          "title": "Case Generator Microusd",
+          "type": "integer"
+        },
+        "judge_microusd": {
+          "const": 0,
+          "default": 0,
+          "title": "Judge Microusd",
+          "type": "integer"
+        }
+      },
+      "title": "RoleBudgets",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "configuration": {
+      "$ref": "#/$defs/CreateRun"
+    },
+    "action": {
+      "default": "new",
+      "enum": [
+        "new",
+        "rerun",
+        "copy"
+      ],
+      "title": "Action",
+      "type": "string"
+    },
+    "source_run_id": {
+      "anyOf": [
+        {
+          "format": "uuid",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Source Run Id"
+    },
+    "dispatch": {
+      "default": "ready",
+      "enum": [
+        "ready",
+        "queue_only"
+      ],
+      "title": "Dispatch",
+      "type": "string"
+    }
+  },
+  "required": [
+    "configuration"
+  ],
+  "title": "RunPlan",
+  "type": "object"
+}

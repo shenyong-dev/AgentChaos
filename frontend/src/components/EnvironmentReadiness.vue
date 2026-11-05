@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import InfoHint from './InfoHint.vue'
 import { computed, ref, onMounted, onBeforeUnmount } from 'vue'
 import type { ReadinessCheck, ReadinessOperation, ReadinessReport } from '../types/readiness'
 
@@ -32,7 +33,7 @@ const steps = [
 
 <template>
   <section class="operation-panel" aria-label="操作就绪检查">
-    <div class="section-heading"><div><h2>现在可以做什么</h2><p>按操作核对前置条件，付费关闭不会阻止查看历史。</p></div><span>{{ loading ? '正在取得最新观察' : report && !stale ? `检测于 ${time(report.checked_at)} · 60秒内有效` : '当前状态未确认' }}</span></div>
+    <div class="section-heading"><div><div class="heading-with-info"><h2>操作就绪</h2><InfoHint label="操作前置" text="按实际操作核对权限、依赖、版本和预算；付费关闭不影响查看历史。" /></div></div><span>{{ loading ? '正在取得最新观察' : report && !stale ? `检测于 ${time(report.checked_at)} · 60秒内有效` : '当前状态未确认' }}</span></div>
     <p v-if="error || (report && stale)" class="readiness-warning" role="status">{{ error || '检测结果已过期，请重新检测。' }} 下方旧结果不能证明当前可用。</p>
     <p v-if="!report" class="readiness-warning">尚未取得操作就绪结果。基础使用指南仍可离线阅读。</p>
     <div v-if="report" class="operation-list">
@@ -45,13 +46,13 @@ const steps = [
         <a :href="op.destination">查看相关入口</a>
       </details>
     </div>
-    <p class="readiness-boundary">{{ report?.boundary ?? '本页不会调用模型、启动服务、修改本地配置或执行预约。实际操作仍由服务端守卫核验。' }}</p>
+
   </section>
 
   <section class="first-use-guide" aria-label="首次使用指南">
-    <div class="section-heading"><div><h2>第一次使用，从这里开始</h2><p>随页面提供的基础指南，API暂不可达时也能查看。</p></div><span>无需AI调用</span></div>
-    <ol><li v-for="(step, index) in steps" :key="step.title"><span class="guide-number">{{ String(index + 1).padStart(2, '0') }}</span><div><h3>{{ step.title }}</h3><p>{{ step.text }}</p><a :href="step.path">{{ step.action }}</a></div></li></ol>
-    <p class="readiness-boundary">配置由维护者在本地处理，不要把密码或密钥贴到页面、聊天或仓库中。预约Agent调试使用独立实验会话；平台测试助手属于后续T17E，尚未提供。</p>
+    <div class="section-heading"><div><h2>第一次使用，从这里开始</h2></div><span>无需AI调用</span></div>
+    <ol><li v-for="(step, index) in steps" :key="step.title"><span class="guide-number">{{ String(index + 1).padStart(2, '0') }}</span><div><div class="heading-with-info"><h3>{{ step.title }}</h3><InfoHint :label="step.title" :text="step.text" /></div><a :href="step.path">{{ step.action }}</a></div></li></ol>
+
   </section>
 </template>
 

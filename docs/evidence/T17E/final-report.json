@@ -1,0 +1,76 @@
+{
+  "task": "T17E",
+  "status": "Implementation and verification complete, awaiting team review",
+  "recorded_at": "2026-11-04T16:31:15.338132+00:00",
+  "version_id": 55,
+  "config_hash": "cd6d54ca9aac87c531a4427df936a8e10ba1aa1d94e9da5094713308ff46bdd6",
+  "validation": {
+    "backend": {
+      "tests": 480,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 564.98
+    },
+    "prior_candidate_478_passed_seconds": 655.67,
+    "specialist_30_seconds": 16.86,
+    "frontend_distinct": 35,
+    "ui_phases": {
+      "copilot_free": 10,
+      "real_copilot_browser": 1,
+      "existing_case_environment_session": 8,
+      "existing_density_guidance": 16
+    },
+    "ui_boundary": "Four separate final runs, not one 35/35 run. Free UI model responses are explicit controls.",
+    "typecheck_production_build": true,
+    "ruff": true,
+    "formatted_python_files": 318,
+    "offline_lock_packages": 94,
+    "contracts_memory_verified": 26,
+    "environment_ready_recheck": {
+      "distinct": 3,
+      "initial_passed": 2,
+      "mobile_initial_wait_failed": true,
+      "mobile_first_recheck_failed": true,
+      "mobile_after_full_original_assertion_passed_seconds": 9.2,
+      "causation_not_established": true
+    }
+  },
+  "real_copilot": {
+    "recorded_at": "2026-11-04T16:17:19.734611+00:00",
+    "ledger_key": "ac:t17e:budget:T17E-20261104-copilot-1:copilot",
+    "ledger": {
+      "limit": 1000000,
+      "held_upper": 0,
+      "charged_estimate": 42091,
+      "calls_started": 34,
+      "calls_completed": 34,
+      "token_upper": 102680
+    },
+    "real_calls": 34,
+    "usage_records": 34,
+    "tokens": {
+      "input_tokens": 90155,
+      "output_tokens": 12525,
+      "total_tokens": 102680
+    },
+    "estimated_peak_usd": 0.042091,
+    "billing_boundary": "Peak-price estimate, not provider invoice. Later explicit team calls share remaining original cap.",
+    "old_14_exact_fields_preserved": true,
+    "other_roles_new_calls": 0
+  },
+  "limitations": [
+    "首批16条真实提问13 completed/3 failed，耗25请求；completed仅指协议返回，不是语义准确率。E003缺证据对象契约失败；E021/E022只读SQL加锁失败；原记录保留。",
+    "最终5条新协议补验完成/HTTP200，耗9请求；没有重新运行或重算原16条。R03语义仍错误地把已采集空SQL数组当作缺SQL，不能计作识别虚报成功的语义通过。",
+    "E015出现选中状态事实仅引用通用指南，来源存在不代表该条文字有支持；E020控制例的说明与零条断言不一致，助手保留疑问，不能称完整新建运行语义验收通过。",
+    "原E007夹具离线网关队列耗尽，不能当清洁SQL0矛盾样本。原E020预检复制T13未带准入被拒、0调用，改可浏览控制例后才真实提问。",
+    "原E008复述旧环境copilot未实现；最终修复环境能力矩阵，补验免费就绪/额度/依赖检查。原真实回答不改，未追加付费重测。",
+    "有界来源可能截断；历史两轮讨论不是新事实。未知usage继续占预留，机械引用/归属校验不能证明解释语义正确。",
+    "24题为实现前冻结的新受控问题，16题做真实调用，另外8题为权限/离线/故障/会话等控制；不宣称24条真人金标准或24条真实模型验收。",
+    "SQL/Redis验收为真实，夹具被测Agent回复为明确离线控制，copilot为真实DeepSeek。没有T19 E4使用效率、独立真人语义标注或统计改善结论。"
+  ],
+  "review_url": "http://127.0.0.1:5190/environment",
+  "expires_at": "2026-11-05T04:22:50.022414+00:00",
+  "no_git": true,
+  "next_candidate": "T17J only after explicit team acceptance and continue"
+}

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import InfoHint from '../components/InfoHint.vue'
+import { useGuideSelection } from '../guidance'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElButton, ElInput, ElTag, ElSelect, ElOption } from 'element-plus'
@@ -6,22 +8,24 @@ import 'element-plus/theme-chalk/el-button.css'
 import 'element-plus/theme-chalk/el-input.css'
 import 'element-plus/theme-chalk/el-tag.css'
 import 'element-plus/es/components/select/style/css'
-import { basicHeader, checkedFact, evidenceGet, streamEvidence } from '../api/evidence'
+import { sessionFetch } from '../api/session'
+import { checkedFact, evidenceGet, streamEvidence } from '../api/evidence'
 import type { EventPage, RunSnapshot, TraceFact } from '../types/evidence'
 import AssertionsPanel from '../components/AssertionsPanel.vue'
 import RelationsPanel from '../components/RelationsPanel.vue'
 import SemanticPanel from '../components/SemanticPanel.vue'
 import ExecutionControls from '../components/ExecutionControls.vue'
+import ChainDiagnostics from '../components/ChainDiagnostics.vue'
 import { workspace } from '../api/workspace'
 import { statuses } from '../types/workbench'
 
 const route = useRoute(), router = useRouter()
 const runId = ref(String(route.params.runId ?? ''))
-const username = ref('demo_operator'), password = ref('')
+
 const snapshot = ref<RunSnapshot>(), facts = ref<TraceFact[]>([]), selected = ref('')
 const error = ref(''), state = ref('未连接'), filter = ref(''), after = ref(''), more = ref(false)
 const busy = ref(false), live = ref(false)
-const activeTab = ref(['assertions', 'relations', 'semantic'].includes(String(route.query.view)) ? String(route.query.view) : 'trace')
+const activeTab = ref(['diagnosis', 'assertions', 'relations', 'semantic'].includes(String(route.query.view)) ? String(route.query.view) : 'trace')
 const semanticExecution = ref(''), semanticQuery = ref('')
 const semanticOptions = computed(() => (snapshot.value?.executions ?? []).filter(item =>
   `${item.case_key ?? ''} ${item.execution_id} ${item.status} ${statuses[item.status] ?? ''}`.toLowerCase().includes(semanticQuery.value)))
@@ -29,13 +33,15 @@ function filterSemanticExecutions(query: string) { semanticQuery.value = query.t
 const focusedFact = ref<TraceFact>(), factsElement = ref<HTMLDetailsElement>()
 const executionFilter = ref(''), pane = ref<'cases' | 'trace' | 'detail'>('trace'), unread = ref(0)
 const detailElement = ref<HTMLElement>()
-let authorization = '', controller: AbortController | undefined, generation = 0
+let authorization = '', controller: AbortController | undefined, generation = 0, readGeneration = 0
 const visible = computed(() => facts.value.filter(f => (!executionFilter.value || !f.event.execution_id || f.event.execution_id === executionFilter.value) && (!filter.value ||
   `${f.event.type} ${f.event.node ?? ''} ${f.event.execution_id ?? ''}`.includes(filter.value))))
 const currentExecution = computed(() => snapshot.value?.executions.find(e => e.execution_id === executionFilter.value))
+useGuideSelection(() => snapshot.value && (!route.params.runId || snapshot.value.run_id === String(route.params.runId)) ? executionFilter.value ? { kind: 'execution', id: executionFilter.value } : { kind: 'run', id: snapshot.value.run_id } : undefined)
 const detail = computed(() => facts.value.find(f => f.event.event_id === selected.value) ?? focusedFact.value)
 const references = computed(() => detail.value?.event.evidence_refs ?? [])
 const profile = computed(() => snapshot.value?.manifest?.fault_profile)
+const observedModes = computed(() => [...new Set(snapshot.value?.executions.map(e => e.timing?.gateway_mode).filter(Boolean))].map(m => m === 'offline_test_double' ? '离线受控模型' : m === 'real_provider' ? '真实模型' : '来源待核对').join('、') || '尚未观察执行来源')
 const offlineModel = computed(() => snapshot.value?.executions.some(e => e.timing?.gateway_mode === 'offline_test_double'))
 const injected = computed(() => snapshot.value?.executions.reduce((n,e) => n + (e.timing?.faults?.injected ?? 0), 0) ?? 0)
 const types: Record<string, string> = {
@@ -53,21 +59,24 @@ const types: Record<string, string> = {
 }
 function setTab(value: string) { activeTab.value = value; void router.replace({ query: { ...route.query, view: value === 'trace' ? undefined : value } }) }
 async function refreshSnapshot() {
-  const run = snapshot.value?.run_id; if (!run) return
-  try { const value = await evidenceGet<RunSnapshot>(`/runs/${run}/snapshot`, authorization); if (snapshot.value?.run_id === run) snapshot.value = value }
-  catch (e) { error.value = (e as Error).message }
+  const run = snapshot.value?.run_id, ticket = readGeneration; if (!run) return
+  try { const value = await evidenceGet<RunSnapshot>(`/runs/${run}/snapshot`, authorization); if (ticket === readGeneration && snapshot.value?.run_id === run) snapshot.value = value }
+  catch (e) { if (ticket === readGeneration) error.value = (e as Error).message }
 }
 function selectExecution(id: string) { executionFilter.value = id; pane.value = 'trace'; filter.value = ''; focusedFact.value = undefined; selected.value = (id ? facts.value.find(f => f.event.execution_id === id) : facts.value[0])?.event.event_id ?? '' }
 async function selectEvent(id: string) { selected.value = id; pane.value = 'detail'; await nextTick(); detailElement.value?.focus({ preventScroll: true }) }
 async function newEvents() { const last = visible.value.at(-1); if (last) { await selectEvent(last.event.event_id); document.getElementById(`trace-${last.event.event_id}`)?.scrollIntoView({ block: 'nearest' }) } unread.value = 0 }
 async function locate(id: string) {
   setTab('trace'); filter.value = ''; error.value = ''
+  const ticket = readGeneration, run = snapshot.value?.run_id
+  if (!run) return
   try {
-    focusedFact.value = facts.value.find(f => f.event.event_id === id) ?? checkedFact(await evidenceGet<TraceFact>(`/runs/${snapshot.value!.run_id}/events/${id}`, authorization), snapshot.value!.run_id)
-    selected.value = id
+    const found = facts.value.find(f => f.event.event_id === id) ?? checkedFact(await evidenceGet<TraceFact>(`/runs/${snapshot.value!.run_id}/events/${id}`, authorization), snapshot.value!.run_id)
+    if (ticket !== readGeneration || snapshot.value?.run_id !== run) return
+    focusedFact.value = found; selected.value = id
     executionFilter.value = focusedFact.value.event.execution_id ?? ''; pane.value = 'detail'
     await nextTick(); detailElement.value?.focus({ preventScroll: true })
-  } catch (e) { error.value = (e as Error).message }
+  } catch (e) { if (ticket === readGeneration) error.value = (e as Error).message }
 }
 function showSnapshot() { if (factsElement.value) { factsElement.value.open = true; factsElement.value.scrollIntoView({ behavior: 'smooth', block: 'nearest' }) } }
 function stop() { live.value = false; generation++; controller?.abort(); state.value = '已暂停' }
@@ -90,38 +99,45 @@ function accept(value: unknown) {
   if (!selected.value && (!executionFilter.value || !fact.event.execution_id || fact.event.execution_id === executionFilter.value)) selected.value = fact.event.event_id
 }
 async function page(replaceWindow = false) {
+  const ticket = readGeneration, run = snapshot.value!.run_id
   const result = await evidenceGet<EventPage>(`/runs/${snapshot.value!.run_id}/events?cursor=${encodeURIComponent(after.value)}&limit=100`, authorization)
+  if (ticket !== readGeneration || snapshot.value?.run_id !== run) return
   if (replaceWindow) { facts.value = []; selected.value = ''; focusedFact.value = undefined }
   result.items.forEach(accept); more.value = result.has_more
 }
 async function load(fromHead = false) {
-  stop(); busy.value = true; error.value = ''; state.value = '读取快照'
+  stop(); const ticket = ++readGeneration
+  busy.value = true; error.value = ''; state.value = '读取快照'
   snapshot.value = undefined; facts.value = []; selected.value = ''; focusedFact.value = undefined
   try {
     if (!/^[a-f0-9]{8}(-[a-f0-9]{4}){3}-[a-f0-9]{12}$/.test(runId.value.trim()))
       throw new Error('请输入有效的运行 UUID。')
-    authorization = workspace.authorization.value || basicHeader(username.value, password.value)
+    authorization = workspace.authorization.value
     const next = await evidenceGet<RunSnapshot>(`/runs/${runId.value.trim()}/snapshot`, authorization)
+    if (ticket !== readGeneration) return
     snapshot.value = next; facts.value = []; selected.value = ''; filter.value = ''; focusedFact.value = undefined
     const linkedExecution = String(route.query.execution ?? '')
     executionFilter.value = next.executions.find(item => item.execution_id === linkedExecution)?.execution_id ?? next.executions[0]?.execution_id ?? ''; unread.value = 0
     after.value = fromHead ? `v1:${next.run_id}:0:0` : next.tail_cursor
     await router.replace({ path: `/runs/${next.run_id}`, query: route.query })
-    await page(); state.value = fromHead ? '历史阅读' : '快照已载入'
+    if (ticket !== readGeneration) return
+    await page(); if (ticket !== readGeneration) return; state.value = fromHead ? '历史阅读' : '快照已载入'
     if (route.query.event && !fromHead) await locate(String(route.query.event))
     if (!fromHead && !more.value) void connect()
-  } catch (e) { error.value = (e as Error).message; state.value = '读取失败' }
-  finally { busy.value = false }
+  } catch (e) { if (ticket === readGeneration) { error.value = (e as Error).message; state.value = '读取失败' } }
+  finally { if (ticket === readGeneration) busy.value = false }
 }
 async function nextPage(replaceWindow = false) {
+  const ticket = readGeneration
   busy.value = true; error.value = ''
-  try { await page(replaceWindow) } catch (e) { error.value = (e as Error).message }
-  finally { busy.value = false }
+  try { await page(replaceWindow) } catch (e) { if (ticket === readGeneration) error.value = (e as Error).message }
+  finally { if (ticket === readGeneration) busy.value = false }
 }
 async function connect() {
   if (!snapshot.value || more.value) return
   stop(); live.value = true
   const current = generation
+  const targetRun = snapshot.value.run_id
   let retries = 0
   while (live.value && current === generation) {
     if (!navigator.onLine) {
@@ -144,7 +160,9 @@ async function connect() {
         if (frame.event === 'stream.reset') { reset = true; throw new Error('游标已不可续传，请重新载入快照。') }
       })
       if (ended) {
-        snapshot.value = await evidenceGet<RunSnapshot>(`/runs/${snapshot.value.run_id}/snapshot`, authorization)
+        const value = await evidenceGet<RunSnapshot>(`/runs/${targetRun}/snapshot`, authorization)
+        if (current !== generation || !live.value || snapshot.value?.run_id !== targetRun) return
+        snapshot.value = value
         live.value = false; state.value = '事件已同步'; break
       }
     } catch (e) {
@@ -159,47 +177,51 @@ async function connect() {
   }
 }
 async function download(reference: string) {
+  const ticket = readGeneration
   try {
     const [, id] = reference.split(':')
-    const response = await fetch(`/api/v1/runs/${snapshot.value!.run_id}/artifacts/${id}`, {
+    const response = await sessionFetch(`/api/v1/runs/${snapshot.value!.run_id}/artifacts/${id}`, {
       headers: { Authorization: authorization }, cache: 'no-store', signal: AbortSignal.timeout(15000),
     })
     if (!response.ok) throw new Error(`证据下载失败（HTTP ${response.status}）。`)
-    const url = URL.createObjectURL(await response.blob()), anchor = document.createElement('a')
+    const blob = await response.blob()
+    if (ticket !== readGeneration) return
+    const url = URL.createObjectURL(blob), anchor = document.createElement('a')
     anchor.href = url; anchor.download = `evidence-${id}.json`; anchor.click(); URL.revokeObjectURL(url)
-  } catch (e) { error.value = (e as Error).message }
+  } catch (e) { if (ticket === readGeneration) error.value = (e as Error).message }
 }
 function offline() { if (live.value) { state.value = '网络离线'; controller?.abort('offline') } }
 function online() { if (live.value) { state.value = '等待重连'; error.value = '' } }
 onMounted(() => { window.addEventListener('offline', offline); window.addEventListener('online', online); if (workspace.authorization.value && runId.value) void load() })
 watch(() => route.params.runId, value => { if (value && value !== runId.value) { stop(); runId.value = String(value); snapshot.value = undefined; if (workspace.authorization.value) void load() } })
-watch(workspace.authorization, (value, old) => { if (!value && old) { stop(); authorization = ''; snapshot.value = undefined; facts.value = []; password.value = '' } })
+watch(workspace.authorization, (value, old) => { if (value !== old) { stop(); readGeneration++; authorization = ''; snapshot.value = undefined; facts.value = []; focusedFact.value = undefined; selected.value = ''; error.value = ''; busy.value = false } })
+watch(() => route.query.view, value => { activeTab.value = ['diagnosis','assertions','relations','semantic'].includes(String(value)) ? String(value) : 'trace' })
 onBeforeUnmount(() => {
-  stop(); authorization = ''; password.value = ''
+  stop(); readGeneration++; authorization = ''
   window.removeEventListener('offline', offline); window.removeEventListener('online', online)
 })
 </script>
 
 <template>
+  <nav v-if="snapshot" class="run-reproduction" aria-label="运行复现"><span>当前查看原始运行记录，浏览不创建新执行。实际来源：{{ observedModes }}。</span><RouterLink :to="`/workbench?source=${snapshot.run_id}&action=rerun`">按原配置再次运行</RouterLink><RouterLink :to="`/workbench?source=${snapshot.run_id}&action=copy`">复制并修改</RouterLink></nav>
   <section class="evidence-page">
-    <div class="page-heading"><div><span class="eyebrow">AGENTCHAOS / EVALUATION</span>
-      <h1>运行证据</h1><p>从判定回到事实，定位每一次工具调用。<RouterLink to="/workbench">返回运行列表 →</RouterLink></p></div>
+    <div class="page-heading"><div><h1>运行证据</h1></div><RouterLink to="/workbench">返回运行列表 →</RouterLink>
       <ElTag :type="state === '实时连接' ? 'success' : state === '连接中断' || state === '读取失败' ? 'danger' : 'info'" role="status">{{ state }}</ElTag>
     </div>
-    <details v-if="!workspace.authorization.value" class="connection-panel" :open="!snapshot"><summary>运行与访问凭据<span>{{ snapshot ? `${snapshot.run_id.slice(0,8)} · 已载入` : '载入一个已有运行' }}</span></summary>
+    <details class="connection-panel" :open="!snapshot"><summary>选择运行<span>{{ snapshot ? `${snapshot.run_id.slice(0,8)} · 已载入` : '载入一个已有运行' }}</span></summary>
     <form class="evidence-access" @submit.prevent="load()">
       <label class="run-field">运行 UUID<ElInput v-model="runId" placeholder="粘贴运行标识" aria-label="运行 UUID" /></label>
-      <label>账号<ElInput v-model="username" autocomplete="username" aria-label="账号" /></label>
-      <label>密码<ElInput v-model="password" type="password" autocomplete="off" aria-label="密码" /></label>
+
+
       <ElButton type="primary" native-type="submit" :loading="busy">载入最近事件</ElButton>
-      <small>凭据仅保留在当前页面内存。浏览证据不会执行模型或预约工具。</small>
+
     </form>
     </details>
     <p v-if="error" class="evidence-error" role="alert">{{ error }}</p>
     <template v-if="snapshot">
       <div class="run-context-bar"><strong>{{ snapshot.run_id.slice(0,8) }}</strong><span>版本ID {{ snapshot.manifest?.target_version_id ?? '未记录' }}</span><span>{{ statuses[snapshot.status] ?? snapshot.status }}</span><span>{{ currentExecution?.case_key ?? '全部执行' }}</span><RouterLink :to="`/reports?run=${snapshot.run_id}`">缺陷与报告 →</RouterLink></div>
       <ExecutionControls :snapshot="snapshot" :authorization="authorization" :execution="executionFilter" :facts="facts" @refresh="refreshSnapshot" />
-      <aside v-if="profile" class="fault-profile" aria-label="冻结故障配置">
+      <aside v-if="profile && activeTab !== 'diagnosis'" class="fault-profile" aria-label="冻结故障配置">
         <div><strong>{{ profile.config.fault_type }} · {{ profile.config.trigger_stage }}</strong>
           <span>{{ profile.config.profile_key }} / 修订 {{ profile.config.revision }}</span></div>
         <p>目标 {{ profile.config.target_tool }} · 种子 {{ profile.config.seed }} · 每执行最多 {{ profile.config.max_triggers }} 次 · 快照已注入 {{ injected }} 次</p>
@@ -207,13 +229,14 @@ onBeforeUnmount(() => {
         <ElButton size="small" @click="setTab('trace'); filter = 'fault.'">只看故障</ElButton>
       </aside>
       <p v-if="offlineModel" class="offline-notice" role="note">离线模型复验：真实数据库、Redis和预约工具；本次不调用DeepSeek，不代表真实模型验收。</p>
-      <div class="evidence-summary">
+      <div v-if="activeTab !== 'diagnosis'" class="evidence-summary">
         <div><small>运行状态</small><strong>{{ snapshot.status }}</strong></div>
         <div><small>持久事件 · 快照时刻</small><strong>{{ snapshot.event_count }}</strong></div>
         <div><small>执行数量</small><strong>{{ snapshot.executions.length }}</strong></div>
         <div><small>待返回模型观察</small><strong>{{ snapshot.pending_model_observations }}</strong></div>
       </div>
-      <div class="evidence-tabs" role="tablist" aria-label="运行视图"><button role="tab" :aria-selected="activeTab === 'trace'" @click="setTab('trace')">调用轨迹</button><button role="tab" :aria-selected="activeTab === 'assertions'" @click="setTab('assertions')">判定结果</button><button v-if="snapshot.manifest?.metamorphic" role="tab" :aria-selected="activeTab === 'relations'" @click="setTab('relations')">变形对照</button><button role="tab" :aria-selected="activeTab === 'semantic'" @click="setTab('semantic')">AI辅助评价</button><span>证据先于结论</span></div>
+      <div class="evidence-tabs" role="tablist" aria-label="运行视图"><button role="tab" :aria-selected="activeTab === 'diagnosis'" @click="setTab('diagnosis'); if (!executionFilter) selectExecution(snapshot.executions[0]?.execution_id ?? '')">链路诊断</button><button role="tab" :aria-selected="activeTab === 'trace'" @click="setTab('trace')">调用轨迹</button><button role="tab" :aria-selected="activeTab === 'assertions'" @click="setTab('assertions')">判定结果</button><button v-if="snapshot.manifest?.metamorphic" role="tab" :aria-selected="activeTab === 'relations'" @click="setTab('relations')">变形对照</button><button role="tab" :aria-selected="activeTab === 'semantic'" @click="setTab('semantic')">AI辅助评价</button><span>证据先于结论</span></div>
+      <ChainDiagnostics v-if="activeTab === 'diagnosis'" :snapshot="snapshot" :facts="facts" :execution-id="executionFilter" :authorization="authorization" :connection="state" :more="more" :busy="busy" @execution="selectExecution" @locate="locate" @head="load(true)" @next="nextPage(facts.length >= 500)" @assertions="setTab('assertions')" @semantic="semanticExecution = executionFilter; setTab('semantic')" @download="download" />
       <AssertionsPanel v-if="activeTab === 'assertions'" :run-id="snapshot.run_id" :authorization="authorization" :execution-id="executionFilter" :executions="snapshot.executions" @locate="locate" @snapshot="showSnapshot" />
       <RelationsPanel v-if="activeTab === 'relations'" :run-id="snapshot.run_id" :authorization="authorization" @locate="locate" @snapshot="showSnapshot" />
       <div v-if="activeTab === 'semantic'">
@@ -278,9 +301,13 @@ onBeforeUnmount(() => {
         </section>
       </div>
       </div>
-      <details ref="factsElement" class="evidence-facts"><summary>执行快照与预算</summary><h3>业务查证</h3><p>这里显示执行时记录的SQL快照。inconclusive 表示未能形成确定结论；任务达成与可靠性判定分开核对。</p><template v-if="currentExecution"><div class="business-comparison"><section><h4>执行前</h4><pre aria-label="业务执行前快照">{{ JSON.stringify(currentExecution.before, null, 2) }}</pre></section><section><h4>执行后</h4><pre aria-label="业务执行后快照">{{ JSON.stringify(currentExecution.after, null, 2) }}</pre></section></div><ElButton v-for="fact in facts.filter(f => f.event.execution_id === executionFilter && ['execution.completed','execution.error','execution.cancelled'].includes(f.event.type))" :key="fact.event.event_id" size="small" @click="locate(fact.event.event_id)">定位执行结束事件</ElButton></template><details><summary>全部执行、预算与版本指纹</summary><pre>{{ JSON.stringify({ executions: snapshot.executions, budget: snapshot.budget, manifest_hash: snapshot.manifest_hash }, null, 2) }}</pre></details></details>
+      <details ref="factsElement" class="evidence-facts"><summary>执行快照与预算</summary><div class="heading-with-info"><h3>业务查证</h3><InfoHint label="SQL快照" text="执行时记录的SQL快照；证据不足不能作为确定结论。任务达成与可靠性判定分别核对。" /></div><template v-if="currentExecution"><div class="business-comparison"><section><h4>执行前</h4><pre aria-label="业务执行前快照">{{ JSON.stringify(currentExecution.before, null, 2) }}</pre></section><section><h4>执行后</h4><pre aria-label="业务执行后快照">{{ JSON.stringify(currentExecution.after, null, 2) }}</pre></section></div><ElButton v-for="fact in facts.filter(f => f.event.execution_id === executionFilter && ['execution.completed','execution.error','execution.cancelled'].includes(f.event.type))" :key="fact.event.event_id" size="small" @click="locate(fact.event.event_id)">定位执行结束事件</ElButton></template><details><summary>全部执行、预算与版本指纹</summary><pre>{{ JSON.stringify({ executions: snapshot.executions, budget: snapshot.budget, manifest_hash: snapshot.manifest_hash }, null, 2) }}</pre></details></details>
       <p class="evidence-hint">每个阅读窗口最多500条；下一窗口沿当前游标继续读取。刷新后重新载入持久记录，游标推进只依据完整事件。</p>
     </template>
-    <div v-else class="empty-state"><h3>从一个真实运行开始</h3><p>输入运行标识和所属账号，读取快照后连接持久事件流。</p></div>
+    <div v-else class="empty-state"><h3>从一个真实运行开始</h3><p>输入运行标识，使用当前平台身份读取快照和持久事件流。</p></div>
   </section>
 </template>
+
+<style scoped>
+.run-reproduction { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; margin-bottom: 20px; font-size: 13px; line-height: 1.8; }.run-reproduction span { color: var(--el-text-color-secondary); }.run-reproduction a { color: var(--el-color-primary); }
+</style>

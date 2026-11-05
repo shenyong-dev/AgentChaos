@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import InfoHint from './InfoHint.vue'
+import { sessionFetch } from '../api/session'
 import { computed, ref, watch, onBeforeUnmount } from 'vue'
 import { ElButton, ElInput, ElSelect, ElOption } from 'element-plus'
 import 'element-plus/es/components/button/style/css'
@@ -15,7 +17,7 @@ const latest = computed(() => data.value?.items.at(-1))
 const human = computed(() => data.value?.human_reviews.find(x => x.ai_result_hash === latest.value?.result_hash))
 const names: Record<string, string> = { supported: '有依据', contradicted: '与证据矛盾', insufficient: '证据不足', reasonable: '解释合理', unreasonable: '解释不合理', passed: 'AI认为可接受', failed: 'AI发现问题', inconclusive: 'AI不确定', error: '裁判错误' }
 async function api<T>(path: string, body?: unknown): Promise<T> {
-  const r = await fetch(`/api/v1/judging${path}`, { method: body ? 'POST' : 'GET', headers: { Authorization: props.authorization, ...(body ? { 'Content-Type': 'application/json' } : {}) }, body: body ? JSON.stringify(body) : undefined, cache: 'no-store', signal: AbortSignal.timeout(body ? 60000 : 20000) })
+  const r = await sessionFetch(`/api/v1/judging${path}`, { method: body ? 'POST' : 'GET', headers: { Authorization: props.authorization, ...(body ? { 'Content-Type': 'application/json' } : {}) }, body: body ? JSON.stringify(body) : undefined, cache: 'no-store', signal: AbortSignal.timeout(body ? 60000 : 20000) })
   const value = await r.json(); if (!r.ok) throw new Error(`${value.error?.message ?? '读取失败'}（HTTP ${r.status}）`); return value.data
 }
 async function load() {
@@ -40,11 +42,10 @@ onBeforeUnmount(() => { alive = false; revision++ })
 
 <template>
   <section class="semantic-panel" aria-label="语义辅助评价">
-    <div class="semantic-header"><h2>AI辅助评价</h2><ElButton :disabled="busy" @click="load">刷新AI记录</ElButton></div>
-    <p class="semantic-boundary">只评价回答的支持性和解释。客观规则、任务是否完成与SQL预约事实保持各自结论；AI通过不能代替它们。</p>
+    <div class="semantic-header"><div class="heading-with-info"><h2>AI辅助评价</h2><InfoHint label="评价范围" text="仅辅助评价回答支持性和解释；AI通过不能代替规则、任务是否完成与SQL事实，原结论分别保留。" /></div><ElButton :disabled="busy" @click="load">刷新AI记录</ElButton></div>
     <p v-if="error" role="alert" class="semantic-error">{{ error }}</p>
     <template v-if="data">
-      <p v-if="!latest">当前执行尚无AI辅助评价，浏览记录不会调用模型。</p>
+      <p v-if="!latest">暂无AI辅助评价。</p>
       <template v-if="latest"><h3>{{ names[latest.status] }}</h3><p v-if="latest.reason">{{ latest.reason }}</p><div class="semantic-columns"><article v-for="dimension in ['support', 'explanation'] as const" :key="dimension"><h4>{{ dimension === 'support' ? '回答支持性' : '解释合理性' }}</h4><template v-if="latest.assessment"><b>{{ names[latest.assessment[dimension].label] }}</b><small>模型自报把握 {{ latest.assessment[dimension].confidence }}，并非校准后的概率</small><p>{{ latest.assessment[dimension].reason }}</p><small>证据 {{ latest.assessment[dimension].evidence_refs.join('、') }}</small></template><p v-else>裁判未提供可用评分，须人工核对。</p></article></div><p v-if="latest.assessment?.suspected_cause">根因候选：{{ latest.assessment.suspected_cause }}</p><div v-if="human" class="semantic-human"><h4>人工复核（另存）</h4><p>{{ names[human.support] }} / {{ names[human.explanation] }}</p><p>{{ human.reviewer_username }}：{{ human.note }}</p></div><a v-else :href="`/semantic/${executionId}`">打开独立页面，用reviewer账号复核</a><details><summary>原始AI记录、消耗与版本</summary><pre>{{ JSON.stringify(data, null, 2) }}</pre></details></template>
       <div v-if="access?.role === 'operator'" class="semantic-action"><label>已完成分歧复核的校准批次<ElInput v-model="calibration" aria-label="已审核校准批次" placeholder="UUID，须与当前裁判版本一致" :disabled="busy" /></label><ElButton :disabled="busy || !access.judge_enabled || !calibration" @click="evaluate">请求AI辅助评价（付费）</ElButton><small v-if="!access.judge_enabled">当前裁判调用开关关闭。</small></div>
       <form v-if="access?.role === 'reviewer' && latest && !human" class="semantic-action" @submit.prevent="review"><label>回答支持性<ElSelect class="form-select" popper-class="form-select-dropdown" :fit-input-width="true" :empty-values="[null, undefined]" placeholder="请选择" v-model="support" aria-label="人工支持性"><ElOption disabled value="" data-value="" label="请选择" /><ElOption v-for="v in ['supported', 'contradicted', 'insufficient']" :key="v" :value="v" :data-value="v" :label="names[v]" /></ElSelect></label><label>解释合理性<ElSelect class="form-select" popper-class="form-select-dropdown" :fit-input-width="true" :empty-values="[null, undefined]" placeholder="请选择" v-model="explanation" aria-label="人工解释"><ElOption disabled value="" data-value="" label="请选择" /><ElOption v-for="v in ['reasonable', 'unreasonable', 'insufficient']" :key="v" :value="v" :data-value="v" :label="names[v]" /></ElSelect></label><label>复核依据<ElInput v-model="note" type="textarea" aria-label="复核依据" :disabled="busy" /></label><ElButton type="primary" native-type="submit" :disabled="busy || !support || !explanation || !note.trim()">保存独立人工复核</ElButton></form>

@@ -37,7 +37,9 @@ pytestmark = [
 
 @pytest.fixture(scope="module")
 def infrastructure():
-    settings = Settings()
+    settings = Settings().model_copy(
+        update={"allow_paid_model_calls": False, "interactive_local_unlimited": False}
+    )
     client = Redis.from_url(settings.redis_url, socket_timeout=15)
     with disposable_database("T17D") as engine:
         migrate(engine)
@@ -289,6 +291,13 @@ def test_api_requires_operator_and_rejects_client_scope_or_clock(fixture):
     app.dependency_overrides[get_booking_service] = lambda: BookingService(service.engine)
     with TestClient(app) as client:
         assert client.get("/api/v1/interactive/access").status_code == 401
+        assert client.get("/api/v1/interactive/sessions").status_code == 401
+        assert (
+            client.get(
+                "/api/v1/interactive/sessions", auth=("demo_reviewer", TEST_PASSWORD)
+            ).status_code
+            == 403
+        )
         assert (
             client.get(
                 "/api/v1/interactive/access", auth=("demo_reviewer", TEST_PASSWORD)
@@ -296,6 +305,11 @@ def test_api_requires_operator_and_rejects_client_scope_or_clock(fixture):
             == 403
         )
         auth = ("demo_operator", TEST_PASSWORD)
+        assert client.get("/api/v1/interactive/sessions", auth=auth).status_code == 200
+        assert (
+            client.get("/api/v1/interactive/sessions?q=" + "x" * 101, auth=auth).status_code == 400
+        )
+        assert client.get("/api/v1/interactive/sessions?cursor=-1", auth=auth).status_code == 400
         assert (
             client.get("/api/v1/interactive/access", auth=auth).json()["data"]["version_id"]
             == view["version_id"]
@@ -346,9 +360,8 @@ def test_closed_budget_still_replays_a_completed_request_without_new_call(fixtur
     assert replay["sql_observation"]["booking_count"] == 1 and len(gateway.calls) == before
 
 
-def test_old_session_version_is_rejected_and_metadata_is_not_rewritten(fixture):
-    service, _, create = fixture
-    view = create()
+def test_old_session_is_read_only_but_actions_rejected_without_rewriting_metadata(fixture):
+    service, gateway, view = preview(fixture)
     runtime = service.runtime(view["session_id"])
     key = runtime._key(view["session_id"])
     raw = service.redis.get(key)
@@ -356,13 +369,58 @@ def test_old_session_version_is_rejected_and_metadata_is_not_rewritten(fixture):
     metadata["config_hash"] = "0" * 64
     changed = json.dumps(metadata)
     service.redis.set(key, changed)
+    usage_key = f"ac:t17d:budget:{AUTHORIZATION}:agent:session:{view['session_id']}"
     try:
+        assert service.view(1, view["session_id"])["read_only"]
+        assert not service.view(1, view["session_id"])["usage_available"]
+        service.redis.hset(usage_key, mapping={"calls_started": 13, "charged_estimate": 30347})
+        historical = service.view(1, view["session_id"])
+        assert historical["usage_available"]
+        assert historical["usage"] == {"calls_started": 13, "charged_estimate": 30347}
+        calls = len(gateway.calls)
+        assert service.history(1, view["session_id"], 0, 10)["items"]
+        assert service.trace(1, view["session_id"], 0, 10)["items"]
+        assert service.view(1, view["session_id"])["pending_draft"] == view["pending_draft"]
+        assert service.receipt(1, view["session_id"], str(uuid4()))["status"] == "not_registered"
         with pytest.raises(AgentError) as error:
-            service.view(1, view["session_id"])
+            service.act(1, view["session_id"], message(view, "不应调用模型"), "message")
         assert error.value.code == "session_version_mismatch"
         assert service.redis.get(key).decode() == changed
+        assert len(gateway.calls) == calls
     finally:
         service.redis.set(key, raw)
+        service.redis.delete(usage_key)
+
+
+def test_records_discover_existing_sessions_search_fields_and_enforce_owner(fixture):
+    service, gateway, view = preview(fixture)
+    other = service.create(9999, {"request_id": str(uuid4()), "version_id": view["version_id"]})
+    try:
+
+        def all_records(user, query=""):
+            result, cursor = [], 0
+            for _ in range(200):
+                page = service.records(user, query, cursor)
+                result.extend(page["items"])
+                if page["next_cursor"] is None:
+                    return result
+                cursor = page["next_cursor"]
+            pytest.fail("Scoped test search did not terminate")
+
+        records = all_records(1)
+        row = next(r for r in records if r["session_id"] == view["session_id"])
+        assert row["fields"]["room_code"] == "A101" and row["booking_count"] == 0
+        assert row["sql_available"] and not row["read_only"]
+        assert not any(r["session_id"] == other["session_id"] for r in records)
+        assert any(r["session_id"] == view["session_id"] for r in all_records(1, "a101"))
+        assert all_records(1, view["session_id"])[0]["session_id"] == view["session_id"]
+        assert all_records(1, "no-such-booking-" + uuid4().hex) == []
+        assert not any(r["session_id"] == view["session_id"] for r in all_records(9999))
+        calls = len(gateway.calls)
+        service.history(1, view["session_id"], 0, 10)
+        assert len(gateway.calls) == calls
+    finally:
+        service.runtime(other["session_id"]).delete_test_session(9999, other["session_id"])
 
 
 def test_interaction_budget_missing_global_and_session_caps_and_unknown_retention(
@@ -432,6 +490,13 @@ def test_same_user_and_source_in_different_actual_database_cannot_read_session(f
         with pytest.raises(AgentError) as error:
             other.view(1, view["session_id"])
         assert error.value.status_code == 404
+        cursor = 0
+        while True:
+            page = other.records(1, view["session_id"], cursor)
+            assert not page["items"]
+            if page["next_cursor"] is None:
+                break
+            cursor = page["next_cursor"]
         new = other.create(1, {**body, "version_id": other.access()["version_id"]})
         assert new["session_id"] != view["session_id"] and new["scope_id"] != view["scope_id"]
         other.runtime(new["session_id"]).delete_test_session(1, new["session_id"])

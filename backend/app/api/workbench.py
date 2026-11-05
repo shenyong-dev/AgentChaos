@@ -9,7 +9,9 @@ from app.api.booking import get_booking_engine
 from app.api.cases import case_identity
 from app.core.config import get_settings
 from app.schemas.common import Envelope, ErrorEnvelope
+from app.schemas.workflow import CommitPlan, RunPlan
 from app.workbench.service import WorkbenchService
+from app.workbench.workflow import WorkflowService
 
 router = APIRouter(
     prefix="/api/v1/workbench",
@@ -25,6 +27,37 @@ def get_workbench_service():
 
 Service = Annotated[WorkbenchService, Depends(get_workbench_service)]
 Identity = Annotated[int, Depends(case_identity)]
+
+
+@lru_cache
+def get_workflow_service():
+    return WorkflowService(get_booking_engine(), get_settings())
+
+
+Workflow = Annotated[WorkflowService, Depends(get_workflow_service)]
+
+
+@router.post("/run-plans")
+async def preview_run(
+    body: RunPlan, request: Request, user: Identity, service: Workflow
+) -> Envelope[dict]:
+    return Envelope(data=await service.preview(user, body), request_id=request.state.request_id)
+
+
+@router.post("/run-plans/commit", status_code=201)
+async def commit_run(
+    body: CommitPlan, request: Request, user: Identity, service: Workflow
+) -> Envelope[dict]:
+    return Envelope(data=await service.commit(user, body), request_id=request.state.request_id)
+
+
+@router.get("/runs/{run_id}/reproduction")
+def reproduction(
+    run_id: str, request: Request, user: Identity, service: Workflow
+) -> Envelope[dict]:
+    return Envelope(data=service.source(user, run_id), request_id=request.state.request_id)
+
+
 Cursor = Annotated[int, Query(ge=0)]
 Limit = Annotated[int, Query(ge=1, le=50)]
 Search = Annotated[str, Query(max_length=80)]

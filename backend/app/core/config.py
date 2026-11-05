@@ -16,6 +16,8 @@ class Settings(BaseSettings):
     )
 
     app_env: Literal["development", "test", "production"] = "development"
+    session_idle_seconds: int = Field(default=1800, ge=60, le=3600)
+    session_absolute_seconds: int = Field(default=28800, ge=3600, le=86400)
     mysql_host: str = "127.0.0.1"
     mysql_port: int = Field(default=13306, ge=1, le=65535)
     mysql_database: str = "agentchaos"
@@ -41,7 +43,14 @@ class Settings(BaseSettings):
     agent_max_output_tokens: int = Field(default=1024, ge=1)
     casegen_max_output_tokens: int = Field(default=2048, ge=1)
     judge_max_output_tokens: int = Field(default=1024, ge=1)
+    copilot_model: str = "deepseek-flash"
+    copilot_thinking: Literal["disabled"] = "disabled"
+    copilot_max_output_tokens: int = Field(default=1536, ge=1, le=1536)
+    copilot_allow_paid_model_calls: bool = False
+    copilot_budget_authorization_id: str = ""
+    copilot_budget_usd: float = Field(default=0, ge=0, le=1, allow_inf_nan=False)
     allow_paid_model_calls: bool = False
+    interactive_local_unlimited: bool = False
     model_budget_authorization_id: str = ""
     agent_budget_usd: float = Field(default=0, ge=0, allow_inf_nan=False)
     casegen_budget_usd: float = Field(default=0, ge=0, allow_inf_nan=False)

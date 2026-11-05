@@ -120,7 +120,7 @@ class ReportService:
         RunService.owned_run(session, owner, session.get(TestRun, execution.run_id).run_uuid)
         return row, execution
 
-    def _snapshot(self, session, owner, identifier):
+    def _snapshot(self, session, owner, identifier, *, lock_events=True):
         run = RunService.owned_run(session, owner, identifier)
         if run.status not in {"completed", "failed", "cancelled"}:
             raise AgentError("report_not_terminal", "运行尚未结束，不能冻结报告或提前下结论。", 409)
@@ -163,7 +163,7 @@ class ReportService:
         )
         entries = []
         for execution in executions:
-            evidence = load_evidence(session, run, execution)
+            evidence = load_evidence(session, run, execution, lock_events=lock_events)
             content = execution.input_snapshot_json.get("content", {})
             entries.append(
                 {
@@ -292,8 +292,8 @@ class ReportService:
 
     def comparison(self, owner, left, right):
         with Session(self.engine) as session:
-            _, before, _ = self._snapshot(session, owner, left)
-            _, after, _ = self._snapshot(session, owner, right)
+            _, before, _ = self._snapshot(session, owner, left, lock_events=False)
+            _, after, _ = self._snapshot(session, owner, right, lock_events=False)
             return compare(before, after)
 
     def collect(self, owner, identifier):

@@ -46,10 +46,16 @@ Service = Annotated[JudgeService, Depends(get_judge_service)]
 
 
 def identity(
-    service: Service, credentials: Annotated[HTTPBasicCredentials | None, Depends(security)]
+    request: Request,
+    service: Service,
+    credentials: Annotated[HTTPBasicCredentials | None, Depends(security)],
 ):
     if credentials is None:
-        raise AgentError("judge_authentication_required", "请登录评价或审核账号。", 401)
+        if not request.cookies and not request.headers.get("x-ac-origin"):
+            raise AgentError("judge_authentication_required", "请登录评价或审核账号。", 401)
+        from app.auth.service import browser_identity
+
+        return browser_identity(request)
     return service.authenticate(credentials.username, credentials.password)
 
 

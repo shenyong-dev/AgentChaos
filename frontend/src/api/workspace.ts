@@ -1,24 +1,23 @@
-import { ref, shallowRef } from 'vue'
-import { basicHeader, evidenceGet } from './evidence'
+import { computed, ref, shallowRef } from 'vue'
+import { session, sessionFetch, loginSession, logoutSession, onSessionReset } from './session'
 import type { Overview, CaseRow } from '../types/workbench'
 
-// Shared only within this tab's JS memory. No storage, URL or browser credential persistence.
-const authorization = ref(''), overview = shallowRef<Overview>()
+// A view key, never a credential. Authentication is a server-side HttpOnly session.
+const authorization = computed(() => session.identity.value ? `session:${session.epoch.value}` : ''), overview = shallowRef<Overview>()
 const selection = ref<CaseRow[]>([])
 const pendingRun = shallowRef<Record<string, unknown>>()
 export const workspace = { authorization, overview, selection, pendingRun,
   async login(username: string, password: string) {
-    const header = basicHeader(username, password)
-    const result = await evidenceGet<Overview>('/workbench/overview', header)
-    authorization.value = header; overview.value = result; selection.value = []
+    await loginSession(username, password)
   },
-  logout() { authorization.value = ''; overview.value = undefined; selection.value = []; pendingRun.value = undefined },
+  logout: logoutSession,
 }
+onSessionReset(() => { overview.value = undefined; selection.value = []; pendingRun.value = undefined })
 
 export class WorkspaceHttpError extends Error { constructor(message: string, public status: number) { super(message) } }
 
 export async function workspacePost<T>(path: string, body: unknown, header = authorization.value): Promise<T> {
-  const response = await fetch(`/api/v1${path}`, { method: 'POST',
+  const response = await sessionFetch(`/api/v1${path}`, { method: 'POST',
     headers: { Authorization: header, 'Content-Type': 'application/json' },
     body: JSON.stringify(body), cache: 'no-store', signal: AbortSignal.timeout(30000) })
   const result = await response.json()

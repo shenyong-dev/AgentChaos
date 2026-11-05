@@ -1,0 +1,74 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "page": {
+      "enum": [
+        "workspace",
+        "targets",
+        "library",
+        "workbench",
+        "runs",
+        "interactive",
+        "cases",
+        "judging",
+        "semantic",
+        "reports",
+        "environment"
+      ],
+      "title": "Page",
+      "type": "string"
+    },
+    "catalog_hash": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Catalog Hash",
+      "type": "string"
+    },
+    "object_kind": {
+      "anyOf": [
+        {
+          "enum": [
+            "case",
+            "run",
+            "execution",
+            "version",
+            "generation",
+            "calibration",
+            "interaction"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Object Kind"
+    },
+    "object_id": {
+      "anyOf": [
+        {
+          "maxLength": 80,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Object Id"
+    },
+    "action_id": {
+      "pattern": "^[a-z]+[a-z.]{1,63}$",
+      "title": "Action Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "page",
+    "catalog_hash",
+    "action_id"
+  ],
+  "title": "GuideAction",
+  "type": "object"
+}

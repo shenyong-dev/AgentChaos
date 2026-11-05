@@ -1,14 +1,22 @@
 import { shallowRef } from 'vue'
 import { workspace } from './workspace'
+import { sessionFetch, onSessionReset } from './session'
 import type { PendingInteraction } from '../types/interactive'
 
 // In-flight message text remains in memory. Only a request identifier is saved in this tab.
 export const interactionPending = shallowRef<PendingInteraction>()
+onSessionReset(() => {
+  interactionPending.value = undefined
+  try {
+    sessionStorage.removeItem('agentchaos.interactive.create')
+    for (const key of Object.keys(sessionStorage)) if (key.startsWith('agentchaos.interactive.receipt.')) sessionStorage.removeItem(key)
+  } catch { /* Receipt storage is optional. */ }
+})
 export class InteractionError extends Error {
   constructor(message: string, public status: number, public code: string) { super(message) }
 }
 export async function interactionRequest<T>(path: string, body?: unknown): Promise<T> {
-  const response = await fetch('/api/v1/interactive' + path, {
+  const response = await sessionFetch('/api/v1/interactive' + path, {
     method: body === undefined ? 'GET' : 'POST', cache: 'no-store',
     headers: { Authorization: workspace.authorization.value, ...(body === undefined ? {} : { 'Content-Type': 'application/json' }) },
     body: body === undefined ? undefined : JSON.stringify(body),

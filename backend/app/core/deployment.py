@@ -12,6 +12,7 @@ from app.core.config import PROJECT_ROOT
 def source_fingerprint():
     paths = sorted((PROJECT_ROOT / "backend/app").rglob("*.py"))
     paths += sorted((PROJECT_ROOT / "backend/app").rglob("*.txt"))
+    paths += sorted((PROJECT_ROOT / "backend/app").rglob("*.json"))
     paths += sorted((PROJECT_ROOT / "backend/alembic/versions").glob("*.py"))
     paths += [PROJECT_ROOT / "backend/uv.lock"]
     return canonical_hash(

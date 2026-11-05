@@ -88,12 +88,12 @@ class AgentRuntime:
             configurable["deadline"] = time.monotonic() + 120
         return {"configurable": configurable, "recursion_limit": 64}
 
-    def _metadata(self, user_id, session_id):
+    def _metadata(self, user_id, session_id, *, read_previous_version=False):
         raw = self.redis.get(self._key(session_id))
         metadata = json.loads(raw) if raw else None
         if metadata is None or metadata["owner_id"] != user_id:
             raise AgentError("session_not_found", "当前身份下找不到该会话。", 404)
-        if metadata["config_hash"] != self.manifest["config_hash"]:
+        if not read_previous_version and metadata["config_hash"] != self.manifest["config_hash"]:
             raise AgentError("session_version_mismatch", "会话绑定的不可变版本与当前代码不符。")
         return metadata
 
@@ -147,14 +147,16 @@ class AgentRuntime:
             "last_error": None,
         }
 
-    def snapshot(self, user_id, session_id):
-        metadata = self._metadata(user_id, session_id)
+    def snapshot(self, user_id, session_id, *, read_previous_version=False):
+        metadata = self._metadata(user_id, session_id, read_previous_version=read_previous_version)
         snapshot = self.graph.get_state(self._config(session_id))
         state = snapshot.values or self.initial(metadata)
         return metadata, state, snapshot
 
-    def view(self, user_id, session_id):
-        metadata, state, snapshot = self.snapshot(user_id, session_id)
+    def view(self, user_id, session_id, *, read_previous_version=False):
+        metadata, state, snapshot = self.snapshot(
+            user_id, session_id, read_previous_version=read_previous_version
+        )
         result = state.get("business_result")
         if result and result.get("request_key"):
             try:
@@ -202,8 +204,10 @@ class AgentRuntime:
             "next_nodes": list(snapshot.next),
         }
 
-    def history(self, user_id, session_id, cursor=0, limit=20):
-        _, state, _ = self.snapshot(user_id, session_id)
+    def history(self, user_id, session_id, cursor=0, limit=20, *, read_previous_version=False):
+        _, state, _ = self.snapshot(
+            user_id, session_id, read_previous_version=read_previous_version
+        )
         messages = [
             message
             for message in state["messages"]

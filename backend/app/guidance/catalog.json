@@ -1,0 +1,378 @@
+{
+  "version": "platform-guide-20261104-v1",
+  "boundary": "确定性基础指引；无模型调用，不执行业务操作，不分析未封存样本或保留集。",
+  "pages": {
+    "workspace": {
+      "title": "项目概览",
+      "purpose": "从运行概况找到实验起点，区分已保存、执行中和实际测试结果。",
+      "prerequisites": [
+        "使用有权限的平台账号；概览不是可靠性总分。"
+      ],
+      "inputs": "无需先准备模型密钥；已有运行会按当前账号显示。",
+      "outputs": "运行数量、状态和最近记录；没有记录时不表示系统测试过。",
+      "empty": "没有运行时先了解开发用例，再检查环境。",
+      "actions": [
+        "page.library",
+        "page.environment",
+        "page.workbench"
+      ],
+      "roles": [
+        "operator"
+      ]
+    },
+    "targets": {
+      "title": "对象与版本",
+      "purpose": "核对被测对象的冻结源码、Prompt、知识和执行配置。",
+      "prerequisites": [
+        "创建运行需要与当前执行环境兼容的版本。"
+      ],
+      "inputs": "选择版本；比较时核对同一用例、模式、时钟、故障和限制。",
+      "outputs": "版本清单与配置哈希；版本号增大不证明智能体更可靠。",
+      "empty": "没有兼容版本时先核对环境与源码，不能随意选择旧版本运行。",
+      "actions": [
+        "page.library",
+        "page.environment"
+      ],
+      "roles": [
+        "operator"
+      ]
+    },
+    "library": {
+      "title": "开发用例库",
+      "purpose": "先弄清每条用例测什么，再把明确修订带入未提交的运行配置。",
+      "prerequisites": [
+        "这里只展示已审核开发用例；校准和保留集不进入调优入口。"
+      ],
+      "inputs": "选择一条用例，查看前置条件、完整轮次、独立预期及断言。",
+      "outputs": "确定性的用例说明和原始修订；尚未创建或执行测试。",
+      "empty": "没有用例时核对筛选条件和审核状态，不把待审候选当正式用例。",
+      "actions": [
+        "case.read",
+        "case.prepare",
+        "page.cases",
+        "page.environment"
+      ],
+      "roles": [
+        "operator"
+      ]
+    },
+    "workbench": {
+      "title": "测试工作台",
+      "purpose": "配置运行并跟进状态，排队、执行完成和业务成功分别核对。",
+      "prerequisites": [
+        "Worker负责执行，Dispatcher负责投递；真实模型还需要独立预算和开关。"
+      ],
+      "inputs": "选择已审核用例、兼容版本、故障、种子、次数、时限与预算。",
+      "outputs": "不可变运行配置和执行记录；新建前必须预检并显式确认。",
+      "empty": "没有运行时从开发用例开始；阻塞时保留配置并查看环境原因。",
+      "actions": [
+        "page.library",
+        "page.environment"
+      ],
+      "roles": [
+        "operator"
+      ]
+    },
+    "runs": {
+      "title": "运行证据",
+      "purpose": "沿输入、工具、SQL和断言核对发生了什么，不只看最终回复。",
+      "prerequisites": [
+        "载入当前账号可访问的运行ID；缺少证据不等于0笔预约。"
+      ],
+      "inputs": "选择某次执行或事件；查看规则判定、实际副作用和来源模式。",
+      "outputs": "运行快照、事件、规则断言、实际故障与受限AI辅助记录。",
+      "empty": "没有载入运行时返回工作台；等待输入要走原确认流程。",
+      "actions": [
+        "run.trace",
+        "run.assertions",
+        "run.semantic",
+        "page.workbench",
+        "environment.worker"
+      ],
+      "roles": [
+        "operator"
+      ]
+    },
+    "interactive": {
+      "title": "预约Agent调试",
+      "purpose": "与被测业务Agent对话，核对字段来源、草稿确认和真实预约。",
+      "prerequisites": [
+        "这是真实业务Agent入口；基础使用指引不是替你预约的助手。"
+      ],
+      "inputs": "创建或载入自有会话；给出日期、时段、人数和场地，逐轮核对草稿。",
+      "outputs": "完整HTTP轮次、字段来源、工具回执和当前业务快照，不是假token流。",
+      "empty": "条件未就绪时先检查环境；结果未知先查原请求，不重复发送新操作。",
+      "actions": [
+        "page.environment",
+        "page.library",
+        "page.workbench"
+      ],
+      "roles": [
+        "operator"
+      ]
+    },
+    "cases": {
+      "title": "AI生成与审核",
+      "purpose": "生成候选后检查格式、语义和重复，再由有权限的人明确审核。",
+      "prerequisites": [
+        "生成是付费操作；候选不是已通过的测试用例。"
+      ],
+      "inputs": "操作者选择生成目标；审核者查看候选、理由和验证问题。",
+      "outputs": "保留原输出、有限修复和逐条审核记录；批准修订才进入开发库。",
+      "empty": "没有批次时可先阅读开发用例；基础指引不启动生成或替人批准。",
+      "actions": [
+        "page.library",
+        "page.environment"
+      ],
+      "roles": [
+        "operator",
+        "reviewer"
+      ]
+    },
+    "judging": {
+      "title": "辅助评价与校准",
+      "purpose": "先独立标注并封存，再比较裁判结果与分歧；原标签不被覆盖。",
+      "prerequisites": [
+        "人工标注未封存前，指引只说明操作和通用判据，不分析样本或建议答案。"
+      ],
+      "inputs": "审核者按页面实际证据逐条标注；没有证据可选证据不足。",
+      "outputs": "原人工标签、AI结果、分歧和另存复核；一致率不是通用准确率。",
+      "empty": "没有批次时不能填造UUID；原T17B按受限人工辅助保留。",
+      "actions": [
+        "page.semantic",
+        "page.environment"
+      ],
+      "roles": [
+        "operator",
+        "reviewer"
+      ]
+    },
+    "semantic": {
+      "title": "执行AI辅助评价",
+      "purpose": "只评价回答支持性与解释合理性，业务成败仍核对规则和SQL。",
+      "prerequisites": [
+        "真实裁判调用需要相同裁判版本的有效校准、独立预算和开关。"
+      ],
+      "inputs": "载入有权限的执行ID；缺少AI记录时先看执行证据，而不是反复点击刷新。",
+      "outputs": "已有评价及人工复核；刷新只读取记录，不会自动调用模型。",
+      "empty": "尚无AI评价是未调用的状态，不等于评价通过或功能损坏。",
+      "actions": [
+        "run.trace",
+        "page.judging",
+        "page.environment"
+      ],
+      "roles": [
+        "operator",
+        "reviewer"
+      ]
+    },
+    "reports": {
+      "title": "缺陷与报告",
+      "purpose": "将实际失败、复核、条件比较和导出连起来，核对结论依据。",
+      "prerequisites": [
+        "报告需要实际运行；等待或未完成不能直接确认修复。"
+      ],
+      "inputs": "选择失败记录、复核结论、关联版本或两次要比较的运行。",
+      "outputs": "缺陷记录、条件差异和证据报告；不能因新版本名称就标已修复。",
+      "empty": "没有缺陷时先看实际执行；没有运行时从开发用例开始。",
+      "actions": [
+        "page.workbench",
+        "page.library",
+        "page.targets"
+      ],
+      "roles": [
+        "operator"
+      ]
+    },
+    "environment": {
+      "title": "工程环境",
+      "purpose": "分别检查基础服务、真实消费者、调度器和模型角色条件。",
+      "prerequisites": [
+        "连接成功不等于模型可用；管理器记录不代替Worker回执。"
+      ],
+      "inputs": "点击重新检测，核对时间、阻塞项、队列/源码/数据库绑定和角色预算。",
+      "outputs": "有有效期的只读观察；加载失败、未检测和过期不能标为正常。",
+      "empty": "API不可达仍可读基础指引；按本机已核验命令手动处理，页面不执行Shell。",
+      "actions": [
+        "environment.worker",
+        "page.library",
+        "page.workbench"
+      ],
+      "roles": [
+        "operator",
+        "reviewer"
+      ]
+    }
+  },
+  "actions": {
+    "page.workspace": {
+      "label": "查看项目概览",
+      "path": "/workspace",
+      "roles": [
+        "operator"
+      ],
+      "public": false,
+      "object_kind": null
+    },
+    "page.targets": {
+      "label": "查看对象与版本",
+      "path": "/targets",
+      "roles": [
+        "operator"
+      ],
+      "public": false,
+      "object_kind": null
+    },
+    "page.library": {
+      "label": "查看开发用例库",
+      "path": "/library",
+      "roles": [
+        "operator"
+      ],
+      "public": false,
+      "object_kind": null
+    },
+    "page.workbench": {
+      "label": "查看测试工作台",
+      "path": "/workbench",
+      "roles": [
+        "operator"
+      ],
+      "public": false,
+      "object_kind": null
+    },
+    "page.interactive": {
+      "label": "查看预约Agent调试",
+      "path": "/interactive",
+      "roles": [
+        "operator"
+      ],
+      "public": false,
+      "object_kind": null
+    },
+    "page.cases": {
+      "label": "查看AI生成与审核",
+      "path": "/cases",
+      "roles": [
+        "operator",
+        "reviewer"
+      ],
+      "public": false,
+      "object_kind": null
+    },
+    "page.judging": {
+      "label": "查看辅助评价与校准",
+      "path": "/judging",
+      "roles": [
+        "operator",
+        "reviewer"
+      ],
+      "public": false,
+      "object_kind": null
+    },
+    "page.semantic": {
+      "label": "查看执行AI辅助评价",
+      "path": "/semantic",
+      "roles": [
+        "operator",
+        "reviewer"
+      ],
+      "public": false,
+      "object_kind": null
+    },
+    "page.reports": {
+      "label": "查看缺陷与报告",
+      "path": "/reports",
+      "roles": [
+        "operator"
+      ],
+      "public": false,
+      "object_kind": null
+    },
+    "page.environment": {
+      "label": "查看工程环境",
+      "path": "/environment",
+      "roles": [
+        "operator",
+        "reviewer"
+      ],
+      "public": true,
+      "object_kind": null
+    },
+    "environment.worker": {
+      "label": "查看Worker与调度器检查",
+      "path": "/environment",
+      "hash": "#worker-operations",
+      "roles": [
+        "operator",
+        "reviewer"
+      ],
+      "public": true,
+      "object_kind": null
+    },
+    "case.read": {
+      "label": "查看所选用例说明",
+      "path": "/library",
+      "query_key": "guide_case",
+      "roles": [
+        "operator"
+      ],
+      "object_kind": "case"
+    },
+    "case.prepare": {
+      "label": "带入运行配置（不提交）",
+      "path": "/library",
+      "query_key": "prepare_case",
+      "roles": [
+        "operator"
+      ],
+      "object_kind": "case"
+    },
+    "run.trace": {
+      "label": "定位执行轨迹与输入处理",
+      "path": "/runs",
+      "view": "trace",
+      "roles": [
+        "operator"
+      ],
+      "object_kind": "run_or_execution",
+      "hash": "#execution-controls"
+    },
+    "run.assertions": {
+      "label": "核对规则与SQL证据",
+      "path": "/runs",
+      "view": "assertions",
+      "roles": [
+        "operator"
+      ],
+      "object_kind": "run_or_execution"
+    },
+    "run.semantic": {
+      "label": "查看已有AI辅助记录",
+      "path": "/runs",
+      "view": "semantic",
+      "roles": [
+        "operator"
+      ],
+      "object_kind": "run_or_execution"
+    }
+  },
+  "terms": {
+    "用例": "包含输入轮次、前置条件和预期检查的测试场景；候选需审核才能作为开发用例。",
+    "修订": "同一用例的一份固定内容。复制或运行必须说明具体修订，不能静默换输入或预期。",
+    "运行与执行": "一次运行冻结一组配置；其中每条用例的每次重复是独立执行，数量不能混用。",
+    "断言": "根据已声明规则核对工具、状态或SQL证据；只证明对应条件，不是总体智能评分。",
+    "业务事实与平台状态": "排队、运行中、取消、超时是执行状态；预约是否真实发生须查看工具和SQL。",
+    "证据不足": "已有材料不足以支持结论；没有SQL证据不能当作0条预约。",
+    "Worker与Dispatcher": "Worker消费并执行任务；Dispatcher扫描SQL待执行记录并投递，两者都需要检查。",
+    "租约": "当前执行者的有时限占用凭证；超时不代表未知工具提交可以随意重放。",
+    "幂等与原回执": "结果未知时用同一个请求标识查证；重新生成标识可能引发重复副作用。",
+    "预检与排队期限": "预检短期有效，提交再次检查；仅排队仍未执行，过期不能当作新任务补跑。",
+    "预算与调用开关": "角色额度、单次限制和开关共同约束付费；页面跳转和帮助不自动开启预算。",
+    "真实模型与离线控制": "真实调用、明确离线流程控制、历史回看分别标记；来源不同不混为同一成绩。",
+    "开发/校准/保留集": "开发集用于调试；独立校准用于对照判断；冻结保留集不能进入开发助手调优。",
+    "封存": "将原人工标注或实验条件固定并留存哈希；事后助手意见只能另存，不能冒充原标签。",
+    "AI辅助评价": "只供人工参考回答是否有支持、解释是否合理；不能代替SQL、任务目标和规则判定。",
+    "配置哈希与复现": "哈希用于核对固定配置；条件相同也不保证模型逐字输出一致，复制修改需列明差异。"
+  }
+}

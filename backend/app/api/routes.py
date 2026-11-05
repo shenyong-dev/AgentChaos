@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, Request, Response
 from app import __version__
 from app.core.config import Settings, get_settings
 from app.core.model_probe import historical_observation
+from app.interactive.budget import local_unlimited
 from app.schemas.common import Envelope
 from app.schemas.health import HealthReport, ModelRoleConfig, PublicConfig
 from app.schemas.readiness import ReadinessReport
@@ -53,6 +54,7 @@ def public_config(request: Request, settings: SettingsDependency) -> Envelope[Pu
             if historical_observation(settings)
             else "not_probed",
             paid_calls_enabled=settings.allow_paid_model_calls,
+            interactive_budget_unlimited=local_unlimited(settings),
             run_concurrency=settings.run_concurrency,
             executor_paid_calls_enabled=settings.executor_allow_paid_model_calls,
             executor_agent_budget_usd=settings.executor_agent_budget_usd,

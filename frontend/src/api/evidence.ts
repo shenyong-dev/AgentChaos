@@ -1,4 +1,5 @@
 import type { TraceFact } from '../types/evidence'
+import { sessionFetch, expireSession } from './session'
 
 export function basicHeader(username: string, password: string) {
   const bytes = new TextEncoder().encode(`${username}:${password}`)
@@ -6,10 +7,13 @@ export function basicHeader(username: string, password: string) {
 }
 
 export async function evidenceGet<T>(path: string, authorization: string, signal?: AbortSignal): Promise<T> {
-  const response = await fetch(`/api/v1${path}`, {
+  const response = await sessionFetch(`/api/v1${path}`, {
     headers: { Authorization: authorization }, cache: 'no-store', signal: signal ?? AbortSignal.timeout(15000),
   })
-  if (!response.ok) throw new Error(`读取失败（HTTP ${response.status}），请核对账号、运行归属和游标。`)
+  if (!response.ok) {
+    const body = await response.json().catch(() => undefined)
+    throw new Error(`${body?.error?.message ?? '读取失败，请核对运行归属和游标。'}（HTTP ${response.status}）`)
+  }
   const body = await response.json()
   if (!body || !('data' in body)) throw new Error('证据响应格式不正确。')
   return body.data as T
@@ -68,7 +72,7 @@ export async function streamEvidence(run: string, cursor: string, authorization:
   resetWatchdog()
   let reader: ReadableStreamDefaultReader<Uint8Array> | undefined
   try {
-    const response = await fetch(`/api/v1/runs/${run}/events/stream`, {
+    const response = await sessionFetch(`/api/v1/runs/${run}/events/stream`, {
       headers: { Authorization: authorization, 'Last-Event-ID': cursor, Accept: 'text/event-stream' },
       signal: controller.signal, cache: 'no-store',
     })
@@ -81,7 +85,14 @@ export async function streamEvidence(run: string, cursor: string, authorization:
       const chunk = await reader.read()
       if (chunk.done) break
       resetWatchdog()
-      for (const frame of parser.push(decoder.decode(chunk.value, { stream: true }))) apply(frame)
+      for (const frame of parser.push(decoder.decode(chunk.value, { stream: true }))) {
+        if (frame.event === 'session.expired') {
+          const code = JSON.parse(frame.data).code
+          if (code === 'session_unavailable') throw new Error('登录会话服务暂不可用，实时连接已停止。')
+          expireSession(); controller.abort(); return
+        }
+        apply(frame)
+      }
     }
     // A truncated last frame intentionally does not advance the cursor.
   } finally {

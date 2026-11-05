@@ -8,11 +8,23 @@ export interface CaseRow {
   id: number; case_key: string; revision: number; family_key: string; category: string
   split: string; content_hash: string; turns: number; review_status: string
   knowledge_profile: string; default_knowledge_compatible: boolean
+  guidance?: { title: string; risk: string; status: 'available' | 'partial' | 'unavailable'; guide_hash?: string }
 }
+export interface CaseGuide {
+  policy: string; policy_hash: string; guide_hash: string; case_revision_id: number; case_key: string; revision: number; content_hash: string
+  title: string; risk: string; reviewed_reason: string | null; status: 'available' | 'partial'; missing: string[]; provenance: string
+  prerequisites: { fixture: string; reference_clock: string; knowledge_profile: string; default_knowledge_compatible: boolean; initial_state: Record<string, unknown> | null; fault_note: string | null }
+  turns: { number: number; user: string }[]
+  expected: { task_goal: Record<string, unknown> | null; active_booking_counts: number[] | null; permitted_booking_facts: Record<string, unknown>[] | null; manual_checks: string[]; retrieval_review: Record<string, unknown> | null; boundary: string }
+  assertions: { type: string; title: string; meaning: string; evidence: string; parameters: Record<string, unknown>; documented: boolean }[]
+  run_steps: string[]
+}
+export interface CaseDetail { case_revision_id: number; dsl: Record<string, unknown>; content_hash: string; guidance: CaseGuide }
 export interface RunRow {
   id: number; run_id: string; status: string; target_version_id: number; created_at: string
   executions: number; event_count: number; summary: Record<string, unknown> | null
   manifest_hash: string; fault: string | null
+  observed_modes?: string[]; declared_gateway_mode?: string | null
 }
 export interface Overview {
   identity: { username: string; role: string }

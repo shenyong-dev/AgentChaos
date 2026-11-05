@@ -1,17 +1,23 @@
 """Free, credential-safe readiness observations. No reservations or model calls."""
 
 import asyncio
+import json
+import re
+import time
 from datetime import UTC, datetime, timedelta
+from itertools import islice
 
 from alembic.config import Config
 from alembic.script import ScriptDirectory
 from celery import Celery
 from redis import Redis
-from sqlalchemy import inspect, select, text
+from sqlalchemy import func, inspect, select, text
 
 from app.agents.budget import AgentBudget
 from app.cases.budget import AUTHORIZATION as CASEGEN_AUTHORIZATION
 from app.cases.budget import GenerationBudget
+from app.copilot.budget import CopilotBudget
+from app.copilot.budget import authorized as copilot_authorized
 from app.core.config import PROJECT_ROOT
 from app.core.deployment import (
     database_binding,
@@ -28,9 +34,10 @@ from app.executors.service import RunService
 from app.interactive.budget import AUTHORIZATION as INTERACTIVE_AUTHORIZATION
 from app.interactive.budget import InteractionBudget
 from app.interactive.budget import authorized as interactive_authorized
+from app.interactive.budget import local_unlimited as interactive_local_unlimited
 from app.judging.budget import AUTHORIZATION as LEGACY_JUDGE_AUTHORIZATION
 from app.judging.budget import PROTOCOL_AUTHORIZATION, JudgeBudget
-from app.models import Base, Target, TargetVersion
+from app.models import Base, Target, TargetVersion, TestExecution
 from app.schemas.readiness import OperationReadiness, ReadinessCheck, ReadinessReport
 from app.services.health import collect_health
 
@@ -138,8 +145,24 @@ def worker_check(settings):
     try:
         expected_binding = database_binding(settings)
         expected_source = source_fingerprint()
+        engine = probe_engine(settings)
+        try:
+            with engine.connect() as connection:
+                active_leases = connection.scalar(
+                    select(func.count())
+                    .select_from(TestExecution)
+                    .where(
+                        TestExecution.status == "running",
+                        TestExecution.lease_until > func.utc_timestamp(6),
+                    )
+                )
+        except Exception:
+            active_leases = None
+        finally:
+            engine.dispose()
         replies = app.control.broadcast("agentchaos_readiness", reply=True, timeout=2)
-        seen, matching = 0, 0
+        seen, matching, active, capacity = 0, 0, 0, 0
+        modes = set()
         for envelope in replies or []:
             for value in envelope.values():
                 if not isinstance(value, dict) or value.get("protocol") != "T17C-1":
@@ -153,6 +176,15 @@ def worker_check(settings):
                     and settings.executor_queue in value.get("queues", [])
                 ):
                     matching += 1
+                    modes.add(value.get("gateway_mode", "unobserved"))
+                    active += (
+                        value.get("active", 0) if isinstance(value.get("active", 0), int) else 0
+                    )
+                    capacity += (
+                        value.get("pool_size", 0)
+                        if isinstance(value.get("pool_size", 0), int)
+                        else 0
+                    )
         return observation(
             "worker",
             "Worker 与执行队列",
@@ -164,6 +196,19 @@ def worker_check(settings):
             "核对已启动Worker的源码、数据库、执行配置与队列；无回执不等于已证明进程停止。",
             responders=seen,
             matching_workers=matching,
+            active_executions=active,
+            observed_slots=capacity,
+            capacity_full=True
+            if capacity and active >= capacity
+            else active_leases >= settings.run_concurrency
+            if active_leases is not None
+            else None,
+            active_database_leases=active_leases,
+            observed_mode=next(iter(modes))
+            if len(modes) == 1
+            else "mixed"
+            if modes
+            else "unobserved",
         )
     except Exception:
         return observation(
@@ -176,6 +221,141 @@ def worker_check(settings):
         )
     finally:
         app.close()
+
+
+def dispatcher_check(settings):
+    client = Redis.from_url(settings.redis_url, socket_connect_timeout=2, socket_timeout=2)
+    try:
+        expected = (
+            source_fingerprint(),
+            database_binding(settings),
+            execution_fingerprint(settings),
+            settings.executor_queue,
+        )
+        matching, seen = 0, 0
+        for key in islice(
+            client.scan_iter(settings.executor_namespace + ":dispatcher:presence:*", count=50), 100
+        ):
+            raw = client.get(key)
+            if not raw:
+                continue
+            try:
+                value = json.loads(raw)
+                if value.get("protocol") != "T17H-1":
+                    continue
+                seen += 1
+                identity = tuple(
+                    value.get(k)
+                    for k in ("source_hash", "database_binding", "execution_hash", "queue")
+                )
+                last = (
+                    datetime.fromisoformat(value["last_scan"]) if value.get("last_scan") else None
+                )
+                age = (datetime.now(UTC) - last).total_seconds() if last else None
+                if (
+                    identity == expected
+                    and value.get("scan_ok") is True
+                    and age is not None
+                    and 0 <= age < 15
+                    and client.ttl(key) > 0
+                ):
+                    matching += 1
+            except (TypeError, ValueError, KeyError):
+                continue
+        return observation(
+            "dispatcher",
+            "任务调度器",
+            "ready" if matching else "blocked",
+            "dispatcher_matches" if matching else "dispatcher_no_matching_scan",
+            "收到匹配环境的近期成功扫描。"
+            if matching
+            else "没有匹配环境的近期成功扫描；调度器可能未运行、配置不匹配或扫描失败。",
+            "在项目根目录手动运行 powershell -File scripts/workers.ps1 -Action start；"
+            "再重新检测。状态/日志用 -Action status 或 logs。",
+            responders=seen,
+            matching_dispatchers=matching,
+        )
+    except Exception:
+        return observation(
+            "dispatcher",
+            "任务调度器",
+            "unknown",
+            "dispatcher_probe_failed",
+            "无法核对调度器，未推定正常。",
+            "核对数据库、Redis及本机Worker启动状态；本页不会启动服务。",
+        )
+    finally:
+        client.close()
+
+
+def manager_check(settings):
+    """An operations receipt is an observation, never proof of a live consumer."""
+    try:
+        expected = {
+            "source": source_fingerprint(),
+            "database": database_binding(settings),
+            "execution": execution_fingerprint(settings),
+            "queue": settings.executor_queue,
+        }
+        records = []
+        for path in islice((PROJECT_ROOT / ".local/workers").glob("*/state.json"), 50):
+            try:
+                value = json.loads(path.read_bytes())
+                if value.get("schema") == "T17H-1" and value.get("binding") == expected:
+                    records.append(value)
+            except (OSError, ValueError):
+                continue
+        if not records:
+            return observation(
+                "worker_manager",
+                "本机执行服务管理",
+                "unknown",
+                "worker_manager_unobserved",
+                "未发现匹配环境的本机管理记录；远端部署需按其运维入口确认。",
+                "本机可用 scripts/workers.ps1 的 start / stop / status / logs；本页不会执行。",
+                source="configuration",
+                phase="unobserved",
+            )
+        value = max(records, key=lambda r: r.get("heartbeat", 0))
+        phase = value.get("phase", "unknown")
+        age = time.time() - value.get("heartbeat", 0)
+        fresh = 0 <= age < 15
+        message = {
+            "starting": "后台服务正在启动，仍需等待实际匹配回执。",
+            "restarting": "后台服务正在按退避策略重启。",
+            "running": "管理器近期报告后台进程运行；是否可执行仍以Worker和调度器实时观察为准。",
+            "stopped": "此环境的本机管理入口已主动停止后台服务。",
+            "failed": "后台服务达到重启上限或出现持续故障，需人工查看状态/日志。",
+            "stopping": "已请求停止后台服务，等待实际结束。",
+        }.get(phase, "本机管理状态未确认，请查看状态/日志。")
+        if value.get("desired") == "running" and not fresh:
+            phase, message = "stale", "本机管理器回执已过期，不能推断容器仍受监督。"
+        return observation(
+            "worker_manager",
+            "本机执行服务管理",
+            "blocked" if phase in ("stopped", "failed", "stopping") else "unknown",
+            "worker_manager_" + phase,
+            message,
+            "在项目根目录手动执行 scripts/workers.ps1 -Action status 或 logs；查看原因后处理。",
+            source="configuration",
+            phase=phase,
+            supervisor_recent=fresh,
+            managed_profile=value.get("profile")
+            if isinstance(value.get("profile"), str)
+            and re.fullmatch(r"[a-z][a-z0-9-]{0,39}", value["profile"])
+            else None,
+        )
+    except Exception:
+        return observation(
+            "worker_manager",
+            "本机执行服务管理",
+            "unknown",
+            "worker_manager_probe_failed",
+            "本机管理记录不可核对。",
+            "先核对数据库与本机服务状态。",
+            source="configuration",
+            phase="unknown",
+        )
 
 
 def budget_checks(settings):
@@ -193,16 +373,22 @@ def budget_checks(settings):
             s.allow_paid_model_calls,
             interactive_authorized(s)
             if s.model_budget_authorization_id == INTERACTIVE_AUTHORIZATION
+            or interactive_local_unlimited(s)
             else s.model_budget_authorization_id == "T04-20261025-agent-1"
             and 0 < s.agent_budget_usd <= 1,
             InteractionBudget(client, s, "readiness").key
             if s.model_budget_authorization_id == INTERACTIVE_AUTHORIZATION
+            or interactive_local_unlimited(s)
             else AgentBudget(client, s).key,
             s.agent_model,
             s.agent_thinking,
             s.agent_max_output_tokens,
-            int(s.agent_budget_usd * 1_000_000),
-            120 if s.model_budget_authorization_id == INTERACTIVE_AUTHORIZATION else 400,
+            -1 if interactive_local_unlimited(s) else int(s.agent_budget_usd * 1_000_000),
+            None
+            if interactive_local_unlimited(s)
+            else 120
+            if s.model_budget_authorization_id == INTERACTIVE_AUTHORIZATION
+            else 400,
             4096,
         ),
         (
@@ -254,6 +440,19 @@ def budget_checks(settings):
             int(s.judge_budget_usd * 1_000_000) if judge_finite else -1,
             12 if judge_finite else None,
             1536 if judge_finite else 2048,
+        ),
+        (
+            "copilot",
+            "平台助手服务",
+            s.copilot_allow_paid_model_calls,
+            copilot_authorized(s),
+            CopilotBudget(client, s, "readiness").key,
+            s.copilot_model,
+            s.copilot_thinking,
+            s.copilot_max_output_tokens,
+            int(s.copilot_budget_usd * 1_000_000),
+            60,
+            1536,
         ),
     ]
     results = []
@@ -383,13 +582,13 @@ def operations(checks):
             "interactive",
             "预约Agent交互调试",
             agent + ["interactive_budget"],
-            "真实会话绑定独立实验范围；调用还需登录、版本、T17D预算与确认。",
+            "真实会话绑定独立范围；调用还需登录、版本、交互授权与确认。",
             "/interactive",
         ),
         (
             "batch",
             "批量真实测试",
-            agent + ["worker", "executor_budget"],
+            agent + ["worker", "dispatcher", "executor_budget"],
             "预检不创建或投递运行，所选用例/版本与每run额度由服务端再次核验。",
             "/workspace",
         ),
@@ -410,15 +609,15 @@ def operations(checks):
         (
             "copilot",
             "平台AI助手",
-            ["copilot"],
-            "规划于T17E，当前没有可调用助手服务。",
+            common + ["redis", "credential", "copilot"],
+            "打开全局测试助手后显式提问；浏览指南不调用模型，不依赖Worker。",
             "/environment",
         ),
     ]
     result = []
     for key, label, required, note, destination in definitions:
-        blockers = [name for name in required if by_id[name].status != "ready"]
-        states = {by_id[name].status for name in blockers}
+        blockers = [name for name in required if name not in by_id or by_id[name].status != "ready"]
+        states = {by_id[name].status if name in by_id else "unknown" for name in blockers}
         status = (
             "not_available"
             if "not_available" in states
@@ -511,6 +710,22 @@ async def collect_readiness(settings):
     checks.extend(database)
     checks.extend(budgets)
     checks.append(worker)
+    checks.append(
+        await guarded(
+            mysql_ready and redis_ready,
+            dispatcher_check,
+            observation(
+                "dispatcher",
+                "任务调度器",
+                "unknown",
+                "dispatcher_probe_skipped",
+                "依赖不可达，未核对调度器。",
+                "先处理数据库和Redis连接。",
+            ),
+        )
+    )
+    if mysql_ready:
+        checks.append(await asyncio.to_thread(manager_check, settings))
     has_key = bool(settings.deepseek_api_key.get_secret_value())
     checks.append(
         observation(
@@ -521,17 +736,6 @@ async def collect_readiness(settings):
             "本地凭据存在；没有实时调用模型。" if has_key else "模型凭据未配置。",
             "由维护者在本地配置；不要在页面、聊天或Git中粘贴密钥。",
             source="configuration",
-        )
-    )
-    checks.append(
-        observation(
-            "copilot",
-            "平台助手服务",
-            "not_available",
-            "copilot_not_implemented",
-            "当前尚未实现，计划T17E。",
-            "先完成环境引导与预约调试窗口。",
-            source="not_implemented",
         )
     )
     now = datetime.now(UTC)

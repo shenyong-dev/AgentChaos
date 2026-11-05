@@ -17,16 +17,14 @@ from app.executors.control import TERMINAL
 from app.models import Artifact, AssertionResult, TestExecution, TestRun, TraceEvent
 
 
-def load_evidence(session, run, execution, *, closing=False):
+def load_evidence(session, run, execution, *, closing=False, lock_events=True):
     events, issues, errors, cache = [], [], [], {}
-    rows = list(
-        session.scalars(
-            select(TraceEvent)
-            .where(TraceEvent.execution_id == execution.id)
-            .order_by(TraceEvent.run_seq_no)
-            .with_for_update()
-        )
+    query = (
+        select(TraceEvent)
+        .where(TraceEvent.execution_id == execution.id)
+        .order_by(TraceEvent.run_seq_no)
     )
+    rows = list(session.scalars(query.with_for_update() if lock_events else query))
     for attempt in {r.attempt_no for r in rows}:
         numbers = [r.seq_no for r in rows if r.attempt_no == attempt]
         if numbers != list(range(1, max(numbers) + 1)):

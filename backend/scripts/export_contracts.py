@@ -9,9 +9,11 @@ from app.schemas.assertions import Assertion
 from app.schemas.cases import Candidate, CandidateReview
 from app.schemas.contracts import TestCaseDraft
 from app.schemas.contracts import TraceEvent as LegacyTraceEvent
+from app.schemas.copilot import CopilotAnswer, CopilotAsk, CopilotCreate
 from app.schemas.datasets import DatasetReview
 from app.schemas.events import TraceEvent
 from app.schemas.faults import FaultSpec
+from app.schemas.guidance import GuideAction, GuideContext
 from app.schemas.interactive import InteractionCreate
 from app.schemas.judging import (
     DisagreementReview,
@@ -22,12 +24,20 @@ from app.schemas.judging import (
 )
 from app.schemas.metamorphic import RelationCatalog
 from app.schemas.readiness import ReadinessReport
+from app.schemas.workflow import CommitPlan, RunPlan
 from app.tools.booking import booking_tool_contracts
 
 destination = Path(__file__).resolve().parents[2] / "docs" / "architecture"
 destination.mkdir(parents=True, exist_ok=True)
 for name, schema in (
     ("openapi.json", app.openapi()),
+    ("guidance-context.schema.json", GuideContext.model_json_schema()),
+    ("guidance-action.schema.json", GuideAction.model_json_schema()),
+    ("copilot-create.schema.json", CopilotCreate.model_json_schema()),
+    ("copilot-ask.schema.json", CopilotAsk.model_json_schema()),
+    ("copilot-answer.schema.json", CopilotAnswer.model_json_schema()),
+    ("run-plan.schema.json", RunPlan.model_json_schema()),
+    ("run-commit.schema.json", CommitPlan.model_json_schema()),
     ("readiness-v1.schema.json", ReadinessReport.model_json_schema()),
     ("interactive-create.schema.json", InteractionCreate.model_json_schema()),
     ("test-case.schema.json", TestCaseDraft.model_json_schema()),

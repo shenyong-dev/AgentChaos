@@ -1,0 +1,98 @@
+{
+  "$defs": {
+    "CitedStatement": {
+      "additionalProperties": false,
+      "properties": {
+        "text": {
+          "maxLength": 600,
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        },
+        "citations": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 5,
+          "minItems": 1,
+          "title": "Citations",
+          "type": "array"
+        }
+      },
+      "required": [
+        "text",
+        "citations"
+      ],
+      "title": "CitedStatement",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "facts": {
+      "items": {
+        "$ref": "#/$defs/CitedStatement"
+      },
+      "maxItems": 5,
+      "title": "Facts",
+      "type": "array"
+    },
+    "possible_causes": {
+      "items": {
+        "$ref": "#/$defs/CitedStatement"
+      },
+      "maxItems": 4,
+      "title": "Possible Causes",
+      "type": "array"
+    },
+    "missing_evidence": {
+      "items": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "$ref": "#/$defs/CitedStatement"
+          }
+        ]
+      },
+      "maxItems": 5,
+      "title": "Missing Evidence",
+      "type": "array"
+    },
+    "next_steps": {
+      "items": {
+        "$ref": "#/$defs/CitedStatement"
+      },
+      "maxItems": 4,
+      "title": "Next Steps",
+      "type": "array"
+    },
+    "action_ids": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 4,
+      "title": "Action Ids",
+      "type": "array"
+    },
+    "certainty": {
+      "enum": [
+        "limited",
+        "insufficient"
+      ],
+      "title": "Certainty",
+      "type": "string"
+    }
+  },
+  "required": [
+    "facts",
+    "possible_causes",
+    "missing_evidence",
+    "next_steps",
+    "action_ids",
+    "certainty"
+  ],
+  "title": "CopilotAnswer",
+  "type": "object"
+}

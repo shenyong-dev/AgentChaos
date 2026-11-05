@@ -210,6 +210,7 @@ def test_range_daypart_inherits_only_within_explicit_source_range(text, quote, v
 def test_t10_approval_is_separate_and_retains_closed_switch():
     s = Settings().model_copy(
         update={
+            "executor_allow_paid_model_calls": False,
             "executor_budget_authorization_id": METAMORPHIC_AUTHORIZATION,
             "executor_agent_budget_unlimited": True,
         }

@@ -154,10 +154,107 @@ class RunService:
             self.settings, retriever, ToolRegistry(BookingService(self.engine), retriever)
         )
 
-    def create(self, user_id, values):
+    def configuration_matches(self, manifest, *, cache=None):
+        """Do not claim/mutate older work merely to discover it cannot run here.
+
+        Explicit frozen knowledge variants remain supported: rebuild against
+        those exact IDs, never substitute the default knowledge revision.
+        """
+        cache = {} if cache is None else cache
+        try:
+            identifiers = tuple(d["id"] for d in manifest["target"]["retrieval"]["documents"])
+            if identifiers not in cache:
+                cache[identifiers] = RunService(
+                    self.engine, self.settings, document_ids=list(identifiers)
+                ).current_manifest()["config_hash"]
+            return cache[identifiers] == manifest["target"]["config_hash"] and manifest[
+                "roles"
+            ] == role_configs(self.settings)
+        except (AgentError, KeyError, TypeError):
+            return False
+
+    def can_consume(self, execution_uuid):
+        with Session(self.engine) as session:
+            manifest = session.scalar(
+                select(TestRun.manifest_json)
+                .join(TestExecution)
+                .where(TestExecution.execution_uuid == str(execution_uuid))
+            )
+        return bool(manifest and self.configuration_matches(manifest))
+
+    def prepare_configuration(self, session, user_id, values, request_hash):
+        version = session.get(TargetVersion, values.target_version_id)
+        target = session.get(Target, version.target_id) if version else None
+        if (
+            not target
+            or target.owner_id != user_id
+            or target.adapter_type != "langgraph_booking"
+            or target.archived_at is not None
+        ):
+            raise AgentError("target_version_not_found", "当前身份下找不到预约对象版本。", 404)
+        current = self.current_manifest()
+        if version.config_hash != current["config_hash"]:
+            raise AgentError(
+                "target_version_unavailable", "当前Worker代码不能执行该历史版本。", 409
+            )
+        rows = list(
+            session.scalars(
+                select(TestCase)
+                .where(TestCase.id.in_(values.case_revision_ids))
+                .order_by(TestCase.id)
+            )
+        )
+        if len(rows) != len(values.case_revision_ids) or any(
+            r.review_status != "approved" for r in rows
+        ):
+            raise AgentError("case_not_approved", "运行只接受存在且已审核的用例修订。", 409)
+        cases = [frozen_case(row) for row in rows]
+        s = self.settings
+        if not s.executor_agent_budget_unlimited and values.budgets.agent_microusd > int(
+            s.executor_agent_budget_usd * 1_000_000
+        ):
+            raise AgentError("run_budget_not_authorized", "运行预算超出本地已批准上限。", 403)
+        limits = values.limits.model_dump()
+        limits["concurrency"] = min(limits["concurrency"], s.run_concurrency)
+        manifest = {
+            "schema": "run-v1",
+            "executor": "T05-v1",
+            "trace_schema": "1.3",
+            "request_hash": request_hash,
+            "target_version_id": version.id,
+            "target": version.model_config_json,
+            "cases": cases,
+            "limits": limits,
+            "repetitions": values.repetitions,
+            "seed": values.seed,
+            "fault_profile": frozen_profile(session, values.fault_profile_id)
+            if values.fault_profile_id
+            else None,
+            "roles": role_configs(s),
+            "pricing": {**PRICING, "verified_on": "2026-10-26"},
+            "evaluation": evaluator_manifest(),
+        }
+        relations = frozen_relations(cases)
+        if relations:
+            manifest["metamorphic"] = relations
+            from app.metamorphic.engine import comparator_manifest
+
+            manifest["relation_comparator"] = comparator_manifest()
+        budget = {
+            "currency": "USD",
+            "unit": "microUSD",
+            "authorization_id": s.executor_budget_authorization_id,
+            "authorization_unlimited": s.executor_agent_budget_unlimited,
+            **values.budgets.model_dump(),
+        }
+        return version, manifest, budget, cases
+
+    def create(self, user_id, values, *, workflow=None):
         request = values.model_dump(mode="json")
         if request.get("fault_profile_id") is None:
             request.pop("fault_profile_id", None)  # Preserve old control-run idempotency hashes.
+        if workflow:
+            request["workflow"] = workflow
         request_hash = canonical_hash(request)
         with advisory(self.engine, "create:" + str(values.request_id)) as connection:
             with Session(connection) as session, session.begin():
@@ -172,73 +269,11 @@ class RunService:
                             "run_request_conflict", "相同请求标识的运行配置不同。", 409
                         )
                     return existing.run_uuid
-                version = session.get(TargetVersion, values.target_version_id)
-                target = session.get(Target, version.target_id) if version else None
-                if (
-                    not target
-                    or target.owner_id != user_id
-                    or target.adapter_type != "langgraph_booking"
-                ):
-                    raise AgentError(
-                        "target_version_not_found", "当前身份下找不到预约对象版本。", 404
-                    )
-                current = self.current_manifest()
-                if version.config_hash != current["config_hash"]:
-                    raise AgentError(
-                        "target_version_unavailable", "当前Worker代码不能执行该历史版本。", 409
-                    )
-                rows = list(
-                    session.scalars(
-                        select(TestCase)
-                        .where(TestCase.id.in_(values.case_revision_ids))
-                        .order_by(TestCase.id)
-                    )
+                version, manifest, budget, cases = self.prepare_configuration(
+                    session, user_id, values, request_hash
                 )
-                if len(rows) != len(values.case_revision_ids) or any(
-                    r.review_status != "approved" for r in rows
-                ):
-                    raise AgentError("case_not_approved", "运行只接受存在且已审核的用例修订。", 409)
-                cases = [frozen_case(row) for row in rows]
-                s = self.settings
-                if not s.executor_agent_budget_unlimited and values.budgets.agent_microusd > int(
-                    s.executor_agent_budget_usd * 1_000_000
-                ):
-                    raise AgentError(
-                        "run_budget_not_authorized", "运行预算超出本地已批准上限。", 403
-                    )
-                limits = values.limits.model_dump()
-                limits["concurrency"] = min(limits["concurrency"], s.run_concurrency)
-                manifest = {
-                    "schema": "run-v1",
-                    "executor": "T05-v1",
-                    "trace_schema": "1.3",
-                    "request_hash": request_hash,
-                    "target_version_id": version.id,
-                    "target": version.model_config_json,
-                    "cases": cases,
-                    "limits": limits,
-                    "repetitions": values.repetitions,
-                    "seed": values.seed,
-                    "fault_profile": frozen_profile(session, values.fault_profile_id)
-                    if values.fault_profile_id
-                    else None,
-                    "roles": role_configs(s),
-                    "pricing": {**PRICING, "verified_on": "2026-10-26"},
-                    "evaluation": evaluator_manifest(),
-                }
-                relations = frozen_relations(cases)
-                if relations:
-                    manifest["metamorphic"] = relations
-                    from app.metamorphic.engine import comparator_manifest
-
-                    manifest["relation_comparator"] = comparator_manifest()
-                budget = {
-                    "currency": "USD",
-                    "unit": "microUSD",
-                    "authorization_id": s.executor_budget_authorization_id,
-                    "authorization_unlimited": s.executor_agent_budget_unlimited,
-                    **values.budgets.model_dump(),
-                }
+                if workflow:
+                    manifest["workflow"] = workflow
                 run = TestRun(
                     run_uuid=str(values.request_id),
                     created_by=user_id,
@@ -268,13 +303,22 @@ class RunService:
                                     "steps": 0,
                                     "revision": 0,
                                     "dispatch_count": 0,
+                                    **(
+                                        {"queue_deadline": workflow["queue_deadline"]}
+                                        if workflow
+                                        else {}
+                                    ),
                                 },
                                 usage_json={"tickets": {}, "roles": {}},
                                 attempt_history_json=[],
                             )
                         )
                 append_event(
-                    session, run, None, {"kind": "run.created", "status": "queued"}, settings=s
+                    session,
+                    run,
+                    None,
+                    {"kind": "run.created", "status": "queued"},
+                    settings=self.settings,
                 )
                 return run.run_uuid
 
@@ -418,7 +462,7 @@ class RunService:
                 )
             )
 
-    def expire_deadlines(self):
+    def expire_deadlines(self, *, compatible_only=False):
         """Waiting for input releases capacity, but does not suspend wall-clock limits."""
         with Session(self.engine) as session:
             ids = list(
@@ -432,11 +476,17 @@ class RunService:
                     .order_by(TestExecution.id)
                 )
             )
-        expired = 0
+        expired, compatibility = 0, {}
         for identifier in ids:
             with Session(self.engine) as session, session.begin():
                 run, e = locked_pair(session, identifier)
-                deadline = (e.timing_json or {}).get("deadline")
+                if compatible_only and not self.configuration_matches(
+                    run.manifest_json, cache=compatibility
+                ):
+                    continue
+                deadline = (e.timing_json or {}).get("deadline") or (e.timing_json or {}).get(
+                    "queue_deadline"
+                )
                 now = database_now(session)
                 if (
                     run.status not in ("queued", "running")
@@ -566,7 +616,8 @@ class RunService:
                     }
                     return None
                 timing = dict(e.timing_json or {})
-                if timing.get("deadline") and now >= datetime.fromisoformat(timing["deadline"]):
+                deadline = timing.get("deadline") or timing.get("queue_deadline")
+                if deadline and now >= datetime.fromisoformat(deadline):
                     e.status, e.error_json = (
                         "error",
                         {"category": "limit", "code": "execution_timeout"},
