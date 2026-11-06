@@ -39,7 +39,7 @@
 - [规则断言Schema](assertion.schema.json)：当前声明式类型；[原用例DSL1.0 Schema](test-case-v1.0.schema.json)保留。
 - [故障配置 JSON Schema](fault-profile.schema.json)：F01—F04的阶段、工具、种子和触发限制。
 - [预约工具契约](booking-tools.schema.json)：从T03输入输出及静态策略导出；直接HTTP接口以OpenAPI为准，模型工具不接收confirmed/身份/scope/时钟。
-- [Agent六工具](agent-tools.schema.json)：T04实际ToolRegistry输入，另含有引文的字段提取和规则检索；执行与来源边界见[Agent说明](agent.md)。
+- [Agent工具登记](agent-tools.schema.json)：当前ToolRegistry输入，含字段提取、规则检索、预约草稿、人数变更和撤销确认；执行与来源边界见[Agent说明](agent.md)。
 
 生成命令：在 `backend` 执行 `uv run --locked python scripts/export_contracts.py`。生成过程不调用模型、不连接数据库。修改契约时同步 schema、示例、消费者与版本记录。
 

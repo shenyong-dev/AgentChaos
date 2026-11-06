@@ -220,7 +220,8 @@ class InteractionService:
                 result["sql_observation"] = {
                     "available": True,
                     "observed_at": datetime.now(UTC).isoformat(),
-                    "booking_count": len(bookings),
+                    "booking_count": sum(b.status == "confirmed" for b in bookings),
+                    "booking_record_count": len(bookings),
                     "bookings": [
                         {
                             "booking_id": b.booking_uuid,
@@ -257,6 +258,77 @@ class InteractionService:
             except Exception:
                 result["request_lookup"] = {"status": "unknown", "commit_state": "unknown"}
         return result
+
+    def upgrade(self, user_id, session_id, body):
+        """Explicit compatibility adoption keeps old checkpoints and owned bookings."""
+        runtime = self.runtime(session_id)
+        key = runtime._key(session_id)
+        lock = self.redis.lock(key + ":operation", timeout=60, blocking_timeout=0)
+        if not lock.acquire(blocking=False):
+            raise AgentError("session_busy", "当前会话有请求在处理，请先查回执。")
+        try:
+            metadata, state, snapshot = runtime.snapshot(
+                user_id, session_id, read_previous_version=True
+            )
+            if metadata["config_hash"] == runtime.manifest["config_hash"]:
+                return self.view(user_id, session_id)
+            if runtime.version_id is None:
+                raise AgentError("agent_version_not_registered", "当前源码版本尚未登记。", 503)
+            if metadata["revision"] != body["expected_revision"]:
+                raise AgentError("session_revision_conflict", "会话已变化，请重新读取。")
+            current_budget = InteractionBudget(self.redis, self.settings, session_id)
+            legacy_keys = [
+                f"{namespace}:budget:{authorization}:agent:session:{session_id}"
+                for namespace, authorization in (
+                    ("ac:t17d", AUTHORIZATION),
+                    ("ac:local:interactive", LOCAL_AUTHORIZATION),
+                )
+            ]
+            if any(
+                key != current_budget.session_key and self.redis.exists(key) for key in legacy_keys
+            ):
+                raise AgentError(
+                    "session_budget_binding_changed",
+                    "原会话使用不同预算授权，升级不能转移额度。请保留原记录并新建会话。",
+                    409,
+                )
+            if (
+                self.redis.exists(key + ":lock")
+                or self.redis.exists(key + ":pending")
+                or state.get("unknown_submission")
+                or (snapshot.next and not snapshot.interrupts)
+            ):
+                raise AgentError("session_busy", "原请求或失败节点尚未查清，不能升级会话。")
+            # Ownership is checked above. Scope, actor, clock, history and usage are
+            # retained; previous metadata/checkpoint remain available for auditing.
+            original = {"metadata": metadata, "checkpoint": snapshot.config}
+            self.redis.set(key + ":upgrade:" + body["request_id"], json.dumps(original), nx=True)
+            runtime.booking.revoke_pending_drafts(runtime.registry.context(state))
+            updates = {
+                "version_id": runtime.version_id,
+                "pending_draft": None,
+                "grant": None,
+                "confirmation_state": "idle",
+                "confirmation_revision": state.get("confirmation_revision", 0) + 1,
+                "candidate_rooms": [],
+                "last_error": None,
+            }
+            if snapshot.values:
+                runtime.graph.update_state(
+                    runtime._config(session_id), {**state, **updates}, as_node="model"
+                )
+            updated = {
+                **metadata,
+                "config_hash": runtime.manifest["config_hash"],
+                "version_id": runtime.version_id,
+                "revision": metadata["revision"] + 1,
+                "last_error": None,
+            }
+            self.redis.set(key, json.dumps(updated, ensure_ascii=False))
+        finally:
+            if lock.owned():
+                lock.release()
+        return self.view(user_id, session_id)
 
     def records(self, user_id, query="", cursor=0):
         """Incremental discovery of existing metadata, confined to this database and owner.

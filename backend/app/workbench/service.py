@@ -129,15 +129,20 @@ class WorkbenchService:
                 "current_config_hash": current,
             }
 
-    def cases(self, owner, *, cursor=0, limit=20, query="", category=None):
+    def cases(self, owner, *, cursor=0, limit=20, query="", category=None, order="oldest"):
         with Session(self.engine) as session:
             self._identity(session, owner)
-            statement = self._cases(session).where(TestCase.id > cursor)
+            statement = self._cases(session)
+            if cursor:
+                statement = statement.where(
+                    TestCase.id < cursor if order == "newest" else TestCase.id > cursor
+                )
             if query:
                 statement = statement.where(TestCase.case_key.contains(query, autoescape=True))
             if category:
                 statement = statement.where(TestCase.category == category)
-            rows = list(session.scalars(statement.order_by(TestCase.id).limit(limit + 1)))
+            ordering = TestCase.id.desc() if order == "newest" else TestCase.id.asc()
+            rows = list(session.scalars(statement.order_by(ordering).limit(limit + 1)))
             return {
                 "items": [
                     {

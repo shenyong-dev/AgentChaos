@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import InfoHint from '../components/InfoHint.vue'
+import DefectWorkflow from '../components/DefectWorkflow.vue'
 import { useGuideSelection } from '../guidance'
 import { useCopilotComparison } from '../copilot'
 import { sessionFetch } from '../api/session'
@@ -12,10 +13,10 @@ import { workspace, workspacePost } from '../api/workspace'
 import { evidenceGet } from '../api/evidence'
 import { statuses } from '../types/workbench'
 import type { Page, RunRow, VersionRow } from '../types/workbench'
-import type { Defect, ReportExport, RunComparison, RunReport } from '../types/reports'
+import type { Defect, ReportExport, RunComparison, RunReport, VerificationAssessment } from '../types/reports'
 
 const route = useRoute(), router = useRouter()
-const view = ref(String(route.query.tab ?? 'report'))
+const view = ref(String(route.query.tab ?? (route.query.defect ? 'defects' : 'report')))
 const selectedRun = ref(String(route.query.run ?? '')), rightRun = ref('')
 const runs = ref<RunRow[]>([]), versions = ref<VersionRow[]>([])
 const report = ref<RunReport>(), comparison = ref<RunComparison>(), exports = ref<ReportExport[]>([])
@@ -26,6 +27,8 @@ const selectedDefect = ref<Defect>(), busy = ref(false), error = ref(''), notice
 const reviewOpen = ref(false), decision = ref('confirmed'), severity = ref('medium'), note = ref(''), attestation = ref(false)
 const fixedVersion = ref<number>(), verificationRun = ref(''), verificationReport = ref<RunReport>(), verificationExecution = ref('')
 const previewReview = ref<Record<string, unknown>>(), expiresHours = ref(24)
+const assessment = ref<VerificationAssessment>(), assessmentBusy = ref(false), assessmentError = ref('')
+let assessmentSequence = 0, defectSequence = 0, verificationSequence = 0
 const exportPending = ref(false)
 const exportRequests = new Map<string, { request_id: string; expires_hours: number }>()
 let epoch = 0, searchSequence = 0
@@ -35,7 +38,7 @@ const offline = computed(() => report.value?.executions.some(item => item.gatewa
 const missingKnowledge = computed(() => report.value?.knowledge.some(item => !item.available))
 const metricNames: Record<string,string> = { booking_count:'有效预约数量', booking_matches:'预约字段匹配', tool_called:'工具调用', result_agrees:'回复与业务结果一致' }
 function observed(value: unknown) { return value && typeof value === 'object' && 'value' in value ? value.value : value }
-const fixOptions = computed(() => versions.value.filter(item => item.target_id === selectedDefect.value?.target_id && item.id !== selectedDefect.value?.occurrences?.[0]?.target_version_id))
+const fixOptions = computed(() => versions.value.filter(item => item.target_id === selectedDefect.value?.target_id && item.id !== (selectedDefect.value?.origin?.version_id ?? selectedDefect.value?.occurrences?.[0]?.target_version_id)))
 const nextDecisions = computed(() => ({ open: ['confirmed', 'rejected'], confirmed: ['fixed', 'rejected'], rejected: ['confirmed'], fixed: ['verified', 'confirmed'], verified: ['confirmed'] }[selectedDefect.value?.status ?? 'open'] ?? []))
 
 async function perform(action: (auth: string, valid: () => boolean) => Promise<void>) {
@@ -101,30 +104,55 @@ async function compareRuns() {
   comparison.value = undefined
   await perform(async (auth, valid) => { const result = await evidenceGet<RunComparison>(`/reports/compare?left=${left}&right=${right}`, auth); if (valid() && selectedRun.value === left && rightRun.value === right) comparison.value = result })
 }
-async function openDefect(value: Defect) {
+async function openDefect(value: Pick<Defect, 'defect_key'>) {
+  const sequence = ++defectSequence
+  assessmentSequence++; assessment.value = undefined; assessmentError.value = ''
+  reviewOpen.value = false
   await perform(async (auth, valid) => {
     const result = await evidenceGet<Defect>(`/defects/${value.defect_key}`, auth)
-    if (valid()) { selectedDefect.value = result; decision.value = ({ open: 'confirmed', confirmed: 'fixed', rejected: 'confirmed', fixed: 'verified', verified: 'confirmed' } as Record<string,string>)[result.status] ?? 'confirmed'; severity.value = result.severity; note.value = ''; attestation.value = false; previewReview.value = undefined; fixedVersion.value = result.fixed_version_id ?? undefined; verificationRun.value = ''; verificationExecution.value = ''; verificationReport.value = undefined; reviewOpen.value = true }
+    if (valid() && sequence === defectSequence) { selectedDefect.value = result; decision.value = ({ open: 'confirmed', confirmed: 'fixed', rejected: 'confirmed', fixed: 'verified', verified: 'confirmed' } as Record<string,string>)[result.status] ?? 'confirmed'; severity.value = result.severity; note.value = ''; attestation.value = false; previewReview.value = undefined; fixedVersion.value = result.fixed_version_id ?? undefined; verificationRun.value = ''; verificationExecution.value = ''; verificationReport.value = undefined; reviewOpen.value = true }
   })
 }
 async function loadVerification() {
-  verificationReport.value = undefined; verificationExecution.value = ''
-  if (!verificationRun.value) return
-  await perform(async (auth, valid) => { const result = await evidenceGet<RunReport>(`/reports/runs/${verificationRun.value}`, auth); if (valid()) verificationReport.value = result })
+  const sequence = ++verificationSequence, run = verificationRun.value, key = selectedDefect.value?.defect_key
+  verificationReport.value = undefined; verificationExecution.value = ''; assessment.value = undefined
+  if (!run) return
+  await perform(async (auth, valid) => {
+    const result = await evidenceGet<RunReport>(`/reports/runs/${run}`, auth)
+    if (valid() && sequence === verificationSequence && run === verificationRun.value && key === selectedDefect.value?.defect_key && reviewOpen.value) verificationReport.value = result
+  })
 }
+async function checkVerification() {
+  const sequence = ++assessmentSequence, key = selectedDefect.value?.defect_key, revision = selectedDefect.value?.revision_hash
+  const execution = verificationExecution.value, version = fixedVersion.value, auth = workspace.authorization.value, generation = epoch
+  assessment.value = undefined; assessmentError.value = ''; assessmentBusy.value = false
+  if (!reviewOpen.value || !key || !execution || !version || decision.value !== 'verified') return
+  const valid = () => sequence === assessmentSequence && generation === epoch && auth === workspace.authorization.value && reviewOpen.value && selectedDefect.value?.defect_key === key && verificationExecution.value === execution && fixedVersion.value === version && decision.value === 'verified'
+  assessmentBusy.value = true
+  try {
+    const result = await evidenceGet<VerificationAssessment>(`/defects/${encodeURIComponent(key)}/verification?execution_id=${execution}&fixed_version_id=${version}`, auth)
+    if (valid()) { if (result.defect_revision_hash !== revision) assessmentError.value = '缺陷已更新，请关闭后重新读取。'; else assessment.value = result }
+  } catch (e) { if (valid()) assessmentError.value = (e as Error).message }
+  finally { if (valid()) assessmentBusy.value = false }
+}
+watch([verificationExecution, fixedVersion, decision, reviewOpen], () => { void checkVerification() })
+watch(fixedVersion, () => { verificationSequence++; verificationRun.value = ''; verificationReport.value = undefined; verificationExecution.value = ''; previewReview.value = undefined })
+watch(reviewOpen, open => { if (!open) { verificationSequence++; assessmentSequence++; assessment.value = undefined; assessmentBusy.value = false } })
 function preview() {
-  if (!selectedDefect.value || !note.value.trim() || !attestation.value) return
+  if (!selectedDefect.value || !note.value.trim() || !attestation.value || (decision.value === 'verified' && (!assessment.value?.eligible || assessmentBusy.value))) return
   previewReview.value = { request_id: crypto.randomUUID(), expected_hash: selectedDefect.value.revision_hash, decision: decision.value, severity: severity.value, note: note.value.trim(), human_attestation: true,
     ...(['fixed','verified'].includes(decision.value) ? { fixed_version_id: fixedVersion.value } : {}), ...(decision.value === 'verified' ? { verification_execution_id: verificationExecution.value } : {}) }
 }
 async function saveReview() {
-  const generation = epoch
-  await perform(async (auth, valid) => { await workspacePost(`/defects/${selectedDefect.value!.defect_key}/reviews`, previewReview.value, auth); if (valid()) { reviewOpen.value = false; notice.value = '人工复核已另存。原规则、AI结果和业务事实保持原记录。' } })
+  const generation = epoch, key = selectedDefect.value?.defect_key, body = previewReview.value
+  if (!key || !body) return
+  await perform(async (auth, valid) => { await workspacePost(`/defects/${key}/reviews`, body, auth); if (valid()) { reviewOpen.value = false; notice.value = '人工复核已另存。原规则、AI结果和业务事实保持原记录。' } })
   if (generation === epoch && !reviewOpen.value && workspace.authorization.value) { await loadDefects(); if (selectedRun.value) await loadReport() }
 }
 function tab(value: string) { view.value = value; void router.replace({ query: { ...route.query, tab: value } }) }
 watch(workspace.authorization, async auth => {
   const generation = ++epoch
+  defectSequence++; verificationSequence++; assessmentSequence++; assessment.value = undefined; assessmentError.value = ''; assessmentBusy.value = false; busy.value = false
   searchSequence++; report.value = undefined; comparison.value = undefined; defects.value = []; exports.value = []; reviewOpen.value = false; exportRequests.clear(); exportPending.value = false; selectedDefect.value = undefined; verificationReport.value = undefined; previewReview.value = undefined; note.value = ''; attestation.value = false; runs.value = []; versions.value = []
   if (!auth) return
   await searchRuns()
@@ -145,10 +173,12 @@ watch(workspace.authorization, async auth => {
   if (!selectedRun.value) selectedRun.value = runs.value.find(item => ['completed','cancelled','failed'].includes(item.status))?.run_id ?? ''
   if (selectedRun.value) await loadReport()
   await loadDefects()
+  if (generation === epoch && workspace.authorization.value === auth && typeof route.query.defect === 'string') await openDefect({defect_key:route.query.defect})
 }, { immediate: true })
 watch([selectedRun,rightRun], () => { comparison.value = undefined })
 watch(() => route.query.run, value => { if (value && value !== selectedRun.value) { selectedRun.value = String(value); if (workspace.authorization.value) void loadReport() } })
-onBeforeUnmount(() => { epoch++; searchSequence++; exportRequests.clear() })
+watch(() => route.query.defect, value => { defectSequence++; reviewOpen.value = false; if (typeof value === 'string' && workspace.authorization.value) void openDefect({defect_key:value}) })
+onBeforeUnmount(() => { epoch++; searchSequence++; defectSequence++; verificationSequence++; assessmentSequence++; exportRequests.clear() })
 </script>
 
 <template>
@@ -166,7 +196,7 @@ onBeforeUnmount(() => { epoch++; searchSequence++; exportRequests.clear() })
         <template v-if="report">
           <p v-if="offline" class="offline-notice">明确离线模型控制记录：验证平台功能，不能作为真实模型成绩或正式V0/V1实验。</p>
           <p v-if="missingKnowledge" class="evidence-error">冻结知识缺失或哈希不符，当前不能导出完整证据包。请先核对来源。</p><div class="report-summary"><div><small>计划执行 / 不同用例</small><strong>{{ report.statistics.planned_executions }} / {{ report.statistics.unique_cases }}</strong></div><div><small>有效规则通过 / 分母</small><strong>{{ report.statistics.reliability.numerator }} / {{ report.statistics.reliability.denominator }}</strong></div><div><small>任务达成 / 有效分母</small><strong>{{ report.statistics.task_fulfilment.numerator }} / {{ report.statistics.task_fulfilment.denominator }}</strong></div><div><small>持久事件 / 含恢复尝试</small><strong>{{ report.source_event_count }} / {{ report.statistics.attempts_including_recovery }}</strong></div></div>
-          <div class="report-actions"><ElButton :disabled="busy" @click="collect">归并缺陷候选</ElButton><span class="workspace-note">规则失败与AI信号分别保留，需人工确认；取消和证据不足不自动算缺陷。</span></div>
+          <div class="report-actions"><ElButton :disabled="busy" @click="collect">归并缺陷候选</ElButton><ElButton v-for="item in report.defects" :key="item.defect_key" :disabled="busy" @click="openDefect(item)">查看候选与修复 · {{ item.defect_key.slice(0,12) }}</ElButton><span class="workspace-note">规则失败与AI信号分别保留，需人工确认；取消和证据不足不自动算缺陷。</span></div>
           <div class="table-scroll"><table class="workspace-table report-executions"><thead><tr><th>用例与执行</th><th>实际状态</th><th>证据完整性</th><th>原始依据</th></tr></thead><tbody><tr v-for="item in report.executions" :key="item.execution_id"><td><strong>{{ item.case_key }}</strong><small>{{ item.execution_id }} · 重复 {{ item.repeat_no }} / 尝试 {{ item.attempt }}</small></td><td>{{ names[item.status] ?? item.status }}</td><td>{{ item.evidence_integrity.complete ? '完整' : '存在缺口' }}<small v-if="!item.evidence_integrity.complete">{{ [...item.evidence_integrity.issues,...item.evidence_integrity.errors].join(' / ') }}</small></td><td><RouterLink :to="`/runs/${report.run.run_id}?view=assertions&execution=${item.execution_id}`">查看断言与业务快照 →</RouterLink></td></tr></tbody></table></div>
           <div class="report-export-panel"><div class="heading-with-info"><h2>报告导出</h2><InfoHint label="证据包内容" text="含原始判定、SQL快照、冻结配置与知识、事件及SHA256清单。ZIP中的verify.py可离线核对清单。" /></div><div class="report-export-controls"><label>下载有效期<ElSelect v-model="expiresHours" aria-label="报告有效期" :disabled="busy || exportPending"><ElOption :value="1" label="1小时" /><ElOption :value="24" label="24小时" /><ElOption :value="168" label="7天" /></ElSelect></label><ElButton type="primary" :disabled="busy || missingKnowledge" @click="generate">{{ exportPending ? '按原请求重试导出' : '生成报告与证据包' }}</ElButton></div><ul v-if="exports.length" class="report-downloads"><li v-for="item in exports" :key="item.artifact_id"><ElButton :disabled="busy" @click="download(item)">下载{{ names[item.kind] }}</ElButton><div><small>{{ item.bytes.toLocaleString() }} 字节 · 有效至 {{ item.expires_at }}</small><code>{{ item.sha256 }}</code></div></li></ul><p v-if="exports.length" class="workspace-note">导出为冻结快照，后续复核不改写旧报告。</p></div>
           <details class="report-details"><summary>完整来源、分母、排除项与版本</summary><pre class="workspace-json">{{ JSON.stringify(report, null, 2) }}</pre></details>
@@ -183,10 +213,10 @@ onBeforeUnmount(() => { epoch++; searchSequence++; exportRequests.clear() })
         <template v-if="comparison"><div class="report-comparison-status" :data-match="comparison.conditions_match"><h2>{{ comparison.conditions_match ? '记录中的对比条件一致' : '不能作为同条件对照' }}</h2><p>{{ comparison.conditions_match ? '仍需结合样本来源与重复方式解释结果。' : '存在不一致或缺失记录，暂不计算通过率差值。' }}</p></div><div class="table-scroll"><table class="workspace-table"><thead><tr><th>条件</th><th>核对</th><th>左右记录</th></tr></thead><tbody><tr v-for="item in comparison.checks" :key="item.condition"><td>{{ conditions[item.condition] ?? item.condition }}</td><td><ElTag :type="item.status === 'match' ? 'success' : 'warning'">{{ names[item.status] }}</ElTag></td><td><details><summary>查看实际值</summary><pre class="workspace-json">{{ JSON.stringify({ left:item.left, right:item.right }, null, 2) }}</pre></details></td></tr></tbody></table></div><div class="report-comparison-counts"><section><h3>左侧规则通过 / 有效分母</h3><strong>{{ comparison.left_statistics.reliability.numerator }} / {{ comparison.left_statistics.reliability.denominator }}</strong></section><section><h3>右侧规则通过 / 有效分母</h3><strong>{{ comparison.right_statistics.reliability.numerator }} / {{ comparison.right_statistics.reliability.denominator }}</strong></section></div><div class="table-scroll report-paired-table"><table class="workspace-table"><thead><tr><th>用例 / 重复</th><th>左侧规则结果</th><th>右侧规则结果</th><th>执行证据</th></tr></thead><tbody><tr v-for="item in comparison.paired_executions" :key="item.left_execution"><td>{{ item.case_key }} / {{ item.repeat_no }}</td><td>{{ names[item.left_rule] ?? item.left_rule }}</td><td>{{ names[item.right_rule] ?? item.right_rule }}</td><td><RouterLink :to="`/runs/${comparison.left_run}?view=assertions&execution=${item.left_execution}`">左侧证据</RouterLink> · <RouterLink :to="`/runs/${comparison.right_run}?view=assertions&execution=${item.right_execution}`">右侧证据</RouterLink></td></tr></tbody></table></div><details class="report-details"><summary>配对执行、排除项与目标版本变化</summary><pre class="workspace-json">{{ JSON.stringify(comparison, null, 2) }}</pre></details></template>
       </template>
     </template>
-    <ElDialog v-model="reviewOpen" title="复核缺陷与原始证据" class="execution-control-dialog report-review-dialog" width="min(840px,94vw)" :close-on-click-modal="false" :close-on-press-escape="!busy" :show-close="!busy">
-      <template v-if="selectedDefect"><p class="workspace-note">{{ selectedDefect.defect_key }} · {{ names[selectedDefect.category] }}。操作账号复核另存，不作为独立盲审，也不覆盖原规则或AI结果。</p><div v-for="item in selectedDefect.occurrences" :key="item.assertion.id" class="report-occurrence"><div><strong>{{ metricNames[item.assertion.metric] ?? item.assertion.key }} · {{ names[item.assertion.verdict] }}</strong><RouterLink :to="`/runs/${item.run_id}?view=assertions&execution=${item.execution_id}`" @click="reviewOpen = false">打开原执行证据 →</RouterLink></div><div class="report-assertion-values"><section><small>预期</small><pre>{{ JSON.stringify(item.assertion.expected, null, 2) }}</pre></section><section><small>实际</small><pre>{{ JSON.stringify(observed(item.assertion.actual), null, 2) }}</pre></section></div><p class="workspace-note">{{ item.assertion.reason }}</p><details><summary>原始断言、评价器与证据引用</summary><pre class="workspace-json">{{ JSON.stringify(item.assertion, null, 2) }}</pre></details></div><details><summary>原复核历史</summary><pre class="workspace-json">{{ JSON.stringify(selectedDefect.reviews, null, 2) }}</pre></details>
-      <div v-if="!previewReview" class="report-review-form"><label>复核决定<ElSelect v-model="decision" aria-label="缺陷复核决定"><ElOption v-for="value in nextDecisions" :key="value" :value="value" :label="names[value]" :disabled="value === 'verified' && selectedDefect.category !== 'rule_violation'" /></ElSelect></label><label>严重度<ElSelect v-model="severity" aria-label="缺陷严重度"><ElOption v-for="value in ['low','medium','high','critical']" :key="value" :value="value" :label="names[value]" /></ElSelect></label><label v-if="['fixed','verified'].includes(decision)" class="report-form-wide">关联修复版本<ElSelect v-model="fixedVersion" aria-label="关联修复版本" placeholder="选择同对象的另一版本"><ElOption v-for="item in fixOptions" :key="item.id" :value="item.id" :label="`修订 ${item.version_no} · 版本ID ${item.id}`" /></ElSelect></label><template v-if="decision === 'verified'"><label class="report-form-wide">实际验证运行<ElSelect v-model="verificationRun" aria-label="修复验证运行" filterable remote :remote-method="searchRuns" @change="loadVerification"><ElOption v-for="item in runs" :key="item.run_id" :value="item.run_id" :label="item.run_id" :disabled="item.status !== 'completed'" /></ElSelect></label><label class="report-form-wide">匹配的通过执行<ElSelect v-model="verificationExecution" aria-label="修复验证执行"><ElOption v-for="item in verificationReport?.executions ?? []" :key="item.execution_id" :value="item.execution_id" :label="`${item.case_key} · ${item.execution_id.slice(0,8)}`" :disabled="item.status !== 'passed'" /></ElSelect></label></template><label class="report-form-wide">复核依据<ElInput v-model="note" aria-label="缺陷复核依据" type="textarea" :rows="4" :maxlength="4000" placeholder="说明依据、误报原因或修复验证的证据。" /></label><ElCheckbox v-model="attestation" class="report-form-wide" aria-label="确认已人工查看证据">我已人工查看原始判定与证据，确认以上复核决定。</ElCheckbox></div><pre v-else class="workspace-json" aria-label="即将保存的缺陷复核">{{ JSON.stringify(previewReview, null, 2) }}</pre><p v-if="error" role="alert" class="evidence-error">{{ error }} 原复核请求保留；状态冲突时请关闭后重新读取。</p></template>
-      <template #footer><ElButton :disabled="busy" @click="reviewOpen = false">返回查看</ElButton><ElButton v-if="!previewReview" type="primary" :disabled="busy || !note.trim() || !attestation || (['fixed','verified'].includes(decision) && !fixedVersion) || (decision === 'verified' && !verificationExecution)" @click="preview">核对复核内容</ElButton><ElButton v-else type="primary" :disabled="busy" @click="saveReview">确认保存复核</ElButton></template>
+    <ElDialog v-model="reviewOpen" title="复核缺陷与原始证据" class="execution-control-dialog report-review-dialog" width="min(1080px,94vw)" append-to-body :close-on-click-modal="false" :close-on-press-escape="!busy" :show-close="!busy">
+      <template v-if="selectedDefect"><DefectWorkflow :defect="selectedDefect" :fixed-version="fixedVersion" :assessment="assessment" :checking="assessmentBusy" :error="assessmentError" /><p class="workspace-note">{{ selectedDefect.defect_key }} · {{ names[selectedDefect.category] }}。操作账号复核另存，不作为独立盲审，也不覆盖原规则或AI结果。</p><div v-for="item in selectedDefect.occurrences" :key="item.assertion.id" class="report-occurrence"><div><strong>{{ metricNames[item.assertion.metric] ?? item.assertion.key }} · {{ names[item.assertion.verdict] }}</strong><RouterLink :to="`/runs/${item.run_id}?view=assertions&execution=${item.execution_id}`" @click="reviewOpen = false">打开原执行证据 →</RouterLink></div><div class="report-assertion-values"><section><small>预期</small><pre>{{ JSON.stringify(item.assertion.expected, null, 2) }}</pre></section><section><small>实际</small><pre>{{ JSON.stringify(observed(item.assertion.actual), null, 2) }}</pre></section></div><p class="workspace-note">{{ item.assertion.reason }}</p><details><summary>原始断言、评价器与证据引用</summary><pre class="workspace-json">{{ JSON.stringify(item.assertion, null, 2) }}</pre></details></div><details><summary>完整复核记录</summary><pre class="workspace-json">{{ JSON.stringify(selectedDefect.reviews, null, 2) }}</pre></details>
+      <div v-if="!previewReview" class="report-review-form"><label>复核决定<ElSelect v-model="decision" aria-label="缺陷复核决定"><ElOption v-for="value in nextDecisions" :key="value" :value="value" :label="names[value]" :disabled="value === 'verified' && selectedDefect.category !== 'rule_violation'" /></ElSelect></label><label>严重度<ElSelect v-model="severity" aria-label="缺陷严重度"><ElOption v-for="value in ['low','medium','high','critical']" :key="value" :value="value" :label="names[value]" /></ElSelect></label><label v-if="['fixed','verified'].includes(decision)" class="report-form-wide">关联修复版本<ElSelect v-model="fixedVersion" aria-label="关联修复版本" placeholder="选择同对象的另一版本"><ElOption v-for="item in fixOptions" :key="item.id" :value="item.id" :label="`修订 ${item.version_no} · 版本ID ${item.id}`" /></ElSelect></label><template v-if="decision === 'verified'"><label class="report-form-wide">实际验证运行<ElSelect v-model="verificationRun" aria-label="修复验证运行" filterable remote :remote-method="searchRuns" @change="loadVerification"><ElOption v-for="item in runs" :key="item.run_id" :value="item.run_id" :label="item.run_id" :disabled="!['completed','failed','cancelled'].includes(item.status)" /></ElSelect></label><label class="report-form-wide">待核对的复测执行<ElSelect v-model="verificationExecution" aria-label="修复验证执行"><ElOption v-for="item in verificationReport?.executions ?? []" :key="item.execution_id" :value="item.execution_id" :label="`${item.case_key} · ${names[item.status] ?? item.status} · ${item.execution_id.slice(0,8)}`" /></ElSelect></label></template><label class="report-form-wide">复核依据<ElInput v-model="note" aria-label="缺陷复核依据" type="textarea" :rows="4" :maxlength="4000" placeholder="说明依据、误报原因或修复验证的证据。" /></label><ElCheckbox v-model="attestation" class="report-form-wide" aria-label="确认已人工查看证据">我已人工查看原始判定与证据，确认以上复核决定。</ElCheckbox></div><p v-if="previewReview" class="workspace-note">确认后将永久另存本次人工复核并更新缺陷状态；原规则、AI结果和业务事实不改写。</p><pre v-if="previewReview" class="workspace-json" aria-label="即将保存的缺陷复核">{{ JSON.stringify(previewReview, null, 2) }}</pre><p v-if="error" role="alert" class="evidence-error">{{ error }} 原复核请求保留；状态冲突时请关闭后重新读取。</p></template>
+      <template #footer><ElButton :disabled="busy" @click="reviewOpen = false">返回查看</ElButton><ElButton v-if="!previewReview" type="primary" :disabled="busy || !note.trim() || !attestation || (['fixed','verified'].includes(decision) && !fixedVersion) || (decision === 'verified' && (!verificationExecution || !assessment?.eligible || assessmentBusy))" @click="preview">核对复核内容</ElButton><ElButton v-else type="primary" :disabled="busy" @click="saveReview">确认保存复核</ElButton></template>
     </ElDialog>
   </section>
 </template>

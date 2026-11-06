@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session
 from app.agents.errors import AgentError
 from app.agents.versions import canonical_hash
 from app.core.config import PROJECT_ROOT
-from app.evaluation.service import load_evidence
+from app.evaluation.service import input_hash, load_evidence
 from app.evidence.reader import item as event_item
 from app.evidence.recorder import EVIDENCE_ROOT, redact
 from app.executors.control import advisory
@@ -39,6 +39,7 @@ from app.reports.analysis import (
     reporter_manifest,
     statistics,
 )
+from app.reports.verification import assess
 
 ROOT = PROJECT_ROOT / ".local/reports"
 EXPORTS = {
@@ -296,6 +297,62 @@ class ReportService:
             _, after, _ = self._snapshot(session, owner, right, lock_events=False)
             return compare(before, after)
 
+    def _verification(self, session, owner, row, first, execution_id, fixed_version_id):
+        execution = session.scalar(
+            select(TestExecution)
+            .join(TestRun)
+            .where(TestExecution.execution_uuid == str(execution_id), TestRun.created_by == owner)
+        )
+        if execution is None:
+            raise AgentError("verification_not_found", "找不到验证执行。", 404)
+        first_run = session.get(TestRun, first.run_id)
+        candidate_run = RunService.owned_run(
+            session, owner, session.get(TestRun, execution.run_id).run_uuid
+        )
+        if candidate_run.status not in {"completed", "failed", "cancelled"}:
+            return {
+                "schema": "defect-verification-v1",
+                "defect_key": row.defect_key,
+                "defect_revision_hash": defect_view(row)["revision_hash"],
+                "eligible": False,
+                "checks": [{"id": "run_completed", "passed": False, "label": "复测运行尚未结束"}],
+                "original": {
+                    "run_id": first_run.run_uuid,
+                    "execution_id": first.execution_uuid,
+                    "version_id": first_run.target_version_id,
+                },
+                "verification": {
+                    "run_id": candidate_run.run_uuid,
+                    "execution_id": execution.execution_uuid,
+                    "version_id": candidate_run.target_version_id,
+                },
+                "comparison": None,
+                "boundary": "等待中的执行不能确认修复。",
+            }
+        _, original, _ = self._snapshot(session, owner, first_run.run_uuid, lock_events=False)
+        _, repaired, _ = self._snapshot(session, owner, candidate_run.run_uuid, lock_events=False)
+        # An old passed row must not validate changed SQL/output/evidence.
+        for report in (original, repaired):
+            run = RunService.owned_run(session, owner, report["run"]["run_id"])
+            for entry in report["executions"]:
+                stored = session.get(TestExecution, entry["database_execution_id"])
+                bundle = load_evidence(session, run, stored, lock_events=False)
+                dsl = stored.input_snapshot_json.get("dsl", {})
+                digest = input_hash(bundle, dsl.get("assertions", []), dsl.get("task_goal"))
+                rows = latest_rows(entry["assertions"])
+                if not rows or any(item["actual"].get("input_hash") != digest for item in rows):
+                    entry["evidence_integrity"]["complete"] = False
+                    entry["evidence_integrity"]["issues"].append("saved_evaluation_input_changed")
+        return assess(defect_view(row), original, repaired, str(execution_id), fixed_version_id)
+
+    def verification(self, owner, key, execution_id, fixed_version_id):
+        with Session(self.engine) as session:
+            row, first = self._owned_defect(session, owner, key)
+            return redact(
+                self._verification(session, owner, row, first, execution_id, fixed_version_id),
+                self.settings,
+            )
+
     def collect(self, owner, identifier):
         # Serialize grouping across runs of the same owner; no cross-owner membership.
         with (
@@ -393,7 +450,18 @@ class ReportService:
                     }
                 )
             return redact(
-                {**defect_view(row), "occurrences": occurrences, "reviews": audits}, self.settings
+                {
+                    **defect_view(row),
+                    "occurrences": occurrences,
+                    "reviews": audits,
+                    "origin": {
+                        "run_id": session.get(TestRun, first.run_id).run_uuid,
+                        "execution_id": first.execution_uuid,
+                        "version_id": session.get(TestRun, first.run_id).target_version_id,
+                        "case_key": first.input_snapshot_json.get("content", {}).get("case_key"),
+                    },
+                },
+                self.settings,
             )
 
     def _write(self, session, run, kind, payload, metadata, written):
@@ -487,54 +555,31 @@ class ReportService:
                         raise AgentError(
                             "fixed_version_mismatch", "请选择该测试对象的修复版本。", 409
                         )
+                if request.decision == "fixed" and request.verification_execution_id:
+                    raise AgentError(
+                        "review_extra_verification", "关联修复版本时不接受验证执行。", 400
+                    )
                 verification = None
                 if request.decision == "verified":
                     if not request.verification_execution_id:
                         raise AgentError(
                             "verification_required", "验证修复需要匹配的实际通过执行。", 409
                         )
-                    execution = session.scalar(
-                        select(TestExecution)
-                        .join(TestRun)
-                        .where(
-                            TestExecution.execution_uuid == str(request.verification_execution_id),
-                            TestRun.created_by == owner,
-                        )
+                    assessment = self._verification(
+                        session,
+                        owner,
+                        row,
+                        first,
+                        request.verification_execution_id,
+                        request.fixed_version_id,
                     )
-                    if execution is None:
-                        raise AgentError("verification_not_found", "找不到验证执行。", 404)
-                    first_run = session.get(TestRun, first.run_id)
-                    verification_run = session.get(TestRun, execution.run_id)
-                    _, original, _ = self._snapshot(session, owner, first_run.run_uuid)
-                    _, repaired, _ = self._snapshot(session, owner, verification_run.run_uuid)
-                    peer = next(
-                        item
-                        for item in repaired["executions"]
-                        if item["execution_id"] == str(request.verification_execution_id)
-                    )
-                    matched = [
-                        item
-                        for item in latest_rows(peer["assertions"])
-                        if candidate_fingerprint(repaired, peer, item) == row.fingerprint
-                        and item["verdict"] == "passed"
-                    ]
-                    if (
-                        row.category != "rule_violation"
-                        or verification_run.target_version_id != request.fixed_version_id
-                        or not peer["evidence_integrity"]["complete"]
-                        or not compare(original, repaired)["conditions_match"]
-                        or not matched
-                    ):
+                    if not assessment["eligible"]:
                         raise AgentError(
                             "verification_mismatch",
                             "执行、预期、证据完整性或对比条件不匹配；不能标为已验证。",
                             409,
                         )
-                    verification = {
-                        "run_id": verification_run.run_uuid,
-                        "execution_id": execution.execution_uuid,
-                        "assertions": [item["id"] for item in matched],
-                    }
+                    verification = {**assessment["verification"], "assessment": assessment}
                 row.status, row.severity = request.decision, request.severity
                 row.review_note = redact(request.note.strip(), self.settings)
                 row.reviewer_id = owner

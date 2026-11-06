@@ -9,7 +9,7 @@ export type InteractionView = {
   kind: 'booking_agent'; scope_id: string; environment_id: string; observed_at: string; processing: boolean; mode: string
   status: string; assistant_text: string; confirmation_state: string; confirmation_revision: number
   fields: Record<string, { value: unknown; source_turn?: number; source_quote?: string; source_kind?: string }>
-  pending_draft: { draft_id: string; draft_hash: string; room_code: string; start_at: string; end_at: string; attendees: number; status: string; expires_at: string } | null
+  pending_draft: { draft_id: string; draft_hash: string; room_code: string; start_at: string; end_at: string; attendees: number; status: string; expires_at: string; operation?: 'attendee_change' | 'cancel'; booking_id?: string; previous_attendees?: number } | null
   business_result: Record<string, unknown> | null; unknown_submission: Record<string, unknown> | null
   request_lookup?: Record<string, unknown>; pending_request: string | null
   last_error: { code: string; message: string } | null; next_nodes: string[]

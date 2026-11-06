@@ -16,6 +16,7 @@ import RelationsPanel from '../components/RelationsPanel.vue'
 import SemanticPanel from '../components/SemanticPanel.vue'
 import ExecutionControls from '../components/ExecutionControls.vue'
 import ChainDiagnostics from '../components/ChainDiagnostics.vue'
+import ReliabilityOverview from '../components/ReliabilityOverview.vue'
 import { workspace } from '../api/workspace'
 import { statuses } from '../types/workbench'
 
@@ -25,7 +26,7 @@ const runId = ref(String(route.params.runId ?? ''))
 const snapshot = ref<RunSnapshot>(), facts = ref<TraceFact[]>([]), selected = ref('')
 const error = ref(''), state = ref('未连接'), filter = ref(''), after = ref(''), more = ref(false)
 const busy = ref(false), live = ref(false)
-const activeTab = ref(['diagnosis', 'assertions', 'relations', 'semantic'].includes(String(route.query.view)) ? String(route.query.view) : 'trace')
+const activeTab = ref(['trace', 'diagnosis', 'assertions', 'relations', 'semantic'].includes(String(route.query.view)) ? String(route.query.view) : 'overview')
 const semanticExecution = ref(''), semanticQuery = ref('')
 const semanticOptions = computed(() => (snapshot.value?.executions ?? []).filter(item =>
   `${item.case_key ?? ''} ${item.execution_id} ${item.status} ${statuses[item.status] ?? ''}`.toLowerCase().includes(semanticQuery.value)))
@@ -57,7 +58,12 @@ const types: Record<string, string> = {
   'fault.scheduled': '故障触发已登记', 'fault.injected': '故障已注入', 'fault.not_applied': '故障条件未达成',
   'assertion.completed': '断言判定', 'evaluation.completed': '评价完成',
 }
-function setTab(value: string) { activeTab.value = value; void router.replace({ query: { ...route.query, view: value === 'trace' ? undefined : value } }) }
+function setTab(value: string) { activeTab.value = value; void router.replace({ query: { ...route.query, view: value === 'overview' ? undefined : value } }) }
+function showAssertion(execution: string, id: number, version: string) {
+  selectExecution(execution); activeTab.value = 'assertions'
+  void router.replace({ query: { ...route.query, view:'assertions', execution, assertion:String(id), evaluator:version } })
+}
+async function showExecutionSnapshot(id: string) { selectExecution(id); await refreshSnapshot(); await nextTick(); showSnapshot() }
 async function refreshSnapshot() {
   const run = snapshot.value?.run_id, ticket = readGeneration; if (!run) return
   try { const value = await evidenceGet<RunSnapshot>(`/runs/${run}/snapshot`, authorization); if (ticket === readGeneration && snapshot.value?.run_id === run) snapshot.value = value }
@@ -195,7 +201,7 @@ function online() { if (live.value) { state.value = '等待重连'; error.value 
 onMounted(() => { window.addEventListener('offline', offline); window.addEventListener('online', online); if (workspace.authorization.value && runId.value) void load() })
 watch(() => route.params.runId, value => { if (value && value !== runId.value) { stop(); runId.value = String(value); snapshot.value = undefined; if (workspace.authorization.value) void load() } })
 watch(workspace.authorization, (value, old) => { if (value !== old) { stop(); readGeneration++; authorization = ''; snapshot.value = undefined; facts.value = []; focusedFact.value = undefined; selected.value = ''; error.value = ''; busy.value = false } })
-watch(() => route.query.view, value => { activeTab.value = ['diagnosis','assertions','relations','semantic'].includes(String(value)) ? String(value) : 'trace' })
+watch(() => route.query.view, value => { activeTab.value = ['trace','diagnosis','assertions','relations','semantic'].includes(String(value)) ? String(value) : 'overview' })
 onBeforeUnmount(() => {
   stop(); readGeneration++; authorization = ''
   window.removeEventListener('offline', offline); window.removeEventListener('online', online)
@@ -221,7 +227,7 @@ onBeforeUnmount(() => {
     <template v-if="snapshot">
       <div class="run-context-bar"><strong>{{ snapshot.run_id.slice(0,8) }}</strong><span>版本ID {{ snapshot.manifest?.target_version_id ?? '未记录' }}</span><span>{{ statuses[snapshot.status] ?? snapshot.status }}</span><span>{{ currentExecution?.case_key ?? '全部执行' }}</span><RouterLink :to="`/reports?run=${snapshot.run_id}`">缺陷与报告 →</RouterLink></div>
       <ExecutionControls :snapshot="snapshot" :authorization="authorization" :execution="executionFilter" :facts="facts" @refresh="refreshSnapshot" />
-      <aside v-if="profile && activeTab !== 'diagnosis'" class="fault-profile" aria-label="冻结故障配置">
+      <aside v-if="profile && !['diagnosis','overview'].includes(activeTab)" class="fault-profile" aria-label="冻结故障配置">
         <div><strong>{{ profile.config.fault_type }} · {{ profile.config.trigger_stage }}</strong>
           <span>{{ profile.config.profile_key }} / 修订 {{ profile.config.revision }}</span></div>
         <p>目标 {{ profile.config.target_tool }} · 种子 {{ profile.config.seed }} · 每执行最多 {{ profile.config.max_triggers }} 次 · 快照已注入 {{ injected }} 次</p>
@@ -229,15 +235,16 @@ onBeforeUnmount(() => {
         <ElButton size="small" @click="setTab('trace'); filter = 'fault.'">只看故障</ElButton>
       </aside>
       <p v-if="offlineModel" class="offline-notice" role="note">离线模型复验：真实数据库、Redis和预约工具；本次不调用DeepSeek，不代表真实模型验收。</p>
-      <div v-if="activeTab !== 'diagnosis'" class="evidence-summary">
+      <div v-if="!['diagnosis','overview'].includes(activeTab)" class="evidence-summary">
         <div><small>运行状态</small><strong>{{ snapshot.status }}</strong></div>
         <div><small>持久事件 · 快照时刻</small><strong>{{ snapshot.event_count }}</strong></div>
         <div><small>执行数量</small><strong>{{ snapshot.executions.length }}</strong></div>
         <div><small>待返回模型观察</small><strong>{{ snapshot.pending_model_observations }}</strong></div>
       </div>
-      <div class="evidence-tabs" role="tablist" aria-label="运行视图"><button role="tab" :aria-selected="activeTab === 'diagnosis'" @click="setTab('diagnosis'); if (!executionFilter) selectExecution(snapshot.executions[0]?.execution_id ?? '')">链路诊断</button><button role="tab" :aria-selected="activeTab === 'trace'" @click="setTab('trace')">调用轨迹</button><button role="tab" :aria-selected="activeTab === 'assertions'" @click="setTab('assertions')">判定结果</button><button v-if="snapshot.manifest?.metamorphic" role="tab" :aria-selected="activeTab === 'relations'" @click="setTab('relations')">变形对照</button><button role="tab" :aria-selected="activeTab === 'semantic'" @click="setTab('semantic')">AI辅助评价</button><span>证据先于结论</span></div>
+      <div class="evidence-tabs" role="tablist" aria-label="运行视图"><button role="tab" :aria-selected="activeTab === 'overview'" @click="setTab('overview')">结果概览</button><button role="tab" :aria-selected="activeTab === 'diagnosis'" @click="setTab('diagnosis'); if (!executionFilter) selectExecution(snapshot.executions[0]?.execution_id ?? '')">链路诊断</button><button role="tab" :aria-selected="activeTab === 'trace'" @click="setTab('trace')">调用轨迹</button><button role="tab" :aria-selected="activeTab === 'assertions'" @click="setTab('assertions')">判定结果</button><button v-if="snapshot.manifest?.metamorphic" role="tab" :aria-selected="activeTab === 'relations'" @click="setTab('relations')">变形对照</button><button role="tab" :aria-selected="activeTab === 'semantic'" @click="setTab('semantic')">AI辅助评价</button><span>证据先于结论</span></div>
+      <ReliabilityOverview v-if="activeTab === 'overview'" :run-id="snapshot.run_id" :authorization="authorization" :execution-id="executionFilter" :revision="`${snapshot.cursor}:${snapshot.status}:${snapshot.executions.map(e=>`${e.status}:${e.timing?.evaluation?.verdict ?? ''}`).join(',')}`" @execution="selectExecution" @locate="locate" @snapshot="showExecutionSnapshot" @assertion="showAssertion" @diagnosis="id => { selectExecution(id); setTab('diagnosis') }" @semantic="id => { semanticExecution = id; setTab('semantic') }" />
       <ChainDiagnostics v-if="activeTab === 'diagnosis'" :snapshot="snapshot" :facts="facts" :execution-id="executionFilter" :authorization="authorization" :connection="state" :more="more" :busy="busy" @execution="selectExecution" @locate="locate" @head="load(true)" @next="nextPage(facts.length >= 500)" @assertions="setTab('assertions')" @semantic="semanticExecution = executionFilter; setTab('semantic')" @download="download" />
-      <AssertionsPanel v-if="activeTab === 'assertions'" :run-id="snapshot.run_id" :authorization="authorization" :execution-id="executionFilter" :executions="snapshot.executions" @locate="locate" @snapshot="showSnapshot" />
+      <AssertionsPanel v-if="activeTab === 'assertions'" :run-id="snapshot.run_id" :authorization="authorization" :execution-id="executionFilter" :executions="snapshot.executions" :assertion-id="Number(route.query.assertion) || undefined" :evaluator-version="String(route.query.evaluator ?? '')" @locate="locate" @snapshot="showSnapshot" />
       <RelationsPanel v-if="activeTab === 'relations'" :run-id="snapshot.run_id" :authorization="authorization" @locate="locate" @snapshot="showSnapshot" />
       <div v-if="activeTab === 'semantic'">
         <div class="semantic-execution-picker">

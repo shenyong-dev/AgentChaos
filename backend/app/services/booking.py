@@ -378,10 +378,10 @@ class BookingService:
             created_at=row.created_at,
         )
 
-    def _booking_result(self, session, row, code="booking_confirmed"):
+    def _booking_result(self, session, row, code="booking_confirmed", summary="已查到原预约事实。"):
         return BookingToolResult[BookingView](
             code=code,
-            summary="已查到原预约事实。",
+            summary=summary,
             data=self._booking_view(session, row),
             request_key=row.idempotency_key,
             commit_state="committed",
@@ -541,7 +541,12 @@ class BookingService:
                 )
                 row.status = "cancelled"
                 session.flush()
-            return self._booking_result(session, row, "booking_cancelled")
+            return self._booking_result(
+                session,
+                row,
+                "booking_cancelled",
+                "预约已取消，占用时段已释放，历史记录保留。",
+            )
 
         return self._write(context, operation, booking_effect=True)
 

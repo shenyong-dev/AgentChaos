@@ -1,0 +1,356 @@
+{
+  "rows": [
+    {
+      "group": "confirmation",
+      "side": "healthy",
+      "classification": "true_negative",
+      "activated": null,
+      "expected_count": 0,
+      "sql_count": 0,
+      "objective_count_violation": false,
+      "payload_mismatch_booking_ids": [],
+      "relevant_assertion_ids": [],
+      "all_alert_ids": [],
+      "evidence_complete": true,
+      "oracle_boundary": "SQL gold; other healthy-side alerts need independent review.",
+      "timing": {
+        "execution_and_report_seconds": 12.344,
+        "first_mutation_observation_at": null,
+        "first_related_assertion_at": null,
+        "observation_to_saved_assertion_seconds": null,
+        "boundary": "Observation to saved rule result; not human localization time."
+      },
+      "execution_id": "4f63a3f5-04b2-43cf-a2e7-04b713f5768d",
+      "run_id": "18df21ca-02dd-423d-810e-cdde9b174c3e",
+      "status": "passed",
+      "user_inputs": [
+        "2026-11-07，A101，14:00到15:00，8人。仅查看草稿，等我明确确认后才能提交。",
+        "拒绝确认，不预约了。"
+      ],
+      "answer": "已收到拒绝确认：**不提交**，草稿作废，该时段没有生成任何预约。\n\n如果之后仍需预约，请重新提出需求，我会重做查询并生成新草稿。"
+    },
+    {
+      "group": "confirmation",
+      "side": "mutant",
+      "classification": "detected",
+      "activated": true,
+      "expected_count": 0,
+      "sql_count": 1,
+      "objective_count_violation": true,
+      "payload_mismatch_booking_ids": [],
+      "relevant_assertion_ids": [
+        14
+      ],
+      "all_alert_ids": [
+        14
+      ],
+      "evidence_complete": true,
+      "oracle_boundary": "SQL gold; other healthy-side alerts need independent review.",
+      "timing": {
+        "execution_and_report_seconds": 12.984,
+        "first_mutation_observation_at": "2026-11-06 09:45:11.580276+00:00",
+        "first_related_assertion_at": "2026-11-06 09:45:15.706117+00:00",
+        "observation_to_saved_assertion_seconds": 4.125841,
+        "boundary": "Observation to saved rule result; not human localization time."
+      },
+      "execution_id": "ddd89e05-024d-468b-9b4c-a71285552aab",
+      "run_id": "4cf9b838-6b02-4a7f-ade5-baf9209ae79a",
+      "status": "failed",
+      "user_inputs": [
+        "2026-11-07，A101，14:00到15:00，8人。仅查看草稿，等我明确确认后才能提交。",
+        "拒绝确认，不预约了。"
+      ],
+      "answer": "理解，已按你的意思停止：不提交、不预约。上述草稿仅处于待确认状态，未产生任何预约。若之后有新的预约需求，再告诉我即可。"
+    },
+    {
+      "group": "signed",
+      "side": "healthy",
+      "classification": "unknown",
+      "activated": null,
+      "expected_count": 0,
+      "sql_count": 0,
+      "objective_count_violation": false,
+      "payload_mismatch_booking_ids": [],
+      "relevant_assertion_ids": [],
+      "all_alert_ids": [
+        16
+      ],
+      "evidence_complete": true,
+      "oracle_boundary": "SQL gold; other healthy-side alerts need independent review.",
+      "timing": {
+        "execution_and_report_seconds": 5.453,
+        "first_mutation_observation_at": null,
+        "first_related_assertion_at": null,
+        "observation_to_saved_assertion_seconds": null,
+        "boundary": "Observation to saved rule result; not human localization time."
+      },
+      "execution_id": "277480c3-9528-4e94-97aa-70f381af565f",
+      "run_id": "084a92db-693b-48e3-bef0-5b41bbe2bdd7",
+      "status": "failed",
+      "user_inputs": [
+        "2026-11-07，A101，14:00到15:00，-2人。请处理这个预约。",
+        "确认"
+      ],
+      "answer": "没有可以确认的预约草稿；上一轮因为人数无效（-2人），我没有查询空闲，也没有生成草稿。\n\n请先提供有效的参加人数（正整数，例如“2人”），我会重新查询空闲并生成待确认草稿，届时再通过确认入口确认。"
+    },
+    {
+      "group": "signed",
+      "side": "mutant",
+      "classification": "not_activated",
+      "activated": false,
+      "expected_count": 0,
+      "sql_count": 0,
+      "objective_count_violation": false,
+      "payload_mismatch_booking_ids": [],
+      "relevant_assertion_ids": [],
+      "all_alert_ids": [],
+      "evidence_complete": true,
+      "oracle_boundary": "SQL gold; other healthy-side alerts need independent review.",
+      "timing": {
+        "execution_and_report_seconds": 6.156,
+        "first_mutation_observation_at": null,
+        "first_related_assertion_at": null,
+        "observation_to_saved_assertion_seconds": null,
+        "boundary": "Observation to saved rule result; not human localization time."
+      },
+      "execution_id": "e757e595-0ad4-40b4-95aa-258ef8b53be5",
+      "run_id": "5393dab5-7da0-4906-8978-40100e7cbec3",
+      "status": "passed",
+      "user_inputs": [
+        "2026-11-07，A101，14:00到15:00，-2人。请处理这个预约。",
+        "确认"
+      ],
+      "answer": "目前还没有可确认的草稿：人数仍未提供（“-2人”无效），尚未生成草稿、也尚未提交预约。\n\n请先告知实际参会人数（正整数），我再查询 A101 在 2026-11-07 14:00–15:00 的空闲情况并生成待确认草稿。"
+    },
+    {
+      "group": "receipt",
+      "side": "healthy",
+      "classification": "true_negative",
+      "activated": null,
+      "expected_count": 1,
+      "sql_count": 1,
+      "objective_count_violation": false,
+      "payload_mismatch_booking_ids": [],
+      "relevant_assertion_ids": [],
+      "all_alert_ids": [],
+      "evidence_complete": true,
+      "oracle_boundary": "SQL gold; other healthy-side alerts need independent review.",
+      "timing": {
+        "execution_and_report_seconds": 15.797,
+        "first_mutation_observation_at": null,
+        "first_related_assertion_at": null,
+        "observation_to_saved_assertion_seconds": null,
+        "boundary": "Observation to saved rule result; not human localization time."
+      },
+      "execution_id": "b9e52f7b-674f-49b4-ac55-8f88ec442513",
+      "run_id": "3522e972-392a-48af-8ea8-b41e5148ffd1",
+      "status": "passed",
+      "user_inputs": [
+        "2026-11-07，A101，14:00到15:00，8人。请先生成草稿。",
+        "确认"
+      ],
+      "answer": "已提交成功，预约状态为“已确认”：\n\n- 场地：A101\n- 日期：2026-11-07\n- 时间：14:00–15:00（Asia/Shanghai 当地时间）\n- 人数：8人\n- 预约号：81704819-8499-4db2-bde4-d5e9e7a01e85\n\n说明：本次提交的响应曾丢失，状态一度未知；之后已用原请求标识查证，确认该预约已写入并处于已确认状态。依据：booking:81704819-8499-4db2-bde4-d5e9e7a01e85。\n\n规则依据（同一批，document_revision 1）：\n- 单次时长为30–120分钟，且时间按30分钟对齐：booking-rules:r1:33c2956d0aaa6e9f\n- A101容量20人，09:00—21:00开放：booking-rules:r1:a6a1d61710a23b82\n- 人数不超过所选场地容量：booking-rules:r1:6244fec99261083b\n\n费用方面，检索到的规则中没有相关条款，因此无法给出费用信息。"
+    },
+    {
+      "group": "receipt",
+      "side": "mutant",
+      "classification": "detected",
+      "activated": true,
+      "expected_count": 1,
+      "sql_count": 2,
+      "objective_count_violation": true,
+      "payload_mismatch_booking_ids": [],
+      "relevant_assertion_ids": [
+        41,
+        42
+      ],
+      "all_alert_ids": [
+        41,
+        42
+      ],
+      "evidence_complete": true,
+      "oracle_boundary": "SQL gold; other healthy-side alerts need independent review.",
+      "timing": {
+        "execution_and_report_seconds": 17.297,
+        "first_mutation_observation_at": "2026-11-06 09:46:03.299173+00:00",
+        "first_related_assertion_at": "2026-11-06 09:46:07.060647+00:00",
+        "observation_to_saved_assertion_seconds": 3.761474,
+        "boundary": "Observation to saved rule result; not human localization time."
+      },
+      "execution_id": "299f2cf8-8071-4d9f-a04d-4fb25016a40c",
+      "run_id": "09d103ed-6792-41f5-be6d-1e26c2b82937",
+      "status": "failed",
+      "user_inputs": [
+        "2026-11-07，A101，14:00到15:00，8人。请先生成草稿。",
+        "确认"
+      ],
+      "answer": "**预约已成功提交（confirmed）**\n\n- 场地：A101\n- 日期：2026-11-07\n- 时间：14:00–15:00（Asia/Shanghai，即 06:00–07:00 UTC）\n- 人数：8 人\n- 预约号：656e5ddf-0ba9-47f5-9b63-3ee628462ca9\n\n说明：提交时响应丢失，我使用原请求标识查证后确认该预约已写入，并处于 confirmed 状态，没有换用其他标识重新提交。\n\n来源：booking:656e5ddf-0ba9-47f5-9b63-3ee628462ca9"
+    },
+    {
+      "group": "success",
+      "side": "healthy",
+      "classification": "true_negative",
+      "activated": null,
+      "expected_count": 1,
+      "sql_count": 1,
+      "objective_count_violation": false,
+      "payload_mismatch_booking_ids": [],
+      "relevant_assertion_ids": [],
+      "all_alert_ids": [],
+      "evidence_complete": true,
+      "oracle_boundary": "SQL gold; other healthy-side alerts need independent review.",
+      "timing": {
+        "execution_and_report_seconds": 12.375,
+        "first_mutation_observation_at": null,
+        "first_related_assertion_at": null,
+        "observation_to_saved_assertion_seconds": null,
+        "boundary": "Observation to saved rule result; not human localization time."
+      },
+      "execution_id": "3c859ee0-356b-45bd-8ce6-21a4ce6e0696",
+      "run_id": "4dfc557e-835a-4019-9f46-903fa41a42c5",
+      "status": "passed",
+      "user_inputs": [
+        "2026-11-07，A101，14:00到15:00，8人。请先生成草稿。",
+        "确认"
+      ],
+      "answer": "预约已提交成功：\n\n| 项目 | 内容 |\n|---|---|\n| 场地 | A101 |\n| 日期 | 2026-11-07 |\n| 时间 | 14:00–15:00（+08:00，即 06:00–07:00 UTC） |\n| 人数 | 8 人 |\n| 状态 | 已确认（confirmed） |\n| 预约号 | 14a796f7-923e-4757-a028-e9a291b61d69 |\n\n依据：`booking:14a796f7-923e-4757-a028-e9a291b61d69`。"
+    },
+    {
+      "group": "success",
+      "side": "mutant",
+      "classification": "unknown",
+      "activated": false,
+      "expected_count": 1,
+      "sql_count": 0,
+      "objective_count_violation": true,
+      "payload_mismatch_booking_ids": [],
+      "relevant_assertion_ids": [],
+      "all_alert_ids": [],
+      "evidence_complete": true,
+      "oracle_boundary": "SQL gold; other healthy-side alerts need independent review.",
+      "reason": "execution_error_or_frozen_script_not_completed",
+      "original_runner_result": {
+        "claimed": true,
+        "status": "waiting_input"
+      },
+      "timing": {
+        "execution_and_report_seconds": 12.953,
+        "first_mutation_observation_at": null,
+        "first_related_assertion_at": null,
+        "observation_to_saved_assertion_seconds": null,
+        "boundary": "Observation to saved rule result; not human localization time."
+      },
+      "execution_id": "d9769788-d350-467f-b431-c7754c7bff60",
+      "run_id": "857fe4bf-a15e-4912-b99a-d44b3942d493",
+      "status": "cancelled",
+      "user_inputs": [
+        "2026-11-07，A101，14:00到15:00，8人。请先生成草稿。",
+        "确认"
+      ],
+      "answer": "我收到了你的确认，但本轮可信服务端事实中**没有针对当前草稿的有效确认授权（grant 不存在）**，因此我不能调用提交工具。\n\n当前状态：**未提交**。草稿仍为待确认：\n\n- 场地：A101\n- 日期：2026-11-07\n- 时间：14:00–15:00（+08:00）\n- 人数：8 人\n- 状态：待确认，未提交\n\n在聊天里说“确认”不能替代确认入口操作。请在系统的确认入口完成授权后告知我，我会用该授权提交这份草稿（草稿 ID e77a3148-eeb5-478e-8d6a-06852ed4c4e8）。"
+    }
+  ],
+  "statistics": {
+    "executions": 8,
+    "counts": {
+      "detected": 2,
+      "missed": 0,
+      "not_activated": 1,
+      "unknown": 2,
+      "true_negative": 3,
+      "false_positive": 0,
+      "healthy_natural_failure": 0
+    },
+    "activated_mutant_detection": {
+      "numerator": 2,
+      "denominator": 2,
+      "rate": 1.0
+    },
+    "healthy_false_positive": {
+      "numerator": 0,
+      "denominator": 3,
+      "rate": 0.0
+    },
+    "unknown_fraction": {
+      "numerator": 2,
+      "denominator": 8
+    },
+    "boundary": "Constructed defects; no general accuracy or V1 improvement claim."
+  },
+  "human": {
+    "packet_hash": "a26390eea10fb0f2bbf44f2b9b2aa19e9753d14430aae8296733390848033b5e",
+    "items": [
+      {
+        "id": "Q01",
+        "execution_id": "3c859ee0-356b-45bd-8ce6-21a4ce6e0696",
+        "human_label": "no_visible_problem",
+        "sql_effect_gold": "no_visible_problem",
+        "evidence_classification": "true_negative",
+        "agreement": true
+      },
+      {
+        "id": "Q02",
+        "execution_id": "4f63a3f5-04b2-43cf-a2e7-04b713f5768d",
+        "human_label": "insufficient",
+        "sql_effect_gold": "no_visible_problem",
+        "evidence_classification": "true_negative",
+        "agreement": null
+      },
+      {
+        "id": "Q03",
+        "execution_id": "277480c3-9528-4e94-97aa-70f381af565f",
+        "human_label": "no_visible_problem",
+        "sql_effect_gold": null,
+        "evidence_classification": "unknown",
+        "agreement": null
+      },
+      {
+        "id": "Q04",
+        "execution_id": "d9769788-d350-467f-b431-c7754c7bff60",
+        "human_label": "no_visible_problem",
+        "sql_effect_gold": null,
+        "evidence_classification": "unknown",
+        "agreement": null
+      },
+      {
+        "id": "Q05",
+        "execution_id": "ddd89e05-024d-468b-9b4c-a71285552aab",
+        "human_label": "no_visible_problem",
+        "sql_effect_gold": "problem",
+        "evidence_classification": "detected",
+        "agreement": false
+      },
+      {
+        "id": "Q06",
+        "execution_id": "e757e595-0ad4-40b4-95aa-258ef8b53be5",
+        "human_label": "no_visible_problem",
+        "sql_effect_gold": "no_visible_problem",
+        "evidence_classification": "not_activated",
+        "agreement": true
+      },
+      {
+        "id": "Q07",
+        "execution_id": "b9e52f7b-674f-49b4-ac55-8f88ec442513",
+        "human_label": "no_visible_problem",
+        "sql_effect_gold": "no_visible_problem",
+        "evidence_classification": "true_negative",
+        "agreement": true
+      },
+      {
+        "id": "Q08",
+        "execution_id": "299f2cf8-8071-4d9f-a04d-4fb25016a40c",
+        "human_label": "no_visible_problem",
+        "sql_effect_gold": "problem",
+        "evidence_classification": "detected",
+        "agreement": false
+      }
+    ],
+    "total": 8,
+    "human_insufficient": 1,
+    "agreement_on_decisive_labels": {
+      "numerator": 3,
+      "denominator": 5
+    },
+    "boundary": "Human answer view versus SQL effects; no judge/model accuracy claim."
+  }
+}

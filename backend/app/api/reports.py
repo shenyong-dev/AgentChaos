@@ -104,6 +104,21 @@ def defect(key: str, request: Request, user: Identity, service: Service) -> Enve
     return Envelope(data=service.defect(user, key), request_id=request.state.request_id)
 
 
+@router.get("/defects/{key}/verification")
+def verification(
+    key: str,
+    request: Request,
+    user: Identity,
+    service: Service,
+    execution_id: UUID,
+    fixed_version_id: Annotated[int, Query(ge=1)],
+) -> Envelope[dict]:
+    return Envelope(
+        data=service.verification(user, key, execution_id, fixed_version_id),
+        request_id=request.state.request_id,
+    )
+
+
 @router.post("/defects/{key}/reviews")
 def review(
     key: str, body: DefectReview, request: Request, user: Identity, service: Service

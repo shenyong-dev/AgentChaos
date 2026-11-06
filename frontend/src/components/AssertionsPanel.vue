@@ -6,7 +6,7 @@ import { ElButton, ElSelect, ElOption } from 'element-plus'
 import { evidenceGet } from '../api/evidence'
 import type { AssertionPage, AssertionResult, EvaluationSummary, Verdict } from '../types/evaluation'
 
-const props = defineProps<{ runId: string; authorization: string; executionId?: string; executions: { execution_id: string; status: string }[] }>()
+const props = defineProps<{ runId: string; authorization: string; executionId?: string; assertionId?: number; evaluatorVersion?: string; executions: { execution_id: string; status: string }[] }>()
 const emit = defineEmits<{ locate: [id: string]; snapshot: [] }>()
 const execution = ref(''), selected = ref<number>(), rows = ref<AssertionResult[]>([])
 const summary = ref<EvaluationSummary | null>(null), versions = ref<string[]>([]), version = ref('')
@@ -47,7 +47,7 @@ async function load(requestedVersion = version.value) {
       cursor = page.has_more ? page.next_cursor : null
     } while (cursor !== null)
     rows.value = found; version.value = chosenVersion
-    selected.value = found.find(r => ['failed', 'error', 'inconclusive'].includes(r.verdict))?.id ?? found[0]?.id
+    selected.value = found.find(r => r.id === props.assertionId)?.id ?? found.find(r => ['failed', 'error', 'inconclusive'].includes(r.verdict))?.id ?? found[0]?.id
   } catch (e) { if (current === generation) error.value = (e as Error).message }
   finally { if (current === generation) busy.value = false }
 }
@@ -70,9 +70,11 @@ function locate(reference: string) {
   if (reference.startsWith('event:')) emit('locate', reference.slice(6))
   else emit('snapshot')
 }
-watch(() => props.runId, () => { execution.value = props.executions[0]?.execution_id ?? ''; version.value = ''; void load('') }, { immediate: true })
+watch(() => props.runId, () => { execution.value = props.executionId || props.executions[0]?.execution_id || ''; version.value = props.evaluatorVersion ?? ''; void load(version.value) }, { immediate: true })
 watch(execution, (next, previous) => { if (previous && next !== previous) { version.value = ''; void load('') } })
-watch(() => props.executionId, value => { if (value && value !== execution.value) { execution.value = value; version.value = ''; void load('') } }, { immediate: true })
+watch(() => props.executionId, value => { if (value && value !== execution.value) { execution.value = value; version.value = props.evaluatorVersion ?? ''; void load(version.value) } }, { immediate: true })
+watch(() => props.evaluatorVersion, value => { if (value && value !== version.value) { version.value = value; void load(value) } })
+watch(() => props.assertionId, value => { if (rows.value.some(row => row.id === value)) selected.value = value })
 watch(filter, () => { if (!visible.value.some(r => r.id === selected.value)) selected.value = visible.value[0]?.id })
 onBeforeUnmount(() => generation++)
 </script>

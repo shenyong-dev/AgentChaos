@@ -38,7 +38,7 @@ function reply(question:string,id:string) {
   const source={source_id:'read_guide:offline-control',title:'当前页面指南 · 离线控制',tool:'read_guide',content:{purpose:'先选择已审核开发用例，再核对运行条件。',control:'explicit browser transport fixture'},observed_at:new Date().toISOString(),expires_at:new Date(Date.now()+60000).toISOString(),content_hash:'b'.repeat(64),action_id:'page.environment',locator:{kind:'guide',id:'control'}}
   return {request_id:id,session_id:SID,context_hash:HASH,question,status:'completed',mode:'offline_control',answer:{facts:[{text:'当前演示为明确的离线交互控制。',citations:[source.source_id]}],possible_causes:[],missing_evidence:['未进行真实模型质量验证。'],next_steps:[{text:'到工程环境核对前置条件。',citations:[source.source_id]}],action_ids:['page.environment'],certainty:'limited'},sources:[source],trace:[{tool:'read_guide',label:'读取当前页指南',source_id:source.source_id,status:'read'}],calls:[{call_id:'offline-control',model_requested:'no-provider-control',usage:{input_tokens:0,output_tokens:0},estimated_peak_microusd:0,status:'completed'}]}
 }
-async function controls(page:Page,opts:{delay?:Promise<void>;drop?:boolean;event?:boolean;long?:boolean;unique?:boolean}={}) {
+async function controls(page:Page,opts:{delay?:Promise<void>;drop?:boolean;event?:boolean;long?:boolean;unique?:boolean;repeatedSource?:boolean}={}) {
   const sent:{request_id:string;question:string}[]=[],created:Record<string,unknown>[]=[]
   let last:ReturnType<typeof reply>|undefined,drop=opts.drop,currentSession=SID
   await page.route('**/api/v1/copilot/**',async route=>{
@@ -49,6 +49,7 @@ async function controls(page:Page,opts:{delay?:Promise<void>;drop?:boolean;event
     if(path.endsWith('/messages')){
       const body=route.request().postDataJSON();sent.push(body);last=reply(body.question,body.request_id);last.session_id=currentSession
       if(opts.long) last.answer.facts[0]!.text = '这是明确的离线长回答控制，仅验证界面滚动和输入位置。'.repeat(60)
+      if(opts.repeatedSource) last.answer.facts = ['当前对象仍是候选。','每次执行需单独核对。','证据只证明已记录的状态。','后续应查看原始结果。'].map(text => ({text,citations:[last!.sources[0]!.source_id]}))
       if(opts.event) {
         const source = last.sources[0]!
         source.action_id='run.trace';source.locator={kind:'run',id:objects.run}
@@ -89,6 +90,19 @@ test('explicit offline answer exposes source snapshot tool trail usage and valid
   await panel.getByText('调用明细 · 1次',{exact:true}).click();await expect(panel).toContainText('no-provider-control')
   await panel.getByRole('button',{name:'打开原页面',exact:true}).click()
   await expect(page).toHaveURL(/\/environment$/);expect(data.sent).toHaveLength(1)
+})
+
+test('repeated evidence title appears once while every claim keeps its own source link',async({page})=>{
+  const data=await controls(page,{repeatedSource:true});const panel=await open(page)
+  await panel.getByRole('textbox',{name:'询问测试助手',exact:true}).fill('解释当前对象')
+  await panel.getByRole('button',{name:'询问AI（付费）',exact:true}).click()
+  await expect(panel.locator('.copilot-answer-group .copilot-citation')).toHaveCount(5)
+  await expect(panel.locator('.copilot-source-list .copilot-source-link')).toHaveCount(1)
+  await expect(panel.locator('.copilot-source-link')).toContainText('当前页面指南 · 离线控制')
+  await expect(panel.locator('.copilot-statement')).toHaveCount(5)
+  await panel.locator('.copilot-statement .copilot-citation').nth(2).click()
+  await expect(panel.getByRole('region',{name:'引用证据',exact:true})).toContainText('先选择已审核开发用例')
+  expect(data.sent).toHaveLength(1)
 })
 
 test('lost reply keeps original request and receipt lookup does not resubmit or charge',async({page})=>{

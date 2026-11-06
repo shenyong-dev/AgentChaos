@@ -60,6 +60,18 @@ class DraftView(BookingSchema):
     expires_at: AwareDatetime
 
 
+class AttendeeChangeDraft(DraftView):
+    operation: Literal["attendee_change"] = "attendee_change"
+    booking_id: UUID
+    previous_attendees: int
+
+
+class CancelBookingDraft(DraftView):
+    operation: Literal["cancel"] = "cancel"
+    booking_id: UUID
+    original_request_key: UUID
+
+
 class BookingView(BookingSchema):
     booking_id: UUID
     draft_id: UUID

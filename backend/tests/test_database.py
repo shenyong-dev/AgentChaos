@@ -77,6 +77,7 @@ def disposable_database(task="T02"):
         "T17G",
         "T17H",
         "T17I",
+        "T17J",
     )
     prefix = f"agentchaos_{task.lower()}_verify_"
     database = prefix + uuid4().hex[:12]

@@ -65,6 +65,11 @@ def test_discovery_pages_versions_and_no_model_side_effects():
         assert not legacy_row["default_knowledge_compatible"]
         assert first["items"][0]["default_knowledge_compatible"]
         assert {r["id"] for r in first["items"] + second["items"]} == set(ids)
+        newest = svc.cases(1, order="newest")
+        remainder = svc.cases(1, order="newest", cursor=newest["next_cursor"])
+        assert [r["id"] for r in newest["items"] + remainder["items"]] == sorted(ids, reverse=True)
+        assert not remainder["has_more"]
+        assert svc.cases(1, order="newest", query="EXEC-")["items"] == newest["items"]
         assert not second["has_more"] and svc.overview(1)["counts"]["runs"] == 0
         with pytest.raises(AgentError):
             svc.case(1, draft)
@@ -129,6 +134,13 @@ def test_owned_run_filter_and_http_auth_bounds():
             assert client.get("/api/v1/workbench/runs").status_code == 401
             auth = ("demo_operator", TEST_PASSWORD)
             assert client.get("/api/v1/workbench/runs?limit=51", auth=auth).status_code == 400
+            assert client.get("/api/v1/workbench/cases?order=invalid", auth=auth).status_code == 400
+            assert (
+                client.get("/api/v1/workbench/cases?order=newest", auth=auth).json()["data"][
+                    "items"
+                ][0]["id"]
+                == case
+            )
             assert (
                 client.get("/api/v1/workbench/runs?status=invented", auth=auth).status_code == 400
             )

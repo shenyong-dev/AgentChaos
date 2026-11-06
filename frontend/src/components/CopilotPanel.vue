@@ -2,7 +2,7 @@
 import { computed, nextTick, onBeforeUnmount, ref, shallowRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElButton, ElInput, ElTag } from 'element-plus'
-import { Document, Plus, CopyDocument } from '@element-plus/icons-vue'
+import { Plus, CopyDocument } from '@element-plus/icons-vue'
 import { session, sessionFetch } from '../api/session'
 import { catalog, catalogHash, checkedRoute, guidanceGet, assistantOpen, openGuide, useCurrentGuide, type GuideDecision } from '../guidance'
 import { copilotRequest, useCurrentComparison, type CopilotAccess, type CopilotSession, type CopilotTurn, type Source } from '../copilot'
@@ -36,6 +36,19 @@ const selectionKey = computed(() => selected.value ? `${selected.value.kind}:${s
 const contextLabel = computed(() => conversation.value?.selected?.title ?? (selected.value ? `${({case:'开发用例',run:'运行',execution:'执行',version:'对象版本',generation:'生成批次',calibration:'校准批次',interaction:'预约会话'} as const)[selected.value.kind]} · ${selected.value.id.slice(0,8)}` : '当前页面'))
 const prompts = computed(() => page.value === 'environment' ? ['为何不能立即运行？','下一步检查什么？'] : comparison.value ? ['这两次运行能直接比较吗？','哪些条件还缺证据？'] : selected.value?.kind === 'case' ? ['这条用例测什么？','怎样新建这条用例的运行？'] : ['run','execution'].includes(selected.value?.kind ?? '') ? ['失败在哪里？','哪些结论还缺证据？'] : ['这页怎么用？','我下一步应该做什么？'])
 const sections = [{ key:'facts', title:'观察到的事实' },{ key:'possible_causes', title:'可能原因' },{ key:'next_steps', title:'建议下一步' }] as const
+function citedSources(turn: CopilotTurn) {
+  if (!turn.answer) return []
+  const ids = new Set([
+    ...sections.flatMap(group => turn.answer![group.key].flatMap(line => line.citations)),
+    ...turn.answer.missing_evidence.flatMap(line => typeof line === 'string' ? [] : line.citations),
+  ])
+  const sources = new Map(turn.sources.map(item => [item.source_id, item]))
+  return [...ids].map(id => sources.get(id)).filter((item): item is Source => !!item)
+}
+function sourceNumber(turn: CopilotTurn, id: string) {
+  const index = citedSources(turn).findIndex(item => item.source_id === id)
+  return index < 0 ? '?' : String(index + 1)
+}
 const cost = computed(() => turns.value.reduce((sum,t) => sum + t.calls.reduce((s,c) => s + (c.estimated_peak_microusd ?? 0),0),0) / 1e6)
 let sequence = 0, controller: AbortController | undefined, accessController: AbortController | undefined, navigationController: AbortController | undefined, accessSequence = 0, copySequence = 0
 function invalidateCopy() { copySequence++; copyMessage.value = ''; copied.value = '' }
@@ -183,8 +196,9 @@ watch(historyView, async () => { await nextTick(); if (thread.value) thread.valu
             <div class="copilot-result-heading"><strong>{{ turn.mode === 'deterministic' ? '基础指引' : turn.mode === 'offline_control' ? '离线控制' : 'AI解释' }}</strong><div class="copilot-result-tools"><ElButton v-if="turn.answer" text size="small" @click="copyTurn(turn)"><CopyDocument aria-hidden="true" />{{ copied === turn.request_id ? '已复制' : '复制回答' }}</ElButton><ElTag size="small" :type="turn.status === 'completed' ? 'info' : 'warning'">{{ turn.status === 'completed' ? '待核对' : turn.status === 'processing' ? '处理中' : '未生成有效回答' }}</ElTag></div></div>
             <p v-if="turn.error" role="status">{{ turn.error }}</p>
             <template v-if="turn.answer">
-              <section v-for="group in sections" :key="group.key" class="copilot-answer-group"><template v-if="turn.answer[group.key].length"><h3>{{ group.title }}</h3><div v-for="(line,index) in turn.answer[group.key]" :key="index" class="copilot-statement"><p>{{ line.text }}</p><button v-for="id in line.citations" :key="id" type="button" class="copilot-citation" :aria-label="`查看引用：${turn.sources.find(s => s.source_id === id)?.title ?? id}`" @click="cite(turn,id)"><Document aria-hidden="true" />{{ turn.sources.find(s => s.source_id === id)?.title ?? '未知引用' }}</button></div></template></section>
-              <section v-if="turn.answer.missing_evidence.length" class="copilot-missing"><h3>尚缺证据</h3><ul><li v-for="(line,index) in turn.answer.missing_evidence" :key="index">{{ typeof line === 'string' ? line : line.text }}<template v-if="typeof line !== 'string'"><button v-for="id in line.citations" :key="id" type="button" class="copilot-citation" :aria-label="`查看缺失证据引用：${turn.sources.find(s => s.source_id === id)?.title ?? id}`" @click="cite(turn,id)">查看依据</button></template></li></ul></section>
+              <section v-for="group in sections" :key="group.key" class="copilot-answer-group"><template v-if="turn.answer[group.key].length"><h3>{{ group.title }}</h3><div v-for="(line,index) in turn.answer[group.key]" :key="index" class="copilot-statement"><p>{{ line.text }}<button v-for="id in [...new Set(line.citations)]" :key="id" type="button" class="copilot-citation" :aria-label="`查看引用：${turn.sources.find(s => s.source_id === id)?.title ?? id}`" @click="cite(turn,id)">[{{ sourceNumber(turn,id) }}]</button></p></div></template></section>
+              <section v-if="turn.answer.missing_evidence.length" class="copilot-missing"><h3>尚缺证据</h3><ul><li v-for="(line,index) in turn.answer.missing_evidence" :key="index">{{ typeof line === 'string' ? line : line.text }}<template v-if="typeof line !== 'string'"><button v-for="id in [...new Set(line.citations)]" :key="id" type="button" class="copilot-citation" :aria-label="`查看缺失证据引用：${turn.sources.find(s => s.source_id === id)?.title ?? id}`" @click="cite(turn,id)">[{{ sourceNumber(turn,id) }}]</button></template></li></ul></section>
+              <div v-if="citedSources(turn).length" class="copilot-source-list" aria-label="回答引用来源"><button v-for="item in citedSources(turn)" :key="item.source_id" type="button" class="copilot-source-link" :aria-label="`查看来源 ${sourceNumber(turn,item.source_id)}：${item.title}`" @click="cite(turn,item.source_id)">[{{ sourceNumber(turn,item.source_id) }}] {{ item.title }}</button></div>
               <div class="copilot-actions"><ElButton v-for="id in turn.answer.action_ids" :key="id" size="small" :disabled="!!acting" @click="navigate(id)">{{ catalog.actions[id]?.label ?? '不可用动作' }}</ElButton></div>
             </template>
             <details v-if="turn.sources.length" class="copilot-evidence"><summary>取证过程与来源 · {{ turn.trace.length }}项</summary><ol><li v-for="(step,index) in turn.trace" :key="index"><button type="button" @click="cite(turn,step.source_id)">{{ step.label }}</button><span>只读</span></li></ol></details>
@@ -226,5 +240,6 @@ watch(historyView, async () => { await nextTick(); if (thread.value) thread.valu
 @media(prefers-reduced-motion:reduce){.copilot-working span{animation:none}.copilot-prompts button{transition:none}}@keyframes working{to{opacity:.35}}
 
 .copilot-context{flex-wrap:wrap}.copilot-context-actions{margin-left:auto;flex-wrap:wrap;max-width:100%;justify-content:flex-end}.copilot-context-actions svg{width:14px;height:14px;margin-right:4px}.copilot-result-tools{display:flex;align-items:center;gap:10px}.copilot-result-tools .el-button{font-size:11px;margin:0}.copilot-result-tools svg{width:13px;height:13px;margin-right:4px}.copilot-followups{display:flex;flex-wrap:wrap;gap:8px;margin:0 auto 16px;max-width:840px}.copilot-followups button{padding:7px 11px;border:1px solid var(--ac-border);border-radius:8px;background:var(--ac-surface);color:var(--ac-muted);font:inherit;font-size:12px;cursor:pointer}.copilot-followups button:hover:enabled{color:var(--ac-link);border-color:var(--ac-link)}.copilot-followups button:disabled{opacity:.5;cursor:not-allowed}.copilot-history-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:12px;color:var(--ac-muted)}.copilot-history-notice{font-size:12px;color:var(--ac-muted);border-bottom:1px solid var(--ac-border);padding-bottom:12px;margin:0 0 20px}.copilot-copy-message{font-size:12px;color:var(--ac-muted)}.copilot-recent-picker{display:grid;gap:6px;padding:12px;border:1px solid var(--ac-border);border-radius:10px;background:var(--ac-hover);margin-bottom:16px}.copilot-recent-picker button{display:flex;justify-content:space-between;gap:12px;min-width:0;padding:8px;text-align:left;overflow-wrap:anywhere;border:0;background:var(--ac-surface);color:var(--ac-text);font:inherit;font-size:12px;cursor:pointer}.copilot-recent-picker small{white-space:nowrap;color:var(--ac-muted)}
+.copilot-statement{margin-bottom:10px}.copilot-statement p{margin:0}.copilot-citation{display:inline-flex;align-items:center;justify-content:center;min-width:24px;min-height:24px;padding:0 2px;margin-left:3px;font-size:11px;line-height:1;vertical-align:middle;white-space:nowrap}.copilot-source-list{display:flex;flex-wrap:wrap;gap:6px 14px;margin:16px 0 8px;padding-top:10px;border-top:1px solid var(--ac-border)}.copilot-source-link{border:0;background:transparent;color:var(--ac-link);font:inherit;font-size:12px;text-align:left;padding:4px 0;cursor:pointer;overflow-wrap:anywhere}.copilot-source-link:hover{text-decoration:underline}
 @media(max-width:760px){.copilot-context>div:first-child{display:flex;flex-wrap:nowrap;gap:8px;width:100%}.copilot-context>div:first-child>span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.copilot-context-actions{gap:2px}.copilot-context-actions .el-button{font-size:11px;padding:4px}.copilot-result-tools{gap:5px}.copilot-result-tools .el-button{font-size:10px}}
 </style>

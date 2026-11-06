@@ -116,6 +116,12 @@ def decision(item, kind="approve", edited=None):
 
 
 def test_generation_drafts_idempotency_duplicate_order_and_role_bound_review(lab):
+    from test_executor import add_case
+
+    from app.workbench.service import WorkbenchService
+
+    # More than one library page must not hide a newly approved candidate.
+    older = [add_case(lab[0]) for _ in range(21)]
     svc, gateway = service(lab, [{"candidates": [proposal(), proposal("capacity")]}])
     req = GenerateCandidates(request_id=uuid4(), profiles=["normal", "capacity"])
     first = svc.generate(1, req)
@@ -134,6 +140,19 @@ def test_generation_drafts_idempotency_duplicate_order_and_role_bound_review(lab
     assert err.value.status_code == 403
     receipt = svc.review(2, normal["id"], approve)
     assert receipt["approved_case_revision_id"] and receipt["reviewer_id"] == 2
+    library = WorkbenchService(lab[0], lab[2])
+    library_page = library.cases(1, order="newest")
+    assert library_page["items"][0]["id"] == receipt["approved_case_revision_id"]
+    assert library_page["items"][0]["guidance"]["title"] == proposal()["title"]
+    assert (
+        library.case(1, receipt["approved_case_revision_id"])["guidance"]["title"]
+        == proposal()["title"]
+    )
+    after = library.cases(1, order="newest", cursor=library_page["next_cursor"])
+    assert {r["id"] for r in library_page["items"] + after["items"]} == {
+        *older,
+        receipt["approved_case_revision_id"],
+    }
     assert svc.review(2, normal["id"], approve) == receipt
     with pytest.raises(AgentError):
         svc.review(2, normal["id"], decision(normal, "reject"))

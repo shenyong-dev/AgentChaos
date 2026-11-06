@@ -21,6 +21,13 @@ const traceItems = ref<Record<string, unknown>[]>([]), traceCursor = ref<number 
 const messageList = ref<HTMLDivElement>()
 const evidenceToggle = ref<InstanceType<typeof ElButton>>()
 const evidenceOpen = ref(true), recordsOpen = ref(false), newChatOpen = ref(false)
+const upgradeOpen = ref(false)
+let upgradeBinding: { id: string; identity: number; revision: number } | undefined
+function openUpgrade() {
+  if (!view.value || navigationBlocked.value) return
+  upgradeBinding = { id:sessionId.value, identity:session.epoch.value, revision:view.value.revision }
+  upgradeOpen.value = true
+}
 let adopted: { id: string; identity: number } | undefined
 const navigationBlocked = computed(() => busy.value || loading.value || uncertain.value || Boolean(view.value?.processing))
 async function newChat(force = false) {
@@ -68,6 +75,26 @@ const mayAct = computed(() => Boolean(access.value?.model_actions_available && a
 const fields = computed(() => ['date','start_time','end_time','duration_minutes','attendees','room_code'].map(key => ({ key, ...view.value?.fields[key] })))
 const fieldNames: Record<string,string> = { date: '日期', start_time: '开始时间', end_time: '结束时间', duration_minutes: '时长（分钟）', attendees: '人数', room_code: '场地' }
 const statusNames: Record<string,string> = { ready: '可继续输入', waiting_confirmation: '等待确认', error: '本轮未完成', pending: '待确认', confirmed: '已提交', rejected: '已拒绝', superseded: '已被新草稿替代', expired: '已过期', idle: '未确认', confirm: '已确认', completed: '已完成', failed: '未完成', processing: '处理中', not_registered: '未登记' }
+function draftNote(draft: { operation?: string } | null) {
+  if (draft?.operation === 'cancel') return '确认后释放占用时段，预约变为已取消，历史记录保留。确认前仍然有效。'
+  if (draft?.operation === 'attendee_change') return '确认后替换原预约，旧记录保留并生成新预约号'
+  return '确认后提交预约'
+}
+function confirmTitle(draft?: { operation?: string } | null) {
+  if (draft?.operation === 'cancel') return '核对并授权撤销预约'
+  if (draft?.operation === 'attendee_change') return '核对并授权人数变更'
+  return '核对并授权本次预约'
+}
+function confirmBody(draft?: { operation?: string } | null) {
+  if (draft?.operation === 'cancel') return '确认后将释放占用时段，该预约状态变为已取消，历史记录保留。此操作不能在本页自动恢复。确认前预约仍然有效。'
+  if (draft?.operation === 'attendee_change') return '确认将原子替换原预约；旧记录保留并生成新预约号。失败时原预约保持不变。'
+  return '确认将允许预约 Agent 通过原工具提交以下完整草稿。'
+}
+function confirmAction(draft?: { operation?: string } | null) {
+  if (draft?.operation === 'cancel') return '确认撤销该预约'
+  if (draft?.operation === 'attendee_change') return '确认修改人数'
+  return '确认当前草稿并提交'
+}
 const pretty = (value: unknown) => JSON.stringify(value, null, 2)
 function time(value?: string) { return value ? new Date(value).toLocaleString('zh-CN', { hour12: false }) : '未采集' }
 function fail(e: unknown) { error.value = e instanceof InteractionError ? `${e.message}（${e.code}）` : '连接未完成，请先重新读取状态。' }
@@ -176,6 +203,22 @@ function openReview() {
   reviewedDraft.value = { ...view.value.pending_draft }; reviewedRevision.value = view.value.revision
   reviewedConfirmation.value = view.value.confirmation_revision; reviewOpen.value = true
 }
+async function upgradeSession() {
+  if (!view.value || navigationBlocked.value || !access.value?.version_id || !upgradeBinding
+    || upgradeBinding.id !== sessionId.value || upgradeBinding.identity !== session.epoch.value
+    || upgradeBinding.revision !== view.value.revision) { upgradeOpen.value = false; return }
+  const ticket = epoch, id = sessionId.value
+  busy.value = true; error.value = ''
+  try {
+    const result = await interactionRequest<InteractionView>(`/sessions/${id}/upgrade`, {
+      request_id:crypto.randomUUID(), expected_revision:upgradeBinding.revision,
+    })
+    if (ticket !== epoch) return
+    view.value = result; upgradeOpen.value = false
+    await readHistory(id, ticket)
+  } catch (e) { if (ticket === epoch) fail(e) }
+  finally { if (ticket === epoch) busy.value = false }
+}
 function decision(value: 'confirm' | 'reject') {
   const draft = value === 'confirm' ? reviewedDraft.value : view.value?.pending_draft
   if (!draft || !view.value || !mayAct.value) return
@@ -213,6 +256,7 @@ function tabKey(event: KeyboardEvent) {
 const conversation = computed(() => { let turn = 0; return messages.value.map(m => ({ ...m, turn: m.role === 'human' ? ++turn : turn })) })
 watch([sessionId, workspace.authorization], () => {
   epoch++
+  upgradeOpen.value = false; upgradeBinding = undefined
   if (adopted?.id === sessionId.value && adopted.identity === session.epoch.value) { adopted = undefined; busy.value = false; return }
   adopted = undefined; createRequest = undefined; recordsOpen.value = false; newChatOpen.value = false
   view.value = undefined; messages.value = []; access.value = undefined; reviewOpen.value = false
@@ -240,7 +284,7 @@ onBeforeUnmount(() => { epoch++; if (timer) clearInterval(timer); compactQuery?.
       <template v-if="view">
         <div class="interaction-session-bar"><div><ElTag :type="view.status === 'error' ? 'warning' : 'info'">{{ view.read_only ? '历史只读' : statusNames[view.status] ?? view.status }}</ElTag><span v-if="sessionId">版本 {{ view.version_id }} · revision {{ view.revision }}</span><span v-else>新会话</span></div><div class="interaction-view-actions"><ElButton :disabled="navigationBlocked" @click="newChat()">新建会话</ElButton><ElButton :disabled="navigationBlocked" @click="recordsOpen = true">预约测试记录</ElButton><ElButton ref="evidenceToggle" :aria-expanded="evidenceOpen" aria-controls="interaction-evidence" @click="setEvidence(!evidenceOpen)"><component :is="evidenceOpen ? Fold : Expand" aria-hidden="true" />{{ evidenceOpen ? '收起证据' : '查看证据' }}</ElButton><ElButton :loading="loading" :disabled="busy" @click="load"><Refresh aria-hidden="true" />重新读取状态</ElButton></div></div>
         <div v-if="sessionId" class="interaction-usage"><span>本会话模型请求 {{ view.usage_available === false ? '未采集' : view.usage.calls_started ?? 0 }}<template v-if="access?.limits.session_calls !== null && access?.limits.session_calls !== undefined"> / {{ access.limits.session_calls }}</template></span><span>峰值费用估算 {{ formatMicroCny(view.usage_available === false ? undefined : view.usage.charged_estimate ?? 0) }}</span><span v-if="view.usage.held_upper">未知／处理中预留 {{ formatMicroCny(view.usage.held_upper) }}</span></div>
-        <p v-if="view.read_only" class="interaction-warning" role="status">历史版本会话，仅供回看。新建会话可使用当前版本；原记录与预约保持保留。</p>
+        <div v-if="view.read_only" class="interaction-warning" role="status">此会话使用旧版本。<ElButton :disabled="navigationBlocked || !access?.version_id" @click="openUpgrade">保留对话并升级</ElButton></div>
         <p v-if="view.mode === 'offline_control'" class="interaction-warning" role="note">明确离线模型控制：SQL、Redis与工具真实运行，固定模型回复不代表 DeepSeek 效果。</p>
         <p v-if="!access?.version_id || !access.model_actions_available" class="interaction-warning">{{ access?.reason }} <RouterLink to="/environment">查看就绪条件</RouterLink></p>
         <p v-if="uncertain || view.processing" class="interaction-warning" role="status">原请求处理中或回执未定。先读取状态，不使用新标识重复发送。<ElButton size="small" :disabled="busy || !interactionPending" @click="interactionPending && execute(interactionPending)">重发同一请求</ElButton></p>
@@ -252,7 +296,7 @@ onBeforeUnmount(() => { epoch++; if (timer) clearInterval(timer); compactQuery?.
               <article v-for="(message,index) in conversation" :id="message.role === 'human' ? 'interaction-turn-' + message.turn : undefined" :key="message.message_id ?? index" class="interaction-message" :class="{ 'from-user': message.role === 'human', 'source-highlight': selectedTurn === message.turn }"><div><strong>{{ message.role === 'human' ? '你' : '预约 Agent' }}</strong><span>第 {{ message.turn }} 轮</span></div><p>{{ message.content }}</p></article>
               <p v-if="busy" class="interaction-working" role="status">正在处理本轮输入，工具与最终回答完成后一起显示…</p>
             </div>
-            <section v-if="view.pending_draft" class="interaction-draft" aria-label="待确认草稿"><div><ElTag type="warning">{{ statusNames[view.pending_draft.status] ?? view.pending_draft.status }}</ElTag></div><h3>{{ view.pending_draft.room_code }} <span>{{ view.pending_draft.attendees }} 人</span></h3><p>{{ time(view.pending_draft.start_at) }} — {{ time(view.pending_draft.end_at) }}</p><small>有效至 {{ time(view.pending_draft.expires_at) }} · 确认后提交预约</small><div class="interaction-draft-actions"><ElButton :disabled="!mayAct || view.status !== 'waiting_confirmation'" @click="decision('reject')">拒绝此草稿</ElButton><ElButton type="primary" :disabled="!mayAct || draftExpired || Boolean(view.unknown_submission) || view.status !== 'waiting_confirmation'" @click="openReview">核对并确认</ElButton></div></section>
+            <section v-if="view.pending_draft" class="interaction-draft" aria-label="待确认草稿"><div><ElTag type="warning">{{ statusNames[view.pending_draft.status] ?? view.pending_draft.status }}</ElTag></div><h3>{{ view.pending_draft.room_code }} <span><template v-if="view.pending_draft.operation === 'attendee_change'">{{ view.pending_draft.previous_attendees }} → </template>{{ view.pending_draft.attendees }} 人</span></h3><p>{{ time(view.pending_draft.start_at) }} — {{ time(view.pending_draft.end_at) }}</p><small>有效至 {{ time(view.pending_draft.expires_at) }} · {{ draftNote(view.pending_draft) }}</small><div class="interaction-draft-actions"><ElButton :disabled="!mayAct || view.status !== 'waiting_confirmation'" @click="decision('reject')">{{ view.pending_draft.operation === 'cancel' ? '保留原预约' : '拒绝此草稿' }}</ElButton><ElButton type="primary" :disabled="!mayAct || draftExpired || Boolean(view.unknown_submission) || view.status !== 'waiting_confirmation'" @click="openReview">核对并确认</ElButton></div></section>
             <form class="interaction-composer" @submit.prevent="send"><label for="interaction-input">本轮输入</label><ElInput id="interaction-input" v-model="text" type="textarea" :autosize="{ minRows:2, maxRows:5 }" :maxlength="12000" aria-label="预约条件" placeholder="例如：明天 A101，14:00—15:00，8人" :disabled="!mayAct" /><div><span>{{ view.read_only ? '历史会话仅供回看' : view.processing ? '正在处理原请求' : !access?.version_id ? '当前源码尚未登记' : !access.model_actions_available ? '模型调用条件尚未具备' : view.mode === 'real_provider' && access?.limits.local_unlimited ? '付费模型调用 · 不设累计金额上限' : 'Enter 换行，按钮发送' }}</span><ElButton type="primary" native-type="submit" :loading="busy" :disabled="!mayAct || !text.trim()">发送本轮输入 <ArrowRight aria-hidden="true" /></ElButton></div></form>
             <div v-if="view.last_error" class="interaction-round-error"><strong>{{ view.last_error.code }}</strong><p>{{ view.last_error.message }}</p><ElButton v-if="view.next_nodes.length && view.status !== 'waiting_confirmation'" :disabled="!mayAct" @click="retry">显式恢复失败节点</ElButton></div>
           </section>
@@ -269,7 +313,8 @@ onBeforeUnmount(() => { epoch++; if (timer) clearInterval(timer); compactQuery?.
     </template>
     <InteractionRecords v-model="recordsOpen" @select="openRecord" />
     <ElDialog v-model="newChatOpen" title="开始新会话？" width="min(420px, calc(100vw - 32px))" append-to-body><p>当前未发送的输入将清空，已有对话和预约记录会保留。</p><template #footer><ElButton @click="newChatOpen = false">继续编辑</ElButton><ElButton type="primary" @click="newChat(true)">清空输入并新建</ElButton></template></ElDialog>
-    <ElDialog v-model="reviewOpen" title="核对并授权本次预约" width="min(540px, calc(100vw - 32px))" append-to-body class="interaction-confirm-dialog"><template v-if="reviewedDraft"><p>确认将允许预约 Agent 通过原工具提交以下完整草稿。它仍需经过后端版本、有效期和幂等校验。</p><dl><div><dt>场地／人数</dt><dd>{{ reviewedDraft.room_code }} · {{ reviewedDraft.attendees }} 人</dd></div><div><dt>时间</dt><dd>{{ time(reviewedDraft.start_at) }} — {{ time(reviewedDraft.end_at) }}</dd></div><div><dt>草稿版本</dt><dd>{{ reviewedConfirmation }} · revision {{ reviewedRevision }}</dd></div></dl></template><template #footer><ElButton @click="reviewOpen = false">返回修改</ElButton><ElButton type="primary" :disabled="!mayAct" @click="decision('confirm')">确认当前草稿并提交</ElButton></template></ElDialog>
+    <ElDialog v-model="upgradeOpen" title="保留对话并升级？" width="min(480px, calc(100vw - 32px))" append-to-body><p>聊天和已提交预约会保留；未提交草稿及旧确认将失效。升级不会调用模型或自动修改预约。</p><template #footer><ElButton @click="upgradeOpen = false">返回</ElButton><ElButton type="primary" :disabled="navigationBlocked" @click="upgradeSession">升级并保留对话</ElButton></template></ElDialog>
+    <ElDialog v-model="reviewOpen" :title="confirmTitle(reviewedDraft)" width="min(540px, calc(100vw - 32px))" append-to-body class="interaction-confirm-dialog"><template v-if="reviewedDraft"><p>{{ confirmBody(reviewedDraft) }}</p><dl><div v-if="reviewedDraft.booking_id"><dt>原预约</dt><dd>{{ reviewedDraft.booking_id }}</dd></div><div><dt>场地／人数</dt><dd>{{ reviewedDraft.room_code }} · <template v-if="reviewedDraft.operation === 'attendee_change'">{{ reviewedDraft.previous_attendees }} → </template>{{ reviewedDraft.attendees }} 人</dd></div><div><dt>时间</dt><dd>{{ time(reviewedDraft.start_at) }} — {{ time(reviewedDraft.end_at) }}</dd></div><div><dt>草稿版本</dt><dd>{{ reviewedConfirmation }} · revision {{ reviewedRevision }}</dd></div></dl></template><template #footer><ElButton @click="reviewOpen = false">返回修改</ElButton><ElButton :type="reviewedDraft?.operation === 'cancel' ? 'danger' : 'primary'" :disabled="!mayAct" @click="decision('confirm')">{{ confirmAction(reviewedDraft) }}</ElButton></template></ElDialog>
   </section>
 </template>
 

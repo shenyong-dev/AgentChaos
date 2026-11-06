@@ -38,6 +38,18 @@ def snapshot(run_id: UUID, request: Request, user_id: Identity, reader: Reader) 
     return Envelope(data=reader.snapshot(user_id, run_id), request_id=request.state.request_id)
 
 
+@router.get("/runs/{run_id}/reliability")
+def reliability(
+    run_id: UUID, request: Request, user_id: Identity, reader: Reader
+) -> Envelope[dict]:
+    from app.reliability.service import ReliabilityService
+
+    return Envelope(
+        data=ReliabilityService(reader.engine, reader.settings).read(user_id, run_id),
+        request_id=request.state.request_id,
+    )
+
+
 @router.get("/runs/{run_id}/events")
 def events(
     run_id: UUID,

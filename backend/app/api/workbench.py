@@ -90,9 +90,12 @@ def cases(
     limit: Limit = 20,
     q: Search = "",
     category: Category | None = None,
+    order: Literal["oldest", "newest"] = "oldest",
 ) -> Envelope[dict]:
     return Envelope(
-        data=service.cases(user, cursor=cursor, limit=limit, query=q, category=category),
+        data=service.cases(
+            user, cursor=cursor, limit=limit, query=q, category=category, order=order
+        ),
         request_id=request.state.request_id,
     )
 

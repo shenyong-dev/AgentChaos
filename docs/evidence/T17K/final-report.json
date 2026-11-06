@@ -1,0 +1,136 @@
+{
+  "task": "T17K",
+  "status": "implementation_verified_pending_team_acceptance",
+  "at": "2026-11-06T09:05:16.373825+00:00",
+  "scope": "Defect original evidence -> associated repair version -> copy draft -> read-only conditions -> separately audited human verification; no automatic run or repair",
+  "runtime_files": [
+    "backend/app/reports/service.py",
+    "backend/app/reports/verification.py",
+    "backend/app/api/reports.py",
+    "backend/app/workbench/workflow.py",
+    "frontend/src/pages/ReportsPage.vue",
+    "frontend/src/pages/WorkspacePage.vue",
+    "frontend/src/components/RunWizard.vue",
+    "frontend/src/components/DefectWorkflow.vue",
+    "frontend/src/types/reports.ts"
+  ],
+  "verification": {
+    "backend": {
+      "passed": 31,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_seconds": 109.18,
+      "new_cases": 11,
+      "command": "pytest backend/tests/test_repair_workflow.py backend/tests/test_reports.py backend/tests/test_run_workflow.py -q",
+      "full_suite": false,
+      "log": ".local/t17k/backend-final.log"
+    },
+    "UI": {
+      "passed": 26,
+      "skipped": 1,
+      "new_repair_cases": 8,
+      "files": [
+        "repair-workflow.spec.ts",
+        "reliability-view.spec.ts",
+        "chain-diagnostics.spec.ts"
+      ],
+      "single_batch": true,
+      "log": ".local/t17k/ui-final.log",
+      "boundary": "Actual browser/application/session, explicit offline response fixtures, no main review/booking writes; includes 1 pure diagnostics helper check."
+    },
+    "main_read_only_UI": {
+      "passed": 1,
+      "run_id": "6833c742-690d-42fe-afb9-bdaebe9ef844",
+      "model_requests": 0,
+      "log": ".local/t17k/ui-live.log",
+      "boundary": "Existing actual owned report and GET responses, no transport fixtures. Existing error is retained; not a repair success example."
+    },
+    "typecheck": true,
+    "production_build": true,
+    "ruff": true,
+    "memory_contracts": 26
+  },
+  "review": {
+    "model": "inherited current main-agent model",
+    "independent_review_rounds": 1,
+    "findings": [
+      {
+        "priority": "P2",
+        "file": "backend/app/reports/service.py",
+        "issue": "raw expected vs normalized frozen DSL produced different saved input digest when optional defaults were omitted",
+        "resolution": "Use input_snapshot_json.dsl exactly as persist_evaluation; integration fixture contains tool_calls without arguments; stale snapshot negative control retained",
+        "verified_by": "backend-final.log: 31 passed"
+      }
+    ],
+    "review_snapshot": ".local/t17k/review-source.zip",
+    "re_review": false
+  },
+  "retained_failures": [
+    {
+      "log": ".local/t17k/backend-first.log",
+      "result": "19 passed, 1 failed: test expected FastAPI 422 but project validation envelope returns 400; test corrected, no contract weakened"
+    },
+    {
+      "log": ".local/t17k/backend-second.log",
+      "result": "Wrong test file path; no tests ran, not counted"
+    },
+    {
+      "log": ".local/t17k/ui-first.log",
+      "result": "1 passed, 6 failed; ambiguous audit text and pointer targeting of Element Plus readonly inputs/checkbox; retained"
+    },
+    {
+      "log": ".local/t17k/ui-debug.log",
+      "result": "Single-test pointer targeting trace retained"
+    },
+    {
+      "log": ".local/t17k/ui-second.log",
+      "result": "5 passed, 2 failed; checkbox input target intercepted; changed to actual labelled control with checked assertion"
+    },
+    {
+      "log": ".local/t17k/ui-third.log",
+      "result": "7 passed before new save-receipt test added; not combined into a fictitious initial clean batch"
+    }
+  ],
+  "source": {
+    "version_id": 61,
+    "config_hash": "97038ad5325ecd5efebeebe163841a167a42f9499e611b76430a427dfb746d9c",
+    "files": 142,
+    "prior_version": 60,
+    "prior_sources_verified": 141
+  },
+  "preservation": {
+    "main_old_table_rows_unchanged": true,
+    "only_main_write": "append compatible target version 61",
+    "ledgers_unchanged": true,
+    "ledger_count": 16,
+    "env_unchanged": true,
+    "five_local_switches": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "git_index_untouched": true
+  },
+  "operations": {
+    "api": 8000,
+    "UI": 5173,
+    "redis": 16380,
+    "worker_dispatcher": "Original script refreshed while no queued/running executions; containers running and supervisor restored via existing serve in managed exec session 73449",
+    "business_readiness": "7 operations ready",
+    "worker_manager_readiness": "unknown",
+    "app_close_survival": "not tested; deployment lifecycle remains T22 work",
+    "config_and_budget_reset": false
+  },
+  "new_provider_calls": 0,
+  "new_dependencies": 0,
+  "remaining_boundaries": [
+    "Explicit offline policy/version fixture is not a real model repair or formal improvement experiment",
+    "T16 negative findings, T17B restricted assistance and original labels unchanged",
+    "No independent human acceptance filled by agent",
+    "No automatic T17L/M/N or Git publication"
+  ],
+  "acceptance": "docs/acceptance/T17K.md",
+  "architecture": "docs/architecture/repair-workflow.md"
+}

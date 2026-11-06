@@ -9,12 +9,12 @@ import { categories, knowledgeNames } from '../types/workbench'
 import type { CaseRow, FaultRow, Overview, Page, VersionRow } from '../types/workbench'
 
 function clone<T>(value: T): T { return JSON.parse(JSON.stringify(value)) as T }
-const props = defineProps<{ modelValue: boolean; sourceRunId?: string; action?: 'new' | 'rerun' | 'copy' }>()
+const props = defineProps<{ modelValue: boolean; sourceRunId?: string; action?: 'new' | 'rerun' | 'copy'; initialTargetVersionId?: number }>()
 const emit = defineEmits<{ 'update:modelValue': [value: boolean] }>()
 const router = useRouter()
 const visible = computed({ get: () => props.modelValue, set: value => emit('update:modelValue', value) })
 interface Config { request_id: string; target_version_id: number; case_revision_ids: number[]; repetitions: number; seed: number; limits: { concurrency: number; timeout_seconds: number; max_steps: number; max_model_calls: number; max_tokens: number }; budgets: { agent_microusd: number; case_generator_microusd: 0; judge_microusd: 0 }; fault_profile_id: number | null }
-interface Source { source_run_id: string; source_manifest_hash: string; configuration: Config; cases: { case_revision_id: number; content: { case_key: string; revision: number; category: string } }[]; gateway_modes: string[]; boundary: string }
+interface Source { target_id?: number; source_run_id: string; source_manifest_hash: string; configuration: Config; cases: { case_revision_id: number; content: { case_key: string; revision: number; category: string } }[]; gateway_modes: string[]; boundary: string }
 interface Plan { plan_id: string | null; request_id: string; expires_at: string; queue_deadline: string; ready: boolean; blockers: string[]; checks: { id: string; label: string; message: string; next_step: string }[]; configuration: Config; effective_limits: Config['limits']; workflow: { dispatch: 'ready' | 'queue_only'; differences: { field: string; before: unknown; after: unknown }[] }; mode_label: string; boundary: string }
 const config = ref<Config>(), source = ref<Source>(), plan = ref<Plan>(), options = ref<CaseRow[]>([]), versions = ref<VersionRow[]>([]), faults = ref<FaultRow[]>([])
 const busy = ref(false), committing = ref(false), error = ref(''), step = ref(1), query = ref(''), dispatch = ref<'ready' | 'queue_only'>('ready'), now = ref(Date.now())
@@ -45,6 +45,11 @@ async function load() {
     if (token !== generation || identity !== workspace.authorization.value) return
     workspace.overview.value = overview; options.value = rows; versions.value = overview.versions.items; faults.value = profiles.items.filter(f => f.enabled_for_test); source.value = original
     config.value = original ? clone(original.configuration) : { request_id: crypto.randomUUID(), target_version_id: versions.value.find(v => v.compatible)?.id ?? 0, case_revision_ids: workspace.selection.value.map(c => c.id), repetitions: 1, seed: 13029, limits: { concurrency: 1, timeout_seconds: 300, max_steps: 100, max_model_calls: 20, max_tokens: 500000 }, budgets: { agent_microusd: 0, case_generator_microusd: 0, judge_microusd: 0 }, fault_profile_id: null }
+    if (props.initialTargetVersionId && original && action.value === 'copy') {
+      const candidate = versions.value.find(v => v.id === props.initialTargetVersionId && v.compatible && v.target_id === original.target_id)
+      if (!candidate) throw new Error('关联修复版本当前不可执行，未替换来源配置。请核对源码登记与对象后再选择版本。')
+      config.value.target_version_id = candidate.id
+    }
     if (workspace.pendingRun.value) { const saved = workspace.pendingRun.value as unknown as { configuration: Config; plan: Plan }; config.value = clone(saved.configuration); plan.value = saved.plan; step.value = 3 }
   } catch (e) { if (token === generation) error.value = (e as Error).message }
   finally { if (token === generation) busy.value = false }
@@ -78,7 +83,7 @@ async function commit() {
     else error.value = '创建结果尚未查明，原请求已保留。请点击“查证原创建回执”，不要另建请求。'
   } finally { if (token === generation) committing.value = false }
 }
-watch([() => props.modelValue, () => props.sourceRunId, () => props.action], ([open]) => { if (open && workspace.authorization.value) void load(); else generation++ }, { immediate: true })
+watch([() => props.modelValue, () => props.sourceRunId, () => props.action, () => props.initialTargetVersionId], ([open]) => { if (open && workspace.authorization.value) void load(); else generation++ }, { immediate: true })
 watch(workspace.authorization, () => { generation++; visible.value = false; config.value = undefined; source.value = undefined; plan.value = undefined; error.value = ''; committing.value = false; busy.value = false })
 watch(config, resetPlan, { deep: true }); watch(dispatch, resetPlan)
 onBeforeUnmount(() => { generation++; clearInterval(timer) })

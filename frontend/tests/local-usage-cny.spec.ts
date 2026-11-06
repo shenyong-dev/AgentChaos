@@ -77,7 +77,7 @@ test('record search follows bounded pages searches terms opens history read-only
  await dialog.getByRole('textbox',{name:'查找预约测试记录',exact:true}).fill('A101');await dialog.getByRole('button',{name:'查找',exact:true}).click();await expect.poll(()=>terms.filter(t=>t==='A101').length).toBe(2)
  await page.setViewportSize({width:390,height:844});await page.evaluate(()=>{localStorage.setItem('agentchaos.theme','dark');window.dispatchEvent(new StorageEvent('storage',{key:'agentchaos.theme',newValue:'dark'}))});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true)
  await page.screenshot({path:resolve(output,'booking-records-phone-dark.png'),animations:'disabled'})
- await dialog.getByRole('button',{name:/明天A101预约测试/}).click();await expect(dialog).not.toBeVisible();await expect(page.getByRole('textbox',{name:'预约条件',exact:true})).toBeDisabled();await expect(page.locator('.interaction-warning').filter({hasText:'历史版本会话，仅供回看'})).toBeVisible()
+ await dialog.getByRole('button',{name:/明天A101预约测试/}).click();await expect(dialog).not.toBeVisible();await expect(page.getByRole('textbox',{name:'预约条件',exact:true})).toBeDisabled();await expect(page.locator('.interaction-warning').filter({hasText:'此会话使用旧版本'})).toBeVisible()
 })
 
 test('unregistered source explains the blocked blank chat even if paid capability is ready',async({page})=>{

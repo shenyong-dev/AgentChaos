@@ -12,7 +12,7 @@ from app.core.config import get_settings
 from app.interactive.service import InteractionService
 from app.schemas.agent import DemoMessage, DemoResume, DemoRetry
 from app.schemas.common import Envelope, ErrorEnvelope
-from app.schemas.interactive import InteractionCreate
+from app.schemas.interactive import InteractionCreate, InteractionUpgrade
 
 router = APIRouter(
     prefix="/api/v1/interactive",
@@ -73,6 +73,16 @@ def history(
 ) -> Envelope[dict]:
     return Envelope(
         data=service.history(user, str(session_id), cursor, limit),
+        request_id=request.state.request_id,
+    )
+
+
+@router.post("/sessions/{session_id}/upgrade")
+def upgrade(
+    session_id: UUID, body: InteractionUpgrade, request: Request, user: Identity, service: Service
+) -> Envelope[dict]:
+    return Envelope(
+        data=service.upgrade(user, str(session_id), body.model_dump(mode="json")),
         request_id=request.state.request_id,
     )
 

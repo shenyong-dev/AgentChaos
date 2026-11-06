@@ -83,6 +83,19 @@ def test_missing_review_metadata_is_visible_and_never_invents_a_goal():
     assert not describe_assertion({"type": "future-predicate"})["documented"]
 
 
+def test_candidate_title_is_readable_without_promoting_missing_review_evidence():
+    source = snapshot()
+    source["content"]["fixture"].pop("dataset")
+    source["content"]["fixture"]["generation"] = {"candidate": {"title": "容量越界"}}
+    original = copy.deepcopy(source)
+    guide = case_guide(source)
+    assert guide["title"] == "容量越界"
+    assert guide["status"] == "partial" and guide["reviewed_reason"] is None
+    assert len(guide["missing"]) == 2 and source == original
+    source["content"]["fixture"]["generation"] = None
+    assert "说明待补充" in case_guide(source)["title"]
+
+
 def test_sql_count_and_existence_meanings_do_not_claim_task_or_exact_unique_success():
     row = {
         "booking_id": "x",

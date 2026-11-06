@@ -13,7 +13,7 @@ from app.agents.errors import AgentError
 from app.agents.versions import canonical_hash
 from app.core.deployment import database_binding, execution_fingerprint, source_fingerprint
 from app.executors.service import RunService, frozen_case
-from app.models import TestCase, TestRun
+from app.models import TargetVersion, TestCase, TestRun
 from app.schemas.runs import CreateRun
 from app.schemas.workflow import RunPlan
 from app.services.readiness import collect_readiness
@@ -84,6 +84,8 @@ class WorkflowService:
             workbench._identity(session, owner)
         value = RunService(self.engine, self.settings).read(owner, identifier)
         manifest = value["manifest"]
+        with Session(self.engine) as session:
+            target_id = session.get(TargetVersion, manifest["target_version_id"]).target_id
         cases = manifest.get("cases", [])
         if not cases or any(c.get("content", {}).get("dataset_split") != "dev" for c in cases):
             raise AgentError(
@@ -111,6 +113,7 @@ class WorkflowService:
         )
         return {
             "source_run_id": value["run_id"],
+            "target_id": target_id,
             "source_manifest_hash": value["manifest_hash"],
             "configuration": configuration,
             "cases": cases,

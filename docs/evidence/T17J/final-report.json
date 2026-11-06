@@ -1,0 +1,60 @@
+{
+  "task": "T17J",
+  "date": "2026-11-06",
+  "status": "implemented_verified_pending_team_acceptance",
+  "entry": "http://127.0.0.1:5173/runs/6833c742-690d-42fe-afb9-bdaebe9ef844",
+  "scope": [
+    "只读完整运行证据投影与保存判定输入指纹核对",
+    "运行默认结果概览及五段证据摘要",
+    "实际覆盖的六维样本与T15原分母；按来源、数据分区、评价器代码分组",
+    "原事件、指定断言版本、SQL快照及独立AI记录入口"
+  ],
+  "verification": {
+    "backend_related_suite": {"passed": 35, "seconds": 79.41, "full_backend_suite": false},
+    "new_backend_checks_included": 12,
+    "browser_final_batch": {"passed": 22, "seconds": 56.9, "new_summary": 10, "chain_regression": 8, "copilot_regression": 4},
+    "additional_real_main_read_only_browser_check": {"passed": 1, "seconds": 1.7},
+    "typecheck_and_production_build": "passed",
+    "ruff": "passed",
+    "in_memory_contracts": 26,
+    "new_provider_calls": 0,
+    "boundary": "数据库专项使用自有MySQL/Redis与明确OfflineGateway。界面状态矩阵使用明确离线传输控制；另1检查读取真实主运行。均不代表新模型质量或独立真人验收。"
+  },
+  "independent_review": {
+    "rounds": 1,
+    "model": "inherited_current_primary_model",
+    "actionable_P2": 2,
+    "fixed": [
+      "旧判定与当前证据输入指纹不匹配时保留原判定、摘要未知并排除分母",
+      "未观察到目标工具参数的零调用断言不证明参数一致性覆盖"
+    ]
+  },
+  "source": {"version_id": 60, "source_count": 141, "config_hash": "4b288a0c0e8c08018a932d0bc23bef362639c454b5a751c0b39ac8240c037e28", "old_version_59_sources_checked": 139},
+  "preservation": {
+    "main_tables": 17,
+    "only_main_sql_change": "append compatible target version 60; prior rows unchanged",
+    "original_global_ledgers": 16,
+    "ledgers_equal_to_baseline": true,
+    "env_bytes_unchanged": true,
+    "five_local_switches": true,
+    "worker_and_dispatcher": "running and matching live replies after explicit refresh with no queued/running executions; original serve supervisor resumed in an owned persistent session after background heartbeat stopped",
+    "main_readiness_operations": "7 ready",
+    "original_T17_test_files": "restored and verified unchanged; T17J tests use separate names",
+    "preexisting_uncommitted_library_and_copilot_changes": "retained, excluded from this task scope"
+  },
+  "retained_initial_results": [
+    "隔离SQL首轮2过1失败：审核员被既有角色门403拦截，测试错误预期404；修正测试后通过",
+    "UI首轮7过3失败：article角色和同名按钮作用域定位错误；修正定位器后通过",
+    "新增测试曾与旧T17测试同名，已移到test_reliability_view.py与reliability-view.spec.ts，原两文件与Git基线一致，最终35项包含恢复后的旧T17检查",
+    "真实HTTP补验初次因未带既有Origin头403；补齐测试请求头后通过，没有放宽保护"
+  ],
+  "limitations": [
+    "现有主运行为原模型执行异常；摘要保留异常、0笔SQL记录与未知任务结果，没有生成成功演示",
+    "六维只证明相应已有规则和实际流程；不证明通用权限、通用语义或全部异常恢复",
+    "T16未观察到改善、T17B受限人工辅助和原标签不改",
+    "未执行新的真实模型实验、未进入T17K、未提交Git",
+    "后台启动的守护曾停止上报；现通过原operations.workers.serve入口持续运行并记录实际归属，未改运行时代码；退出Codex后的存活未实测，不能承诺"
+  ],
+  "local_raw_records": ".local/t17j",
+  "acceptance": "docs/acceptance/T17J.md"
+}

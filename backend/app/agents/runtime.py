@@ -29,6 +29,21 @@ from app.models import TargetVersion
 from app.services.booking import BookingService, utc_now
 
 
+def confirmation_text(draft, decision):
+    if decision != "confirm":
+        if draft.get("operation") == "cancel":
+            return "拒绝撤销，保留原预约。"
+        return "拒绝确认，不要预约。"
+    if draft.get("operation") == "cancel":
+        return (
+            "确认撤销该预约。请调用cancel_booking，"
+            "参数精确复用当前草稿的booking_id、draft_id、draft_hash和suggested_idempotency_key。"
+        )
+    if draft.get("operation") == "attendee_change":
+        return "确认修改人数并提交。"
+    return "确认当前完整草稿，请提交。"
+
+
 class AgentRuntime:
     def __init__(
         self,
@@ -271,9 +286,7 @@ class AgentRuntime:
                 invoke_input = Command(
                     resume={
                         "kind": body["decision"],
-                        "text": "确认当前完整草稿，请提交。"
-                        if body["decision"] == "confirm"
-                        else "拒绝确认，不要预约。",
+                        "text": confirmation_text(draft, body["decision"]),
                         "draft_id": draft["draft_id"],
                         "draft_hash": draft["draft_hash"],
                         "revision": state["confirmation_revision"],
@@ -290,7 +303,11 @@ class AgentRuntime:
                 if interrupted:
                     draft = state["pending_draft"]
                     simple = text.strip().strip("。！! ")
-                    confirm = simple in ("确认", "确认预约", "确认提交", "确认当前草稿")
+                    confirm = simple in (
+                        ("确认", "确认取消", "确认撤销", "确认撤销预约", "确认取消预约")
+                        if draft.get("operation") == "cancel"
+                        else ("确认", "确认预约", "确认提交", "确认当前草稿")
+                    )
                     invoke_input = Command(
                         resume={
                             "kind": "confirm" if confirm else "message",

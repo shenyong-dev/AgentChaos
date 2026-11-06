@@ -143,6 +143,10 @@ def case_guide(snapshot):
     independent = independent if isinstance(independent, dict) else {}
     reason = independent.get("reason")
     reason = reason.strip() if isinstance(reason, str) else ""
+    generation = content["fixture"].get("generation", {})
+    candidate = generation.get("candidate", {}) if isinstance(generation, dict) else {}
+    title = candidate.get("title") if isinstance(candidate, dict) else None
+    title = title.strip() if isinstance(title, str) else ""
     category, risk = CATEGORIES.get(content["category"], ("其他用例", "风险说明待补充。"))
     profile = dataset.get("knowledge_profile", "base")
     checks = [describe_assertion(a) for a in content["expected"]["assertions"]]
@@ -161,7 +165,7 @@ def case_guide(snapshot):
         "case_key": content["case_key"],
         "revision": content["revision"],
         "content_hash": snapshot["content_hash"],
-        "title": reason or f"{category} · 说明待补充",
+        "title": reason or title or f"{category} · 说明待补充",
         "risk": risk,
         "reviewed_reason": reason or None,
         "status": "partial" if missing else "available",

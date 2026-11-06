@@ -281,6 +281,103 @@
           "type": "object"
         }
       }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "preview_attendee_change",
+        "description": "改已提交预约人数：用原booking_id和新人数生成变更草稿；保留原场地与时间，不重新按新预约查空闲，不取消原预约；仍须用户确认后confirm_booking。",
+        "parameters": {
+          "additionalProperties": false,
+          "properties": {
+            "booking_id": {
+              "format": "uuid",
+              "title": "Booking Id",
+              "type": "string"
+            },
+            "attendees": {
+              "maximum": 2147483647,
+              "minimum": 1,
+              "title": "Attendees",
+              "type": "integer"
+            },
+            "source_quote": {
+              "default": "",
+              "maxLength": 240,
+              "title": "Source Quote",
+              "type": "string"
+            }
+          },
+          "required": [
+            "booking_id",
+            "attendees"
+          ],
+          "title": "AttendeeChange",
+          "type": "object"
+        }
+      }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "preview_cancel_booking",
+        "description": "为当前身份下已确认的预约生成撤销确认；确认前不释放时段。",
+        "parameters": {
+          "additionalProperties": false,
+          "properties": {
+            "booking_id": {
+              "format": "uuid",
+              "title": "Booking Id",
+              "type": "string"
+            }
+          },
+          "required": [
+            "booking_id"
+          ],
+          "title": "CancelBookingRequest",
+          "type": "object"
+        }
+      }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "cancel_booking",
+        "description": "仅在用户确认授权与当前撤销草稿一致时取消该预约并释放时段。",
+        "parameters": {
+          "additionalProperties": false,
+          "properties": {
+            "booking_id": {
+              "format": "uuid",
+              "title": "Booking Id",
+              "type": "string"
+            },
+            "draft_id": {
+              "format": "uuid",
+              "title": "Draft Id",
+              "type": "string"
+            },
+            "draft_hash": {
+              "pattern": "^[0-9a-f]{64}$",
+              "title": "Draft Hash",
+              "type": "string"
+            },
+            "idempotency_key": {
+              "format": "uuid",
+              "title": "Idempotency Key",
+              "type": "string"
+            }
+          },
+          "required": [
+            "booking_id",
+            "draft_id",
+            "draft_hash",
+            "idempotency_key"
+          ],
+          "title": "CancelBooking",
+          "type": "object"
+        }
+      }
     }
   ]
 }

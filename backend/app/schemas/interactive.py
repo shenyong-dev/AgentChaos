@@ -9,3 +9,9 @@ class InteractionCreate(BaseModel):
     model_config = ConfigDict(extra="forbid")
     request_id: UUID
     version_id: int = Field(ge=1)
+
+
+class InteractionUpgrade(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    request_id: UUID
+    expected_revision: int = Field(ge=0)
