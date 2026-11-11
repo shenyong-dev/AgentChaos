@@ -12,6 +12,9 @@ import { workspace } from '../api/workspace'
 import { interactionRequest, InteractionError, interactionPending, saveReceipt, receiptId, forgetReceipt } from '../api/interactive'
 import type { InteractionAccess, InteractionView, InteractionMessage, InteractionReceipt, PendingInteraction } from '../types/interactive'
 
+const props = defineProps<{ embedded?: boolean }>()
+const emit = defineEmits<{ 'navigation-state': [value: { busy: boolean; dirty: boolean }] }>()
+
 const route = useRoute(), router = useRouter()
 const access = ref<InteractionAccess>(), view = ref<InteractionView>(), messages = ref<InteractionMessage[]>([])
 const busy = ref(false), loading = ref(false), text = ref(''), error = ref(''), notice = ref(''), uncertain = ref(false)
@@ -30,6 +33,7 @@ function openUpgrade() {
 }
 let adopted: { id: string; identity: number } | undefined
 const navigationBlocked = computed(() => busy.value || loading.value || uncertain.value || Boolean(view.value?.processing))
+watch([navigationBlocked, text], () => emit('navigation-state', { busy: navigationBlocked.value, dirty: Boolean(text.value.trim()) }), { immediate: true })
 async function newChat(force = false) {
   if (navigationBlocked.value) return
   if (!force && text.value.trim()) { newChatOpen.value = true; return }
@@ -274,7 +278,7 @@ onBeforeUnmount(() => { epoch++; if (timer) clearInterval(timer); compactQuery?.
 
 <template>
   <section class="interaction-page">
-    <div class="page-heading"><div><h1>预约 Agent 调试</h1></div><RouterLink to="/environment" class="interaction-environment">检查环境 <ArrowRight aria-hidden="true" /></RouterLink></div>
+    <div v-if="!props.embedded" class="page-heading"><div><h1>场地预约</h1></div><RouterLink to="/environment" class="interaction-environment">检查环境 <ArrowRight aria-hidden="true" /></RouterLink></div>
 
     <p v-if="error" role="alert" class="evidence-error">{{ error }}</p>
     <p v-if="notice" role="status" class="interaction-notice">{{ notice }}</p>

@@ -5,6 +5,8 @@ from uuid import uuid4
 
 from app.agents.budget import peak_estimate_microusd
 from app.agents.errors import AgentError
+from app.core.cloud import authorized as cloud_authorized
+from app.core.cloud import root_key
 from app.executors.budget import RESERVE, SETTLE, UNKNOWN
 
 AUTHORIZATION = "T12-20261028-judge-open"
@@ -14,7 +16,10 @@ PROTOCOL_AUTHORIZATION = "T17B-20261030-judge-050"
 class JudgeBudget:
     def __init__(self, redis, settings, batch, record, *, prefix="ac:t12:budget"):
         self.redis, self.settings, self.record = redis, settings, record
-        self.key = f"{prefix}:{settings.judge_budget_authorization_id}:judge"
+        self.key = (
+            root_key(settings, "judge")
+            or f"{prefix}:{settings.judge_budget_authorization_id}:judge"
+        )
         self.batch_key = self.key + ":batch:" + batch
         self.calls_key = self.batch_key + ":calls"
 
@@ -28,7 +33,9 @@ class JudgeBudget:
             and not s.judge_budget_unlimited
             and 0 < s.judge_budget_usd <= 0.50
         )
-        legacy = s.judge_budget_unlimited and s.judge_budget_authorization_id == AUTHORIZATION
+        legacy = s.judge_budget_unlimited and (
+            s.judge_budget_authorization_id == AUTHORIZATION or cloud_authorized(s, "judge")
+        )
         if (
             not s.judge_allow_paid_model_calls
             or not (finite or legacy)

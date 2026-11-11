@@ -152,6 +152,7 @@ def snapshot(folder, settings):
             "backend/alembic",
             "backend/operations",
             "backend/reliability",
+            "backend/reference_agents",
             "knowledge",
         ):
             shutil.copytree(
@@ -251,6 +252,7 @@ def create_container(docker, role, record, release, env_file, image):
         (release / "backend/alembic", "backend/alembic"),
         (release / "backend/operations", "backend/operations"),
         (release / "backend/reliability", "backend/reliability"),
+        (release / "backend/reference_agents", "backend/reference_agents"),
         (release / "knowledge", "knowledge"),
         (release / "backend/uv.lock", "backend/uv.lock"),
         (release / "backend/alembic.ini", "backend/alembic.ini"),

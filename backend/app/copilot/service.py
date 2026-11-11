@@ -1,6 +1,7 @@
 """Bounded model/tool loop, immutable per-request receipts and verified source IDs."""
 
 import json
+import re
 import time
 from datetime import UTC, datetime
 from pathlib import Path
@@ -14,8 +15,15 @@ from app.agents.errors import AgentError
 from app.agents.gateway import ModelGateway
 from app.agents.versions import canonical_hash
 from app.cases.service import CaseService
-from app.copilot.budget import CopilotBudget, authorized
+from app.copilot.budget import (
+    CALL_LIMIT,
+    SESSION_CALL_LIMIT,
+    CopilotBudget,
+    authorized,
+    unlimited_calls,
+)
 from app.copilot.sources import SourceTools, clean
+from app.core.cloud import authorized as cloud_authorized
 from app.core.config import PROJECT_ROOT
 from app.core.deployment import source_fingerprint
 from app.schemas.copilot import CitedStatement, CopilotAnswer, CopilotContext
@@ -48,7 +56,9 @@ def configuration(settings):
         "request_seconds": min(45, settings.model_timeout_seconds),
         "backend_source_fingerprint": source_fingerprint(),
         "max_turn_calls": 3,
+        "local_unlimited_calls": unlimited_calls(settings),
         "context_bytes": 32768,
+        "cloud_binding": [settings.cloud_deployment_id, settings.cloud_approval_sha256],
     }
     return {**value, "config_hash": canonical_hash(value)}
 
@@ -80,13 +90,23 @@ class CopilotService:
         ledger = CopilotBudget(self.redis, self.settings, "access")
         raw = self.redis.hgetall(ledger.key)
         account = {(k.decode() if isinstance(k, bytes) else k): int(v) for k, v in raw.items()}
+        cloud = cloud_authorized(self.settings, "copilot")
+        ledger_ready = (
+            account.get("limit") == -1
+            if cloud
+            else account.get("limit", 0) > 0
+            and account.get("held_upper", 0) + account.get("charged_estimate", 0)
+            < min(account.get("limit", 0), int(self.settings.copilot_budget_usd * 1e6))
+        )
         enabled = (
             authorized(self.settings)
             and bool(self.settings.deepseek_api_key.get_secret_value())
-            and account.get("limit", 0) > 0
-            and account.get("calls_started", 0) < 60
-            and account.get("held_upper", 0) + account.get("charged_estimate", 0)
-            < min(account.get("limit", 0), int(self.settings.copilot_budget_usd * 1e6))
+            and ledger_ready
+            and (unlimited_calls(self.settings) or account.get("calls_started", 0) < CALL_LIMIT)
+            and all(
+                account.get(k, 0) >= 0
+                for k in ("held_upper", "charged_estimate", "calls_started", "token_upper")
+            )
             and not account.get("protocol_overrun")
         )
         return {
@@ -96,8 +116,9 @@ class CopilotService:
             "budget": account,
             "limits": {
                 "turn_calls": 3,
-                "session_calls": 12,
-                "session_microusd": 100000,
+                "session_calls": None if unlimited_calls(self.settings) else SESSION_CALL_LIMIT,
+                "total_calls": None if unlimited_calls(self.settings) else CALL_LIMIT,
+                "session_microusd": None if cloud else 100000,
                 "request_seconds": 45,
                 "turn_seconds": 120,
             },
@@ -204,12 +225,14 @@ class CopilotService:
                 if old["question_hash"] != question_hash:
                     raise AgentError("copilot_request_conflict", "同一请求标识不能更换问题。", 409)
                 return old
-            if record["turns"] >= 12:
+            if not unlimited_calls(self.settings) and record["turns"] >= SESSION_CALL_LIMIT:
                 raise AgentError(
                     "copilot_session_limit", "本会话已达到12轮上限，请查看已有记录。", 429
                 )
             tools = self.tools_factory(owner, CopilotContext.model_validate(record["context"]))
             tools.invoke("read_guide", {})
+            if record["context"].get("object_kind") == "case":
+                tools.invoke("read_selection", {})
             result = {
                 "request_id": str(body.request_id),
                 "session_id": str(session_id),
@@ -295,6 +318,7 @@ class CopilotService:
                         "page": record["context"]["page"],
                         "selection": self.selection_metadata(tools.observation["selection"]),
                         "allowed_action_ids": tools.allowed_actions,
+                        "navigation": tools.navigation(),
                         "source": list(tools.sources.values()),
                     },
                     ensure_ascii=False,
@@ -394,6 +418,15 @@ class CopilotService:
                 raise AgentError(
                     "copilot_sources_expired", "取证后状态已过期，请重新核对后再问。", 409
                 )
+            # Keep control IDs in action_ids; prose uses the same verified button names.
+            for group in (answer.facts, answer.possible_causes, answer.next_steps, cited_missing):
+                for statement in group:
+                    for action in tools.navigation():
+                        statement.text = re.sub(
+                            r"(?<![\w.])" + re.escape(action["id"]) + r"(?![\w.])",
+                            lambda _, label=action["label"]: label,
+                            statement.text,
+                        )
             result.update(
                 {"status": "completed", "answer": clean(answer.model_dump(), self.settings)}
             )

@@ -21,6 +21,8 @@ from app.api.guidance import router as guidance_router
 from app.api.interactive import router as interactive_router
 from app.api.judging import router as judging_router
 from app.api.metamorphic import router as metamorphic_router
+from app.api.reductions import router as reductions_router
+from app.api.refund_interactive import router as refund_interactive_router
 from app.api.reports import router as reports_router
 from app.api.routes import router
 from app.api.runs import router as runs_router
@@ -43,7 +45,9 @@ def create_app() -> FastAPI:
     app.include_router(datasets_router)
     app.include_router(workbench_router)
     app.include_router(reports_router)
+    app.include_router(reductions_router)
     app.include_router(interactive_router)
+    app.include_router(refund_interactive_router)
     app.include_router(guidance_router)
 
     @app.middleware("http")

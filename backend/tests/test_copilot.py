@@ -38,6 +38,100 @@ def context(page="workspace", kind=None, identifier=None, **extra):
     }
 
 
+def test_case_question_preloads_actual_turns_and_uses_visible_navigation(lab):
+    from app.workbench.service import WorkbenchService
+
+    original = WorkbenchService(lab["engine"], lab["settings"]).case(1, lab["case"])
+
+    class DirectGateway:
+        def invoke(self, messages, tools, **kwargs):
+            # A model can answer immediately; it need not spend a request discovering turns.
+            payload = json.loads(messages[-1].content)
+            selected = next(s for s in payload["source"] if s["tool"] == "read_selection")
+            value = selected["content"]
+            assert value["turns_complete"] is True
+            assert [t["user"] for t in value["turns"]] == [
+                t["user"] for t in original["guidance"]["turns"]
+            ]
+            assert "智能体会收到什么" in value["locations"]["turns"]
+            assert selected["action_id"] == "case.read"
+            assert {a["id"]: a["label"] for a in payload["navigation"]}["case.read"] == (
+                "查看所选用例说明"
+            )
+            return AIMessage(
+                json.dumps(
+                    {
+                        "facts": [
+                            {"text": "用例第1轮是待测输入。", "citations": [selected["source_id"]]}
+                        ],
+                        "possible_causes": [],
+                        "missing_evidence": [],
+                        "next_steps": [
+                            {
+                                "text": "点击 case.read 核对第1轮。",
+                                "citations": [selected["source_id"]],
+                            }
+                        ],
+                        "action_ids": ["case.read"],
+                        "certainty": "limited",
+                    },
+                    ensure_ascii=False,
+                )
+            ), {"call_id": str(uuid4()), "status": "completed"}
+
+    service = CopilotService(
+        lab["engine"], lab["redis"], lab["settings"], gateway_factory=lambda _: DirectGateway()
+    )
+    created = create(lab, context("library", "case", lab["case"]), service=service)
+    result = ask(service, created, "证据在哪")
+    assert result["status"] == "completed" and len(result["calls"]) == 1
+    assert result["answer"]["next_steps"][0]["text"] == "点击 查看所选用例说明 核对第1轮。"
+
+
+def test_case_context_keeps_structured_turns_when_large_and_redacts_secrets(lab, monkeypatch):
+    from copy import deepcopy
+
+    from app.workbench.service import WorkbenchService
+
+    tools = SourceTools(
+        lab["engine"],
+        lab["settings"],
+        1,
+        CopilotContext.model_validate(context("library", "case", lab["case"])),
+    )
+    value = deepcopy(WorkbenchService(lab["engine"], lab["settings"]).case(1, lab["case"]))
+    value["guidance"]["turns"] = [
+        {"number": i + 1, "user": "password=secret-control " + "多轮原文" * 3000} for i in range(8)
+    ]
+    monkeypatch.setattr(WorkbenchService, "case", lambda *args: value)
+    source = tools.read_selection()
+    content = source["content"]
+    assert content["kind"] == "case" and content["turns"]
+    assert content["turns_complete"] is False and content["total_turns"] == 8
+    assert content["turns"][0]["truncated"] is True
+    assert "secret-control" not in json.dumps(source)
+    assert len(json.dumps(content, ensure_ascii=False).encode()) <= 16000
+
+
+def test_case_read_rechecks_revision_access_after_context_creation(lab, monkeypatch):
+    from app.workbench.service import WorkbenchService
+
+    tools = SourceTools(
+        lab["engine"],
+        lab["settings"],
+        1,
+        CopilotContext.model_validate(context("library", "case", lab["case"])),
+    )
+
+    def denied(*args):
+        raise AgentError("case_not_found", "已不再是可浏览开发用例", 404)
+
+    monkeypatch.setattr(WorkbenchService, "case", denied)
+    with pytest.raises(AgentError, match="已不再是"):
+        tools.read_selection()
+    assert not tools.sources
+
+
 def test_minimal_context_rejects_urls_shell_arbitrary_files_and_comparison_without_selection():
     for change in (
         {"path": "C:/secret"},
@@ -108,6 +202,7 @@ def lab():
                 "executor_namespace": "ac:t17e:test:" + uuid4().hex,
                 "deepseek_api_key": SecretStr(""),
                 "copilot_allow_paid_model_calls": False,
+                "copilot_local_unlimited_calls": False,
             }
         )
         case = add_case(engine)

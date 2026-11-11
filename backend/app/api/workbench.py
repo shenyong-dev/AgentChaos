@@ -9,8 +9,10 @@ from app.api.booking import get_booking_engine
 from app.api.cases import case_identity
 from app.core.config import get_settings
 from app.schemas.common import Envelope, ErrorEnvelope
+from app.schemas.versions import RegisterVersion
 from app.schemas.workflow import CommitPlan, RunPlan
 from app.workbench.service import WorkbenchService
+from app.workbench.versions import VersionRegistrationService
 from app.workbench.workflow import WorkflowService
 
 router = APIRouter(
@@ -35,6 +37,33 @@ def get_workflow_service():
 
 
 Workflow = Annotated[WorkflowService, Depends(get_workflow_service)]
+
+
+@lru_cache
+def get_version_registration_service():
+    return VersionRegistrationService(get_booking_engine(), get_settings())
+
+
+Registration = Annotated[VersionRegistrationService, Depends(get_version_registration_service)]
+
+
+@router.get("/version-registration/targets")
+def registration_targets(request: Request, user: Identity, service: Registration) -> Envelope[dict]:
+    return Envelope(data=service.targets(user), request_id=request.state.request_id)
+
+
+@router.get("/version-registration/check")
+def check_version(
+    request: Request, user: Identity, service: Registration, target_id: Annotated[int, Query(ge=1)]
+) -> Envelope[dict]:
+    return Envelope(data=service.inspect(user, target_id), request_id=request.state.request_id)
+
+
+@router.post("/version-registration")
+def register_version(
+    body: RegisterVersion, request: Request, user: Identity, service: Registration
+) -> Envelope[dict]:
+    return Envelope(data=service.register(user, body), request_id=request.state.request_id)
 
 
 @router.post("/run-plans")

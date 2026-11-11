@@ -1,0 +1,33 @@
+body {
+  font: 16px/1.75 system-ui; margin: 40px auto; padding: 0 20px; max-width: 900px;
+  background: #f3f6fb; color: #182638;
+}
+main { padding: 32px; background: #fff; border: 1px solid #dce4ef; border-radius: 16px; }
+h1 { font-size: 26px; margin-top: 0; }
+label { display: grid; gap: 8px; margin: 20px 0; }
+input, select, textarea, button {
+  font: inherit; padding: 10px; border: 1px solid #b8c5d7; border-radius: 8px;
+  min-width: 0; max-width: 100%; box-sizing: border-box;
+}
+textarea { width: 100%; min-height: 120px; resize: vertical; }
+.check { display: flex; align-items: start; gap: 12px; }
+.check input { margin-top: 8px; }
+.fields { display: flex; gap: 18px; flex-wrap: wrap; }
+.fields label { flex: 1; min-width: 180px; }
+button { background: #2463eb; color: #fff; border: 0; cursor: pointer; padding: 10px 20px; }
+.platform { color: #1858c8; display: inline-block; margin: 8px 0; }
+:focus-visible { outline: 3px solid #719aff; outline-offset: 3px; }
+small { color: #536680; }
+@media (max-width: 600px) {
+  body { margin: 16px auto; }
+  main { padding: 20px; }
+  .fields { gap: 0; }
+  .fields label { flex-basis: 100%; }
+}
+@media (prefers-color-scheme: dark) {
+  body { background: #101923; color: #e2eaf5; }
+  main { background: #192535; border-color: #34465e; }
+  input, select, textarea { background: #101c2c; color: #e2eaf5; border-color: #4d6078; }
+  .platform { color: #90b6ff; }
+  small { color: #b4c5db; }
+}

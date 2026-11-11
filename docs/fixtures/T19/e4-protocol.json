@@ -1,0 +1,38 @@
+{
+  "schema": "t19-e4-case-understanding-v1",
+  "status": "prepared_not_executed",
+  "scope": "用例理解与证据定位；不涵盖全平台助手收益、首次使用、安装或新增运行",
+  "participants": ["P01", "P02", "P03"],
+  "owner": 1,
+  "tasks": [
+    {"id": "D1", "pair": "missing_required_field", "case_id": 3, "case_key": "T13-N003", "instruction": "阅读这条开发用例，解释最初缺什么、后续如何补齐、什么时候才允许写入。给出原页面证据和下一步安全操作。"},
+    {"id": "D2", "pair": "missing_required_field", "case_id": 5, "case_key": "T13-N005", "instruction": "阅读这条开发用例，解释最初缺什么、后续如何补齐、什么时候才允许写入。给出原页面证据和下一步安全操作。"},
+    {"id": "T1", "pair": "missing_time", "case_id": 4, "case_key": "T13-N004", "instruction": "阅读这条开发用例，说明时间信息如何变化、哪些条件需要确认、什么结果才符合预期。给出原页面证据和下一步安全操作。"},
+    {"id": "T2", "pair": "missing_time", "case_id": 6, "case_key": "T13-N006", "instruction": "阅读这条开发用例，说明时间信息如何变化、哪些条件需要确认、什么结果才符合预期。给出原页面证据和下一步安全操作。"}
+  ],
+  "allocation": {
+    "P01": [["D1", "guide"], ["D2", "ai"], ["T1", "ai"], ["T2", "guide"]],
+    "P02": [["D2", "guide"], ["D1", "ai"], ["T2", "ai"], ["T1", "guide"]],
+    "P03": [["D1", "ai"], ["D2", "guide"], ["T1", "guide"], ["T2", "ai"]]
+  },
+  "limits": {"authorization_id": "T19B-20261110-copilot-1", "role": "copilot", "global_microusd": 1000000, "global_requests": 72, "session_microusd": 100000, "session_requests": 12, "questions_per_task": 4, "requests_per_question": 3, "question_seconds": 120, "request_seconds": 45, "max_output_tokens": 1536},
+  "required_record_fields": ["conclusion", "evidence_found", "evidence_location", "evidence_excerpt", "evidence_reason", "missing_reason", "next_action", "help_count", "used_ai", "interrupted", "deviation_note"],
+  "scoring": {
+    "authority": "封存后由人按冻结开发依据核对；开发者参考判据不是独立人工金标准",
+    "dimensions": ["指出缺失条件", "正确复述补齐后的条件", "说明显式确认与完整条件绑定", "区分用例预期和实际执行事实", "给出对应原证据及安全下一步"],
+    "task_success": "五维均有证据支持才计完整正确；部分正确、证据不足、错误分别保留。自报完成不直接评分。",
+    "critical_errors": ["缺条件或未确认时可以提交", "把用例预期说成实际已预约", "编造证据位置或不存在的运行结果"],
+    "assistant_review": "回答与来源逐条核对；拒答、校验失败、未知与缺证据分别记录，不把有来源当语义正确。"
+  },
+  "boundaries": [
+    "原P01阶段A答案及题目保持；本轮新题不补填阶段A。",
+    "P01已用过平台，回访必须记录熟悉程度；不能称首次使用。",
+    "题目按所缺条件及轮次作设计配对，难度等价未经独立验证。",
+    "同一人先后试用仍有迁移学习；两种顺序和不同题降低而不能消除影响。",
+    "至少一人、尽量两至三人；人数如实记录，多任务不算多位参与者。",
+    "所有条件都可看同版本基础指南与用例页面；仅AI条件可使用独立试验助手，禁止主助手或其他AI代答。",
+    "历史日期仅阅读，不提交预约，不调用Agent、生成器或裁判；新运行另案授权。",
+    "AI仅显式发送才调用；失败按原请求查证，未知不换键重发，不为好看追加试次。",
+    "额度耗尽、未完成或受干扰照实报告，不换会话或扩大上限补齐成功。"
+  ]
+}

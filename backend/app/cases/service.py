@@ -15,7 +15,7 @@ from sqlalchemy.orm import Session
 from app.agents.errors import AgentError
 from app.agents.gateway import ModelGateway
 from app.agents.versions import canonical_hash
-from app.cases import evidence
+from app.cases import evidence, refund
 from app.cases.budget import GenerationBudget
 from app.cases.validation import check, templates
 from app.core.passwords import verify_password
@@ -23,25 +23,103 @@ from app.db.seeds import RULE_PATH
 from app.evidence.recorder import redact
 from app.executors.control import advisory
 from app.executors.service import case_content
-from app.models import Artifact, TestCase, User
-from app.schemas.cases import Candidate
+from app.models import Artifact, Target, TestCase, User
+from app.schemas.cases import Candidate, RefundCandidate
+
+PROFILE_NAMES = {
+    "normal": "正常预约",
+    "capacity": "容量越界",
+    "correction": "多轮修正",
+    **refund.PROFILE_NAMES,
+}
 
 
-def manifest(settings, reference, profiles):
-    prompt = (Path(__file__).parent / "prompt.txt").read_text(encoding="utf-8")
-    rules = RULE_PATH.read_text(encoding="utf-8")
+def candidate_model(frozen):
+    return RefundCandidate if frozen.get("target") == "refund" else Candidate
+
+
+def check_candidate(candidate, frozen):
+    checker = refund.check if frozen.get("target") == "refund" else check
+    return checker(candidate, frozen["reference_clock"], frozen["risks"])
+
+
+def case_family(frozen):
+    if frozen.get("mode") == "verified_reduction":
+        return frozen["family_key"]
+    prefix = "generated-refund-" if frozen.get("target") == "refund" else "generated-booking-"
+    return prefix + templates(frozen["reference_clock"])["normal"]["initial"]["date"]
+
+
+def batch_problem(decoded, profiles):
+    """Check the selection before ingestion; keep candidate schema checks separate."""
+    candidates = decoded.get("candidates") if isinstance(decoded, dict) else None
+    received = len(candidates) if isinstance(candidates, list) else None
+    returned = (
+        [
+            item["profile"]
+            for item in candidates
+            if isinstance(item, dict)
+            and isinstance(item.get("profile"), str)
+            and item["profile"] in PROFILE_NAMES
+        ]
+        if isinstance(candidates, list)
+        else []
+    )
+    unexpected = sorted(set(returned) - set(profiles))
+    duplicates = sorted({p for p in returned if returned.count(p) > 1})
+    shape_bad = (
+        not isinstance(decoded, dict) or set(decoded) != {"candidates"} or received != len(profiles)
+    )
+    if not shape_bad and not unexpected and not duplicates:
+        return None
+
+    def names(values):
+        return "、".join(PROFILE_NAMES[p] for p in values)
+
+    messages = [f"本批应生成{len(profiles)}条（{names(profiles)}）"]
+    messages.append(f"模型返回{received}条" if received is not None else "模型未返回候选数组")
+    if unexpected:
+        messages.append("包含未选择的“" + names(unexpected) + "”")
+    if duplicates:
+        messages.append("重复生成“" + names(duplicates) + "”")
+    if isinstance(decoded, dict) and set(decoded) != {"candidates"}:
+        messages.append("顶层字段须只有candidates")
+    return {
+        "code": "batch_shape" if shape_bad else "batch_profiles",
+        "message": "，".join(messages) + "。",
+        "expected_count": len(profiles),
+        "received_count": received,
+        "requested_profiles": list(profiles),
+        "returned_profiles": returned,
+        "missing_profiles": sorted(set(profiles) - set(returned)),
+        "unexpected_profiles": unexpected,
+        "duplicate_profiles": duplicates,
+    }
+
+
+def manifest(settings, reference, profiles, target="booking"):
+    is_refund = target == "refund"
+    model = RefundCandidate if is_refund else Candidate
+    prompt = (
+        Path(__file__).parent / ("refund-prompt.txt" if is_refund else "prompt.txt")
+    ).read_text(encoding="utf-8")
+    rules = refund.RULES if is_refund else RULE_PATH.read_text(encoding="utf-8")
     sources = {
         p.name: hashlib.sha256(p.read_bytes()).hexdigest()
         for p in sorted(Path(__file__).parent.glob("*.py"))
     }
-    sources["schema"] = canonical_hash(Candidate.model_json_schema())
+    sources["schema"] = canonical_hash(model.model_json_schema())
+    risks_source = refund.templates() if is_refund else templates(reference)
     # Expected SQL counts are independently checked later, not supplied as labels to the model.
     risks = {
-        p: {k: v for k, v in templates(reference)[p].items() if k != "expected_count"}
-        for p in profiles
+        p: {k: v for k, v in risks_source[p].items() if k != "expected_count"} for p in profiles
     }
+    schema = model.model_json_schema()
+    schema["properties"]["profile"]["enum"] = list(profiles)
     return {
         "version": "T11-v1",
+        "target": target,
+        "adapter_type": "reference_refund" if is_refund else "langgraph_booking",
         "role": "case_generator",
         "reference_clock": reference,
         "provider": "DeepSeek",
@@ -61,9 +139,12 @@ def manifest(settings, reference, profiles):
         "prompt_hash": hashlib.sha256(prompt.encode()).hexdigest(),
         "public_rules": rules,
         "rules_hash": hashlib.sha256(rules.encode()).hexdigest(),
-        "source_ref": "knowledge/booking-rules-v1.md",
+        "source_ref": "project-reference/refund-fixture-v1"
+        if is_refund
+        else "knowledge/booking-rules-v1.md",
         "sources": sources,
-        "candidate_schema": Candidate.model_json_schema(),
+        "candidate_schema": schema,
+        "selection": {"profiles": list(profiles), "count": len(profiles)},
         "risks": risks,
         "input_boundary": (
             "Only allowlisted public rule file, authored risk templates and schema. "
@@ -114,8 +195,14 @@ class CaseService:
         # Deliberately dev-only. No holdout text or answers are loaded even for deduplication.
         found = []
         query = select(TestCase).where(
-            TestCase.dataset_split == "dev", TestCase.review_status != "rejected"
+            TestCase.dataset_split == "dev",
+            TestCase.review_status != "rejected",
+            TestCase.source != "reduction_trial:T17M",
         )
+        if validation.get("fixture") == "refund-reference-v1":
+            query = query.where(
+                TestCase.fixture_json["fixture"].as_string() == "refund-reference-v1"
+            )
         if before_candidate_id is not None:
             query = query.where(
                 or_(
@@ -138,8 +225,8 @@ class CaseService:
         raw = redact(raw, self.settings)
         candidate, validation = None, None
         try:
-            candidate = Candidate.model_validate(raw)
-            validation = check(candidate, frozen["reference_clock"], frozen["risks"])
+            candidate = candidate_model(frozen).model_validate(raw)
+            validation = check_candidate(candidate, frozen)
             errors = []
         except ValidationError as exc:
             errors = [{"location": list(x["loc"]), "type": x["type"]} for x in exc.errors()]
@@ -190,24 +277,34 @@ class CaseService:
     @staticmethod
     def _new_case(candidate, frozen, owner, batch, artifact_id, validation, *, case_key, revision):
         value = candidate.model_dump(mode="json")
-        family = (
-            "generated-booking-" + templates(frozen["reference_clock"])["normal"]["initial"]["date"]
-        )
+        family = case_family(frozen)
+        is_refund = frozen.get("target") == "refund"
+        reduced = frozen.get("mode") == "verified_reduction"
+        if reduced:
+            family = frozen["family_key"]
         row = TestCase(
             case_key=case_key,
             revision=revision,
             family_key=family,
-            category="robustness"
+            category=frozen["category"]
+            if reduced
+            else "security"
+            if is_refund
+            and candidate.profile in ("refund_owner", "refund_change", "refund_decline")
+            else "tool_execution"
+            if is_refund and candidate.profile != "refund_normal"
+            else "robustness"
             if candidate.profile == "capacity"
             else "memory_and_tool"
             if candidate.profile == "correction"
             else "normal",
             dataset_split="dev",
-            source="case_generator:T11:" + str(batch),
+            source=("verified_reduction:T17M:" if reduced else "case_generator:T11:") + str(batch),
             turns_json=value["turns"],
             fixture_json={
-                "fixture": "booking-default-v1",
+                "fixture": "refund-reference-v1" if is_refund else "booking-default-v1",
                 "reference_clock": frozen["reference_clock"],
+                **({"reference_title": candidate.title} if is_refund else {}),
                 "generation": {
                     "owner_id": owner,
                     "batch_id": str(batch),
@@ -219,9 +316,9 @@ class CaseService:
                 },
             },
             expected_json={
-                "schema_version": "1.1",
+                "schema_version": "refund-1" if is_refund else "1.1",
                 "assertions": value["assertions"],
-                "task_goal": value["task_goal"],
+                **({} if is_refund else {"task_goal": value["task_goal"]}),
             },
             review_status="draft",
             content_hash="0" * 64,
@@ -231,7 +328,10 @@ class CaseService:
 
     def generate(self, owner, request):
         batch = str(request.request_id)
-        request_hash = canonical_hash(request.model_dump(mode="json"))
+        request_body = request.model_dump(mode="json")
+        if request.target == "booking":
+            request_body.pop("target")  # Preserve original booking request receipts.
+        request_hash = canonical_hash(request_body)
         with advisory(self.engine, "casegen-owner:" + str(owner)):
             with advisory(self.engine, "casegen:" + batch):
                 with Session(self.engine) as session:
@@ -252,8 +352,20 @@ class CaseService:
                         return self.read(
                             owner, batch
                         )  # No automatic regeneration after interruption.
+                    if request.target == "refund" and not session.scalar(
+                        select(Target.id)
+                        .where(
+                            Target.owner_id == owner,
+                            Target.adapter_type == "reference_refund",
+                            Target.archived_at.is_(None),
+                        )
+                        .limit(1)
+                    ):
+                        raise AgentError(
+                            "casegen_target_unavailable", "当前账号没有可用的退款测试对象。", 409
+                        )
                 reference = self.clock().isoformat()
-                frozen = manifest(self.settings, reference, request.profiles)
+                frozen = manifest(self.settings, reference, request.profiles, request.target)
                 self._append(
                     owner,
                     batch,
@@ -263,6 +375,7 @@ class CaseService:
                         "request_hash": request_hash,
                         "phase": "request",
                         "mode": "offline_double" if self.gateway_factory else "real_provider",
+                        "target": request.target,
                     },
                 )
 
@@ -290,6 +403,7 @@ class CaseService:
                                     "reference_clock",
                                     "candidate_schema",
                                     "risks",
+                                    "selection",
                                 )
                             },
                             ensure_ascii=False,
@@ -297,9 +411,10 @@ class CaseService:
                     ),
                 ]
                 deadline = time.monotonic() + 90
-                attempts, candidate_ids, error = [], [], None
+                attempts, candidate_ids, error, error_detail = [], [], None, None
                 for attempt in range(2):
                     content = ""
+                    error_detail = None
                     try:
                         message, raw_call = gateway.invoke(messages, [], deadline=deadline)
                         self._append(
@@ -313,13 +428,9 @@ class CaseService:
                         if not isinstance(content, str) or not content.strip():
                             raise ValueError("empty_output")
                         decoded = json.loads(content)
-                        if (
-                            not isinstance(decoded, dict)
-                            or set(decoded) != {"candidates"}
-                            or not isinstance(decoded["candidates"], list)
-                            or not 1 <= len(decoded["candidates"]) <= len(request.profiles)
-                        ):
-                            raise ValueError("batch_shape")
+                        error_detail = batch_problem(decoded, request.profiles)
+                        if error_detail:
+                            raise ValueError(error_detail["code"])
                         for index, raw in enumerate(decoded["candidates"], 1):
                             candidate_ids.append(
                                 self._store_candidate(owner, batch, index, raw, frozen)
@@ -354,12 +465,19 @@ class CaseService:
                                 exc.agent_record,
                                 {"phase": "provider_error", "attempt": attempt + 1},
                             )
-                        attempts.append({"attempt": attempt + 1, "outcome": code})
+                        attempts.append(
+                            {
+                                "attempt": attempt + 1,
+                                "outcome": code,
+                                **({"detail": error_detail} if error_detail else {}),
+                            }
+                        )
                         error = code
                         if attempt or code not in (
                             "invalid_json",
                             "empty_output",
                             "batch_shape",
+                            "batch_profiles",
                             "model_output_truncated",
                             "model_empty_stream",
                             "model_empty_response",
@@ -368,7 +486,15 @@ class CaseService:
                         messages += [
                             AIMessage(content=content or "[empty or truncated output]"),
                             HumanMessage(
-                                content="仅修复输出格式。重新完整输出同一批候选的JSON对象，不能省略原模板或添加审核/身份字段；这是最后一次修复。"
+                                content=(
+                                    "上次输出未通过校验："
+                                    + json.dumps(error_detail or {"code": code}, ensure_ascii=False)
+                                    + "。仅修复本批输出，完整返回只有candidates键的JSON对象。"
+                                    + f"必须恰好{len(request.profiles)}条，profile仅允许"
+                                    + json.dumps(request.profiles, ensure_ascii=False)
+                                    + "，每种恰好一条；删除未选类型、补齐缺失类型、去除重复类型。"
+                                    "保留原模板条件和候选Schema，不添加审核/身份字段；这是最后一次修复。"
+                                )
                             ),
                         ]
                 self._append(
@@ -379,6 +505,7 @@ class CaseService:
                         "candidate_ids": candidate_ids,
                         "attempts": attempts,
                         "error": error,
+                        "error_detail": error_detail,
                         "ledger": budget.snapshot(),
                         "requested": len(request.profiles),
                     },
@@ -427,11 +554,16 @@ class CaseService:
                 # which remains the denominator for initial model-quality metrics.
                 current = {"status": "schema_error", "validation": None, "duplicates": []}
                 try:
-                    checked = check(
-                        Candidate.model_validate(value["raw"]),
-                        frozen["reference_clock"],
-                        frozen["risks"],
-                    )
+                    if frozen.get("mode") == "verified_reduction":
+                        from app.reductions.service import ReductionService
+
+                        checked = ReductionService(self.engine, self.settings).validate_draft(
+                            frozen, value["raw"]
+                        )
+                    else:
+                        checked = check_candidate(
+                            candidate_model(frozen).model_validate(value["raw"]), frozen
+                        )
                     duplicate_ids = self._duplicates(
                         session,
                         checked,
@@ -447,7 +579,7 @@ class CaseService:
                         "validation": checked,
                         "duplicates": duplicate_ids,
                     }
-                except ValidationError:
+                except (ValidationError, AgentError):
                     pass
                 candidates.append(
                     {
@@ -456,7 +588,14 @@ class CaseService:
                         "recheck": {
                             **current,
                             "checker_hash": hashlib.sha256(
-                                (Path(__file__).parent / "validation.py").read_bytes()
+                                (
+                                    Path(__file__).parent
+                                    / (
+                                        "refund.py"
+                                        if frozen.get("target") == "refund"
+                                        else "validation.py"
+                                    )
+                                ).read_bytes()
                             ).hexdigest(),
                         },
                         "case_revisions": [
@@ -473,12 +612,26 @@ class CaseService:
                     }
                 )
             result = evidence.read(final) if final else None
+            # Explain historical failures without rewriting their sealed results or calling a model.
+            failure = result.get("error_detail") if result else None
+            if result and result["error"] in ("batch_shape", "batch_profiles") and not failure:
+                provider = next(
+                    (r for r in reversed(rows) if r.metadata_json.get("phase") == "provider"), None
+                )
+                if provider:
+                    content = evidence.read(provider).get("response", {}).get("content")
+                    if isinstance(content, str):
+                        try:
+                            failure = batch_problem(json.loads(content), list(frozen["risks"]))
+                        except ValueError:
+                            pass
             counts = {
                 s: sum(c["status"] == s for c in candidates)
                 for s in ("valid", "semantic_error", "schema_error", "duplicate")
             }
             return {
                 "generation_id": str(batch),
+                "target": frozen.get("target", "booking"),
                 "owner_id": request.owner_id,
                 "status": "error"
                 if result and result["error"]
@@ -490,6 +643,7 @@ class CaseService:
                 "manifest_hash": canonical_hash(frozen),
                 "candidates": candidates,
                 "result": result,
+                "failure": failure,
                 "metrics": {
                     "received": len(candidates),
                     "valid_before_review": counts["valid"],
@@ -511,12 +665,19 @@ class CaseService:
                 ],
             }
 
-    def page(self, owner, after=0, limit=20):
+    def page(self, owner, after=0, limit=20, target=None):
         with Session(self.engine) as session:
             user = self.role(session, owner)
             query = select(Artifact).where(Artifact.kind == "casegen_request", Artifact.id > after)
             if user.role != "reviewer":
                 query = query.where(Artifact.owner_id == owner)
+            if target:
+                domain = Artifact.metadata_json["target"].as_string()
+                query = query.where(
+                    or_(domain == "booking", domain.is_(None))
+                    if target == "booking"
+                    else domain == "refund"
+                )
             rows = list(session.scalars(query.order_by(Artifact.id).limit(limit + 1)))
             return {
                 "items": [
@@ -526,6 +687,7 @@ class CaseService:
                         "owner_id": r.owner_id,
                         "created_at": r.created_at.isoformat(),
                         "mode": r.metadata_json["mode"],
+                        "target": r.metadata_json.get("target", "booking"),
                     }
                     for r in rows[:limit]
                 ],
@@ -558,9 +720,10 @@ class CaseService:
         if request.expected_candidate_hash != original["candidate_hash"]:
             raise AgentError("candidate_hash_conflict", "候选内容已不匹配，请重新读取。", 409)
         body_hash = canonical_hash(request.model_dump(mode="json"))
-        family = (
-            "generated-booking-" + templates(frozen["reference_clock"])["normal"]["initial"]["date"]
-        )
+        family = case_family(frozen)
+        reduced = frozen.get("mode") == "verified_reduction"
+        if reduced:
+            family = frozen["family_key"]
         with advisory(self.engine, "case-family:" + family) as connection:
             with Session(connection) as session, session.begin():
                 reviews = list(
@@ -584,7 +747,22 @@ class CaseService:
                 new_id, changes = None, []
                 if request.decision != "reject":
                     try:
-                        candidate = request.edited or Candidate.model_validate(original["raw"])
+                        if reduced:
+                            from app.schemas.reductions import VerifiedReductionCandidate
+
+                            if request.edited is not None:
+                                raise AgentError(
+                                    "reduction_edit_requires_verification",
+                                    "修改缩减内容必须重新复验，不能沿用旧证明。",
+                                    409,
+                                )
+                            candidate = VerifiedReductionCandidate.model_validate(original["raw"])
+                        else:
+                            candidate = candidate_model(frozen).model_validate(
+                                request.edited.model_dump(mode="json")
+                                if request.edited is not None
+                                else original["raw"]
+                            )
                     except ValueError:
                         raise AgentError(
                             "candidate_invalid", "格式错误的候选需明确修改后才能通过。", 409
@@ -600,7 +778,14 @@ class CaseService:
                         raise AgentError(
                             "candidate_profile_changed", "更换风险模板需重新生成候选。", 409
                         )
-                    validation = check(candidate, frozen["reference_clock"], frozen["risks"])
+                    if reduced:
+                        from app.reductions.service import ReductionService
+
+                        validation = ReductionService(self.engine, self.settings).validate_draft(
+                            frozen, original["raw"]
+                        )
+                    else:
+                        validation = check_candidate(candidate, frozen)
                     prior = session.scalar(
                         select(TestCase)
                         .where(

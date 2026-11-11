@@ -26,14 +26,13 @@ const tasks = computed(() => [
     question: props.comparison ? '核对当前明确选择的两个开发运行的比较条件，列出相同项、不同项和缺失证据，再说明这些结果能支持什么结论。不要把条件不一致说成改进。' : '两个版本的运行需要满足哪些条件才能比较？请给出输入、种子、知识、故障、预算和执行模式的核对清单。尚未选择两个运行，不对实际优劣下结论。' },
 ])
 const status = computed(() => props.checking ? '正在核对' : !props.access ? '状态待确认' : !props.fresh ? '状态待刷新' : props.access.enabled ? 'AI可询问' : '暂不可调用')
-const remaining = computed(() => props.fresh && typeof props.access?.budget.calls_started === 'number' ? Math.max(0,60-props.access.budget.calls_started) : undefined)
 </script>
 
 <template>
   <div class="copilot-home">
     <div class="copilot-home-scope">
       <div><span>当前分析范围</span><strong>{{ selected ? context : catalog.pages[page].title }}</strong></div>
-      <div class="copilot-home-status"><strong>{{ status }}</strong><span v-if="remaining !== undefined">总额度还余 {{ remaining }} 次请求</span></div>
+      <div class="copilot-home-status"><strong>{{ status }}</strong></div>
       <InfoHint label="助手首页操作" text="任务卡和快捷问题只填入草稿，点击询问AI才会付费。快捷入口只做导航。最近讨论仅保留本页、本对象内存中的4条，换对象、刷新或退出后清空；不删除服务端原回执。" />
     </div>
     <div class="copilot-task-grid" aria-label="助手任务">

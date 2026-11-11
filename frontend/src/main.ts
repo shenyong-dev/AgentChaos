@@ -9,7 +9,7 @@ import JudgingPage from './pages/JudgingPage.vue'
 import SemanticPage from './pages/SemanticPage.vue'
 import WorkspacePage from './pages/WorkspacePage.vue'
 import ReportsPage from './pages/ReportsPage.vue'
-import InteractivePage from './pages/InteractivePage.vue'
+import AgentTestPage from './pages/AgentTestPage.vue'
 // Include Dialog's Overlay dependency so its fixed positioning and stacking apply on every route.
 import 'element-plus/es/components/dialog/style/css'
 import 'element-plus/es/components/select/style/css'
@@ -31,7 +31,8 @@ const router = createRouter({
     { path: '/library', component: WorkspacePage },
     { path: '/workbench', component: WorkspacePage },
     { path: '/reports', component: ReportsPage },
-    { path: '/interactive/:sessionId?', component: InteractivePage },
+    { path: '/interactive/refund/:refundSessionId?', component: AgentTestPage },
+    { path: '/interactive/:sessionId?', component: AgentTestPage },
     { path: '/environment', component: EnvironmentPage },
     { path: '/runs/:runId?', component: EvidencePage },
     { path: '/cases/:batchId?', component: CasesPage },

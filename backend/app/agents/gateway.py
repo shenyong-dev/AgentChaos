@@ -47,7 +47,20 @@ class ModelGateway:
         self.audit_directory = audit_directory or PROJECT_ROOT / ".local/t04/model-calls"
         self.control = control
 
-    def invoke(
+    def invoke(self, messages, tools, *, deadline=None, tool_choice=None):
+        from contextlib import nullcontext
+
+        from app.core.cloud import invocation_guard
+
+        guard = (
+            invocation_guard(self.budget.redis, self.settings, self.role)
+            if self.settings.cloud_deployment_id
+            else nullcontext()
+        )
+        with guard:
+            return self._invoke(messages, tools, deadline=deadline, tool_choice=tool_choice)
+
+    def _invoke(
         self,
         messages: list[BaseMessage],
         tools: list[dict],
@@ -56,6 +69,9 @@ class ModelGateway:
         tool_choice=None,
     ) -> tuple[AIMessage, dict]:
         s = self.settings
+        from app.core.cloud import require_capacity
+
+        require_capacity(s)
         if self.role == "copilot":
             deadline = min(deadline or float("inf"), time.monotonic() + 45)
         if not s.deepseek_api_key.get_secret_value():

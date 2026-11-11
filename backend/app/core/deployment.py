@@ -14,6 +14,8 @@ def source_fingerprint():
     paths += sorted((PROJECT_ROOT / "backend/app").rglob("*.txt"))
     paths += sorted((PROJECT_ROOT / "backend/app").rglob("*.json"))
     paths += sorted((PROJECT_ROOT / "backend/alembic/versions").glob("*.py"))
+    paths += sorted((PROJECT_ROOT / "backend/reference_agents").rglob("*.py"))
+    paths += sorted((PROJECT_ROOT / "backend/reference_agents").rglob("*.txt"))
     paths += [PROJECT_ROOT / "backend/uv.lock"]
     return canonical_hash(
         {
@@ -57,6 +59,9 @@ def execution_fingerprint(settings):
         "executor_budget_authorization_id",
         "executor_agent_budget_usd",
         "executor_agent_budget_unlimited",
+        "cloud_deployment_id",
+        "cloud_approval_sha256",
+        "cloud_open_model_budget",
     )
     return canonical_hash(
         {

@@ -1,0 +1,103 @@
+name: agentchaos-cloud
+x-app: &app
+  image: ${CLOUD_IMAGE:?Build and pin the reviewed application image}
+  pull_policy: never
+  env_file: /opt/agentchaos/config/app.env
+  volumes:
+    - /opt/agentchaos/data:/workspace/AgentChaos/.local
+    - /opt/agentchaos/cache:/workspace/AgentChaos/.cache
+  networks: [private]
+  restart: unless-stopped
+  logging: &logs
+    driver: json-file
+    options: {max-size: 10m, max-file: "3"}
+services:
+  mysql:
+    image: agentchaos-cloud-mysql:t22a-20261111
+    pull_policy: never
+    # Source: mysql:8.0.39@sha256:ccb8f749bb5e59f9f8f03bf7282c7ef27a93a1814a24f0a8a926fb4e19b7fb97
+    environment:
+      MYSQL_DATABASE: agentchaos
+      MYSQL_USER: agentchaos
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?Private cloud credentials required}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Private cloud credentials required}
+    volumes:
+      - /opt/agentchaos/mysql:/var/lib/mysql
+      - ./mysql.cnf:/etc/mysql/conf.d/agentchaos.cnf:ro
+    networks: [private]
+    mem_limit: 320m
+    memswap_limit: 512m
+    restart: unless-stopped
+    logging: *logs
+    healthcheck:
+      test: [CMD-SHELL, "MYSQL_PWD=$$MYSQL_PASSWORD mysql -uagentchaos -Dagentchaos -e 'SELECT 1' >/dev/null"]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+  redis:
+    image: agentchaos-cloud-redis:t22a-20261111
+    pull_policy: never
+    # Source: redis:8.2@sha256:e5f23377739f95a2f530b9c99f93accb4f634577f09d00a7d8e0638f2fdf69e0
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?Private cloud credentials required}
+    entrypoint: [/bin/sh, /etc/agentchaos/start-redis.sh]
+    volumes:
+      - /opt/agentchaos/redis:/data
+      - ./redis.conf:/etc/agentchaos/redis.conf:ro
+      - ./start-redis.sh:/etc/agentchaos/start-redis.sh:ro
+    networks: [private]
+    mem_limit: 192m
+    memswap_limit: 256m
+    restart: unless-stopped
+    logging: *logs
+    healthcheck:
+      test: [CMD-SHELL, "export REDISCLI_AUTH=$$REDIS_PASSWORD; redis-cli -e PING >/dev/null && redis-cli -e JSON.TYPE ac:health:probe >/dev/null && redis-cli -e FT._LIST >/dev/null"]
+      interval: 15s
+      timeout: 5s
+      retries: 12
+  api:
+    <<: *app
+    command: [uvicorn, app.main:app, --host, 0.0.0.0, --port, "8000", --workers, "1", --proxy-headers, --forwarded-allow-ips, "172.29.88.1", --limit-concurrency, "24"]
+    ports: ["127.0.0.1:18080:8000"]
+    mem_limit: 384m
+    memswap_limit: 640m
+    depends_on:
+      mysql: {condition: service_healthy}
+      redis: {condition: service_healthy}
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health',timeout=5)"]
+      interval: 30s
+      timeout: 8s
+      retries: 5
+      start_period: 45s
+  worker:
+    <<: *app
+    command: [celery, -A, "app.workers.celery_app:celery_app", worker, --loglevel=WARNING, --concurrency=1, --prefetch-multiplier=1]
+    volumes:
+      - /opt/agentchaos/data:/workspace/AgentChaos/.local
+      - /opt/agentchaos/cache:/workspace/AgentChaos/.cache
+      - ./worker-health.py:/etc/agentchaos/worker-health.py:ro
+    mem_limit: 448m
+    memswap_limit: 768m
+    depends_on:
+      mysql: {condition: service_healthy}
+      redis: {condition: service_healthy}
+    healthcheck:
+      test: [CMD, python, /etc/agentchaos/worker-health.py]
+      interval: 30s
+      timeout: 12s
+      retries: 3
+      start_period: 45s
+  dispatcher:
+    <<: *app
+    command: [python, -m, app.executors.dispatch]
+    mem_limit: 256m
+    memswap_limit: 512m
+    depends_on:
+      mysql: {condition: service_healthy}
+      redis: {condition: service_healthy}
+networks:
+  private:
+    driver: bridge
+    ipam:
+      config: [{subnet: 172.29.88.0/24, gateway: 172.29.88.1}]

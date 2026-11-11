@@ -1,12 +1,11 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
-import { getConfig, getHealth, getReadiness } from '../api/client'
-import type { HealthReport, PublicConfig } from '../types/api'
+import { getHealth, getReadiness } from '../api/client'
+import type { HealthReport } from '../types/api'
 import type { ReadinessReport } from '../types/readiness'
 
 export const useEnvironmentStore = defineStore('environment', () => {
   const health = ref<HealthReport | null>(null)
-  const config = ref<PublicConfig | null>(null)
   const requestId = ref('')
   const loading = ref(false)
   const error = ref('')
@@ -18,22 +17,17 @@ export const useEnvironmentStore = defineStore('environment', () => {
     loading.value = true
     error.value = ''
     readinessError.value = ''
-    const [healthResult, configResult, readinessResult] = await Promise.allSettled([getHealth(), getConfig(), getReadiness()])
+    const [healthResult, readinessResult] = await Promise.allSettled([getHealth(), getReadiness()])
     if (healthResult.status === 'fulfilled') {
       health.value = healthResult.value.data
       requestId.value = healthResult.value.request_id
     } else {
       error.value = '无法读取最新健康状态，请检查 API 服务后重新检测。'
     }
-    if (configResult.status === 'fulfilled') {
-      config.value = configResult.value.data
-    } else {
-      error.value ||= '模型配置暂时无法读取，请重新检测。'
-    }
     if (readinessResult.status === 'fulfilled') readiness.value = readinessResult.value.data
     else readinessError.value = '操作就绪检查未完成；上次结果仅供历史参考。'
     loading.value = false
   }
 
-  return { health, config, requestId, loading, error, readiness, readinessError, refresh }
+  return { health, requestId, loading, error, readiness, readinessError, refresh }
 })

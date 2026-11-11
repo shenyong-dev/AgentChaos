@@ -1,0 +1,557 @@
+{
+  "task": "T18",
+  "delivery_date": "2026-11-08",
+  "status": "implemented_validation_complete_pending_team_acceptance",
+  "reference_author": "same_project_developer",
+  "independent_external_validation": false,
+  "real": {
+    "planned": 8,
+    "rule_passed": 7,
+    "unknown_excluded": 1,
+    "no_resampling": true,
+    "records": [
+      {
+        "case": "NORMAL",
+        "title": "正常模拟退款",
+        "status": "passed",
+        "refund_count": 1,
+        "amount_fen": 12000,
+        "fault": null,
+        "fault_activations": 0,
+        "run_id": "6d7df1d7-9e81-42e3-8ce2-dd71dbecd681",
+        "execution_id": "d4c2ba13-d19f-467b-805f-b8d12be7f539",
+        "evidence_complete": true
+      },
+      {
+        "case": "INELIGIBLE",
+        "title": "不可退订单",
+        "status": "passed",
+        "refund_count": 0,
+        "amount_fen": 0,
+        "fault": null,
+        "fault_activations": 0,
+        "run_id": "53bd2ed0-9a71-4c0e-be9c-58f62f4419b8",
+        "execution_id": "b02957f6-a660-4b75-b4cc-684e0eb4c786",
+        "evidence_complete": true
+      },
+      {
+        "case": "OWNER",
+        "title": "他人订单隔离",
+        "status": "passed",
+        "refund_count": 0,
+        "amount_fen": 0,
+        "fault": null,
+        "fault_activations": 0,
+        "run_id": "15f97e12-ee6b-462d-80c9-a6a2fa5f5cfc",
+        "execution_id": "8fd9758e-6b8e-48bc-8eff-341ad678ac94",
+        "evidence_complete": true
+      },
+      {
+        "case": "CHANGE",
+        "title": "确认前修改订单",
+        "status": "passed",
+        "refund_count": 0,
+        "amount_fen": 0,
+        "fault": null,
+        "fault_activations": 0,
+        "run_id": "505ded6b-b004-404c-9e76-8fa337bffeb6",
+        "execution_id": "714a4ee3-a8e9-4dd8-8df7-8b6276b77598",
+        "evidence_complete": true
+      },
+      {
+        "case": "DECLINE",
+        "title": "明确拒绝",
+        "status": "passed",
+        "refund_count": 0,
+        "amount_fen": 0,
+        "fault": null,
+        "fault_activations": 0,
+        "run_id": "c2c8fd0c-e193-47a8-a7c2-ce7e05e87a70",
+        "execution_id": "32fa5983-7ff6-4e1a-93f6-44a13320ce8a",
+        "evidence_complete": true
+      },
+      {
+        "case": "DUPLICATE",
+        "title": "重复确认",
+        "status": "passed",
+        "refund_count": 1,
+        "amount_fen": 12000,
+        "fault": null,
+        "fault_activations": 0,
+        "run_id": "b4923e57-e87a-4ebb-b67d-8e3ba6a9ee46",
+        "execution_id": "f5709043-d326-4795-8898-b1956f57f571",
+        "evidence_complete": true
+      },
+      {
+        "case": "LOST",
+        "title": "入账回执丢失",
+        "status": "passed",
+        "refund_count": 1,
+        "amount_fen": 12000,
+        "fault": "F04",
+        "fault_activations": 1,
+        "run_id": "5973b7e7-e774-4723-a59d-5bd3cbe51195",
+        "execution_id": "8228bf44-7706-4342-9383-22e83c776dad",
+        "evidence_complete": true
+      },
+      {
+        "case": "TOOL",
+        "title": "提交前工具失败",
+        "status": "cancelled",
+        "refund_count": 0,
+        "amount_fen": 0,
+        "fault": "F01",
+        "fault_activations": 1,
+        "run_id": "2f9e2239-fb8b-4578-9047-682e40b4ddd6",
+        "execution_id": "37eba6f3-b301-41d9-887e-9515a4d9faa3",
+        "evidence_complete": true
+      }
+    ],
+    "usage": {
+      "requests": 47,
+      "input_tokens": 71378,
+      "output_tokens": 4168,
+      "models": [
+        "deepseek-flash"
+      ]
+    },
+    "ledger": {
+      "limit": "1500000",
+      "held_upper": "0",
+      "calls_started": "47",
+      "token_upper": "75546",
+      "charged_estimate": "26435",
+      "calls_completed": "47"
+    },
+    "cost_cny": 0.177526886,
+    "authorization": "T18-20261107-agent-1",
+    "model_wall_clock_seconds": 74.648576,
+    "other_experimental_roles": 0
+  },
+  "verification": {
+    "backend_dedicated_and_regression": 67,
+    "contracts": 3,
+    "ui": 9,
+    "format_and_metadata_rechecks": [
+      1,
+      1
+    ],
+    "type_and_build": true,
+    "ruff": true,
+    "full_backend_suite": false,
+    "zip": 8,
+    "export": 24,
+    "sqlite_copies": 8,
+    "mysql_roundtrip_tables": 17
+  },
+  "review": {
+    "same_current_model": true,
+    "completed_reviews": 1,
+    "findings": [
+      {
+        "priority": "P2",
+        "issue": "legitimate pending-input SQL revision lead and checkpoint crash boundary",
+        "fixed": true
+      },
+      {
+        "priority": "P2",
+        "issue": "malformed tool calls treated as final replies, including downstream non-dict evaluator guard",
+        "fixed": true
+      }
+    ],
+    "scope": "T18 snapshot increment only; old uncommitted work excluded"
+  },
+  "integration": {
+    "files": [
+      {
+        "path": "backend/app/adapters/__init__.py",
+        "added": 23,
+        "deleted": 0,
+        "before_sha256": null,
+        "after_sha256": "a818ab6b1fbed3dfbfc2b7cc87e14662181832ebe80ab9c57dd360106379e8ec"
+      },
+      {
+        "path": "backend/app/adapters/refund.py",
+        "added": 90,
+        "deleted": 0,
+        "before_sha256": null,
+        "after_sha256": "c48c85cbeae1b75c49591697c3476ac03075a95c64d0b0456cdbe6e526e6b4b4"
+      },
+      {
+        "path": "backend/app/adapters/refund_cases.py",
+        "added": 56,
+        "deleted": 0,
+        "before_sha256": null,
+        "after_sha256": "ab01743d1ba9f9a2d2eddc7df04229743bbc3d5a9a572b4fa5ced95c938cd352"
+      },
+      {
+        "path": "backend/app/adapters/refund_catalog.py",
+        "added": 190,
+        "deleted": 0,
+        "before_sha256": null,
+        "after_sha256": "6e07fbd17008bb61a45452684dca7ca38acbb05bed56bc7b79f1396712df7125"
+      },
+      {
+        "path": "backend/app/adapters/refund_guidance.py",
+        "added": 64,
+        "deleted": 0,
+        "before_sha256": null,
+        "after_sha256": "6ef8ae2d6040758ef9c4a9cfe3de89959fc679cee2521f235edd2352c30d9de2"
+      },
+      {
+        "path": "backend/app/adapters/refund_rules.py",
+        "added": 174,
+        "deleted": 0,
+        "before_sha256": null,
+        "after_sha256": "3e2fdc3fcb6392db25846e9dda6fba2d1fd0ad91ca42183989c51527b1fb5ed4"
+      },
+      {
+        "path": "backend/app/adapters/refund_runner.py",
+        "added": 116,
+        "deleted": 0,
+        "before_sha256": null,
+        "after_sha256": "3caef9de02b4ef8884e7017ccbad30480d54879991214cf2a7b5699c004688fa"
+      },
+      {
+        "path": "backend/app/cases/prompt.txt",
+        "added": 7,
+        "deleted": 0,
+        "before_sha256": null,
+        "after_sha256": "0433bf495b4b157bb738862139c3011dbb028457164db34b2a81b2946bbc4268"
+      },
+      {
+        "path": "backend/app/core/deployment.py",
+        "added": 2,
+        "deleted": 0,
+        "before_sha256": "3bacf23251649a1493193c52ceb0f15f0348c3606fde830d1ad91d2d563e12d6",
+        "after_sha256": "6ab7273ee8eb2e389412b27ec4b820533a96a487bedb5e5020cad384a215dbe8"
+      },
+      {
+        "path": "backend/app/evaluation/service.py",
+        "added": 13,
+        "deleted": 2,
+        "before_sha256": "7e0c5af554a4f5f9053eaacdfe492df64121c314c1ff7f19ee2c2e33569c4ff5",
+        "after_sha256": "17c56c5491a6470831280d279317cbe1723c7ffa0abafb698e93d4a77a62436b"
+      },
+      {
+        "path": "backend/app/evidence/recorder.py",
+        "added": 3,
+        "deleted": 3,
+        "before_sha256": "fab4fecf859fb45e4e520d0eb204b0c84d25ee25d8476fbc4a86f8881e68b2ba",
+        "after_sha256": "643542fbfa23178c20aa2d3da97990ec72168e7d65f593ab2a889c7f8f1a2cd6"
+      },
+      {
+        "path": "backend/app/executors/runner.py",
+        "added": 9,
+        "deleted": 0,
+        "before_sha256": "baf0a49d5b18692f58ea4198c60bd8a8ae64cba291c7859c3a6c9b73c2c8ba88",
+        "after_sha256": "658d93bebf66fb90894f053e1e02b10479d63c556d68683c55b47724b26f3082"
+      },
+      {
+        "path": "backend/app/executors/service.py",
+        "added": 77,
+        "deleted": 14,
+        "before_sha256": "a3d06098c48887f9dd97c64ed7d7d6b2b84aa545cafb7c880cad93e9a1c5dcd7",
+        "after_sha256": "6c246795753742c58eda11e5707df731d23d3c04ef9d47d01be3d933c8dadd57"
+      },
+      {
+        "path": "backend/app/faults/engine.py",
+        "added": 7,
+        "deleted": 5,
+        "before_sha256": "968c61b629e4d60dac5ccb5423761352bab665210b8b06815ba6b37ee6283986",
+        "after_sha256": "b54dc9b1f4d2380097943a169e2d98eb54ee1ab270066e07d5106de1f952b333"
+      },
+      {
+        "path": "backend/app/judging/executions.py",
+        "added": 6,
+        "deleted": 0,
+        "before_sha256": "16e4ff78c8dda0aa2f12797a4e47efb3e0afc4869b2910db9e35944bb21d5d2d",
+        "after_sha256": "0410e1b4dd180d5c8af55bfa0a08e62ff516013beef01a9e0777e56943095bbf"
+      },
+      {
+        "path": "backend/app/judging/prompt.txt",
+        "added": 17,
+        "deleted": 0,
+        "before_sha256": null,
+        "after_sha256": "82ec31b2c94ef1fdbcf4b586eebf6c1460043261ab700b2dcde7b80e451fc830"
+      },
+      {
+        "path": "backend/app/reliability/service.py",
+        "added": 6,
+        "deleted": 0,
+        "before_sha256": "c3b03be2a35560219813f530fda8fd720807959ebb2b77876a7b801726b0bac9",
+        "after_sha256": "a6af55cfef6013c4e307f5222d36fba8e6384ff5c553fdf9a215e5447d941408"
+      },
+      {
+        "path": "backend/app/reports/service.py",
+        "added": 14,
+        "deleted": 1,
+        "before_sha256": "a84945997d671f6cabac636a6625ceac2d43479a6c6a9574ec4f93531497954f",
+        "after_sha256": "3ee3c78518be01ae9cf36f27652a9caa4121664a591c8328b020386f8151c10f"
+      },
+      {
+        "path": "backend/app/schemas/faults.py",
+        "added": 14,
+        "deleted": 3,
+        "before_sha256": "9a5a3c721b03c9c7a5dbd2cfbf229379ccda05dcfa7b7bebc5723e281285ef9c",
+        "after_sha256": "8b02fa8ea887c1344f01dafb1abe1734368a1255b3074d826333b1e4bcb626c7"
+      },
+      {
+        "path": "backend/app/workbench/guidance.py",
+        "added": 3,
+        "deleted": 0,
+        "before_sha256": "d0d5c52050f47d2a5e9cd8fc5ca8d4351c9f75a81eb00d6d9b99da3045b12e1e",
+        "after_sha256": "a5233795e62d057eea1e193965458efda78ee95bde717dc975c7d8ed592235d5"
+      },
+      {
+        "path": "backend/app/workbench/service.py",
+        "added": 15,
+        "deleted": 3,
+        "before_sha256": "c5d7ef0b6e961cacb49c2d9463027ea238a2247b05250c4f5a2942ec40ba6bbd",
+        "after_sha256": "1ece4d7a0327f261e17ea446637b0fd2235817fb4e817b5c745ed765c152e59e"
+      },
+      {
+        "path": "backend/benchmarks/t18/__init__.py",
+        "added": 1,
+        "deleted": 0,
+        "before_sha256": null,
+        "after_sha256": "9e9bcb674d941586bb8860cb88064d0db1cc5c70c38b9166e8aa7c7a46c1188c"
+      },
+      {
+        "path": "backend/benchmarks/t18/budget.py",
+        "added": 85,
+        "deleted": 0,
+        "before_sha256": null,
+        "after_sha256": "63d698a05f6b859014519dbb29b23f1515bc69e0f1f481c2d174b8a5f1991471"
+      },
+      {
+        "path": "backend/benchmarks/t18/common.py",
+        "added": 35,
+        "deleted": 0,
+        "before_sha256": null,
+        "after_sha256": "eb9523e334149c94d61758abfbaa5c670a09716160f2022d99da8fa28db64c4d"
+      },
+      {
+        "path": "backend/benchmarks/t18/offline.py",
+        "added": 56,
+        "deleted": 0,
+        "before_sha256": null,
+        "after_sha256": "d472667500b78775e798bd711b293b6ef8f079e1f9c2ba87affd72c73cf3f2d0"
+      },
+      {
+        "path": "backend/benchmarks/t18/runner.py",
+        "added": 205,
+        "deleted": 0,
+        "before_sha256": null,
+        "after_sha256": "8fb033de1c04cbc017fa4fd4f8cf20b6a361be8de64c9d1d36269a57ca9646a9"
+      },
+      {
+        "path": "backend/operations/workers.py",
+        "added": 2,
+        "deleted": 0,
+        "before_sha256": "02f06a680fcae3159dc3ead2d5a9df6bc86bfa7b0685d29ba715c8fd54c7ed77",
+        "after_sha256": "782f70d4caf96a06a647092dd0934e39323f06bb145a08a00207c9620395c979"
+      },
+      {
+        "path": "backend/reference_agents/__init__.py",
+        "added": 1,
+        "deleted": 0,
+        "before_sha256": null,
+        "after_sha256": "8b75216b4065fb4246e47e785d8ea157f05919298c8e1edfd081e77f6e114be7"
+      },
+      {
+        "path": "backend/reference_agents/refund/__init__.py",
+        "added": 1,
+        "deleted": 0,
+        "before_sha256": null,
+        "after_sha256": "ddebf92c8c7064c68d8c0be4de210f85f52eebc8b7afc57eb7472184977426e7"
+      },
+      {
+        "path": "backend/reference_agents/refund/agent.py",
+        "added": 338,
+        "deleted": 0,
+        "before_sha256": null,
+        "after_sha256": "8056980154293a547a71fb01512c741979504697b9d8e52088eb806bf286e92b"
+      },
+      {
+        "path": "backend/reference_agents/refund/prompt.txt",
+        "added": 5,
+        "deleted": 0,
+        "before_sha256": null,
+        "after_sha256": "a3c831aee3d6e8714c8279ac9866686f91771166c54bcb231b014df319a6fd70"
+      },
+      {
+        "path": "backend/reference_agents/refund/store.py",
+        "added": 159,
+        "deleted": 0,
+        "before_sha256": null,
+        "after_sha256": "a709c849d3fab405d530a27db85db172889f76d7b423cbe48163b432ae5aa7e6"
+      },
+      {
+        "path": "backend/reference_agents/refund/tools.py",
+        "added": 42,
+        "deleted": 0,
+        "before_sha256": null,
+        "after_sha256": "8522ccc22d0c3c15f2b15d9c8dedc2b2ee9a1efedca6e753c1c5dc66fadb78dd"
+      },
+      {
+        "path": "backend/tests/test_refund_integration.py",
+        "added": 169,
+        "deleted": 0,
+        "before_sha256": null,
+        "after_sha256": "33591bc03dd09ec6d782295e3c663f968a267198bd2667561686915a81e6e42c"
+      },
+      {
+        "path": "backend/tests/test_refund_reference.py",
+        "added": 161,
+        "deleted": 0,
+        "before_sha256": null,
+        "after_sha256": "ee9af59e29e07599245342b692d694ed242ef7dbf9538a9f62242d5458b3cfae"
+      },
+      {
+        "path": "frontend/src/components/ChainDiagnostics.vue",
+        "added": 5,
+        "deleted": 4,
+        "before_sha256": "8f5e288e049add69594f38dc4c7443f05614b11951ea81e0a3389bf645cb02b5",
+        "after_sha256": "713b57cd0d86c8477ec4b385078b0a955a69bd5b4fa8a8fd30eb47a100542215"
+      },
+      {
+        "path": "frontend/src/components/RefundRunOverview.vue",
+        "added": 27,
+        "deleted": 0,
+        "before_sha256": null,
+        "after_sha256": "39577ecbd16545adb82d864258e93dc8e3a6b42149d7af840d4b3405e6be2f97"
+      },
+      {
+        "path": "frontend/src/components/RunWizard.vue",
+        "added": 6,
+        "deleted": 4,
+        "before_sha256": "9ad0f28b159f557d91bf97910c089b8f80bc8f2067df04d25166da0de38693d7",
+        "after_sha256": "3c4f6c4976d06e1477d3061d5d485e43a81e4555e3086aa9cf2b1e04f981c016"
+      },
+      {
+        "path": "frontend/src/pages/EvidencePage.vue",
+        "added": 7,
+        "deleted": 4,
+        "before_sha256": "f44a62d5ae95216c135ea68da4b49eafeb453e9e8cacf7b535acbd2de2ac8b31",
+        "after_sha256": "a4cd2fa6a8b9a375f911e05c0cbe8328f803b695186c7abd128bbb3c49976551"
+      },
+      {
+        "path": "frontend/src/pages/WorkspacePage.vue",
+        "added": 3,
+        "deleted": 3,
+        "before_sha256": "45aba3659c3d8fe74d0061beb3abc7b58935c3ebdd5e63fc7c8775e7149e1a09",
+        "after_sha256": "0fb1400c3f44d3efa8553f779f4d6a250bbecdca1c2e788128a531b30698e3ce"
+      },
+      {
+        "path": "frontend/src/types/evidence.ts",
+        "added": 1,
+        "deleted": 1,
+        "before_sha256": "b7b9bf9e563847e9f5843440b10a4af8a5a397a1b0b0b4e4938b187f00aaf427",
+        "after_sha256": "8ab3fec9c5e90496dad62e5dbadb7453d6263208672b9dfeb92ee6ea25fd9b74"
+      },
+      {
+        "path": "frontend/src/types/workbench.ts",
+        "added": 3,
+        "deleted": 1,
+        "before_sha256": "23a3d40260faefad5ed773302df01d29206b7842f75250c2e84433436d12c51a",
+        "after_sha256": "e8b9648ff3c7529dd54d344794343368713d9efb2b13cb2c83c08b57d920e410"
+      },
+      {
+        "path": "frontend/tests/refund.spec.ts",
+        "added": 73,
+        "deleted": 0,
+        "before_sha256": null,
+        "after_sha256": "0f6e51ba99294ec3cf92dc88af9c2a26ade32e7705e7c20ae385a72b03433643"
+      }
+    ],
+    "added_lines": 2291,
+    "deleted_lines": 48,
+    "effort": {
+      "wall_clock_hours_from_initial_snapshot": 17.506,
+      "method": "filesystem snapshot mtime to inventory creation; includes waits/tests/tool calls; not independently measured human or coding time"
+    },
+    "main_registration": {
+      "booking_version": 71,
+      "booking_hash": "9e40b67e144e0edaa6c851c54c02dbb1d85d1f20002ce2931b2c1caf74019ef8",
+      "booking_sources": 157,
+      "refund": {
+        "target_id": 2,
+        "version_id": 72,
+        "case_ids": [
+          131,
+          132,
+          133,
+          134,
+          135,
+          136,
+          137,
+          138
+        ],
+        "config_hash": "86bd87dde040fcd6c0a2bbf85df0e8e9b60de8a64d81219f61fbe35867ea8866",
+        "provenance": {
+          "author_relation": "same_project_developer",
+          "independent_external_validation": false,
+          "implementation": "project_reference",
+          "license": "project reference; no external license claim"
+        }
+      }
+    },
+    "new_frameworks": [],
+    "additional_database_migrations": 0,
+    "shared": "runs/leases/budgets/events/reports/fault interception/creation preflight",
+    "domain_specific": "prompt/tools/SQLite ledger/confirmation/domain assertions/case fixtures/execution port",
+    "adapter_boundary": "whitelisted Python reference adapter, not no-code arbitrary third-party HTTP/Agent plug-in"
+  },
+  "preservation": {
+    "env_unchanged": true,
+    "real_batch_main_tables_unchanged": true,
+    "real_batch_old_19_ledgers_unchanged": true,
+    "whole_session_main_table_deltas": {
+      "ac_fault_profiles": [
+        20,
+        22
+      ],
+      "ac_target_versions": [
+        66,
+        72
+      ],
+      "ac_targets": [
+        1,
+        2
+      ],
+      "ac_test_cases": [
+        130,
+        138
+      ],
+      "sb_rooms": [
+        72,
+        75
+      ]
+    },
+    "whole_session_other_ledger_changes": [
+      "ac:local:interactive:budget:LOCAL-20261105-interactive-open:agent"
+    ],
+    "daily_interactive_change_attribution": "not independently attributed; not included in T18 costs and not rolled back",
+    "new_t18_ledger": "ac:t18:budget:T18-20261107-agent-1:agent",
+    "old_limits_not_reset": true,
+    "daily_switches_kept": true,
+    "raw_and_shared_backups_local_only": true,
+    "no_git": true
+  },
+  "post_real_source_changes": {
+    "reliability_format_ast_equal": true,
+    "refund_context_metadata_corrected_to_actual_full_history": true,
+    "business_and_prompt_unchanged": true,
+    "original_frozen_source_preserved": true,
+    "no_paid_rerun": true
+  },
+  "limits": [
+    "Same-developer small developer examples, not external independent generality",
+    "Only simulated full refunds; no partial/real payment or arbitrary objects",
+    "No retrieval; booking six-dimensional display and AI judge are not calibrated for refunds",
+    "Bounded full history without booking structured compaction; no cross-execution memory",
+    "Crash automatic replay disabled, incomplete checkpoints require manual facts review",
+    "Shared Windows/API and managed Linux Worker volume deployment; independent deployment/supervision remains T22"
+  ]
+}

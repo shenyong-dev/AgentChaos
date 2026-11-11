@@ -1,0 +1,61 @@
+{
+  "backend": {
+    "passed": 46,
+    "seconds": 95.53,
+    "full_suite": false,
+    "log": ".local/t17n/backend-tests-final.log"
+  },
+  "contracts": {
+    "passed": 3,
+    "log": ".local/t17n/contracts.log"
+  },
+  "ui": {
+    "different_checks": 8,
+    "final_batch_passed": 8,
+    "seconds": 7.6,
+    "last_label_adjustment_recheck": 1,
+    "log": ".local/t17n/ui-complete.log"
+  },
+  "build": "passed",
+  "ruff": "passed",
+  "review": {
+    "scope": "T17N actual changes only",
+    "model": "inherited same current model",
+    "rounds": 1,
+    "findings": [
+      {
+        "priority": "P2",
+        "issue": "cancelled history incorrectly counted as active bookings",
+        "fixed": true,
+        "verification": "test_cancelled_history_is_retained_without_false_goal_violation"
+      },
+      {
+        "priority": "P2",
+        "issue": "missing optional task_goal treated as failure",
+        "fixed": true,
+        "verification": "test_missing_independent_goal_is_unknown_not_failure"
+      }
+    ]
+  },
+  "runtime": {
+    "api_port": 8000,
+    "ui_port": 5173,
+    "redis_port": 16380,
+    "snapshot_port": 18031,
+    "api_listener": 15184,
+    "ui_listener": 29492,
+    "redis_listener": 1696,
+    "snapshot_listener": 23484,
+    "worker_supervisor_session": 70062,
+    "worker_instance": "1c0b1765a1bb4a0e8d011f7e214b4258",
+    "supervisor_observed": true,
+    "worker_dispatcher_running": true,
+    "readiness_operations": 7,
+    "observed_not_independent_deployment_promise": true
+  },
+  "freeze_binding_matches": true,
+  "original_failures_retained": true,
+  "real_executions": 12,
+  "no_extra_provider_calls": true,
+  "old_experiments_unmodified": true
+}

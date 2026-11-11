@@ -15,47 +15,35 @@ const checks = computed(() => new Map(props.report?.checks.map(c => [c.id, c]) ?
 function state(value: ReadinessOperation | ReadinessCheck) {
   if (props.loading) return 'checking'
   if (stale.value || ('expires_at' in value && expired(value.expires_at))) return 'stale'
+  if ('required_checks' in value && value.status === 'ready') {
+    const required = value.required_checks.map(id => checks.value.get(id))
+    if (required.some(check => check && expired(check.expires_at))) return 'stale'
+    if (required.some(check => !check || check.status !== 'ready')) return 'unknown'
+  }
   return value.status
 }
-function time(value: string) {
-  return new Date(value).toLocaleTimeString('zh-CN', { timeZone: 'Asia/Shanghai', hour12: false })
-}
+const operations = computed(() => props.report?.operations.filter(op => op.id !== 'copilot') ?? [])
+const label = (op: ReadinessOperation) => op.id === 'interactive' ? 'Agent 测试' : op.label
+const issues = computed(() => operations.value.filter(op => state(op) !== 'ready'))
+const summary = computed(() => props.loading ? '检测中' : !props.report ? '未确认' : stale.value ? '已过期' : !operations.value.length ? '尚无检查项' : issues.value.length ? `${issues.value.length} 项待处理` : `${operations.value.length} 项条件具备`)
 function reasons(op: ReadinessOperation) {
-  return op.blockers.map(id => checks.value.get(id)).filter((x): x is ReadinessCheck => Boolean(x))
+  return [...new Set([...op.blockers, ...op.required_checks.filter(id => { const check = checks.value.get(id); return !check || state(check) !== 'ready' })])]
+    .map(id => checks.value.get(id)).filter((check): check is ReadinessCheck => Boolean(check))
 }
-const steps = [
-  { title: '先查看已有记录', text: '登录你的账号，从项目概览或运行证据开始。查看历史不需要模型付费开关；没有记录时会显示空状态。', path: '/workspace', action: '项目概览' },
-  { title: '核对对象与开发用例', text: '选与当前源码兼容的对象版本，再查看已审核的开发用例和预期。历史版本与冻结实验结果保留，不会自动替换。', path: '/targets', action: '对象与版本' },
-  { title: '按需准备一次测试', text: '交互调试可体验预约Agent的字段、草稿与业务查证；真实调用需独立角色额度和开关。批量测试另需Worker，本页不启动实验。', path: '/interactive', action: '预约Agent调试' },
-  { title: '回到证据核对结果', text: '对照工具请求、SQL事实与规则断言。回答中的“成功”不是提交凭据；AI裁判意见仅供人工辅助。', path: '/runs', action: '运行证据' },
-]
 </script>
 
 <template>
   <section class="operation-panel" aria-label="操作就绪检查">
-    <div class="section-heading"><div><div class="heading-with-info"><h2>操作就绪</h2><InfoHint label="操作前置" text="按实际操作核对权限、依赖、版本和预算；付费关闭不影响查看历史。" /></div></div><span>{{ loading ? '正在取得最新观察' : report && !stale ? `检测于 ${time(report.checked_at)} · 60秒内有效` : '当前状态未确认' }}</span></div>
-    <p v-if="error || (report && stale)" class="readiness-warning" role="status">{{ error || '检测结果已过期，请重新检测。' }} 下方旧结果不能证明当前可用。</p>
-    <p v-if="!report" class="readiness-warning">尚未取得操作就绪结果。基础使用指南仍可离线阅读。</p>
-    <div v-if="report" class="operation-list">
-      <details v-for="op in report.operations" :key="op.id" :data-operation="op.id">
-        <summary><span>{{ op.label }}</span><span class="readiness-status" :data-state="state(op)">{{ names[state(op)] }}</span></summary>
-        <p>{{ op.note }}</p>
-        <ul v-if="reasons(op).length"><li v-for="check in reasons(op)" :key="check.id"><b>{{ check.label }}</b>：{{ check.message }}<small>下一步：{{ check.next_step }}</small></li></ul>
-        <p v-else>{{ stale || loading ? '请取得新的检测结果后再判断是否可执行。' : '前置条件具备；实际动作仍受服务端权限、版本与预算守卫约束。' }}</p>
-        <details class="required-observations"><summary>本操作的检测依据</summary><ul><li v-for="id in op.required_checks" :key="id"><template v-if="checks.get(id)"><b>{{ checks.get(id)!.label }}</b> · {{ names[state(checks.get(id)!)] }}<small>{{ checks.get(id)!.message }} · {{ time(checks.get(id)!.checked_at) }}（北京时间）</small></template></li></ul></details>
-        <a :href="op.destination">查看相关入口</a>
-      </details>
+    <header class="operation-heading"><div class="heading-with-info"><h2>操作就绪</h2><InfoHint label="操作前置" text="这里只检查前置条件，不执行测试或调用模型。实际操作仍核对权限、确认与预算。" /></div><span role="status" class="readiness-status" :data-state="loading?'checking':!report?'unknown':stale?'stale':!operations.length?'unknown':issues.length?'blocked':'ready'">{{ summary }}</span></header>
+    <p v-if="error || (report && stale)" class="readiness-warning" role="status">{{ error || '结果已过期，请重新检测。' }}</p>
+    <p v-else-if="!report && !loading" class="readiness-empty">尚未取得检查结果，请重新检测。</p>
+    <div v-if="report && !stale && !loading && issues.length" class="operation-list">
+      <details v-for="op in issues" :key="op.id" :data-operation="op.id"><summary><span>{{ label(op) }}</span><span class="readiness-status" :data-state="state(op)">{{ names[state(op)] }}</span></summary><ul v-if="reasons(op).length"><li v-for="check in reasons(op)" :key="check.id"><strong>{{ check.label }}</strong><p>{{ check.message }}</p><p v-if="check.next_step">{{ check.next_step }}</p></li></ul><p v-else>{{ op.note }}</p><a :href="op.destination">前往处理</a></details>
     </div>
-
-  </section>
-
-  <section class="first-use-guide" aria-label="首次使用指南">
-    <div class="section-heading"><div><h2>第一次使用，从这里开始</h2></div><span>无需AI调用</span></div>
-    <ol><li v-for="(step, index) in steps" :key="step.title"><span class="guide-number">{{ String(index + 1).padStart(2, '0') }}</span><div><div class="heading-with-info"><h3>{{ step.title }}</h3><InfoHint :label="step.title" :text="step.text" /></div><a :href="step.path">{{ step.action }}</a></div></li></ol>
-
+    <details v-if="report" class="all-operations"><summary>查看全部 {{ operations.length }} 项</summary><div v-for="op in operations" :key="op.id" class="operation-row" :data-operation="op.id"><a :href="op.destination">{{ label(op) }}</a><span class="readiness-status" :data-state="state(op)">{{ names[state(op)] }}</span></div></details>
   </section>
 </template>
 
 <style scoped>
-.operation-panel,.first-use-guide{background:var(--ac-surface,#fff);border:1px solid var(--ac-border);border-radius:10px;padding:22px 24px;margin:24px 0}.section-heading{margin:0 0 18px}.section-heading p{font-size:13px;color:var(--ac-muted);margin-top:7px}.section-heading>span{font-size:12px;color:var(--ac-muted)}.operation-list{border-top:1px solid var(--ac-border)}.operation-list>details{padding:14px 0;border-bottom:1px solid var(--ac-border)}summary{cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:16px;font-size:14px;list-style:none}summary:focus-visible,a:focus-visible{outline:2px solid var(--ac-accent);outline-offset:4px}.readiness-status{font-size:12px;font-weight:500;color:var(--ac-muted);background:var(--ac-surface-soft);padding:4px 9px;border-radius:5px;white-space:nowrap}.readiness-status[data-state=ready]{color:#22684f;background:#edf6f1}.readiness-status[data-state=blocked]{color:#8a5a23;background:#fbf4e9}.readiness-warning{color:#8a5a23;background:#fbf4e9;border-radius:5px;padding:11px 13px;font-size:13px;margin:12px 0}.operation-list p,.operation-list ul{font-size:13px;line-height:1.8;color:var(--ac-text);margin:12px 0}.operation-list ul{padding-left:18px}.operation-list li+li{margin-top:12px}small{display:block;color:var(--ac-muted);font-size:12px;line-height:1.8}.required-observations{background:var(--ac-surface-soft);padding:10px 12px;border-radius:5px;margin:12px 0}.required-observations summary{font-size:12px}.readiness-boundary{font-size:12px;color:var(--ac-muted);line-height:1.8;margin-top:16px}a{color:var(--ac-accent);font-size:13px;text-decoration:underline;text-underline-offset:4px}.first-use-guide ol{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:1fr 1fr;gap:24px 30px}.first-use-guide li{display:flex;gap:14px;align-items:flex-start}.guide-number{color:var(--ac-muted);font:14px/1.8 Consolas,monospace}.first-use-guide h3{font-size:14px;margin:0}.first-use-guide li p{font-size:13px;color:var(--ac-text);line-height:1.8;margin:7px 0 9px}@media(max-width:700px){.operation-panel,.first-use-guide{padding:17px}.section-heading{flex-direction:column;gap:8px}.section-heading>span{max-width:none;text-align:left}.first-use-guide ol{grid-template-columns:1fr;gap:20px}.readiness-status{font-size:11px}.operation-list summary{font-size:13px}}
+.operation-panel{background:var(--ac-surface);border:1px solid var(--ac-border);border-radius:10px;padding:20px 24px;margin:24px 0}.operation-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}.operation-heading h2{font-size:14px;margin:0}.readiness-status{font-size:12px;font-weight:500;color:var(--ac-muted);background:var(--ac-surface-soft);padding:4px 9px;border-radius:5px;white-space:nowrap}.readiness-status[data-state=ready]{color:var(--ac-success);background:color-mix(in srgb,var(--ac-success) 9%,var(--ac-surface))}.readiness-status[data-state=blocked]{color:var(--ac-warning,#9b6a20);background:color-mix(in srgb,var(--ac-warning,#9b6a20) 9%,var(--ac-surface))}summary{cursor:pointer;font-size:13px;color:var(--ac-link)}summary:focus-visible,a:focus-visible{outline:2px solid var(--ac-link);outline-offset:4px}.operation-list{margin-top:14px;border-top:1px solid var(--ac-border)}.operation-list>details{padding:14px 0;border-bottom:1px solid var(--ac-border)}.operation-list>details>summary{display:flex;align-items:center;justify-content:space-between;gap:12px;color:var(--ac-ink)}.operation-list ul{list-style:none;padding:0;margin:12px 0}.operation-list li+li{margin-top:12px}.operation-list strong{font-size:13px}.operation-list p{font-size:13px;color:var(--ac-muted);line-height:1.7;margin:5px 0;overflow-wrap:anywhere}.operation-list a,.operation-row a{color:var(--ac-link);font-size:13px}.operation-list a{display:inline-block;margin-top:10px}.readiness-warning,.readiness-empty{color:var(--ac-muted);font-size:13px;line-height:1.7;margin-top:14px}.all-operations{border-top:1px solid var(--ac-border);margin-top:16px;padding-top:12px}.all-operations>summary{width:fit-content;font-size:12px}.operation-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 0;border-bottom:1px solid var(--ac-border)}@media(max-width:600px){.operation-panel{padding:17px}.operation-row a,.operation-list summary{font-size:13px}}
 </style>

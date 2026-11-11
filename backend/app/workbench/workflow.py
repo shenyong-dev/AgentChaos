@@ -142,6 +142,12 @@ class WorkflowService:
                 )
         with Session(self.engine) as session:
             workbench._identity(session, owner)
+            if self.mode == "real_provider" and plan.configuration.budgets.agent_microusd <= 0:
+                raise AgentError(
+                    "run_budget_required",
+                    "本次运行预算必须大于0；0表示禁止模型调用。原配置为0时，请复制并修改预算后再创建。",
+                    400,
+                )
             visible = set(session.scalars(workbench._cases(session).with_only_columns(TestCase.id)))
             requested = set(plan.configuration.case_revision_ids)
             if plan.action != "rerun" and not requested.issubset(visible):

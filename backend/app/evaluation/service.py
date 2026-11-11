@@ -172,7 +172,13 @@ def bounded(value):
 
 
 def persist_evaluation(session, run, execution, settings, *, closing=False, automatic=False):
-    manifest = evaluator_manifest()
+    refund = run.manifest_json.get("adapter_type") == "reference_refund"
+    if refund:
+        from app.adapters.refund_rules import evaluator_manifest as refund_manifest
+
+        manifest = refund_manifest()
+    else:
+        manifest = evaluator_manifest()
     if automatic and run.manifest_json.get("evaluation") != manifest:
         raise AgentError("evaluator_version_unavailable", "当前评价器不匹配冻结版本。", 409)
     expected = execution.input_snapshot_json["dsl"]
@@ -193,7 +199,12 @@ def persist_evaluation(session, run, execution, settings, *, closing=False, auto
     )
     if existing:
         return summarize(existing)
-    outcome = evaluate(definitions, bundle, goal=goal)
+    if refund:
+        from app.adapters.refund_rules import evaluate as evaluate_refund
+
+        outcome = evaluate_refund(definitions, bundle, goal=goal, owner=run.created_by)
+    else:
+        outcome = evaluate(definitions, bundle, goal=goal)
     for result in outcome["results"]:
         clean = redact(result, settings)
         row = AssertionResult(

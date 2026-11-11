@@ -16,6 +16,9 @@ class Settings(BaseSettings):
     )
 
     app_env: Literal["development", "test", "production"] = "development"
+    cloud_deployment_id: str = Field(default="", pattern=r"^$|^[0-9a-f]{32}$")
+    cloud_approval_sha256: str = Field(default="", pattern=r"^$|^[0-9a-f]{64}$")
+    cloud_open_model_budget: bool = False
     session_idle_seconds: int = Field(default=1800, ge=60, le=3600)
     session_absolute_seconds: int = Field(default=28800, ge=3600, le=86400)
     mysql_host: str = "127.0.0.1"
@@ -47,6 +50,7 @@ class Settings(BaseSettings):
     copilot_thinking: Literal["disabled"] = "disabled"
     copilot_max_output_tokens: int = Field(default=1536, ge=1, le=1536)
     copilot_allow_paid_model_calls: bool = False
+    copilot_local_unlimited_calls: bool = False
     copilot_budget_authorization_id: str = ""
     copilot_budget_usd: float = Field(default=0, ge=0, le=1, allow_inf_nan=False)
     allow_paid_model_calls: bool = False

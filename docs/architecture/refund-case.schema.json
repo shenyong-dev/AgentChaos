@@ -1,0 +1,163 @@
+{
+  "$defs": {
+    "RefundExpected": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "refund_ledger",
+          "title": "Type",
+          "type": "string"
+        },
+        "count": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Count",
+          "type": "integer"
+        },
+        "total_fen": {
+          "minimum": 0,
+          "title": "Total Fen",
+          "type": "integer"
+        },
+        "order_id": {
+          "anyOf": [
+            {
+              "pattern": "^O-[0-9]{4}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Order Id"
+        }
+      },
+      "required": [
+        "type",
+        "count",
+        "total_fen"
+      ],
+      "title": "RefundExpected",
+      "type": "object"
+    },
+    "UserTurn": {
+      "additionalProperties": false,
+      "properties": {
+        "user": {
+          "maxLength": 12000,
+          "minLength": 1,
+          "title": "User",
+          "type": "string"
+        }
+      },
+      "required": [
+        "user"
+      ],
+      "title": "UserTurn",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "refund-1",
+      "default": "refund-1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "case_key": {
+      "pattern": "^[A-Z][A-Z0-9-]{2,79}$",
+      "title": "Case Key",
+      "type": "string"
+    },
+    "revision": {
+      "minimum": 1,
+      "title": "Revision",
+      "type": "integer"
+    },
+    "family_key": {
+      "maxLength": 100,
+      "minLength": 1,
+      "title": "Family Key",
+      "type": "string"
+    },
+    "category": {
+      "enum": [
+        "normal",
+        "tool_execution",
+        "memory_and_tool",
+        "retrieval",
+        "security",
+        "robustness"
+      ],
+      "title": "Category",
+      "type": "string"
+    },
+    "dataset_split": {
+      "enum": [
+        "dev",
+        "calibration",
+        "holdout"
+      ],
+      "title": "Dataset Split",
+      "type": "string"
+    },
+    "reference_clock": {
+      "format": "date-time",
+      "title": "Reference Clock",
+      "type": "string"
+    },
+    "fixture": {
+      "const": "refund-reference-v1",
+      "default": "refund-reference-v1",
+      "title": "Fixture",
+      "type": "string"
+    },
+    "turns": {
+      "items": {
+        "$ref": "#/$defs/UserTurn"
+      },
+      "maxItems": 50,
+      "minItems": 1,
+      "title": "Turns",
+      "type": "array"
+    },
+    "assertions": {
+      "items": {
+        "$ref": "#/$defs/RefundExpected"
+      },
+      "maxItems": 1,
+      "minItems": 1,
+      "title": "Assertions",
+      "type": "array"
+    },
+    "review_status": {
+      "default": "draft",
+      "enum": [
+        "draft",
+        "approved",
+        "rejected"
+      ],
+      "title": "Review Status",
+      "type": "string"
+    },
+    "task_goal": {
+      "default": null,
+      "title": "Task Goal",
+      "type": "null"
+    }
+  },
+  "required": [
+    "case_key",
+    "revision",
+    "family_key",
+    "category",
+    "dataset_split",
+    "reference_clock",
+    "turns",
+    "assertions"
+  ],
+  "title": "RefundCase",
+  "type": "object"
+}

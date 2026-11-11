@@ -5,6 +5,8 @@ from uuid import uuid4
 
 from app.agents.budget import peak_estimate_microusd
 from app.agents.errors import AgentError
+from app.core.cloud import authorized as cloud_authorized
+from app.core.cloud import root_key
 from app.executors.budget import RESERVE, SETTLE, UNKNOWN
 
 AUTHORIZATION = "T11-20261028-casegen-open"
@@ -13,7 +15,10 @@ AUTHORIZATION = "T11-20261028-casegen-open"
 class GenerationBudget:
     def __init__(self, redis, settings, batch, record, *, prefix="ac:t11:budget"):
         self.redis, self.settings, self.record = redis, settings, record
-        self.key = f"{prefix}:{settings.casegen_budget_authorization_id}:case_generator"
+        self.key = (
+            root_key(settings, "case_generator")
+            or f"{prefix}:{settings.casegen_budget_authorization_id}:case_generator"
+        )
         self.batch_key = self.key + ":batch:" + batch
         self.calls_key = self.batch_key + ":calls"
 
@@ -25,7 +30,10 @@ class GenerationBudget:
         if (
             not s.casegen_allow_paid_model_calls
             or not s.casegen_budget_unlimited
-            or s.casegen_budget_authorization_id != AUTHORIZATION
+            or (
+                s.casegen_budget_authorization_id != AUTHORIZATION
+                and not cloud_authorized(s, "case_generator")
+            )
             or s.casegen_model != "deepseek-flash"
         ):
             raise AgentError("casegen_not_authorized", "T11生成器独立开关或授权尚未匹配。", 403)

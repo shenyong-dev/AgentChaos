@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import RefundRunOverview from '../components/RefundRunOverview.vue'
 import InfoHint from '../components/InfoHint.vue'
 import { useGuideSelection } from '../guidance'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
@@ -234,19 +235,21 @@ onBeforeUnmount(() => {
         <small>故障是否生效，与规则判定分开记录；请结合断言和实际副作用核对。</small>
         <ElButton size="small" @click="setTab('trace'); filter = 'fault.'">只看故障</ElButton>
       </aside>
-      <p v-if="offlineModel" class="offline-notice" role="note">离线模型复验：真实数据库、Redis和预约工具；本次不调用DeepSeek，不代表真实模型验收。</p>
+      <p v-if="offlineModel" class="offline-notice" role="note">离线模型复验：真实数据库、Redis和领域工具；本次不调用DeepSeek，不代表真实模型验收。</p>
       <div v-if="!['diagnosis','overview'].includes(activeTab)" class="evidence-summary">
         <div><small>运行状态</small><strong>{{ snapshot.status }}</strong></div>
         <div><small>持久事件 · 快照时刻</small><strong>{{ snapshot.event_count }}</strong></div>
         <div><small>执行数量</small><strong>{{ snapshot.executions.length }}</strong></div>
         <div><small>待返回模型观察</small><strong>{{ snapshot.pending_model_observations }}</strong></div>
       </div>
-      <div class="evidence-tabs" role="tablist" aria-label="运行视图"><button role="tab" :aria-selected="activeTab === 'overview'" @click="setTab('overview')">结果概览</button><button role="tab" :aria-selected="activeTab === 'diagnosis'" @click="setTab('diagnosis'); if (!executionFilter) selectExecution(snapshot.executions[0]?.execution_id ?? '')">链路诊断</button><button role="tab" :aria-selected="activeTab === 'trace'" @click="setTab('trace')">调用轨迹</button><button role="tab" :aria-selected="activeTab === 'assertions'" @click="setTab('assertions')">判定结果</button><button v-if="snapshot.manifest?.metamorphic" role="tab" :aria-selected="activeTab === 'relations'" @click="setTab('relations')">变形对照</button><button role="tab" :aria-selected="activeTab === 'semantic'" @click="setTab('semantic')">AI辅助评价</button><span>证据先于结论</span></div>
-      <ReliabilityOverview v-if="activeTab === 'overview'" :run-id="snapshot.run_id" :authorization="authorization" :execution-id="executionFilter" :revision="`${snapshot.cursor}:${snapshot.status}:${snapshot.executions.map(e=>`${e.status}:${e.timing?.evaluation?.verdict ?? ''}`).join(',')}`" @execution="selectExecution" @locate="locate" @snapshot="showExecutionSnapshot" @assertion="showAssertion" @diagnosis="id => { selectExecution(id); setTab('diagnosis') }" @semantic="id => { semanticExecution = id; setTab('semantic') }" />
+      <div class="evidence-tabs" role="tablist" aria-label="运行视图"><button role="tab" :aria-selected="activeTab === 'overview'" @click="setTab('overview')">结果概览</button><button role="tab" :aria-selected="activeTab === 'diagnosis'" @click="setTab('diagnosis'); if (!executionFilter) selectExecution(snapshot.executions[0]?.execution_id ?? '')">链路诊断</button><button role="tab" :aria-selected="activeTab === 'trace'" @click="setTab('trace')">调用轨迹</button><button role="tab" :aria-selected="activeTab === 'assertions'" @click="setTab('assertions')">判定结果</button><button v-if="snapshot.manifest?.metamorphic" role="tab" :aria-selected="activeTab === 'relations'" @click="setTab('relations')">变形对照</button><button v-if="snapshot.manifest?.adapter_type !== 'reference_refund'" role="tab" :aria-selected="activeTab === 'semantic'" @click="setTab('semantic')">AI辅助评价</button><span>证据先于结论</span></div>
+      <RefundRunOverview v-if="activeTab === 'overview' && snapshot.manifest?.adapter_type === 'reference_refund'" :snapshot="snapshot" :execution-id="executionFilter" @execution="selectExecution" @assertions="setTab('assertions')" @diagnosis="id=>{selectExecution(id);setTab('diagnosis')}" />
+      <ReliabilityOverview v-else-if="activeTab === 'overview'" :run-id="snapshot.run_id" :authorization="authorization" :execution-id="executionFilter" :revision="`${snapshot.cursor}:${snapshot.status}:${snapshot.executions.map(e=>`${e.status}:${e.timing?.evaluation?.verdict ?? ''}`).join(',')}`" @execution="selectExecution" @locate="locate" @snapshot="showExecutionSnapshot" @assertion="showAssertion" @diagnosis="id => { selectExecution(id); setTab('diagnosis') }" @semantic="id => { semanticExecution = id; setTab('semantic') }" />
       <ChainDiagnostics v-if="activeTab === 'diagnosis'" :snapshot="snapshot" :facts="facts" :execution-id="executionFilter" :authorization="authorization" :connection="state" :more="more" :busy="busy" @execution="selectExecution" @locate="locate" @head="load(true)" @next="nextPage(facts.length >= 500)" @assertions="setTab('assertions')" @semantic="semanticExecution = executionFilter; setTab('semantic')" @download="download" />
       <AssertionsPanel v-if="activeTab === 'assertions'" :run-id="snapshot.run_id" :authorization="authorization" :execution-id="executionFilter" :executions="snapshot.executions" :assertion-id="Number(route.query.assertion) || undefined" :evaluator-version="String(route.query.evaluator ?? '')" @locate="locate" @snapshot="showSnapshot" />
       <RelationsPanel v-if="activeTab === 'relations'" :run-id="snapshot.run_id" :authorization="authorization" @locate="locate" @snapshot="showSnapshot" />
-      <div v-if="activeTab === 'semantic'">
+      <p v-if="activeTab === 'semantic' && snapshot.manifest?.adapter_type === 'reference_refund'" role="status">模拟退款尚未校准 AI 辅助评价，请查看判定结果和账本证据。</p>
+      <div v-else-if="activeTab === 'semantic'">
         <div class="semantic-execution-picker">
           <div><label for="semantic-execution-select">选择语义评价的执行</label><p>按用例、执行标识或状态查找</p></div>
           <ElSelect id="semantic-execution-select" v-model="semanticExecution" class="semantic-execution-select" aria-label="选择语义执行" placeholder="请选择执行" filterable clearable :filter-method="filterSemanticExecutions" :fit-input-width="true" popper-class="semantic-execution-dropdown" :no-data-text="semanticQuery ? '未找到匹配的执行' : '暂无可选执行'" no-match-text="未找到匹配的执行" @visible-change="open => { if (!open) semanticQuery = '' }">

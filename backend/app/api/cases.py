@@ -1,7 +1,7 @@
 """Authenticated generator requests and reviewer decisions; no imported approval flags."""
 
 from functools import lru_cache
-from typing import Annotated
+from typing import Annotated, Literal
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query, Request
@@ -62,8 +62,11 @@ def page(
     service: Service,
     after: Annotated[int, Query(alias="cursor", ge=0)] = 0,
     limit: Annotated[int, Query(ge=1, le=100)] = 20,
+    target: Literal["booking", "refund"] | None = None,
 ) -> Envelope[dict]:
-    return Envelope(data=service.page(owner, after, limit), request_id=request.state.request_id)
+    return Envelope(
+        data=service.page(owner, after, limit, target), request_id=request.state.request_id
+    )
 
 
 @router.get("/access")

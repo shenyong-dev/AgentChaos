@@ -22,9 +22,10 @@ const event=computed(()=>selected.value?.events.find(f=>f.event.event_id===event
 const profile=computed(()=>props.snapshot.manifest?.fault_profile)
 const incomplete=computed(()=>props.facts.length<props.snapshot.event_count || props.more || (props.facts[0]?.event.run_seq??1)>1)
 const role=computed(()=>{const roles=current.value?.usage.roles;return roles&&typeof roles==='object'&&'agent' in roles&&roles.agent&&typeof roles.agent==='object'?roles.agent as Record<string,unknown>:{}})
-const bookings=computed(()=>bookingObservation(current.value?.after))
+const refund=computed(()=>props.snapshot.manifest?.adapter_type==='reference_refund')
+const bookings=computed(()=>refund.value ? (Array.isArray(current.value?.after) && current.value.after.every((r:any)=>r.status==='posted'&&Number.isInteger(r.amount_fen)) ? current.value.after.length : null) : bookingObservation(current.value?.after))
 const labels:Record<string,string>={passed:'通过',failed:'未通过',inconclusive:'证据不足',error:'评价错误',na:'不适用',fulfilled:'已达成',not_fulfilled:'未达成',safely_degraded:'安全降级',unknown:'未知'}
-const buckets=[['工具契约',['tool_contract','tool_calls']],['确认与安全',['confirmation_binding','original_request_recovery','unique_bookings']],['业务一致性',['business_consistent','booking_count','booking_matches','no_booking_on','reply_booking_consistent']],['状态与回复',['state_matches','reply_literals']]] as const
+const buckets=[['工具契约',['tool_contract','tool_calls','refund.tool_contract']],['确认与安全',['confirmation_binding','original_request_recovery','unique_bookings','refund.confirmation','refund.original_request','refund.unique']],['业务一致性',['business_consistent','booking_count','booking_matches','no_booking_on','reply_booking_consistent','refund.ledger','refund.evidence']],['状态与回复',['state_matches','reply_literals']]] as const
 const checks=computed(()=>buckets.map(([name,types])=>{const group=rows.value.filter(r=>(types as readonly string[]).includes(r.type));return{name,passed:group.filter(r=>r.verdict==='passed').length,failed:group.filter(r=>r.verdict==='failed').length,unknown:group.filter(r=>['error','inconclusive'].includes(r.verdict)).length,total:group.filter(r=>r.verdict!=='na').length,na:group.filter(r=>r.verdict==='na').length}}))
 const attention=computed(()=>rows.value.filter(r=>['failed','error','inconclusive'].includes(r.verdict)))
 function eventTrail(events:TraceFact[]){return events.map(f=>traceEventNames[f.event.type]??f.event.type).join(' · ')}
@@ -213,7 +214,7 @@ onBeforeUnmount(()=>generation++)
 </section>
     <section class="diagnostic-business">
 <h3>业务查证</h3>
-<strong>{{ bookings===null?'未知':bookings }}<small v-if="bookings!==null">笔有效预约</small>
+<strong>{{ bookings===null?'未知':bookings }}<small v-if="bookings!==null">{{ refund ? '笔模拟退款' : '笔有效预约' }}</small>
 </strong>
 <p>{{ summary?`任务结果：${labels[summary.task_outcome]??summary.task_outcome}`:'任务结果尚未判定' }}</p>
 <details>
@@ -224,7 +225,7 @@ onBeforeUnmount(()=>generation++)
 <pre>{{ JSON.stringify(current?.after,null,2)??'未采集' }}</pre>
 </details>
 </section>
-    <section>
+    <section v-if="!refund">
 <header>
 <h3>AI辅助评价</h3>
 <InfoHint label="AI评价边界" text="仅查看或按已有流程明确请求辅助评价。AI意见不替代规则或SQL事实，打开诊断页不会调用模型，也不会自动修复代码。"/>

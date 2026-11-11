@@ -20,7 +20,7 @@ from app.agents.errors import AgentError
 from app.api.booking import get_booking_service
 from app.api.cases import get_case_service
 from app.cases.budget import AUTHORIZATION, GenerationBudget
-from app.cases.service import CaseService, manifest
+from app.cases.service import CaseService, batch_problem, manifest
 from app.cases.validation import check, text_fingerprint
 from app.core.config import Settings
 from app.core.passwords import hash_password
@@ -31,6 +31,44 @@ from app.schemas.cases import Candidate, CandidateReview, GenerateCandidates
 from app.services.booking import BookingService
 
 REFERENCE = datetime(2026, 10, 28, 1, tzinfo=UTC)
+
+
+@pytest.mark.parametrize(
+    "values,expected,code",
+    [
+        (["normal", "capacity", "correction"], ["normal", "correction"], "batch_shape"),
+        (["normal", "normal"], ["normal", "correction"], "batch_profiles"),
+        (["normal", "capacity"], ["normal", "correction"], "batch_profiles"),
+        (["normal"], ["normal", "correction"], "batch_shape"),
+        ([], ["normal"], "batch_shape"),
+        (["correction", "normal"], ["normal", "correction"], None),
+    ],
+)
+def test_batch_selection_count_duplicates_and_unselected_types(values, expected, code):
+    problem = batch_problem({"candidates": [{"profile": p} for p in values]}, expected)
+    assert (problem["code"] if problem else None) == code
+    if problem:
+        assert problem["received_count"] == len(values)
+        assert problem["expected_count"] == len(expected)
+
+
+@pytest.mark.parametrize("decoded", [None, [], {}, {"candidates": {}}, {"candidates": None}])
+def test_batch_non_array_fails_before_ingestion(decoded):
+    assert batch_problem(decoded, ["normal"])["code"] == "batch_shape"
+
+
+def test_manifest_explicit_selection_and_narrowed_enum_do_not_leak_between_requests():
+    selected = ["normal", "correction"]
+    frozen = manifest(Settings(), REFERENCE.isoformat(), selected)
+    assert frozen["selection"] == {"profiles": selected, "count": 2}
+    assert frozen["candidate_schema"]["properties"]["profile"]["enum"] == selected
+    other = manifest(Settings(), REFERENCE.isoformat(), ["capacity"])
+    assert other["candidate_schema"]["properties"]["profile"]["enum"] == ["capacity"]
+    assert Candidate.model_json_schema()["properties"]["profile"]["enum"] == [
+        "normal",
+        "capacity",
+        "correction",
+    ]
 
 
 def test_proposals_cannot_import_approval_identity_partition_or_arbitrary_assertions():
@@ -269,6 +307,92 @@ def test_invalid_null_candidate_and_tampered_evidence_fail_safely(lab):
         assert err.value.code == "casegen_evidence_invalid"
     finally:
         path.write_bytes(original)
+
+
+def test_unselected_extra_candidate_is_repaired_with_exact_feedback_before_ingestion(lab):
+    selected = ["normal", "correction"]
+    bad = {"candidates": [proposal(p) for p in ["normal", "capacity", "correction"]]}
+    good = {"candidates": [proposal(p) for p in selected]}
+    svc, gateway = service(lab, [bad, good])
+    req = GenerateCandidates(request_id=uuid4(), profiles=selected)
+    batch = svc.generate(1, req)
+    assert batch["status"] == "completed" and len(batch["candidates"]) == 2
+    assert [c["raw"]["profile"] for c in batch["candidates"]] == selected
+    assert batch["result"]["error_detail"] is None and batch["failure"] is None
+    detail = batch["result"]["attempts"][0]["detail"]
+    assert detail["unexpected_profiles"] == ["capacity"]
+    assert detail["received_count"] == 3 and "未选择" in detail["message"]
+    payload = json.loads(gateway.calls[0][1].content)
+    assert payload["selection"] == {"profiles": selected, "count": 2}
+    repair = gateway.calls[1][-1].content
+    assert '"unexpected_profiles": ["capacity"]' in repair
+    assert 'profile仅允许["normal", "correction"]' in repair
+    assert "必须恰好2条" in repair
+    assert svc.generate(1, req) == batch and len(gateway.calls) == 2
+    assert all(c["review"] is None for c in batch["candidates"])
+
+
+@pytest.mark.parametrize("profiles", [["normal", "normal"], ["normal", "capacity"]])
+def test_profile_mismatch_stops_after_one_repair_without_partial_import(lab, profiles):
+    bad = {"candidates": [proposal(p) for p in profiles]}
+    svc, gateway = service(lab, [bad, bad])
+    req = GenerateCandidates(request_id=uuid4(), profiles=["normal", "correction"])
+    batch = svc.generate(1, req)
+    assert len(gateway.calls) == 2 and not batch["candidates"]
+    assert batch["result"]["error"] == "batch_profiles"
+    assert batch["failure"]["code"] == "batch_profiles"
+    assert len(batch["result"]["attempts"]) == 2
+    assert svc.generate(1, req) == batch and len(gateway.calls) == 2
+
+
+def test_historical_batch_shape_diagnostic_is_derived_without_rewriting_evidence(lab):
+    from app.cases import evidence
+
+    svc, gateway = service(lab, [])
+    batch = str(uuid4())
+    frozen = manifest(lab[2], REFERENCE.isoformat(), ["normal", "correction"])
+    frozen.pop("selection")
+    svc._append(1, batch, "casegen_request", frozen, {"mode": "real_provider", "phase": "request"})
+    svc._append(
+        1,
+        batch,
+        "casegen_call",
+        {
+            "response": {
+                "content": json.dumps(
+                    {"candidates": [proposal(p) for p in ["normal", "capacity", "correction"]]}
+                )
+            }
+        },
+        {"phase": "provider", "attempt": 2},
+    )
+    original = {
+        "candidate_ids": [],
+        "error": "batch_shape",
+        "attempts": [],
+        "ledger": {},
+        "requested": 2,
+    }
+    svc._append(1, batch, "casegen_result", original, {"phase": "batch_result"})
+    with Session(lab[0]) as session:
+        rows = list(
+            session.query(Artifact).filter(
+                Artifact.metadata_json["generation_id"].as_string() == batch
+            )
+        )
+        before = [(r.id, r.sha256, evidence.read(r)) for r in rows]
+    view = svc.read(1, batch)
+    assert view["result"] == original
+    assert view["failure"]["unexpected_profiles"] == ["capacity"]
+    assert view["failure"]["received_count"] == 3
+    assert not gateway.calls
+    with Session(lab[0]) as session:
+        rows = list(
+            session.query(Artifact).filter(
+                Artifact.metadata_json["generation_id"].as_string() == batch
+            )
+        )
+        assert [(r.id, r.sha256, evidence.read(r)) for r in rows] == before
 
 
 @pytest.mark.parametrize(

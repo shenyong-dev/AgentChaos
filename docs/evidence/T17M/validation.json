@@ -1,0 +1,69 @@
+{
+  "backend": {
+    "command": "pytest tests/test_reductions.py tests/test_reductions_integration.py tests/test_database.py tests/test_case_generation.py -q",
+    "passed": 48,
+    "seconds": 78.26,
+    "full_suite": false
+  },
+  "frontend": {
+    "new_reduction_controls": 8,
+    "existing_repair_controls": 8,
+    "combined_passed": 16,
+    "combined_skipped": 1,
+    "seconds": 22.0,
+    "skip": "Optional existing-main-report test lacked its environment input; separate real read-only browser verification passed afterward.",
+    "live_read_only": {
+      "passed": true,
+      "checks": [
+        "real frozen summary and SQL counts",
+        "GET/HEAD whitelist and POST/path rejection",
+        "desktop and phone snapshot",
+        "actual owned existing main report without transport fixtures"
+      ],
+      "main_run": "95b2eae4-9290-4473-894f-4d3eb8808cc0",
+      "errors": [],
+      "new_model_calls": 0
+    }
+  },
+  "review": {
+    "findings": [
+      {
+        "priority": "P2",
+        "file": "frontend/src/pages/CasesPage.vue",
+        "problem": "verified_reduction lacks expected_fixture; candidate page rendered undefined",
+        "fix": "mode-specific frozen expectation/proof view plus actual-shape UI test",
+        "verified": "8 UI controls pass; candidate review test included"
+      }
+    ],
+    "reviewer": "independent same inherited current model subagent t17m_review",
+    "scope": "T17M actual changes only",
+    "repeat_review": false
+  },
+  "contracts": {
+    "memory_matches": 26,
+    "contract_unit_tests": 3
+  },
+  "type_and_build": "passed",
+  "ruff": "passed",
+  "git_diff_check": "passed",
+  "exports": {
+    "hashes": 27,
+    "ZIP_manifests": 9,
+    "SQL_roundtrip_17_tables": true
+  },
+  "intermediate_failures_retained": [
+    "unit-initial.txt",
+    "free-test-01.log",
+    "free-test-02.log",
+    "free-test-06.log",
+    "backend-check-04.log",
+    "ui-check-01.log",
+    "repair-ui-regression.log"
+  ],
+  "models": {
+    "real_requests": 67,
+    "real_executions": 9,
+    "other_roles": 0,
+    "further_calls_after_batch": 0
+  }
+}

@@ -78,6 +78,15 @@ def run_execution(engine, redis, settings, execution_uuid, *, gateway_factory=No
                 / str(execution_uuid),
             )
         )
+        if claim["manifest"].get("adapter_type") == "reference_refund":
+            from app.adapters.refund_runner import execute
+
+            output = execute(engine, redis, settings, claim, control, recorder, gateway)
+            waiting = output["status"] == "waiting_confirmation"
+            finished = service.finish(
+                claim["id"], claim["token"], "waiting_input" if waiting else "inconclusive", output
+            )
+            return {"claimed": True, "status": finished or "lease_lost"}
         runtime = AgentRuntime(
             engine,
             redis,

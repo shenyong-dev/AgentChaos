@@ -11,6 +11,7 @@ const emit = defineEmits<{ navigate: []; close: [] }>()
 const route = useRoute()
 const active = computed(() => navigationPath(route.path))
 const groups = navigationGroups
+const teamCloud = import.meta.env.VITE_DEPLOYMENT_MODE === 'team'
 </script>
 
 <template>
@@ -34,7 +35,7 @@ const groups = navigationGroups
         </ElTooltip>
       </section>
     </nav>
-    <footer class="app-sidebar-footer"><span class="sidebar-footer-label">本地开发环境</span><span class="sidebar-dev-badge">DEV</span></footer>
+    <footer class="app-sidebar-footer"><span class="sidebar-footer-label">{{ teamCloud ? '团队云端' : '本地开发环境' }}</span><span class="sidebar-dev-badge">{{ teamCloud ? 'TEAM' : 'DEV' }}</span></footer>
   </aside>
 </template>
 

@@ -4,9 +4,13 @@ RUN pip install --no-cache-dir uv==0.12.21
 COPY backend/pyproject.toml backend/uv.lock ./
 RUN uv sync --locked --no-dev --no-install-project
 COPY backend/app ./app
+COPY backend/reference_agents ./reference_agents
 COPY backend/alembic ./alembic
 COPY backend/alembic.ini ./alembic.ini
 COPY knowledge /workspace/AgentChaos/knowledge
+COPY datasets /workspace/AgentChaos/datasets
+COPY docs/fixtures/T12/samples.json /workspace/AgentChaos/docs/fixtures/T12/samples.json
+COPY docs/fixtures/T17B/samples.json /workspace/AgentChaos/docs/fixtures/T17B/samples.json
 COPY docs/evidence/T04/model-probe.json /workspace/AgentChaos/docs/evidence/T04/model-probe.json
 RUN uv sync --locked --no-dev
 RUN mkdir -p /workspace/AgentChaos/.local /workspace/AgentChaos/.cache/jieba && chown -R 10001:10001 /workspace/AgentChaos/.local /workspace/AgentChaos/.cache

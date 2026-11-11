@@ -4,7 +4,14 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-READ_TOOLS = {"retrieve_rules", "query_availability", "lookup_booking_by_request"}
+READ_TOOLS = {
+    "retrieve_rules",
+    "query_availability",
+    "lookup_booking_by_request",
+    "query_order",
+    "check_refund",
+    "lookup_refund_by_request",
+}
 STAGES = {"F01": "PRE_DISPATCH", "F02": "PRE_COMMIT", "F03": "POST_RESULT", "F04": "POST_COMMIT"}
 
 
@@ -35,9 +42,13 @@ class FaultSpec(BaseModel):
             READ_TOOLS
             if self.fault_type == "F03"
             else (
-                READ_TOOLS | {"confirm_booking"}
+                READ_TOOLS | {"confirm_booking", "confirm_refund"}
                 if self.fault_type == "F01"
-                else {"confirm_booking"}
+                else (
+                    {"confirm_booking", "confirm_refund"}
+                    if self.fault_type == "F04"
+                    else {"confirm_booking"}
+                )
             )
         )
         if self.target_tool not in allowed:

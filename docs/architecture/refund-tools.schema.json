@@ -1,0 +1,127 @@
+[
+  {
+    "type": "function",
+    "function": {
+      "name": "query_order",
+      "description": "查询当前用户订单。不能改身份。",
+      "parameters": {
+        "additionalProperties": false,
+        "properties": {
+          "order_id": {
+            "pattern": "^O-[0-9]{4}$",
+            "title": "Order Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "order_id"
+        ],
+        "title": "Order",
+        "type": "object"
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "check_refund",
+      "description": "校验是否可退，金额由订单决定，单位分。",
+      "parameters": {
+        "additionalProperties": false,
+        "properties": {
+          "order_id": {
+            "pattern": "^O-[0-9]{4}$",
+            "title": "Order Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "order_id"
+        ],
+        "title": "Order",
+        "type": "object"
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "preview_refund",
+      "description": "生成完整模拟退款草稿；必须展示并等待用户明确确认。",
+      "parameters": {
+        "additionalProperties": false,
+        "properties": {
+          "order_id": {
+            "pattern": "^O-[0-9]{4}$",
+            "title": "Order Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "order_id"
+        ],
+        "title": "Preview",
+        "type": "object"
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "confirm_refund",
+      "description": "按当前已确认草稿模拟入账；未确认时禁止调用。",
+      "parameters": {
+        "additionalProperties": false,
+        "properties": {
+          "draft_id": {
+            "maxLength": 36,
+            "minLength": 36,
+            "title": "Draft Id",
+            "type": "string"
+          },
+          "draft_hash": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Draft Hash",
+            "type": "string"
+          },
+          "idempotency_key": {
+            "maxLength": 36,
+            "minLength": 36,
+            "title": "Idempotency Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "draft_id",
+          "draft_hash",
+          "idempotency_key"
+        ],
+        "title": "Confirm",
+        "type": "object"
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "lookup_refund_by_request",
+      "description": "按原请求键查询入账事实；未知回执不能换键重提。",
+      "parameters": {
+        "additionalProperties": false,
+        "properties": {
+          "idempotency_key": {
+            "maxLength": 36,
+            "minLength": 36,
+            "title": "Idempotency Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "idempotency_key"
+        ],
+        "title": "Lookup",
+        "type": "object"
+      }
+    }
+  }
+]

@@ -297,6 +297,31 @@ class ReportService:
             _, after, _ = self._snapshot(session, owner, right, lock_events=False)
             return compare(before, after)
 
+    def fault_comparison(self, owner, normal, fault):
+        from app.reports.fault_pairs import compare_faults
+
+        with Session(self.engine) as session:
+            reports = []
+            for identifier in (normal, fault):
+                run, report, _ = self._snapshot(session, owner, identifier, lock_events=False)
+                if run.manifest_json.get("adapter_type") == "reference_refund":
+                    raise AgentError(
+                        "fault_comparison_domain",
+                        "预约故障配对协议不适用退款；请查看退款账本与执行链路。",
+                        409,
+                    )
+                if len(report["executions"]) > 120:
+                    raise AgentError(
+                        "fault_comparison_limit", "每侧最多120条执行，请缩小比较范围。", 413
+                    )
+                for value in report["executions"]:
+                    execution = session.get(TestExecution, value["database_execution_id"])
+                    value["observed_events"] = load_evidence(
+                        session, run, execution, lock_events=False
+                    ).events
+                reports.append(report)
+            return compare_faults(*reports)
+
     def _verification(self, session, owner, row, first, execution_id, fixed_version_id):
         execution = session.scalar(
             select(TestExecution)
@@ -702,7 +727,14 @@ class ReportService:
                         raise AgentError("export_id_conflict", "导出请求标识已绑定其他参数。", 409)
                     return self.export_view(old)
                 run, report, events = self._snapshot(session, owner, identifier)
-                if not report["knowledge"] or any(
+                retrieval_na = (
+                    run.manifest_json.get("adapter_type") == "reference_refund"
+                    and run.manifest_json["target"]["retrieval"]
+                    == {"mode": "not_applicable", "documents": []}
+                    and run.manifest_json["target"].get("capabilities", {}).get("retrieval")
+                    is False
+                )
+                if (not report["knowledge"] and not retrieval_na) or any(
                     not item["available"] for item in report["knowledge"]
                 ):
                     raise AgentError(

@@ -8,6 +8,7 @@ import { catalog, catalogHash, checkedRoute, guidanceGet, assistantOpen, openGui
 import { copilotRequest, useCurrentComparison, type CopilotAccess, type CopilotSession, type CopilotTurn, type Source } from '../copilot'
 import InfoHint from './InfoHint.vue'
 import CopilotHome from './CopilotHome.vue'
+import CopilotSourceContent from './CopilotSourceContent.vue'
 import { formatCny } from '../money'
 
 const route = useRoute(), router = useRouter(), { page, selected } = useCurrentGuide(), comparison = useCurrentComparison()
@@ -35,7 +36,7 @@ const active = computed(() => assistantOpen.value)
 const selectionKey = computed(() => selected.value ? `${selected.value.kind}:${selected.value.id}` : '')
 const contextLabel = computed(() => conversation.value?.selected?.title ?? (selected.value ? `${({case:'开发用例',run:'运行',execution:'执行',version:'对象版本',generation:'生成批次',calibration:'校准批次',interaction:'预约会话'} as const)[selected.value.kind]} · ${selected.value.id.slice(0,8)}` : '当前页面'))
 const prompts = computed(() => page.value === 'environment' ? ['为何不能立即运行？','下一步检查什么？'] : comparison.value ? ['这两次运行能直接比较吗？','哪些条件还缺证据？'] : selected.value?.kind === 'case' ? ['这条用例测什么？','怎样新建这条用例的运行？'] : ['run','execution'].includes(selected.value?.kind ?? '') ? ['失败在哪里？','哪些结论还缺证据？'] : ['这页怎么用？','我下一步应该做什么？'])
-const sections = [{ key:'facts', title:'观察到的事实' },{ key:'possible_causes', title:'可能原因' },{ key:'next_steps', title:'建议下一步' }] as const
+const sections = [{ key:'facts', title:'' },{ key:'possible_causes', title:'可能原因' },{ key:'next_steps', title:'下一步' }] as const
 function citedSources(turn: CopilotTurn) {
   if (!turn.answer) return []
   const ids = new Set([
@@ -196,7 +197,7 @@ watch(historyView, async () => { await nextTick(); if (thread.value) thread.valu
             <div class="copilot-result-heading"><strong>{{ turn.mode === 'deterministic' ? '基础指引' : turn.mode === 'offline_control' ? '离线控制' : 'AI解释' }}</strong><div class="copilot-result-tools"><ElButton v-if="turn.answer" text size="small" @click="copyTurn(turn)"><CopyDocument aria-hidden="true" />{{ copied === turn.request_id ? '已复制' : '复制回答' }}</ElButton><ElTag size="small" :type="turn.status === 'completed' ? 'info' : 'warning'">{{ turn.status === 'completed' ? '待核对' : turn.status === 'processing' ? '处理中' : '未生成有效回答' }}</ElTag></div></div>
             <p v-if="turn.error" role="status">{{ turn.error }}</p>
             <template v-if="turn.answer">
-              <section v-for="group in sections" :key="group.key" class="copilot-answer-group"><template v-if="turn.answer[group.key].length"><h3>{{ group.title }}</h3><div v-for="(line,index) in turn.answer[group.key]" :key="index" class="copilot-statement"><p>{{ line.text }}<button v-for="id in [...new Set(line.citations)]" :key="id" type="button" class="copilot-citation" :aria-label="`查看引用：${turn.sources.find(s => s.source_id === id)?.title ?? id}`" @click="cite(turn,id)">[{{ sourceNumber(turn,id) }}]</button></p></div></template></section>
+              <section v-for="group in sections" :key="group.key" class="copilot-answer-group"><template v-if="turn.answer[group.key].length"><h3 v-if="group.title">{{ group.title }}</h3><div v-for="(line,index) in turn.answer[group.key]" :key="index" class="copilot-statement"><p>{{ line.text }}<button v-for="id in [...new Set(line.citations)]" :key="id" type="button" class="copilot-citation" :aria-label="`查看引用：${turn.sources.find(s => s.source_id === id)?.title ?? id}`" @click="cite(turn,id)">[{{ sourceNumber(turn,id) }}]</button></p></div></template></section>
               <section v-if="turn.answer.missing_evidence.length" class="copilot-missing"><h3>尚缺证据</h3><ul><li v-for="(line,index) in turn.answer.missing_evidence" :key="index">{{ typeof line === 'string' ? line : line.text }}<template v-if="typeof line !== 'string'"><button v-for="id in [...new Set(line.citations)]" :key="id" type="button" class="copilot-citation" :aria-label="`查看缺失证据引用：${turn.sources.find(s => s.source_id === id)?.title ?? id}`" @click="cite(turn,id)">[{{ sourceNumber(turn,id) }}]</button></template></li></ul></section>
               <div v-if="citedSources(turn).length" class="copilot-source-list" aria-label="回答引用来源"><button v-for="item in citedSources(turn)" :key="item.source_id" type="button" class="copilot-source-link" :aria-label="`查看来源 ${sourceNumber(turn,item.source_id)}：${item.title}`" @click="cite(turn,item.source_id)">[{{ sourceNumber(turn,item.source_id) }}] {{ item.title }}</button></div>
               <div class="copilot-actions"><ElButton v-for="id in turn.answer.action_ids" :key="id" size="small" :disabled="!!acting" @click="navigate(id)">{{ catalog.actions[id]?.label ?? '不可用动作' }}</ElButton></div>
@@ -214,7 +215,7 @@ watch(historyView, async () => { await nextTick(); if (thread.value) thread.valu
     <section v-if="source" ref="sourcePane" class="copilot-source" aria-label="引用证据" tabindex="-1">
       <div class="copilot-source-heading"><h3>{{ source.title }}</h3><ElButton size="small" @click="closeSource">收起证据</ElButton></div>
       <p>采集 {{ new Date(source.observed_at).toLocaleTimeString('zh-CN', { hour12: false }) }} · {{ Date.parse(source.expires_at) < now ? '历史快照，状态需重新核对' : '本轮快照' }}</p>
-      <pre>{{ JSON.stringify(source.content,null,2) }}</pre>
+      <CopilotSourceContent :content="source.content" />
       <details><summary>来源标识与校验值</summary><code>{{ source.source_id }}<br />{{ source.content_hash }}</code></details>
       <div class="copilot-actions"><ElButton v-if="source.action_id" size="small" @click="navigate(source.action_id)">打开原页面</ElButton><ElButton v-if="source.action_id === 'run.trace' && source.locator?.event_ids?.length" size="small" @click="navigate('run.trace',source)">定位证据事件</ElButton></div>
       <InfoHint label="来源校验边界" text="校验仅确认来源与完整性，不保证AI解释正确。" />
@@ -226,7 +227,7 @@ watch(historyView, async () => { await nextTick(); if (thread.value) thread.valu
         <ElInput id="copilot-question" ref="composerField" v-model="question" type="textarea" :autosize="{ minRows:3, maxRows:6 }" :maxlength="1500" :disabled="busy || !!pending || !!acting" placeholder="询问当前页面、用例或运行结果…" @keydown.ctrl.enter.prevent="ask()" @keydown.meta.enter.prevent="ask()" />
         <p v-if="access && !access.enabled" class="copilot-disabled" role="status">{{ access.reason }}</p>
         <div class="copilot-send">
-          <div class="copilot-budget"><span>本会话估算 {{ formatCny(cost) }}</span><span v-if="access?.enabled">上限 {{ formatCny(0.10) }} · 12请求</span><ElButton text size="small" :disabled="busy" @click="loadAccess">刷新调用状态</ElButton></div>
+          <div class="copilot-budget"><span>本会话估算 {{ formatCny(cost) }}</span><span v-if="access?.enabled && access.limits.session_microusd !== null">会话费用上限 {{ formatCny((access.limits.session_microusd ?? 100000) / 1000000) }}</span><ElButton text size="small" :disabled="busy" @click="loadAccess">刷新调用状态</ElButton></div>
           <div class="copilot-send-actions"><template v-if="pending"><ElButton :disabled="busy || !!acting" @click="ask(true)">查询原问题回执</ElButton><ElButton :disabled="busy || !!acting || !access?.enabled" @click="ask(false)">按原标识重试</ElButton></template><ElButton v-else type="primary" native-type="submit" :loading="busy" :disabled="loading || !!acting || !access?.enabled || !question.trim()">询问AI（付费）</ElButton></div>
         </div>
       </form>

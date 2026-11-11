@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { formatCny } from '../money'
-import InfoHint from '../components/InfoHint.vue'
 import { computed, onMounted, onBeforeUnmount, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { ElAlert, ElButton, ElSkeleton, ElTag } from 'element-plus'
@@ -8,88 +6,56 @@ import 'element-plus/es/components/alert/style/css'
 import 'element-plus/es/components/button/style/css'
 import 'element-plus/es/components/skeleton/style/css'
 import 'element-plus/es/components/tag/style/css'
-import { useEnvironmentStore } from '../stores/environment'
-import type { CheckStatus, ComponentCheck } from '../types/api'
+import InfoHint from '../components/InfoHint.vue'
 import EnvironmentReadiness from '../components/EnvironmentReadiness.vue'
 import WorkerOperations from '../components/WorkerOperations.vue'
+import { useEnvironmentStore } from '../stores/environment'
+import type { ComponentCheck } from '../types/api'
 
 const store = useEnvironmentStore()
-const { health, config, requestId, loading, error, readiness, readinessError } = storeToRefs(store)
+const { health, requestId, loading, error, readiness, readinessError } = storeToRefs(store)
 const now = ref(Date.now())
 let clock: ReturnType<typeof setInterval> | undefined
-const connectionsStale = computed(() => Boolean(error.value) || !health.value || now.value >= Date.parse(health.value.checked_at) + 60000)
-onMounted(() => { clock = setInterval(() => { now.value = Date.now() }, 1000) })
-onBeforeUnmount(() => { if (clock) clearInterval(clock) })
-const labels = { api: 'API 服务', mysql: 'MySQL 数据库', redis: 'Redis 与检查点能力', model: 'DeepSeek 模型' }
-const descriptions = { api: '接口响应', mysql: '业务与评测记录', redis: '队列、协调与会话', model: '凭据与角色配置' }
-const statusLabels: Record<CheckStatus, string> = {
-  ok: '已验证', error: '需处理', not_configured: '待配置', not_probed: '未探测',
-}
-const roleNames = { agent: '被测智能体', case_generator: '用例生成', judge: '辅助评价' }
-const healthyCount = computed(() => health.value?.checks.filter((check) => check.name !== 'model' && check.status === 'ok').length ?? 0)
-const checkedAt = computed(() => health.value
-  ? new Intl.DateTimeFormat('zh-CN', { timeZone: 'Asia/Shanghai', hour12: false,
-    month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' })
-    .format(new Date(health.value.checked_at))
-  : '尚未检测')
-const title = computed(() => {
-  if (error.value) return '暂时无法取得最新状态'
-  if (loading.value) return '正在检查环境连接'
-  if (!health.value) return '正在检查环境连接'
-  if (connectionsStale.value) return '检测结果已过期'
-  return health.value.status === 'infrastructure_ready' ? '基础服务已连通' : '还有服务等待连接'
+const connectionsStale = computed(() => {
+  const checked = Date.parse(health.value?.checked_at ?? '')
+  return Boolean(error.value) || !Number.isFinite(checked) || now.value >= checked + 60000
 })
-function tagType(check: ComponentCheck) {
-  if (connectionsStale.value || loading.value || check.name === 'model') return 'info'
+const services = computed(() => (['api', 'mysql', 'redis'] as const).map(name => ({
+  name, label: { api: 'API', mysql: 'MySQL', redis: 'Redis' }[name],
+  check: health.value?.checks.find(check => check.name === name),
+})))
+function status(check?: ComponentCheck) {
+  if (loading.value) return '检测中'
+  if (!check) return '未确认'
+  if (connectionsStale.value) return '已过期'
+  return { ok: '已连接', error: '需处理', not_configured: '待配置', not_probed: '未探测' }[check.status]
+}
+function tagType(check?: ComponentCheck) {
+  if (loading.value || connectionsStale.value || !check) return 'info'
   return check.status === 'ok' ? 'success' : check.status === 'error' ? 'danger' : 'info'
 }
-function checkMessage(check: ComponentCheck) {
-  if (check.code !== 'model_historically_verified') return check.message
-  return check.message.replace(/\d{4}-\d{2}-\d{2}T[\d:.]+(?:Z|[+-]\d{2}:\d{2})/, (value) =>
-    new Intl.DateTimeFormat('zh-CN', { timeZone: 'Asia/Shanghai', month: '2-digit', day: '2-digit',
-      hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date(value)) + '（北京时间）')
-}
-onMounted(store.refresh)
+const checkedAt = computed(() => {
+  if (!health.value || !Number.isFinite(Date.parse(health.value.checked_at))) return '尚未检测'
+  const time = new Date(health.value.checked_at).toLocaleTimeString('zh-CN', { timeZone: 'Asia/Shanghai', hour12: false })
+  return `${connectionsStale.value ? '历史结果' : '检测于'} ${time}`
+})
+onMounted(() => { clock = setInterval(() => { now.value = Date.now() }, 1000); void store.refresh() })
+onBeforeUnmount(() => { if (clock) clearInterval(clock) })
 </script>
 
 <template>
-  <div class="page-heading">
-    <div><h1>工程环境</h1></div>
-    <ElButton type="primary" :loading="loading" @click="store.refresh">重新检测</ElButton>
-  </div>
-
-  <ElAlert v-if="error" class="error-banner" :title="error" type="error" :closable="false" show-icon>
-    <template #default><span v-if="health">以下保留上一次检测结果，不能视为当前连接状态。</span></template>
-  </ElAlert>
-
-  <section class="readiness-panel" :class="{ stale: error }" aria-live="polite">
-    <div class="readiness-mark" :class="{ ready: health?.status === 'infrastructure_ready' && !connectionsStale && !loading }" aria-hidden="true">↗</div>
-    <div class="readiness-copy"><div class="heading-with-info"><h2>{{ title }}</h2><InfoHint label="连接检查范围" text="这里检测基础服务，不发起模型调用。模型是否可调用还需核对角色开关、预算与实际执行环境。" /></div></div>
-    <div class="readiness-total"><strong>{{ health && !connectionsStale && !loading ? healthyCount : '—' }}<span> / 3</span></strong><small>基础连接已验证</small></div>
+  <div class="page-heading"><h1>工程环境</h1><ElButton type="primary" :loading="loading" @click="store.refresh">重新检测</ElButton></div>
+  <ElAlert v-if="error" class="error-banner" :title="error" type="error" :closable="false" show-icon />
+  <section class="environment-connections" aria-label="基础服务状态" :aria-busy="loading">
+    <header><div class="heading-with-info"><h2>服务状态</h2><InfoHint label="连接检查范围" text="基础连接检测不调用模型。结果60秒内有效；实际操作仍核对权限、版本、确认与预算。" /></div><span>{{ checkedAt }}<template v-if="health"> · 北京时间</template></span></header>
+    <ElSkeleton v-if="loading && !health" :rows="1" animated />
+    <dl v-else class="connection-strip"><div v-for="item in services" :key="item.name" :data-service="item.name"><dt>{{ item.label }}</dt><dd><ElTag :type="tagType(item.check)" effect="light" size="small">{{ status(item.check) }}</ElTag></dd></div></dl>
+    <details v-if="health" class="connection-details"><summary>连接详情</summary><div v-for="item in services" :key="item.name" class="connection-detail"><strong>{{ item.label }}</strong><div><p>{{ item.check?.message ?? '尚未取得此项检测结果。' }}</p><small v-if="item.check">{{ item.check.version ? `v${item.check.version}` : '版本未确认' }}<template v-if="item.check.latency_ms !== null"> · {{ item.check.latency_ms }} ms</template><template v-if="item.name==='redis'"> · JSON {{ item.check.capabilities.json ? '✓' : '未验证' }} · Search {{ item.check.capabilities.search ? '✓' : '未验证' }}</template></small></div></div><small v-if="connectionsStale || loading" role="status">以上为历史观察，不能证明当前连接状态。</small><small v-if="requestId">请求 {{ requestId }}</small><a href="/docs" target="_blank" rel="noopener">查看 API 契约 ↗</a></details>
   </section>
-
-  <WorkerOperations :report="readiness" :stale="Boolean(readinessError) || loading || !readiness || now >= Date.parse(readiness.expires_at)" />
+  <WorkerOperations :report="readiness" :stale="Boolean(readinessError) || loading || !readiness || !Number.isFinite(Date.parse(readiness.expires_at)) || now >= Date.parse(readiness.expires_at)" />
   <EnvironmentReadiness :report="readiness" :error="readinessError" :loading="loading" />
-
-  <div class="section-heading"><h2>服务状态</h2><span>最近检测 {{ checkedAt }} · 北京时间</span></div>
-  <ElSkeleton v-if="loading && !health" :rows="5" animated class="loading-panel" />
-  <div v-else-if="!health" class="empty-state"><h3>暂无健康检查结果</h3><p>启动 API 后，点击“重新检测”查看实际连接状态。</p></div>
-  <div v-else class="service-grid" :aria-busy="loading">
-    <article v-for="check in health.checks" :key="check.name" class="service-card">
-      <div class="service-card-top"><span class="service-code">{{ check.name.toUpperCase() }}</span><ElTag :type="tagType(check)" effect="light" size="small">{{ check.code === 'model_historically_verified' ? '历史已验证' : loading ? '检测中' : connectionsStale ? '历史结果' : statusLabels[check.status] }}</ElTag></div>
-      <div class="heading-with-info"><h3>{{ labels[check.name] }}</h3><InfoHint :label="labels[check.name]" :text="descriptions[check.name]" /></div>
-      <p class="check-message">{{ checkMessage(check) }}</p>
-      <div v-if="Object.keys(check.capabilities).length" class="capabilities"><span v-for="(supported, capability) in check.capabilities" :key="capability" :class="{ supported: supported && !connectionsStale && !loading }">{{ capability === 'historical_agent_probe' ? '历史调用' : capability.toUpperCase() }} {{ supported ? '✓' : '—' }}</span></div>
-      <footer><span>{{ check.version ? `v${check.version}` : '版本待验证' }}</span><span>{{ check.latency_ms === null ? (check.name === 'api' ? '进程响应' : '未请求') : `${check.latency_ms} ms` }}</span></footer>
-    </article>
-  </div>
-
-  <section class="model-panel">
-    <div class="section-heading"><div class="heading-with-info"><h2>模型角色配置</h2><InfoHint label="角色预算" text="各角色独立配置、授权与记账。历史连通记录不代表此刻实时可用。" /></div><ElTag type="info">{{ config?.paid_calls_enabled ? '预约Agent调用已启用' : '预约Agent调用未启用' }}</ElTag></div>
-    <div v-if="!config" class="inline-empty">配置尚未读取成功。</div>
-    <div v-else class="role-grid"><article v-for="role in config.roles" :key="role.role"><span class="role-code">{{ role.role }}</span><h3>{{ roleNames[role.role] }}</h3><p>{{ role.model }}</p><dl><div><dt>思考模式</dt><dd>{{ role.thinking === 'disabled' ? '关闭' : '开启' }}</dd></div><div><dt>输出上限</dt><dd>{{ role.max_output_tokens.toLocaleString() }} tokens</dd></div><div><dt>授权预算</dt><dd>{{ (role.role === 'agent' && config.interactive_budget_unlimited) || (role.role === 'judge' && config.judge_budget_unlimited) || (role.role === 'case_generator' && config.casegen_budget_unlimited) ? '独立授权金额无总上限' : role.budget_usd === 0 ? '未设置' : formatCny(role.budget_usd) }}</dd></div></dl></article></div>
-  </section>
-
-  <p v-if="config" class="card-description">批量调用：{{ config.executor_paid_calls_enabled ? (config.executor_agent_budget_unlimited ? '本项 agent 授权金额无总上限；逐次记账，运行限制继续生效' : `agent 授权上限 ${formatCny(config.executor_agent_budget_usd)}，剩余额度以持久账本为准`) : '付费调用关闭' }}。</p>
-  <p v-if="config" class="card-description">裁判调用：{{ config.judge_paid_calls_enabled ? '独立授权已启用，每批调用、token和时间上限继续生效' : '关闭；已保存的评价仍可查看' }}。</p><footer class="page-footer"><a href="/docs" target="_blank" rel="noopener">查看 API 契约 ↗</a><small v-if="requestId">请求 {{ requestId }}</small></footer>
 </template>
+
+<style scoped>
+.environment-connections{padding:20px 24px;background:var(--ac-surface);border:1px solid var(--ac-border);border-radius:10px}.environment-connections>header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}.environment-connections h2{font-size:14px;margin:0}.environment-connections header>span{font-size:12px;color:var(--ac-muted)}.connection-strip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;margin:0}.connection-strip>div{display:flex;align-items:center;justify-content:space-between;gap:10px}.connection-strip>div+div{border-left:1px solid var(--ac-border);padding-left:20px}.connection-strip dt{font-size:14px;font-weight:600}.connection-strip dd{margin:0}.connection-details{margin-top:18px;border-top:1px solid var(--ac-border);padding-top:12px}.connection-details summary{font-size:12px;color:var(--ac-link);cursor:pointer;width:fit-content}.connection-details summary:focus-visible{outline:2px solid var(--ac-link);outline-offset:4px}.connection-detail{display:grid;grid-template-columns:70px minmax(0,1fr);gap:14px;padding:14px 0;border-bottom:1px solid var(--ac-border);font-size:13px}.connection-detail p{line-height:1.7;overflow-wrap:anywhere}.connection-details small{display:block;color:var(--ac-muted);font-size:12px;line-height:1.7;margin-top:6px;overflow-wrap:anywhere}.connection-details a{display:inline-block;margin-top:12px;color:var(--ac-link);font-size:12px}@media(max-width:600px){.environment-connections{padding:17px}.environment-connections>header{align-items:flex-start;flex-wrap:wrap}.connection-strip{gap:10px}.connection-strip>div{align-items:flex-start;flex-direction:column;gap:9px}.connection-strip>div+div{padding-left:12px}.connection-strip dt{font-size:13px}}
+</style>

@@ -137,6 +137,9 @@ def describe_assertion(spec):
 
 def case_guide(snapshot):
     content = snapshot["content"]
+    if content["fixture"].get("fixture") == "refund-reference-v1":
+        from app.adapters.refund_guidance import guide
+        return guide(snapshot)
     dataset = content["fixture"].get("dataset", {})
     dataset = dataset if isinstance(dataset, dict) else {}
     independent = dataset.get("independent_expectation", {})

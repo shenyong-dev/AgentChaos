@@ -91,9 +91,11 @@ class FaultController:
                 "reused": False,
             }
             if selected:
-                from app.executors.service import booking_snapshot
+                from app.executors.service import business_snapshot
 
-                op["before"] = booking_snapshot(session, execution.scope_id)
+                op["before"] = business_snapshot(
+                    session, run, execution.scope_id, self.recorder.settings
+                )
                 ledger["reserved"] += 1
                 append_event(
                     session,
@@ -175,7 +177,7 @@ class FaultController:
                 "commit_state": "not_committed",
                 "retryable": False,
             }
-            if name == "confirm_booking":
+            if name in {"confirm_booking", "confirm_refund"}:
                 visible["request_key"] = str(values.idempotency_key)
         elif fault_type == "F02":
 
@@ -217,9 +219,9 @@ class FaultController:
         if applied:
             self._mask(state, previous, fault_type, values)
         with self.control.transaction() as (session, run, execution):
-            from app.executors.service import booking_snapshot
+            from app.executors.service import business_snapshot
 
-            after = booking_snapshot(session, execution.scope_id)
+            after = business_snapshot(session, run, execution.scope_id, self.recorder.settings)
             actual_commit = (
                 "committed"
                 if fault_type == "F04" and applied

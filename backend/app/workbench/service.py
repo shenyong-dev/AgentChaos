@@ -1,5 +1,8 @@
 """Discover actual owned runs/versions and approved development cases; no dispatch."""
 
+import hashlib
+import json
+
 from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session, aliased
 
@@ -7,7 +10,7 @@ from app.agents.errors import AgentError
 from app.cases.service import CaseService
 from app.datasets.service import DatasetService
 from app.executors.service import RunService, frozen_case
-from app.models import Target, TargetVersion, TestCase, TestExecution, TestRun
+from app.models import Artifact, Target, TargetVersion, TestCase, TestExecution, TestRun
 from app.workbench.guidance import case_guide
 
 
@@ -30,6 +33,57 @@ class WorkbenchService:
     def _identity(self, session, owner):
         return CaseService.role(session, owner, "operator")
 
+    def _cloud_imports(self, session):
+        from app.core.cloud import team_cloud
+        from app.core.config import PROJECT_ROOT
+
+        if not team_cloud(self.settings):
+            return []
+        root = (PROJECT_ROOT / ".local/cloud").resolve()
+        imports = []
+        for record in session.scalars(
+            select(Artifact).where(
+                Artifact.kind == "dataset_manifest",
+                Artifact.metadata_json["phase"].as_string() == "cloud_development_import",
+                Artifact.metadata_json["deployment_id"].as_string()
+                == self.settings.cloud_deployment_id,
+            )
+        ):
+            path = (PROJECT_ROOT / record.relative_path).resolve()
+            try:
+                if not path.is_relative_to(root) or not 0 < record.size_bytes <= 65536:
+                    continue
+                raw = path.read_bytes()
+                if (
+                    len(raw) != record.size_bytes
+                    or hashlib.sha256(raw).hexdigest() != record.sha256
+                ):
+                    continue
+                value = json.loads(raw)
+                if (
+                    value["deployment_id"] != self.settings.cloud_deployment_id
+                    or value["kind"] != "imported_approved_development_revisions"
+                ):
+                    continue
+                entries = value["cases"]
+                if not isinstance(entries, list) or len(entries) > 120:
+                    continue
+                for entry in entries:
+                    identifier, digest = entry["id"], entry["content_hash"]
+                    if (
+                        type(identifier) is int
+                        and identifier > 0
+                        and isinstance(digest, str)
+                        and len(digest) == 64
+                        and all(c in "0123456789abcdef" for c in digest)
+                    ):
+                        imports.append(
+                            (TestCase.id == identifier) & (TestCase.content_hash == digest)
+                        )
+            except (OSError, ValueError, KeyError, TypeError):
+                continue
+        return imports
+
     def _cases(self, session):
         # Formal calibration/holdout are not a browsing or tuning library.
         dataset = DatasetService(self.engine, self.settings)
@@ -39,7 +93,12 @@ class WorkbenchService:
         return select(TestCase).where(
             TestCase.review_status == "approved",
             TestCase.dataset_split == "dev",
-            or_(~TestCase.case_key.startswith("T13-"), TestCase.id.in_(ids)),
+            TestCase.source != "reduction_trial:T17M",
+            or_(
+                ~TestCase.case_key.startswith("T13-"),
+                TestCase.id.in_(ids),
+                *self._cloud_imports(session),
+            ),
             ~select(latest.id)
             .where(
                 latest.case_key == TestCase.case_key,
@@ -93,6 +152,9 @@ class WorkbenchService:
 
     def versions(self, owner, *, cursor=0, limit=20):
         current = RunService(self.engine, self.settings).current_manifest()["config_hash"]
+        from app.adapters.refund import RefundAdapter
+
+        refund_current = RefundAdapter(self.engine, self.settings).manifest()["config_hash"]
         with Session(self.engine) as session:
             self._identity(session, owner)
             query = (
@@ -117,9 +179,13 @@ class WorkbenchService:
                         "graph_revision": v.graph_revision,
                         "adapter_revision": v.adapter_revision,
                         "model": v.model_config_json.get("model_requested"),
-                        "compatible": v.config_hash == current and t.archived_at is None,
+                        "capabilities": t.capabilities_json,
+                        "compatible": v.config_hash
+                        == (refund_current if t.adapter_type == "reference_refund" else current)
+                        and t.archived_at is None,
                         "availability": "current_source"
-                        if v.config_hash == current
+                        if v.config_hash
+                        == (refund_current if t.adapter_type == "reference_refund" else current)
                         else "historical_source_required",
                     }
                     for v, t in rows[:limit]
@@ -156,9 +222,12 @@ class WorkbenchService:
                         "turns": len(c.turns_json),
                         "review_status": c.review_status,
                         "guidance": reading_summary(c),
-                        "knowledge_profile": c.fixture_json.get("dataset", {}).get(
-                            "knowledge_profile", "base"
-                        ),
+                        "knowledge_profile": "not_applicable"
+                        if c.fixture_json.get("fixture") == "refund-reference-v1"
+                        else c.fixture_json.get("dataset", {}).get("knowledge_profile", "base"),
+                        "adapter_type": "reference_refund"
+                        if c.fixture_json.get("fixture") == "refund-reference-v1"
+                        else "langgraph_booking",
                         "default_knowledge_compatible": c.fixture_json.get("dataset", {}).get(
                             "knowledge_profile", "base"
                         )
@@ -203,13 +272,15 @@ class WorkbenchService:
                 if ids
                 else {}
             )
-            modes = {}
+            modes, execution_counts = {}, {}
             if ids:
-                for run_id, timing in session.execute(
-                    select(TestExecution.run_id, TestExecution.timing_json).where(
-                        TestExecution.run_id.in_(ids)
-                    )
+                for run_id, timing, status in session.execute(
+                    select(
+                        TestExecution.run_id, TestExecution.timing_json, TestExecution.status
+                    ).where(TestExecution.run_id.in_(ids))
                 ):
+                    counts = execution_counts.setdefault(run_id, {})
+                    counts[status] = counts.get(status, 0) + 1
                     value = (timing or {}).get("gateway_mode")
                     if isinstance(value, str):
                         modes.setdefault(run_id, set()).add(value)
@@ -222,6 +293,7 @@ class WorkbenchService:
                         "target_version_id": r.target_version_id,
                         "created_at": r.created_at.isoformat(),
                         "executions": executions.get(r.id, 0),
+                        "execution_counts": execution_counts.get(r.id, {}),
                         "summary": r.summary_json,
                         "event_count": r.event_seq,
                         "manifest_hash": r.manifest_hash,

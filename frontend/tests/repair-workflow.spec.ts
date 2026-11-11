@@ -18,6 +18,7 @@ async function controls(page:Page,eligible=true){
   await page.route('**/api/v1/**',route=>{
     const url=new URL(route.request().url()),path=url.pathname,send=(data:unknown)=>route.fulfill({json:{data}})
     if(route.request().method()!=='GET')return route.fallback()
+    if(path.endsWith('/defects/'+key+'/reduction'))return send(null)
     if(path.endsWith('/verification'))return send(assessment(eligible))
     if(path.endsWith('/defects/'+key))return send(defect())
     if(path.endsWith('/defects'))return send({items:[defect()],has_more:false,next_cursor:null})

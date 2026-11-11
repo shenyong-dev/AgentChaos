@@ -323,7 +323,7 @@ class EvidenceRecorder:
             return row.event_uuid if row else None
 
     def business_snapshot(self):
-        from app.executors.service import booking_snapshot
+        from app.executors.service import business_snapshot
 
-        with self.control.transaction() as (session, _, execution):
-            return booking_snapshot(session, execution.scope_id)
+        with self.control.transaction() as (session, run, execution):
+            return business_snapshot(session, run, execution.scope_id, self.settings)

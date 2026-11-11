@@ -18,6 +18,7 @@ from app.cases.budget import AUTHORIZATION as CASEGEN_AUTHORIZATION
 from app.cases.budget import GenerationBudget
 from app.copilot.budget import CopilotBudget
 from app.copilot.budget import authorized as copilot_authorized
+from app.copilot.budget import unlimited_calls as copilot_unlimited_calls
 from app.core.config import PROJECT_ROOT
 from app.core.deployment import (
     database_binding,
@@ -359,6 +360,9 @@ def manager_check(settings):
 
 
 def budget_checks(settings):
+    from app.core.cloud import authorized as cloud_authorized
+    from app.core.cloud import root_key
+
     client = Redis.from_url(settings.redis_url, socket_connect_timeout=2, socket_timeout=2)
     s = settings
     judge_finite = (
@@ -396,7 +400,7 @@ def budget_checks(settings):
             "批量Agent预算",
             s.executor_allow_paid_model_calls,
             authorization_limit(s) != 0,
-            f"ac:t05:budget:{s.executor_budget_authorization_id}:agent",
+            root_key(s, "agent") or f"ac:t05:budget:{s.executor_budget_authorization_id}:agent",
             s.agent_model,
             s.agent_thinking,
             s.agent_max_output_tokens,
@@ -415,7 +419,10 @@ def budget_checks(settings):
             "用例生成预算",
             s.casegen_allow_paid_model_calls,
             s.casegen_budget_unlimited
-            and s.casegen_budget_authorization_id == CASEGEN_AUTHORIZATION,
+            and (
+                s.casegen_budget_authorization_id == CASEGEN_AUTHORIZATION
+                or cloud_authorized(s, "case_generator")
+            ),
             GenerationBudget(client, s, "readiness", None).key,
             s.casegen_model,
             s.casegen_thinking,
@@ -431,7 +438,10 @@ def budget_checks(settings):
             judge_finite
             or (
                 s.judge_budget_unlimited
-                and s.judge_budget_authorization_id == LEGACY_JUDGE_AUTHORIZATION
+                and (
+                    s.judge_budget_authorization_id == LEGACY_JUDGE_AUTHORIZATION
+                    or cloud_authorized(s, "judge")
+                )
             ),
             JudgeBudget(client, s, "readiness", None).key,
             s.judge_model,
@@ -450,8 +460,8 @@ def budget_checks(settings):
             s.copilot_model,
             s.copilot_thinking,
             s.copilot_max_output_tokens,
-            int(s.copilot_budget_usd * 1_000_000),
-            60,
+            -1 if cloud_authorized(s, "copilot") else int(s.copilot_budget_usd * 1_000_000),
+            None if copilot_unlimited_calls(s) else 60,
             1536,
         ),
     ]
@@ -616,6 +626,8 @@ def operations(checks):
     ]
     result = []
     for key, label, required, note, destination in definitions:
+        if "cloud_capacity" in by_id and key not in ("history", "offline"):
+            required = [*required, "cloud_capacity"]
         blockers = [name for name in required if name not in by_id or by_id[name].status != "ready"]
         states = {by_id[name].status if name in by_id else "unknown" for name in blockers}
         status = (
@@ -727,6 +739,21 @@ async def collect_readiness(settings):
     if mysql_ready:
         checks.append(await asyncio.to_thread(manager_check, settings))
     has_key = bool(settings.deepseek_api_key.get_secret_value())
+    if settings.cloud_deployment_id:
+        from app.core.cloud import capacity
+
+        resource = capacity(settings)
+        checks.append(
+            observation(
+                "cloud_capacity",
+                "云端资源余量",
+                "ready" if resource["ready"] else "blocked",
+                "cloud_capacity_ready" if resource["ready"] else "cloud_capacity_unavailable",
+                resource.get("reason") or "内存和磁盘余量满足本次准入条件。",
+                "不足时先由维护者检查资源，不自动重发模型请求。",
+                **{k: v for k, v in resource.items() if k != "reason"},
+            )
+        )
     checks.append(
         observation(
             "credential",

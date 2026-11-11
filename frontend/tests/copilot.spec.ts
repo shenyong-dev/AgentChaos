@@ -6,6 +6,29 @@ const password = process.env.AC_UI_PASSWORD ?? '', enabled = process.env.AC_T17E
 const output = process.env.AC_E2E_EVIDENCE_DIR ?? resolve(import.meta.dirname,'../../.local/t17e/ui')
 const origin = process.env.AC_E2E_BASE_URL ?? 'http://127.0.0.1:5173'
 const objects = JSON.parse(process.env.AC_T17E_OBJECTS ?? '{}')
+
+for(const width of [1440,390])test(`environment shares observations once and preserves expiry ${width}`,async({page})=>{
+  await page.clock.install()
+  await page.setViewportSize({width,height:900})
+  const checked_at=new Date().toISOString(), expires_at=new Date(Date.now()+60000).toISOString()
+  const checks=[['api','API服务'],['mysql','数据库连接']].map(([id,label])=>({id,label,status:'ready',code:'ok',message:'连接已验证。',next_step:'无需处理。',checked_at,expires_at,source:'live',facts:{}}))
+  const operations=[['interactive','预约Agent交互调试'],['judge','AI辅助裁判']].map(([id,label])=>({id,label,status:'ready',blockers:[],required_checks:['api','mysql'],note:id==='judge'?'仍须独立标注和封存。':'提交预约仍须确认。',destination:'/workspace'}))
+  await page.route('**/api/v1/system/readiness',route=>route.fulfill({json:{data:{checked_at,expires_at,checks,operations},request_id:'offline-readiness-control'}}))
+  await page.goto('/environment')
+  const panel=page.getByRole('region',{name:'操作就绪检查',exact:true})
+  await expect(panel.locator('[data-operation]')).toHaveCount(2)
+  await panel.locator('[data-operation=interactive]>summary').click()
+  await panel.locator('[data-operation=judge]>summary').click()
+  await expect(panel.locator('[data-operation] .required-observations')).toHaveCount(0)
+  await expect(panel.locator('.required-observations')).toHaveCount(1)
+  await panel.getByText('全部检测项',{exact:true}).click()
+  await expect(panel.locator('.required-observations li')).toHaveCount(2)
+  await expect(panel.locator('[data-operation=judge]')).toContainText('仍须独立标注和封存')
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true)
+  await page.clock.runFor(62000)
+  await expect(panel.locator('.readiness-warning')).toContainText('检测结果已过期')
+  await expect(panel.locator('.readiness-status[data-state=ready]')).toHaveCount(0)
+})
 let cookies: Cookie[] = [], errors: string[], writes: string[]
 test.beforeAll(async ({browser}) => {
   if(!enabled || !password) return
@@ -403,7 +426,7 @@ test('a pending safe navigation cannot send a question or leave the new discussi
 
 test('home access expires visibly without automatically spending or refreshing a model request',async({page})=>{
   await page.clock.install();const data=await controls(page),panel=await open(page)
-  await expect(panel).toContainText('AI可询问');await expect(panel).toContainText('总额度还余 53 次请求')
+  await expect(panel).toContainText('AI可询问');await expect(panel).not.toContainText('次请求');await expect(panel).not.toContainText('12请求')
   await page.clock.fastForward(31000);await expect(panel).toContainText('状态待刷新')
   expect(data.sent).toHaveLength(0);expect(data.created).toHaveLength(0)
 })

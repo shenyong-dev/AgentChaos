@@ -13,7 +13,7 @@ export function useCurrentComparison() {
   const route = useRoute()
   return computed(() => comparison.value?.path === route.fullPath && comparison.value.epoch === session.epoch.value ? comparison.value.right : undefined)
 }
-export interface CopilotAccess { enabled: boolean; reason: string; budget: Record<string, number>; configuration: { config_hash: string; model: string }; limits: { turn_calls: number; session_calls: number } }
+export interface CopilotAccess { enabled: boolean; reason: string; budget: Record<string, number>; configuration: { config_hash: string; model: string }; limits: { turn_calls: number; session_calls: number | null; total_calls?: number | null; session_microusd?: number | null } }
 export interface CopilotSession { session_id: string; context_hash: string; selected?: { title: string; id: string }; configuration_hash: string }
 export interface Source { source_id: string; title: string; tool: string; content: unknown; content_hash: string; observed_at: string; expires_at: string; action_id?: string | null; locator?: { kind: string; id: string; event_ids?: string[]; first_error_event_id?: string | null } }
 export interface Statement { text: string; citations: string[] }

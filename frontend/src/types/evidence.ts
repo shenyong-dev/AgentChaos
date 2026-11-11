@@ -15,7 +15,7 @@ export interface EventPage {
 export interface RunSnapshot {
   run_id: string; status: string; cursor: string; tail_cursor: string; event_count: number
   pending_model_observations: number; manifest_hash: string
-  manifest?: { target_version_id?: number; metamorphic?: unknown; workflow?: { declared_gateway_mode?: string; source_run_id?: string | null; source_manifest_hash?: string | null; action?: string; queue_deadline?: string; dispatch?: string }; fault_profile?: { id: number; config_hash: string; config: {
+  manifest?: { adapter_type?: string; target_version_id?: number; metamorphic?: unknown; workflow?: { declared_gateway_mode?: string; source_run_id?: string | null; source_manifest_hash?: string | null; action?: string; queue_deadline?: string; dispatch?: string }; fault_profile?: { id: number; config_hash: string; config: {
     profile_key: string; revision: number; fault_type: string; trigger_stage: string
     target_tool: string; seed: number; max_triggers: number
   } } | null }

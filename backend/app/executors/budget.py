@@ -12,6 +12,8 @@ from sqlalchemy.orm import Session
 
 from app.agents.budget import peak_estimate_microusd
 from app.agents.errors import AgentError
+from app.core.cloud import executor_authorized as cloud_executor_authorized
+from app.core.cloud import root_key
 from app.executors.control import locked_pair
 
 AUTHORIZATION = "T05-20261026-agent-1"
@@ -25,6 +27,8 @@ FIELD_SOURCE_AUTHORIZATION = "T17A-20261030-agent-1"
 
 def authorization_limit(settings):
     """-1 explicitly means the user's open T06 approval; zero never means unlimited."""
+    if cloud_executor_authorized(settings) and settings.executor_agent_budget_unlimited:
+        return -1
     if settings.executor_budget_authorization_id in (
         OPEN_AUTHORIZATION,
         FAULT_AUTHORIZATION,
@@ -96,7 +100,10 @@ class ExecutorBudget:
         self, redis, settings, control, run_uuid, execution_uuid, *, prefix="ac:t05:budget"
     ):
         self.redis, self.settings, self.control = redis, settings, control
-        self.key = f"{prefix}:{settings.executor_budget_authorization_id}:agent"
+        self.key = (
+            root_key(settings, "agent")
+            or f"{prefix}:{settings.executor_budget_authorization_id}:agent"
+        )
         self.run_key = f"{self.key}:run:{run_uuid}"
         self.execution_key = f"{self.run_key}:execution:{execution_uuid}"
 

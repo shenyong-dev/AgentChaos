@@ -6,7 +6,9 @@ import logging
 import math
 import re
 from datetime import datetime
+from functools import lru_cache
 from importlib.metadata import version
+from threading import RLock
 
 import jieba
 from rank_bm25 import BM25Okapi
@@ -22,6 +24,27 @@ def digest(value: str) -> str:
     return hashlib.sha256(value.encode()).hexdigest()
 
 
+_TOKENIZER_LOCK = RLock()
+
+
+def _load_tokenizer(dictionary_path):
+    jieba.setLogLevel(logging.ERROR)
+    tokenizer = jieba.Tokenizer()
+    cache = PROJECT_ROOT / ".cache/jieba"
+    cache.mkdir(parents=True, exist_ok=True)
+    tokenizer.tmp_dir = str(cache)
+    tokenizer.cache_file = "booking-jieba-0421.cache"
+    tokenizer.initialize()
+    tokenizer.load_userdict(str(dictionary_path))
+    return tokenizer
+
+
+@lru_cache(maxsize=1)
+def _cloud_tokenizer(dictionary_path, dictionary_hash):
+    # Hash is part of the cache key; a changed user dictionary cannot reuse it.
+    return _load_tokenizer(dictionary_path)
+
+
 class KnowledgeRetriever:
     def __init__(self, engine, document_ids: list[int] | None = None):
         self.engine = engine
@@ -29,14 +52,18 @@ class KnowledgeRetriever:
         dictionary_path = PROJECT_ROOT / "knowledge/booking-userdict.txt"
         self.terms = json.loads(terms_path.read_text(encoding="utf-8"))
         self.stop = set(self.terms["stopwords"])
-        jieba.setLogLevel(logging.ERROR)
-        self.tokenizer = jieba.Tokenizer()
-        cache = PROJECT_ROOT / ".cache/jieba"
-        cache.mkdir(parents=True, exist_ok=True)
-        self.tokenizer.tmp_dir = str(cache)
-        self.tokenizer.cache_file = "booking-jieba-0421.cache"
-        self.tokenizer.initialize()
-        self.tokenizer.load_userdict(str(dictionary_path))
+        from app.core.config import get_settings
+
+        cloud = bool(get_settings().cloud_deployment_id)
+        # The dictionary is immutable within a pinned cloud image. Sharing only
+        # tokenization does not share documents, scopes, checkpoints or answers.
+        if cloud:
+            with _TOKENIZER_LOCK:
+                self.tokenizer = _cloud_tokenizer(
+                    str(dictionary_path), digest(dictionary_path.read_text(encoding="utf-8"))
+                )
+        else:
+            self.tokenizer = _load_tokenizer(dictionary_path)
         with Session(engine) as session:
             query = select(KnowledgeDocument).order_by(
                 KnowledgeDocument.document_key, KnowledgeDocument.revision

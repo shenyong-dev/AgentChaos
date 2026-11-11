@@ -54,6 +54,15 @@ def comparison(
     return Envelope(data=service.comparison(user, left, right), request_id=request.state.request_id)
 
 
+@router.get("/reports/fault-compare")
+def fault_comparison(
+    request: Request, user: Identity, service: Service, normal: UUID, fault: UUID
+) -> Envelope[dict]:
+    return Envelope(
+        data=service.fault_comparison(user, normal, fault), request_id=request.state.request_id
+    )
+
+
 @router.post("/reports/runs/{identifier}/exports")
 def export(
     identifier: UUID, body: ExportReport, request: Request, user: Identity, service: Service

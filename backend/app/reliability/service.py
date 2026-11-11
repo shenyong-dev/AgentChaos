@@ -191,6 +191,12 @@ class ReliabilityService:
         with read_session(self.engine) as session:
             run = RunService.owned_run(session, owner, identifier)
             manifest = run.manifest_json
+            if manifest.get("adapter_type") == "reference_refund":
+                raise AgentError(
+                    "domain_coverage_not_applicable",
+                    "预约六维概览不适用于退款对象，请查看退款账本与领域判定。",
+                    409,
+                )
             if canonical_hash(manifest) != run.manifest_hash:
                 raise AgentError(
                     "reliability_manifest_integrity", "运行清单哈希不符，摘要不可用。", 503

@@ -52,9 +52,10 @@ class InteractionService:
                 self._source = current
             key = str(session_id)
             if key not in self._runtimes:
-                self._runtimes[key] = self._runtime(key)
-                if len(self._runtimes) > 64:
+                maximum = 4 if self.settings.cloud_deployment_id else 64
+                while len(self._runtimes) >= maximum:
                     self._runtimes.popitem(last=False)
+                self._runtimes[key] = self._runtime(key)
             runtime = self._runtimes[key]
             self._runtimes.move_to_end(key)
             if runtime.version_id is None:
@@ -119,7 +120,7 @@ class InteractionService:
             if runtime.version_id is None
             else "真实调用需匹配交互授权、密钥和持久账本；读历史不调用模型。"
             if not available and not self.gateway_factory
-            else "本地按需调用，无累计次数与金额上限；单次限制与逐次记账保留。"
+            else "按需调用，无累计次数与金额上限；单次限制与逐次记账保留。"
             if local_unlimited(self.settings)
             else "请求仍按会话/总预算逐次预留。",
             "limits": limits(self.settings),
@@ -187,6 +188,12 @@ class InteractionService:
                     ("ac:local:interactive", LOCAL_AUTHORIZATION),
                 )
             ]
+            if self.settings.cloud_deployment_id:
+                rows.append(
+                    self.redis.hgetall(
+                        InteractionBudget(self.redis, self.settings, session_id).session_key
+                    )
+                )
             result["usage"] = {}
             result["usage_available"] = any(rows)
             for row in rows:

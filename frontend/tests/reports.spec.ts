@@ -62,7 +62,7 @@ test('reports download actual JSON Markdown ZIP and prove original hashes', asyn
 
 test('comparison distinguishes matched controls from a real seed mismatch', async ({ page }) => {
   await login(page, lab.failed_run)
-  await page.getByRole('tab', { name: '版本对比', exact: true }).click()
+  await page.getByRole('tab', { name: '运行比较', exact: true }).click()
   await selectRun(page, '选择对比运行', lab.repaired_run)
   await page.getByRole('button', { name: '核对比较条件', exact: true }).click()
   await expect(page.getByRole('heading', { name: '记录中的对比条件一致', exact: true })).toBeVisible()

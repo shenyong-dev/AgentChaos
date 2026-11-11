@@ -59,6 +59,10 @@ def frozen_case(row):
     content = case_content(row)
     if row.content_hash != canonical_hash(content):
         raise AgentError("case_hash_mismatch", "用例修订的内容哈希不一致。", 409)
+    if content["fixture"].get("fixture") == "refund-reference-v1":
+        from app.adapters.refund_cases import freeze
+
+        return freeze(row, content)
     try:
         draft = TestCaseDraft.model_validate(
             {
@@ -78,7 +82,7 @@ def frozen_case(row):
                 "reference_clock": content["fixture"]["reference_clock"],
                 "fixture": content["fixture"]["fixture"],
                 "assertions": content["expected"]["assertions"],
-                "review_status": "approved",
+                "review_status": row.review_status,
             }
         )
     except (ValueError, KeyError):
@@ -91,7 +95,7 @@ def frozen_case(row):
         "content": content,
         "dsl": draft.model_dump(mode="json"),
         "reviewer_id": row.reviewer_id,
-        "reviewed_at": row.reviewed_at.isoformat(),
+        "reviewed_at": row.reviewed_at.isoformat() if row.reviewed_at else None,
     }
 
 
@@ -111,6 +115,16 @@ def booking_snapshot(session, scope):
             select(Booking).where(Booking.scope_id == scope).with_for_update()
         )
     ]
+
+
+def business_snapshot(session, run, scope, settings):
+    if run.manifest_json.get("adapter_type") == "reference_refund":
+        from app.adapters import adapter_for
+
+        return adapter_for(session.get_bind(), settings, "reference_refund").snapshot(
+            scope, run.created_by
+        )
+    return booking_snapshot(session, scope)
 
 
 def refresh_run(session, run):
@@ -139,12 +153,17 @@ def refresh_run(session, run):
 
 
 class RunService:
-    def __init__(self, engine, settings, *, document_ids=None):
+    def __init__(self, engine, settings, *, document_ids=None, adapter_type="langgraph_booking"):
         self.engine, self.settings = engine, settings
         # Trusted configuration only; HTTP CreateRun cannot choose knowledge revisions.
         self.document_ids = document_ids
+        self.adapter_type = adapter_type
 
     def current_manifest(self):
+        if self.adapter_type == "reference_refund":
+            from app.adapters import adapter_for
+
+            return adapter_for(self.engine, self.settings, self.adapter_type).manifest()
         from app.agents.registry import ToolRegistry
         from app.agents.retrieval import KnowledgeRetriever
         from app.services.booking import BookingService
@@ -163,11 +182,16 @@ class RunService:
         cache = {} if cache is None else cache
         try:
             identifiers = tuple(d["id"] for d in manifest["target"]["retrieval"]["documents"])
-            if identifiers not in cache:
-                cache[identifiers] = RunService(
-                    self.engine, self.settings, document_ids=list(identifiers)
+            adapter_type = manifest.get("adapter_type", "langgraph_booking")
+            cache_key = (adapter_type, identifiers)
+            if cache_key not in cache:
+                cache[cache_key] = RunService(
+                    self.engine,
+                    self.settings,
+                    document_ids=list(identifiers),
+                    adapter_type=adapter_type,
                 ).current_manifest()["config_hash"]
-            return cache[identifiers] == manifest["target"]["config_hash"] and manifest[
+            return cache[cache_key] == manifest["target"]["config_hash"] and manifest[
                 "roles"
             ] == role_configs(self.settings)
         except (AgentError, KeyError, TypeError):
@@ -182,17 +206,22 @@ class RunService:
             )
         return bool(manifest and self.configuration_matches(manifest))
 
-    def prepare_configuration(self, session, user_id, values, request_hash):
+    def prepare_configuration(self, session, user_id, values, request_hash, *, private_case_ids=()):
         version = session.get(TargetVersion, values.target_version_id)
         target = session.get(Target, version.target_id) if version else None
         if (
             not target
             or target.owner_id != user_id
-            or target.adapter_type != "langgraph_booking"
+            or target.adapter_type not in {"langgraph_booking", "reference_refund"}
             or target.archived_at is not None
         ):
             raise AgentError("target_version_not_found", "当前身份下找不到预约对象版本。", 404)
-        current = self.current_manifest()
+        current = RunService(
+            self.engine,
+            self.settings,
+            document_ids=self.document_ids,
+            adapter_type=target.adapter_type,
+        ).current_manifest()
         if version.config_hash != current["config_hash"]:
             raise AgentError(
                 "target_version_unavailable", "当前Worker代码不能执行该历史版本。", 409
@@ -204,11 +233,43 @@ class RunService:
                 .order_by(TestCase.id)
             )
         )
+        if any(r.source == "reduction_trial:T17M" and r.id not in private_case_ids for r in rows):
+            raise AgentError("reduction_trial_private", "缩减验证用例只能由原提炼计划执行。", 403)
         if len(rows) != len(values.case_revision_ids) or any(
-            r.review_status != "approved" for r in rows
+            r.review_status != "approved"
+            and not (
+                r.source == "reduction_trial:T17M"
+                and r.id in private_case_ids
+                and r.review_status == "draft"
+            )
+            for r in rows
         ):
-            raise AgentError("case_not_approved", "运行只接受存在且已审核的用例修订。", 409)
+            raise AgentError(
+                "case_not_approved", "运行只接受已审核用例或绑定计划的私有验证草稿。", 409
+            )
         cases = [frozen_case(row) for row in rows]
+        if any(
+            c["dsl"].get("adapter_type", "langgraph_booking") != target.adapter_type for c in cases
+        ):
+            raise AgentError("case_adapter_mismatch", "用例领域与对象适配器不一致。", 409)
+        if target.adapter_type == "reference_refund" and values.fault_profile_id:
+            profile = frozen_profile(session, values.fault_profile_id)["config"]
+            if profile["target_tool"] not in {
+                "query_order",
+                "check_refund",
+                "lookup_refund_by_request",
+                "confirm_refund",
+            }:
+                raise AgentError("fault_adapter_mismatch", "故障工具不属于退款对象。", 409)
+        elif target.adapter_type == "langgraph_booking" and values.fault_profile_id:
+            if frozen_profile(session, values.fault_profile_id)["config"]["target_tool"].endswith(
+                "refund"
+            ) or frozen_profile(session, values.fault_profile_id)["config"]["target_tool"] in {
+                "query_order",
+                "check_refund",
+                "lookup_refund_by_request",
+            }:
+                raise AgentError("fault_adapter_mismatch", "故障工具不属于预约对象。", 409)
         s = self.settings
         if not s.executor_agent_budget_unlimited and values.budgets.agent_microusd > int(
             s.executor_agent_budget_usd * 1_000_000
@@ -232,8 +293,10 @@ class RunService:
             else None,
             "roles": role_configs(s),
             "pricing": {**PRICING, "verified_on": "2026-10-26"},
-            "evaluation": evaluator_manifest(),
+            "evaluation": current.get("evaluator") or evaluator_manifest(),
         }
+        if target.adapter_type == "reference_refund":
+            manifest["adapter_type"] = "reference_refund"
         relations = frozen_relations(cases)
         if relations:
             manifest["metamorphic"] = relations
@@ -270,7 +333,11 @@ class RunService:
                         )
                     return existing.run_uuid
                 version, manifest, budget, cases = self.prepare_configuration(
-                    session, user_id, values, request_hash
+                    session,
+                    user_id,
+                    values,
+                    request_hash,
+                    private_case_ids=(workflow or {}).get("reduction_case_ids", ()),
                 )
                 if workflow:
                     manifest["workflow"] = workflow
@@ -305,7 +372,7 @@ class RunService:
                                     "dispatch_count": 0,
                                     **(
                                         {"queue_deadline": workflow["queue_deadline"]}
-                                        if workflow
+                                        if workflow and "queue_deadline" in workflow
                                         else {}
                                     ),
                                 },
@@ -396,7 +463,9 @@ class RunService:
                 if row.status not in TERMINAL:
                     row.status, row.lease_token, row.lease_until = "cancelled", None, None
                     row.error_json = {"category": "control", "code": "execution_cancelled"}
-                    row.after_state_json = booking_snapshot(session, row.scope_id)
+                    row.after_state_json = business_snapshot(
+                        session, run, row.scope_id, self.settings
+                    )
                     append_event(
                         session,
                         run,
@@ -498,7 +567,7 @@ class RunService:
                 e.status, e.lease_token, e.lease_until = "error", None, None
                 e.error_json = {"category": "limit", "code": "execution_timeout"}
                 e.timing_json = {**e.timing_json, "finished_at": now.isoformat()}
-                e.after_state_json = booking_snapshot(session, e.scope_id)
+                e.after_state_json = business_snapshot(session, run, e.scope_id, self.settings)
                 append_event(
                     session,
                     run,
@@ -623,7 +692,7 @@ class RunService:
                         {"category": "limit", "code": "execution_timeout"},
                     )
                     e.lease_token, e.lease_until = None, None
-                    e.after_state_json = booking_snapshot(session, e.scope_id)
+                    e.after_state_json = business_snapshot(session, run, e.scope_id, self.settings)
                     append_event(
                         session,
                         run,
@@ -677,9 +746,17 @@ class RunService:
                         {"kind": "run.started", "status": "running"},
                         settings=self.settings,
                     )
-                ensure_rooms(session, e.scope_id)
+                if run.manifest_json.get("adapter_type") == "reference_refund":
+                    if e.before_state_json is None:
+                        from app.adapters import adapter_for
+
+                        adapter_for(self.engine, self.settings, "reference_refund").prepare(
+                            e.scope_id, run.created_by
+                        )
+                else:
+                    ensure_rooms(session, e.scope_id)
                 if e.before_state_json is None:
-                    e.before_state_json = booking_snapshot(session, e.scope_id)
+                    e.before_state_json = business_snapshot(session, run, e.scope_id, self.settings)
                 append_event(
                     session,
                     run,
@@ -727,7 +804,7 @@ class RunService:
                 return False
             e.status, e.final_output_json, e.error_json = status, output, error
             e.task_outcome = "unknown" if status != "waiting_input" else None
-            e.after_state_json = booking_snapshot(session, e.scope_id)
+            e.after_state_json = business_snapshot(session, run, e.scope_id, self.settings)
             if status == "inconclusive" and isinstance(run.manifest_json.get("evaluation"), dict):
                 from app.evaluation.service import persist_evaluation
 

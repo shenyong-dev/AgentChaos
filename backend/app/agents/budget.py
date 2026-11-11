@@ -58,8 +58,18 @@ class AgentBudget:
     def __init__(self, redis: Redis, settings: Settings, *, prefix="ac:t04:budget"):
         self.redis, self.settings = redis, settings
         self.key = f"{prefix}:{settings.model_budget_authorization_id}:agent"
+        from app.core.cloud import authorized
+
+        self.cloud_budget = None
+        if authorized(settings, "agent"):
+            from app.interactive.budget import InteractionBudget
+
+            self.cloud_budget = InteractionBudget(redis, settings, "standalone")
+            self.key = self.cloud_budget.key
 
     def reserve(self, prompt_bytes: int, max_output: int):
+        if self.cloud_budget:
+            return self.cloud_budget.reserve(prompt_bytes, max_output)
         s = self.settings
         if (
             not s.allow_paid_model_calls
@@ -91,6 +101,8 @@ class AgentBudget:
         }
 
     def settle(self, ticket: dict, usage: dict | None):
+        if self.cloud_budget:
+            return self.cloud_budget.settle(ticket, usage)
         if (
             not usage
             or not isinstance(usage.get("input_tokens"), int)
@@ -116,6 +128,8 @@ class AgentBudget:
         return estimate
 
     def unknown(self, ticket):
+        if self.cloud_budget:
+            return self.cloud_budget.unknown(ticket)
         # No refund for a request that may have consumed tokens. Never reset on startup.
         if self.redis.hget(ticket["key"], "state") in (b"reserved", "reserved"):
             self.redis.hset(ticket["key"], "state", "unknown")

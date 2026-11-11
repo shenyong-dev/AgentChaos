@@ -6,6 +6,8 @@ from uuid import uuid4
 
 from app.agents.budget import peak_estimate_microusd
 from app.agents.errors import AgentError
+from app.core.cloud import authorized as cloud_authorized
+from app.core.cloud import root_key
 from app.core.config import PROJECT_ROOT
 from app.executors.budget import RESERVE, SETTLE, UNKNOWN
 
@@ -42,7 +44,7 @@ def local_unlimited(settings):
         settings.app_env == "development"
         and settings.interactive_local_unlimited
         and settings.model_budget_authorization_id == LOCAL_AUTHORIZATION
-    )
+    ) or cloud_authorized(settings, "agent")
 
 
 def limits(settings):
@@ -77,7 +79,10 @@ class InteractionBudget:
     def __init__(self, redis, settings, session_id, *, directory: Path | None = None):
         self.redis, self.settings = redis, settings
         namespace = "ac:local:interactive" if local_unlimited(settings) else "ac:t17d"
-        self.key = f"{namespace}:budget:{settings.model_budget_authorization_id}:agent"
+        self.key = (
+            root_key(settings, "agent")
+            or f"{namespace}:budget:{settings.model_budget_authorization_id}:agent"
+        )
         self.session_key = self.key + ":session:" + str(session_id)
         self.calls_key = self.session_key + ":calls"
         self.directory = directory or PROJECT_ROOT / ".local/t17d/budget-tickets" / str(session_id)
