@@ -30,7 +30,7 @@ test('reference ledger displays actual integer fen and retains provenance on dem
 })
 test('missing ledger stays unknown rather than zero',async({page})=>{await setup(page,null);const p=page.getByRole('region',{name:'模拟退款结果',exact:true});await expect(p).toContainText('账本未采集，不能推断为0笔');await expect(p.locator('.refund-metrics')).toContainText('未知');await expect(p).not.toContainText('¥0.00')})
 test('empty ledger is a fact rather than a task success claim',async({page})=>{await setup(page,[]);const p=page.getByRole('region',{name:'模拟退款结果',exact:true});await expect(p).toContainText('¥0.00');await expect(p).toContainText('是否满足用例预期请查看领域判定')})
-test('direct semantic route does not mount an uncalibrated paid judge',async({page})=>{await setup(page,[], 'semantic');await expect(page.getByRole('status').filter({hasText:'尚未校准'})).toBeVisible();await expect(page.getByRole('button',{name:'请求AI辅助评价（付费）',exact:true})).toHaveCount(0)})
+test('direct semantic route does not mount an uncalibrated paid judge',async({page})=>{await setup(page,[], 'semantic');await expect(page.getByRole('status').filter({hasText:'尚未校准'})).toBeVisible();await expect(page.getByRole('button',{name:'请求AI辅助评价',exact:true})).toHaveCount(0)})
 test('refund chain uses refund facts and keeps booking judge hidden',async({page})=>{await setup(page,undefined,'diagnosis');await expect(page.locator('.diagnostic-business')).toContainText('1笔模拟退款');await expect(page.getByRole('button',{name:'查看本执行的AI记录',exact:true})).toHaveCount(0)})
 test('phone light and dark preserve keyboard evidence access without overflow',async({page})=>{
  await page.setViewportSize({width:390,height:844});for(const theme of ['light','dark']){await page.addInitScript(v=>localStorage.setItem('agentchaos.theme',v),theme);await setup(page);const p=page.getByRole('region',{name:'模拟退款结果',exact:true});await expect(p).toBeVisible();const summary=p.locator('summary').filter({hasText:'原始账本快照'});await summary.focus();await summary.press('Enter');await expect(p.locator('pre')).toContainText('amount_fen');expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await p.screenshot({path:resolve(output,`refund-${theme}-390.png`),animations:'disabled'})}
@@ -46,7 +46,7 @@ test('wizard defaults to booking and switching domain clears incompatible choice
   return route.continue()})
  await page.goto('/workbench');await page.getByRole('button',{name:'新建运行',exact:true}).first().click()
  const dialog=page.getByRole('dialog',{name:'新建运行',exact:true});await expect(dialog.getByRole('checkbox',{name:'运行用例 BOOKING-CONTROL',exact:true})).toBeVisible();await expect(dialog.getByRole('checkbox',{name:'运行用例 T18-NORMAL',exact:true})).toHaveCount(0)
- await dialog.getByRole('checkbox',{name:'运行用例 BOOKING-CONTROL',exact:true}).check();await dialog.locator('.el-select__wrapper').filter({has:page.locator('#run-target-domain')}).click();await page.getByRole('option',{name:'订单售后与模拟退款 · 项目参考',exact:true}).click()
+ await dialog.getByRole('checkbox',{name:'运行用例 BOOKING-CONTROL',exact:true}).check();await dialog.locator('.el-select__wrapper').filter({has:page.locator('#run-target-domain')}).click();await page.getByRole('option',{name:'订单售后与模拟退款',exact:true}).click()
  await expect(dialog.getByRole('checkbox',{name:'运行用例 BOOKING-CONTROL',exact:true})).toHaveCount(0);await expect(dialog.getByRole('heading',{name:'选择开发用例 · 已选 0 条',exact:true})).toBeVisible();await expect(dialog.getByRole('checkbox',{name:'运行用例 T18-NORMAL',exact:true})).toBeVisible()
  await dialog.getByRole('checkbox',{name:'运行用例 T18-NORMAL',exact:true}).check();await dialog.getByRole('button',{name:'下一步：运行条件',exact:true}).click();await expect(dialog.locator('.run-form').first()).toContainText('模拟退款参考 · V1 · 当前可执行')
 })
@@ -56,9 +56,9 @@ test('actual main reference case opens a refund draft without creating an execut
  const registration=JSON.parse(readFileSync(resolve(import.meta.dirname,'../../.local/t18/main-registration.json'),'utf8'))
  await page.route('**/api/v1/**',route=>{if(route.request().method()!=='GET'){writes.push(route.request().url());return route.abort()}return route.continue()})
  await page.goto(`/library?prepare_case=${registration.refund.case_ids[0]}`)
- const dialog=page.getByRole('dialog',{name:'新建运行',exact:true});await expect(dialog).toBeVisible();await expect(dialog).toContainText('订单售后与模拟退款 · 项目参考');await expect(dialog.getByRole('checkbox',{name:'运行用例 T18-NORMAL',exact:true})).toBeChecked();await expect(dialog.getByRole('checkbox',{name:/运行用例 T13-/})).toHaveCount(0)
+ const dialog=page.getByRole('dialog',{name:'新建运行',exact:true});await expect(dialog).toBeVisible();await expect(dialog).toContainText('订单售后与模拟退款');await expect(dialog.getByRole('checkbox',{name:'运行用例 T18-NORMAL',exact:true})).toBeChecked();await expect(dialog.getByRole('checkbox',{name:/运行用例 T13-/})).toHaveCount(0)
  await page.screenshot({path:resolve(output,'main-refund-prepared.png'),fullPage:true,animations:'disabled'})
- await dialog.getByRole('button',{name:'关闭',exact:true}).click();await page.goto('/targets');await expect(page.locator('.version-list')).toContainText('订单售后与模拟退款 · 项目参考')
+ await dialog.getByRole('button',{name:'关闭',exact:true}).click();await page.goto('/targets');await expect(page.locator('.version-list')).toContainText('订单售后与模拟退款')
  await page.screenshot({path:resolve(output,'main-targets.png'),fullPage:true,animations:'disabled'})
 })
 

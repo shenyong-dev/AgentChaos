@@ -36,7 +36,7 @@ onBeforeUnmount(()=>resolveSwitch?.(false))
 </script>
 <template>
  <section class="agent-test-page">
-  <header class="page-heading"><div class="agent-test-title"><h1>Agent 测试</h1><InfoHint label="测试对象" text="场地预约与模拟订单退款使用独立会话和业务数据。订单与退款为项目参考对象，不连接真实支付。" /></div><RouterLink class="agent-test-environment" to="/environment">检查环境 <ArrowRight aria-hidden="true" /></RouterLink></header>
+  <header class="page-heading"><div class="agent-test-title"><h1>Agent 测试</h1><InfoHint label="测试对象" text="场地预约与模拟订单退款使用独立会话和业务数据。订单与退款为本项目实现的模拟对象，不连接真实支付。" /></div><RouterLink class="agent-test-environment" to="/environment">检查环境 <ArrowRight aria-hidden="true" /></RouterLink></header>
   <nav class="agent-object-switch" aria-label="选择测试对象"><button type="button" :aria-pressed="domain==='booking'" @click="select('booking')"><Calendar aria-hidden="true" /><span>场地预约</span></button><button type="button" :aria-pressed="domain==='refund'" @click="select('refund')"><Connection aria-hidden="true" /><span>模拟订单与退款</span></button></nav>
   <p v-if="warning" role="alert" class="evidence-error">{{ warning }}</p>
   <InteractivePage v-if="domain==='booking'" embedded @navigation-state="state=$event" />

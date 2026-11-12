@@ -104,7 +104,7 @@ onBeforeUnmount(()=>{epoch++;pending.clear()})
         <p v-else-if="variant.review">语义决定：{{ variant.review.semantic_preserved ? '人工确认保留原意' : '人工拒绝' }}</p>
         <div v-if="(!variant.runs.length || variant.executions.some(e=>e.read_error === 'run_not_found')) && (!index || variant.review?.semantic_preserved)" class="reduction-launch">
           <ElCheckbox v-model="paid[index]" :disabled="busy">确认创建3次隔离执行，合计预算上限{{ formatMicroCny(plan.conditions.budget.agent_microusd * 3) }}，将产生模型费用。</ElCheckbox>
-          <ElButton type="primary" :disabled="busy || !paid[index]" @click="execute(index)">{{ pending.has(`execute:${index}`) ? '按原请求重试验证' : variant.runs.length ? '继续创建原验证运行（付费）' : '执行3次验证（付费）' }}</ElButton>
+          <ElButton type="primary" :disabled="busy || !paid[index]" @click="execute(index)">{{ pending.has(`execute:${index}`) ? '按原请求重试验证' : variant.runs.length ? '继续创建原验证运行' : '执行3次验证' }}</ElButton>
         </div>
         <div v-if="variant.runs.length" class="reduction-results" role="status"><span>同签名 {{ variant.summary.same_failure }} / 有效 {{ variant.summary.valid }}</span><span>未证实 {{ variant.summary.unproven }}</span><span>其他失败 {{ variant.summary.different_failure }} · 未复现 {{ variant.summary.not_reproduced }}</span></div>
         <div v-if="variant.usage_metrics?.observed_calls" class="reduction-results"><span>输入 {{ variant.usage_metrics.input_tokens ?? '未完整采集' }} token</span><span>峰值费用估算 {{ formatMicroCny(variant.usage_metrics.estimated_microusd) }}</span><span v-if="variant.usage_metrics.unknown_calls">未知用量 {{ variant.usage_metrics.unknown_calls }} 次</span></div>

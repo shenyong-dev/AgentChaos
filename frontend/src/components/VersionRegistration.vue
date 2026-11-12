@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { targetDisplayName } from '../types/workbench'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { ElButton, ElCheckbox, ElDialog, ElOption, ElSelect, ElTag } from 'element-plus'
 import { evidenceGet } from '../api/evidence'
@@ -69,7 +70,7 @@ onBeforeUnmount(() => { alive = false; sequence++ })
 <template>
   <section class="version-registration" aria-label="核对与登记版本">
     <div class="registration-toolbar">
-      <label>测试对象<ElSelect v-model="target" aria-label="登记测试对象" :disabled="busy || !!pending" @change="reset"><ElOption v-for="item in targets" :key="item.id" :value="item.id" :label="item.name" /></ElSelect></label>
+      <label>测试对象<ElSelect v-model="target" aria-label="登记测试对象" :disabled="busy || !!pending" @change="reset"><ElOption v-for="item in targets" :key="item.id" :value="item.id" :label="targetDisplayName(item.name)" /></ElSelect></label>
       <ElButton :loading="busy && !pending" :disabled="busy || !!pending || !target" @click="inspect">核对当前源码</ElButton>
       <InfoHint label="版本登记范围" text="登记保存源码指纹与配置记录，不备份或部署源码。更改源码或配置后先重启API，测试前在工程环境核对Worker。" />
     </div>

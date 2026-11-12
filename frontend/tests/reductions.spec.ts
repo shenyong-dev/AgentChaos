@@ -34,7 +34,7 @@ async function setup(page:Page,value:ReturnType<typeof plan>|null=plan(),fail=fa
 }
 test('opening a reduction never launches trials or changes approvals',async({page})=>{
   const {panel,writes}=await setup(page)
-  await expect(panel.getByRole('button',{name:'执行3次验证（付费）',exact:true})).toBeDisabled()
+  await expect(panel.getByRole('button',{name:'执行3次验证',exact:true})).toBeDisabled()
   await expect(panel.getByText('离线模型控制记录，不代表真实模型效果。',{exact:true})).toBeVisible()
   expect(writes).toEqual([])
 })
@@ -65,7 +65,7 @@ test('rejected meaning cannot launch paid trials',async({page})=>{
 test('unknown response retries exact paid request without another identifier',async({page})=>{
   const {panel,writes}=await setup(page,plan(),true)
   const baseline=panel.locator('.reduction-variant').first()
-  await baseline.getByText(/确认创建3次隔离执行/).click();await baseline.getByRole('button',{name:'执行3次验证（付费）',exact:true}).click()
+  await baseline.getByText(/确认创建3次隔离执行/).click();await baseline.getByRole('button',{name:'执行3次验证',exact:true}).click()
   await expect(panel.getByRole('alert')).toContainText('回执未确认')
   await baseline.getByRole('button',{name:'按原请求重试验证',exact:true}).click()
   await expect.poll(()=>writes.length).toBe(2);expect(writes[0]).toEqual(writes[1])
@@ -73,7 +73,7 @@ test('unknown response retries exact paid request without another identifier',as
 test('partial journal exposes recovery while unknown evidence never becomes verified',async({page})=>{
   const value=plan();value.variants[0]!.runs=[id];value.variants[0]!.executions=[{run_id:id,status:'unknown',read_error:'run_not_found'}];value.variants[0]!.summary.unproven=1
   const {panel,writes}=await setup(page,value)
-  await expect(panel.getByRole('button',{name:'继续创建原验证运行（付费）',exact:true})).toBeDisabled()
+  await expect(panel.getByRole('button',{name:'继续创建原验证运行',exact:true})).toBeDisabled()
   await expect(panel.getByRole('button',{name:'提交回归草稿审核',exact:true})).toHaveCount(0);expect(writes).toEqual([])
 })
 test('phone themes keep review actions reachable and contain long turns',async({page})=>{

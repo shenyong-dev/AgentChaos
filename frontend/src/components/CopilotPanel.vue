@@ -129,7 +129,7 @@ async function ask(receiptOnly = false) {
     if (value.status !== 'processing') { pending.value = undefined; question.value = '' }
     else notice.value = '原问题仍在处理，请稍后查询原回执。'
     void loadAccess()
-  } catch (e) { if (valid()) error.value = `${(e as Error).message} 请查询原问题回执，勿另建请求重复付费。` }
+  } catch (e) { if (valid()) error.value = `${(e as Error).message} 请查询原问题回执，勿另建请求重复计费。` }
   finally { if (valid()) busy.value = false }
 }
 async function navigate(id: string, locate?: Source) {
@@ -227,8 +227,8 @@ watch(historyView, async () => { await nextTick(); if (thread.value) thread.valu
         <ElInput id="copilot-question" ref="composerField" v-model="question" type="textarea" :autosize="{ minRows:3, maxRows:6 }" :maxlength="1500" :disabled="busy || !!pending || !!acting" placeholder="询问当前页面、用例或运行结果…" @keydown.ctrl.enter.prevent="ask()" @keydown.meta.enter.prevent="ask()" />
         <p v-if="access && !access.enabled" class="copilot-disabled" role="status">{{ access.reason }}</p>
         <div class="copilot-send">
-          <div class="copilot-budget"><span>本会话估算 {{ formatCny(cost) }}</span><span v-if="access?.enabled && access.limits.session_microusd !== null">会话费用上限 {{ formatCny((access.limits.session_microusd ?? 100000) / 1000000) }}</span><ElButton text size="small" :disabled="busy" @click="loadAccess">刷新调用状态</ElButton></div>
-          <div class="copilot-send-actions"><template v-if="pending"><ElButton :disabled="busy || !!acting" @click="ask(true)">查询原问题回执</ElButton><ElButton :disabled="busy || !!acting || !access?.enabled" @click="ask(false)">按原标识重试</ElButton></template><ElButton v-else type="primary" native-type="submit" :loading="busy" :disabled="loading || !!acting || !access?.enabled || !question.trim()">询问AI（付费）</ElButton></div>
+          <div class="copilot-budget"><span>本会话费用估算 {{ formatCny(cost) }}</span><span v-if="access?.enabled && access.limits.session_microusd !== null">会话费用上限 {{ formatCny((access.limits.session_microusd ?? 100000) / 1000000) }}</span><ElButton text size="small" :disabled="busy" @click="loadAccess">刷新调用状态</ElButton></div>
+          <div class="copilot-send-actions"><template v-if="pending"><ElButton :disabled="busy || !!acting" @click="ask(true)">查询原问题回执</ElButton><ElButton :disabled="busy || !!acting || !access?.enabled" @click="ask(false)">按原标识重试</ElButton></template><ElButton v-else type="primary" native-type="submit" :loading="busy" :disabled="loading || !!acting || !access?.enabled || !question.trim()">询问AI</ElButton></div>
         </div>
       </form>
     </footer>

@@ -33,7 +33,7 @@ const status = computed(() => props.checking ? '正在核对' : !props.access ? 
     <div class="copilot-home-scope">
       <div><span>当前分析范围</span><strong>{{ selected ? context : catalog.pages[page].title }}</strong></div>
       <div class="copilot-home-status"><strong>{{ status }}</strong></div>
-      <InfoHint label="助手首页操作" text="任务卡和快捷问题只填入草稿，点击询问AI才会付费。快捷入口只做导航。最近讨论仅保留本页、本对象内存中的4条，换对象、刷新或退出后清空；不删除服务端原回执。" />
+      <InfoHint label="助手首页操作" text="任务卡和快捷问题只填入草稿，点击询问AI才产生模型调用费用。快捷入口只做导航。最近讨论仅保留本页、本对象内存中的4条，换对象、刷新或退出后清空；不删除服务端原回执。" />
     </div>
     <div class="copilot-task-grid" aria-label="助手任务">
       <button v-for="task in tasks" :key="task.title" type="button" :aria-label="task.title" :disabled="locked" @click="emit('draft',task.question)">

@@ -22,7 +22,7 @@ test('explicit real copilot question uses current checks and opens a verified so
   const panel=page.getByRole('dialog',{name:'平台测试助手',exact:true})
   await panel.getByRole('textbox',{name:'询问测试助手',exact:true}).fill('当前这些检查里，哪些状态阻止批量执行？请区分已观察和需要确认的部分。')
   const response=page.waitForResponse(r=>r.url().includes('/copilot/sessions/')&&r.url().endsWith('/messages')&&r.request().method()==='POST',{timeout:130000})
-  await panel.getByRole('button',{name:'询问AI（付费）',exact:true}).click()
+  await panel.getByRole('button',{name:'询问AI',exact:true}).click()
   const http=await response,value=await http.json()
   writeFileSync(resolve(output,'R01-real-http.json'),JSON.stringify({http_status:http.status(),response:value.data??value,businessWrites:writes,pageErrors:errors,boundary:'Real DeepSeek copilot through actual browser/API; owned read-only SQL; not a real tested-Agent outcome.'},null,2))
   expect(http.status()).toBe(200);expect(value.data.status).toBe('completed');expect(value.data.mode).toBe('ai')

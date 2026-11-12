@@ -8,6 +8,11 @@ import InfoHint from './InfoHint.vue'
 const route = useRoute(), router = useRouter(), { page, selected } = useCurrentGuide()
 const entry = computed(() => catalog.pages[page.value]), observation = shallowRef<GuideObservation>()
 const error = ref(''), busy = ref(false), acting = ref(''), search = ref(''), now = ref(Date.now())
+function guideDisplayText(text: string) {
+  return text.replace('模型对话按已授权额度付费', '模型对话按已授权额度计费')
+    .replace('生成是付费操作', '生成会产生模型调用费用')
+    .replace('共同约束付费', '共同约束模型调用费用')
+}
 const terms = computed(() => Object.entries(catalog.terms).filter(([title, text]) => (title + text).toLowerCase().includes(search.value.trim().toLowerCase())))
 const stale = computed(() => !observation.value || now.value >= Date.parse(observation.value.expires_at))
 const next = computed(() => !stale.value && observation.value ? observation.value.actions : entry.value.actions)
@@ -65,12 +70,12 @@ async function navigate(id: string) {
     <ElButton v-if="guideTab === 'selection' && selected && !['calibration','generation'].includes(selected.kind)" text @click="openAssistant">问助手解释选中内容</ElButton>
     <template v-if="guideTab === 'page'">
       <p class="guide-purpose">{{ entry.purpose }}</p>
-      <section class="guide-section"><h3>开始前</h3><ul><li v-for="line in entry.prerequisites" :key="line">{{ line }}</li></ul></section>
+      <section class="guide-section"><h3>开始前</h3><ul><li v-for="line in entry.prerequisites" :key="line">{{ guideDisplayText(line) }}</li></ul></section>
       <details class="guide-section"><summary>输入与结果</summary><p>{{ entry.inputs }}</p><p>{{ entry.outputs }}</p></details>
       <details class="guide-section"><summary>没有数据或遇到阻塞</summary><p>{{ entry.empty }}</p></details>
       <ElButton @click="guideTab = 'next'">查看下一步</ElButton>
     </template>
-    <template v-else-if="guideTab === 'terms'"><ElInput v-model="search" aria-label="搜索平台术语" placeholder="例如：断言、预算、封存" clearable /><section v-for="([title, text]) in terms" :key="title" class="guide-section"><h3>{{ title }}</h3><p>{{ text }}</p></section><p v-if="!terms.length">没有匹配术语，请换一个关键词。</p></template>
+    <template v-else-if="guideTab === 'terms'"><ElInput v-model="search" aria-label="搜索平台术语" placeholder="例如：断言、预算、封存" clearable /><section v-for="([title, text]) in terms" :key="title" class="guide-section"><h3>{{ title }}</h3><p>{{ guideDisplayText(text) }}</p></section><p v-if="!terms.length">没有匹配术语，请换一个关键词。</p></template>
     <template v-else>
       <div class="guide-observation" role="status"><p v-if="busy">正在核对当前身份与对象状态…</p><p v-else-if="!session.identity.value">尚未登录，只提供通用说明。</p><p v-else-if="stale">动态状态未取得或已过期；不能据此认定正常。</p><p v-else>本次身份/对象核对有效至 {{ new Date(observation!.expires_at).toLocaleTimeString('zh-CN', { hour12: false }) }}；跳转前会重新校验。</p><p v-if="!selected">尚未选择对象；权限核对不代表环境、模型或运行已就绪。</p><ElButton v-if="session.identity.value" size="small" :disabled="busy || !!acting" @click="inspect">重新核对当前状态</ElButton></div>
       <template v-if="guideTab === 'selection'">
@@ -79,7 +84,7 @@ async function navigate(id: string) {
       </template>
       <template v-else><section class="guide-section"><h3>根据当前步骤继续</h3><p v-if="!stale && observation?.selection">{{ observation.selection.summary }}</p><p v-else>{{ entry.empty }}</p><p v-if="observation && !observation.allowed">当前角色只能阅读通用说明；受保护入口仍需相应权限。</p></section></template>
       <div class="guide-actions"><div v-for="id in next" :key="id"><ElButton v-if="catalog.actions[id]" :disabled="!!unavailable(id) || !!acting" :loading="acting === id" @click="navigate(id)">{{ catalog.actions[id]!.label }}</ElButton><small v-if="unavailable(id)">{{ unavailable(id) }}</small></div></div>
-      <p class="guide-safety">只导航、打开说明或带入未提交配置。不会自动执行运行、确认预约、保存审核或开启付费。</p>
+      <p class="guide-safety">只导航、打开说明或带入未提交配置。不会自动执行运行、确认预约、保存审核或修改模型调用开关。</p>
     </template>
     <p v-if="error" class="guide-error" role="alert">{{ error }} 基础说明仍可使用。</p>
   </ElDrawer>

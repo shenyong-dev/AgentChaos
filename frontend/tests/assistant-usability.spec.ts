@@ -34,7 +34,7 @@ for (const [width, theme] of [[1440, 'light'], [390, 'dark']] as const) {
     await page.getByRole('button', { name: '打开测试助手', exact: true }).click()
     const panel = page.getByRole('dialog', { name: '平台测试助手', exact: true })
     await panel.getByRole('textbox', { name: '询问测试助手', exact: true }).fill('证据在哪')
-    await panel.getByRole('button', { name: '询问AI（付费）', exact: true }).click()
+    await panel.getByRole('button', { name: '询问AI', exact: true }).click()
     await expect(panel.locator('.copilot-statement').filter({ hasText: '在用例说明第二节查看逐轮输入。' })).toBeVisible()
     await expect(panel.getByRole('heading', { name: '观察到的事实', exact: true })).toHaveCount(0)
     await panel.getByRole('button', { name: '查看引用：用例原文控制', exact: true }).first().click()

@@ -1,3 +1,5 @@
+export function targetDisplayName(name: string) { return name.replace(/\s*·\s*项目参考$/, '') }
+
 export interface Page<T> { items: T[]; has_more: boolean; next_cursor: number | null }
 export interface VersionRow {
   id: number; version_no: number; target_id: number; target: string; adapter_type: string

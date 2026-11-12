@@ -210,11 +210,18 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <nav v-if="snapshot" class="run-reproduction" aria-label="运行复现"><span>当前查看原始运行记录，浏览不创建新执行。实际来源：{{ observedModes }}。</span><RouterLink :to="`/workbench?source=${snapshot.run_id}&action=rerun`">按原配置再次运行</RouterLink><RouterLink :to="`/workbench?source=${snapshot.run_id}&action=copy`">复制并修改</RouterLink></nav>
   <section class="evidence-page">
-    <div class="page-heading"><div><h1>运行证据</h1></div><RouterLink to="/workbench">返回运行列表 →</RouterLink>
-      <ElTag :type="state === '实时连接' ? 'success' : state === '连接中断' || state === '读取失败' ? 'danger' : 'info'" role="status">{{ state }}</ElTag>
-    </div>
+    <header class="evidence-heading">
+      <div class="evidence-title"><h1>运行证据</h1><ElTag :type="state === '实时连接' ? 'success' : state === '连接中断' || state === '读取失败' ? 'danger' : 'info'" role="status">{{ state }}</ElTag></div>
+      <nav class="evidence-actions" aria-label="运行复现">
+        <RouterLink class="evidence-action" to="/workbench">返回运行列表</RouterLink>
+        <template v-if="snapshot">
+          <RouterLink class="evidence-action" :to="`/workbench?source=${snapshot.run_id}&action=copy`">复制并修改</RouterLink>
+          <RouterLink class="evidence-action evidence-action-primary" :to="`/workbench?source=${snapshot.run_id}&action=rerun`">按原配置再次运行</RouterLink>
+        </template>
+      </nav>
+      <p v-if="snapshot" class="run-reproduction">当前查看原始运行记录，浏览不创建新执行。实际来源：{{ observedModes }}。</p>
+    </header>
     <details class="connection-panel" :open="!snapshot"><summary>选择运行<span>{{ snapshot ? `${snapshot.run_id.slice(0,8)} · 已载入` : '载入一个已有运行' }}</span></summary>
     <form class="evidence-access" @submit.prevent="load()">
       <label class="run-field">运行 UUID<ElInput v-model="runId" placeholder="粘贴运行标识" aria-label="运行 UUID" /></label>
@@ -319,5 +326,5 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
-.run-reproduction { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; margin-bottom: 20px; font-size: 13px; line-height: 1.8; }.run-reproduction span { color: var(--el-text-color-secondary); }.run-reproduction a { color: var(--el-color-primary); }
+.evidence-heading{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px 24px;margin-bottom:24px}.evidence-title{display:flex;align-items:center;gap:14px;flex-wrap:wrap}.evidence-title h1{margin:0}.evidence-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.evidence-action{display:inline-flex;align-items:center;justify-content:center;min-height:36px;padding:7px 14px;box-sizing:border-box;border:1px solid var(--ac-border);border-radius:8px;background:var(--ac-surface);color:var(--ac-text);font-size:13px;line-height:20px;text-decoration:none;transition:background .15s,border-color .15s}.evidence-action:hover{color:var(--ac-link);border-color:var(--ac-link);background:var(--ac-accent-soft)}.evidence-action:focus-visible{outline:2px solid var(--ac-link);outline-offset:3px}.evidence-action-primary{color:var(--el-color-white);background:var(--el-color-primary);border-color:var(--el-color-primary)}.evidence-action-primary:hover{color:var(--el-color-white);background:var(--el-color-primary-dark-2);border-color:var(--el-color-primary-dark-2)}.run-reproduction{flex-basis:100%;font-size:12px;line-height:1.8;color:var(--ac-muted);margin:0}@media(max-width:700px){.evidence-actions{width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.evidence-action{min-height:40px;padding:9px 10px}.evidence-action-primary{grid-column:1/-1}.evidence-heading{gap:14px}}
 </style>

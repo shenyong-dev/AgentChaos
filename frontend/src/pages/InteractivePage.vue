@@ -257,7 +257,17 @@ function tabKey(event: KeyboardEvent) {
   const next = event.key === 'Home' ? 0 : event.key === 'End' ? buttons.length - 1 : (index + (event.key === 'ArrowRight' ? 1 : -1) + buttons.length) % buttons.length
   buttons[next]?.click(); buttons[next]?.focus()
 }
-const conversation = computed(() => { let turn = 0; return messages.value.map(m => ({ ...m, turn: m.role === 'human' ? ++turn : turn })) })
+const cancelConfirmationInstruction = '确认撤销该预约。请调用cancel_booking，参数精确复用当前草稿的booking_id、draft_id、draft_hash和suggested_idempotency_key。'
+const conversation = computed(() => {
+  let turn = 0
+  return messages.value.map(message => ({
+    ...message,
+    content: message.role === 'human' && message.content === cancelConfirmationInstruction
+      ? '确认撤销该预约。'
+      : message.content,
+    turn: message.role === 'human' ? ++turn : turn,
+  }))
+})
 watch([sessionId, workspace.authorization], () => {
   epoch++
   upgradeOpen.value = false; upgradeBinding = undefined
@@ -301,7 +311,7 @@ onBeforeUnmount(() => { epoch++; if (timer) clearInterval(timer); compactQuery?.
               <p v-if="busy" class="interaction-working" role="status">正在处理本轮输入，工具与最终回答完成后一起显示…</p>
             </div>
             <section v-if="view.pending_draft" class="interaction-draft" aria-label="待确认草稿"><div><ElTag type="warning">{{ statusNames[view.pending_draft.status] ?? view.pending_draft.status }}</ElTag></div><h3>{{ view.pending_draft.room_code }} <span><template v-if="view.pending_draft.operation === 'attendee_change'">{{ view.pending_draft.previous_attendees }} → </template>{{ view.pending_draft.attendees }} 人</span></h3><p>{{ time(view.pending_draft.start_at) }} — {{ time(view.pending_draft.end_at) }}</p><small>有效至 {{ time(view.pending_draft.expires_at) }} · {{ draftNote(view.pending_draft) }}</small><div class="interaction-draft-actions"><ElButton :disabled="!mayAct || view.status !== 'waiting_confirmation'" @click="decision('reject')">{{ view.pending_draft.operation === 'cancel' ? '保留原预约' : '拒绝此草稿' }}</ElButton><ElButton type="primary" :disabled="!mayAct || draftExpired || Boolean(view.unknown_submission) || view.status !== 'waiting_confirmation'" @click="openReview">核对并确认</ElButton></div></section>
-            <form class="interaction-composer" @submit.prevent="send"><label for="interaction-input">本轮输入</label><ElInput id="interaction-input" v-model="text" type="textarea" :autosize="{ minRows:2, maxRows:5 }" :maxlength="12000" aria-label="预约条件" placeholder="例如：明天 A101，14:00—15:00，8人" :disabled="!mayAct" /><div><span>{{ view.read_only ? '历史会话仅供回看' : view.processing ? '正在处理原请求' : !access?.version_id ? '当前源码尚未登记' : !access.model_actions_available ? '模型调用条件尚未具备' : view.mode === 'real_provider' && access?.limits.local_unlimited ? '付费模型调用 · 不设累计金额上限' : 'Enter 换行，按钮发送' }}</span><ElButton type="primary" native-type="submit" :loading="busy" :disabled="!mayAct || !text.trim()">发送本轮输入 <ArrowRight aria-hidden="true" /></ElButton></div></form>
+            <form class="interaction-composer" @submit.prevent="send"><label for="interaction-input">本轮输入</label><ElInput id="interaction-input" v-model="text" type="textarea" :autosize="{ minRows:2, maxRows:5 }" :maxlength="12000" aria-label="预约条件" placeholder="例如：明天 A101，14:00—15:00，8人" :disabled="!mayAct" /><div><span>{{ view.read_only ? '历史会话仅供回看' : view.processing ? '正在处理原请求' : !access?.version_id ? '当前源码尚未登记' : !access.model_actions_available ? '模型调用条件尚未具备' : view.mode === 'real_provider' && access?.limits.local_unlimited ? '模型调用 · 不设累计金额上限' : 'Enter 换行，按钮发送' }}</span><ElButton type="primary" native-type="submit" :loading="busy" :disabled="!mayAct || !text.trim()">发送本轮输入 <ArrowRight aria-hidden="true" /></ElButton></div></form>
             <div v-if="view.last_error" class="interaction-round-error"><strong>{{ view.last_error.code }}</strong><p>{{ view.last_error.message }}</p><ElButton v-if="view.next_nodes.length && view.status !== 'waiting_confirmation'" :disabled="!mayAct" @click="retry">显式恢复失败节点</ElButton></div>
           </section>
           <aside v-show="evidenceOpen" id="interaction-evidence" class="interaction-evidence" aria-label="会话字段与业务查证">
