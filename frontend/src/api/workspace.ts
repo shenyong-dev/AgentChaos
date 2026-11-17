@@ -16,10 +16,10 @@ onSessionReset(() => { overview.value = undefined; selection.value = []; pending
 
 export class WorkspaceHttpError extends Error { constructor(message: string, public status: number) { super(message) } }
 
-export async function workspacePost<T>(path: string, body: unknown, header = authorization.value): Promise<T> {
+export async function workspacePost<T>(path: string, body: unknown, header = authorization.value, timeout = 30000): Promise<T> {
   const response = await sessionFetch(`/api/v1${path}`, { method: 'POST',
     headers: { Authorization: header, 'Content-Type': 'application/json' },
-    body: JSON.stringify(body), cache: 'no-store', signal: AbortSignal.timeout(30000) })
+    body: JSON.stringify(body), cache: 'no-store', signal: AbortSignal.timeout(timeout) })
   const result = await response.json()
   if (!response.ok) throw new WorkspaceHttpError(`${result.error?.message ?? '操作未完成'}（${result.error?.code ?? response.status}）`, response.status)
   return result.data as T

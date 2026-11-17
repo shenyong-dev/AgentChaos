@@ -102,10 +102,12 @@ fieldset { min-width: 0; margin: 0; padding: 12px; border: 1px solid var(--el-bo
 legend { padding-inline: 6px; font-weight: 600; }
 .case-message { margin-bottom: 12px; }
 .case-message > div { justify-content: space-between; margin-bottom: 6px; }
-input, textarea {
-  width: 100%; padding: 8px 10px; font: inherit; color: var(--el-text-color-primary);
-  background: var(--el-bg-color); border: 1px solid var(--el-border-color); border-radius: 6px;
+.external-case-editor :is(input, textarea) {
+  box-sizing: border-box; width: 100%; min-width: 0; padding: 9px 11px; font: inherit;
+  color: var(--el-text-color-primary); background: var(--el-bg-color);
+  border: 1px solid var(--ac-border); border-radius: 8px;
 }
+.external-case-editor :is(input, textarea):focus { outline: 2px solid var(--ac-link); outline-offset: -2px; }
 textarea { display: block; resize: vertical; }
 .case-expectations { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .case-footer { justify-content: flex-end; }

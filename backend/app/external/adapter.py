@@ -9,9 +9,9 @@ from app.external.schema import PROTOCOL
 
 
 class ExternalAdapter:
-    def __init__(self, engine, settings, kind):
+    def __init__(self, engine, settings, kind, *, entry=None):
         self.engine, self.settings, self.kind = engine, settings, kind
-        self.entry = entry_for(settings, kind)
+        self.entry = entry if entry is not None else entry_for(settings, kind)
 
     def manifest(self):
         from app.external.rules import evaluator_manifest

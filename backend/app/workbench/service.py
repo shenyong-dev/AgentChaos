@@ -3,7 +3,7 @@
 import hashlib
 import json
 
-from sqlalchemy import func, or_, select
+from sqlalchemy import case, func, or_, select
 from sqlalchemy.orm import Session, aliased
 
 from app.agents.errors import AgentError
@@ -13,6 +13,27 @@ from app.executors.service import RunService, frozen_case
 from app.external.registry import is_external
 from app.models import Artifact, Target, TargetVersion, TestCase, TestExecution, TestRun
 from app.workbench.guidance import case_guide
+
+
+def completed_run_result():
+    def count_status(status):
+        return func.count(case((TestExecution.status.collate("utf8mb4_bin") == status, 1)))
+
+    total = func.count()
+    return (
+        select(
+            case(
+                (count_status("error") > 0, "error"),
+                (count_status("failed") > 0, "has_failed"),
+                (count_status("inconclusive") > 0, "inconclusive"),
+                ((total > 0) & (count_status("passed") == total), "passed"),
+                else_="ended",
+            )
+        )
+        .where(TestExecution.run_id == TestRun.id)
+        .correlate(TestRun)
+        .scalar_subquery()
+    )
 
 
 def reading_summary(row):
@@ -278,18 +299,23 @@ class WorkbenchService:
             snapshot = frozen_case(row)
             return {**snapshot, "guidance": case_guide(snapshot)}
 
-    def runs(self, owner, *, cursor=0, limit=20, status=None, query=""):
+    def runs(self, owner, *, cursor=0, limit=20, status=None, result=None, query=""):
         with Session(self.engine) as session:
             self._identity(session, owner)
-            statement = select(TestRun).where(TestRun.created_by == owner)
+            evaluated = completed_run_result()
+            completed = TestRun.status.collate("utf8mb4_bin") == "completed"
+            display = case((completed, evaluated), else_=TestRun.status)
+            statement = select(TestRun, display).where(TestRun.created_by == owner)
             if cursor:
                 statement = statement.where(TestRun.id < cursor)
             if status:
                 statement = statement.where(TestRun.status == status)
+            if result:
+                statement = statement.where(completed, evaluated == result)
             if query:
                 statement = statement.where(TestRun.run_uuid.startswith(query, autoescape=True))
-            rows = list(session.scalars(statement.order_by(TestRun.id.desc()).limit(limit + 1)))
-            ids = [r.id for r in rows[:limit]]
+            rows = session.execute(statement.order_by(TestRun.id.desc()).limit(limit + 1)).all()
+            ids = [r.id for r, _ in rows[:limit]]
             executions = (
                 dict(
                     session.execute(
@@ -319,6 +345,7 @@ class WorkbenchService:
                         "id": r.id,
                         "run_id": r.run_uuid,
                         "status": r.status,
+                        "display_status": display_status,
                         "target_version_id": r.target_version_id,
                         "created_at": r.created_at.isoformat(),
                         "executions": executions.get(r.id, 0),
@@ -334,8 +361,8 @@ class WorkbenchService:
                         .get("config", {})
                         .get("fault_type"),
                     }
-                    for r in rows[:limit]
+                    for r, display_status in rows[:limit]
                 ],
                 "has_more": len(rows) > limit,
-                "next_cursor": rows[limit - 1].id if len(rows) > limit else None,
+                "next_cursor": rows[limit - 1][0].id if len(rows) > limit else None,
             }

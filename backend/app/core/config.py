@@ -17,6 +17,7 @@ class Settings(BaseSettings):
 
     app_env: Literal["development", "test", "production"] = "development"
     external_agent_registry_path: str = ""
+    external_agent_web_policy_path: str = ""
     external_agent_calls_enabled: bool = False
     cloud_deployment_id: str = Field(default="", pattern=r"^$|^[0-9a-f]{32}$")
     cloud_approval_sha256: str = Field(default="", pattern=r"^$|^[0-9a-f]{64}$")

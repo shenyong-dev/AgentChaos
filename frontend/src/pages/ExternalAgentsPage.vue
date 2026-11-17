@@ -1,10 +1,14 @@
 <script setup lang="ts">
 import { computed, defineAsyncComponent, onBeforeUnmount, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { ElButton, ElCheckbox, ElOption, ElSelect } from 'element-plus'
+import { ArrowLeft, Connection, Document, Link, Plus, Refresh } from '@element-plus/icons-vue'
 import { evidenceGet } from '../api/evidence'
 import { workspace, workspacePost, WorkspaceHttpError } from '../api/workspace'
 import ExternalAgentTemplates from '../components/ExternalAgentTemplates.vue'
 import ExternalCaseEditor from '../components/ExternalCaseEditor.vue'
+import ExternalConnectionDialog from '../components/ExternalConnectionDialog.vue'
+import type { ConnectionProfile } from '../components/ExternalConnectionDialog.vue'
 import type { ExternalCaseDraft } from '../components/ExternalCaseEditor.vue'
 import type { Page, VersionRow } from '../types/workbench'
 
@@ -18,6 +22,8 @@ type Case = { id: number; case_key: string; review_status: string; content_hash:
   fixture: { adapter_type: string; reference_clock?: string }
 } }
 const definitions = ref<Definition[]>([]), cases = ref<Case[]>([]), role = ref(''), selected = ref('')
+const profiles = ref<ConnectionProfile[]>([]), connectionOpen = ref(false)
+let openFromLink = useRoute().query.configure === '1'
 const checked = ref<Check>(), confirmed = ref(false), reviewed = ref(false), current = ref<Case>()
 const busy = ref(false), error = ref(''), notice = ref(''), enabled = ref(false)
 const definition = computed(() => definitions.value.find(item => item.registered_id === selected.value))
@@ -31,21 +37,26 @@ const canWriteCase = computed(() => Boolean(definition.value?.enabled && registe
 let epoch = 0, alive = true
 const valid = (ticket: number, identity: string) => alive && ticket === epoch && identity === workspace.authorization.value
 function resetCheck() { checked.value = undefined; confirmed.value = false; error.value = ''; notice.value = '' }
-async function load() {
+async function load(preferredId?: string) {
   const ticket = ++epoch, identity = workspace.authorization.value
   const previousId = current.value?.id
-  definitions.value = []; cases.value = []; role.value = ''; current.value = undefined; resetCheck()
+  definitions.value = []; profiles.value = []; cases.value = []; role.value = ''; current.value = undefined; resetCheck()
   if (!identity) { busy.value = false; return }
   busy.value = true
   try {
     const [data, rows] = await Promise.all([
-      evidenceGet<{ role: string; calls_enabled: boolean; items: Definition[] }>('/external-agents', identity),
+      evidenceGet<{ role: string; calls_enabled: boolean; items: Definition[]; connection_profiles?: ConnectionProfile[] }>('/external-agents', identity),
       evidenceGet<{ items: Case[] }>('/external-agents/cases', identity),
     ])
     if (!valid(ticket, identity)) return
     definitions.value = data.items; role.value = data.role; enabled.value = data.calls_enabled
-    cases.value = rows.items; selected.value = data.items.find(item => item.enabled)?.registered_id ?? ''
+    profiles.value = data.connection_profiles ?? []
+    cases.value = rows.items; selected.value = data.items.find(item => item.registered_id === preferredId)?.registered_id ?? data.items.find(item => item.enabled)?.registered_id ?? ''
     current.value = rows.items.find(row => row.id === previousId)
+    if (openFromLink) {
+      openFromLink = false
+      connectionOpen.value = data.role === 'operator'
+    }
     if (data.role === 'operator' && data.items.length) {
       const versions = await evidenceGet<Page<VersionRow>>('/workbench/versions?limit=50', identity).catch(() => null)
       if (valid(ticket, identity) && versions) {
@@ -54,6 +65,14 @@ async function load() {
     }
   } catch (e) { if (valid(ticket, identity)) error.value = (e as Error).message }
   finally { if (valid(ticket, identity)) busy.value = false }
+}
+async function connectionRegistered(id: string, version: number) {
+  connectionOpen.value = false
+  const identity = workspace.authorization.value
+  await load(id)
+  if (!alive || identity !== workspace.authorization.value) return
+  registeredKinds.value.add('external_http:' + id)
+  notice.value = `已登记对象版本 ${version}`
 }
 async function action(work: (identity: string) => Promise<string>) {
   if (busy.value) return
@@ -177,6 +196,7 @@ watch(() => workspace.authorization.value, () => {
   registeredKinds.value = new Set()
   pendingDraft.value = undefined
   current.value = undefined
+  connectionOpen.value = false
   editorOpen.value = false
   wizardOpen.value = false
   void load()
@@ -186,36 +206,90 @@ onBeforeUnmount(() => { alive = false; epoch++ })
 
 <template>
   <main class="workspace-page external-agents">
-    <header class="page-heading"><h1>外部 Agent 接入</h1><RouterLink to="/targets">返回对象与版本 →</RouterLink></header>
-    <p v-if="!workspace.authorization.value" role="status">请先登录。</p>
-    <p v-if="error && !editorOpen" class="evidence-error" role="alert">{{ error }}</p>
-    <p v-if="notice" role="status">{{ notice }}</p>
-    <section v-if="role === 'operator'" class="external-card">
-      <div class="external-actions"><label for="external-target">已配置服务</label><ElSelect id="external-target" v-model="selected" aria-label="外部服务" :disabled="busy"><ElOption v-for="item in definitions" :key="item.registered_id" :value="item.registered_id" :label="item.name" :disabled="!item.enabled" /></ElSelect><ElButton :disabled="busy || !selected || !enabled" @click="check">检查连接</ElButton></div>
-      <p v-if="!definitions.length">尚无外部服务，请由维护者配置服务端登记文件。</p>
-      <p v-else-if="!enabled" role="status">外部调用开关未开启。</p>
-      <div v-if="definition" class="external-definition"><strong>{{ definition.name }}</strong><span>{{ definition.revision }}</span><span>{{ definition.billing === 'free' ? '声明免费' : '使用外部账户计费' }}</span><span v-if="definition.author_relation === 'project_example'">项目协议示例</span></div>
-      <p v-if="definition?.billing === 'external_account'">运行可能产生外部账户费用；平台保守记录声明上限，无法核实外部账单。</p>
-      <div v-if="checked" class="external-register"><ElCheckbox v-model="confirmed" :disabled="busy">确认登记此版本；登记不启动测试</ElCheckbox><ElButton type="primary" :disabled="busy || !confirmed" @click="register">登记对象版本</ElButton></div>
-      <ExternalAgentTemplates />
-    </section>
-    <section v-if="role" class="external-card">
-      <header class="external-actions">
-        <h2>对话用例</h2>
-        <ElButton v-if="role === 'operator'" type="primary" :disabled="busy || (!canWriteCase && !pendingDraft)" @click="openEditor">{{ pendingDraft ? '查证原草稿' : '创建测试用例' }}</ElButton>
-        <label v-if="role === 'operator'" class="external-file">导入 JSON 草稿<input type="file" accept="application/json,.json" aria-label="导入外部对话用例" :disabled="busy" @change="importFile" /></label>
-        <ElButton :disabled="busy" @click="load">刷新</ElButton>
-      </header>
-      <div class="external-cases"><nav aria-label="外部对话用例"><button v-for="item in cases" :key="item.id" :aria-pressed="current?.id === item.id" @click="current = item; reviewed = false"><strong>{{ item.case_key }}</strong><span>{{ item.review_status === 'approved' ? '已批准' : item.review_status === 'rejected' ? '已拒绝' : '待审核' }}</span></button><p v-if="!cases.length">暂无已导入的对话用例。</p></nav>
-        <article v-if="current"><h3>{{ current.case_key }}</h3><ol><li v-for="(turn, i) in current.content.turns" :key="i">{{ turn.user }}</li></ol><h4>最后一条回答</h4>
-          <dl class="case-checks" v-for="(assertion, index) in current.content.expected.assertions" :key="index">
-            <div v-if="assertion.contains?.length"><dt>应包含</dt><dd><ul><li v-for="(term, i) in assertion.contains" :key="i">{{ term }}</li></ul></dd></div>
-            <div v-if="assertion.excludes?.length"><dt>不得包含</dt><dd><ul><li v-for="(term, i) in assertion.excludes" :key="i">{{ term }}</li></ul></dd></div>
-          </dl><div v-if="role === 'reviewer' && current.review_status === 'draft'"><p>批准后该修订可被运行，内容保持不可变。</p><ElCheckbox v-model="reviewed" :disabled="busy">已核对输入与预期</ElCheckbox><div class="external-actions"><ElButton type="primary" :disabled="busy || !reviewed" @click="review('approved')">批准此修订</ElButton><ElButton :disabled="busy || !reviewed" @click="review('rejected')">拒绝此修订</ElButton></div></div>
-          <ElButton v-if="role === 'operator' && current.review_status === 'approved'" type="primary" :disabled="busy" @click="startFromCase(current)">使用此用例新建运行</ElButton>
-        </article>
+    <header class="page-heading external-page-heading">
+      <div>
+        <RouterLink class="external-back" to="/targets"><ArrowLeft aria-hidden="true" /> 返回对象与版本</RouterLink>
+        <h1>外部 Agent 接入</h1>
       </div>
-    </section>
+    </header>
+    <p v-if="!workspace.authorization.value" role="status">请先登录。</p>
+    <p v-if="error && !editorOpen" class="evidence-error external-feedback" role="alert">{{ error }}</p>
+    <p v-if="notice && (!checked || notice !== '连接与版本已核对')" class="external-feedback workspace-note" role="status">{{ notice }}</p>
+    <div class="external-layout" :class="{ 'operator-layout': role === 'operator' }">
+      <section v-if="role === 'operator'" class="external-card">
+        <header class="external-card-header">
+          <h2><Connection aria-hidden="true" />外部服务</h2>
+          <ElButton :icon="Plus" type="primary" :disabled="busy" @click="connectionOpen = true">接入 Agent</ElButton>
+        </header>
+        <div class="external-card-body">
+          <div v-if="definitions.length" class="service-picker">
+            <div>
+              <label for="external-target">已配置服务</label>
+              <ElSelect id="external-target" v-model="selected" aria-label="外部服务" placeholder="选择外部服务" :disabled="busy">
+                <ElOption v-for="item in definitions" :key="item.registered_id" :value="item.registered_id" :label="item.name" :disabled="!item.enabled" />
+              </ElSelect>
+            </div>
+            <ElButton :icon="Link" :disabled="busy || !selected || !enabled" @click="check">检查连接</ElButton>
+          </div>
+          <p v-if="!definitions.length" class="external-empty">暂无已接入服务。</p>
+          <p v-else-if="!enabled" class="workspace-note" role="status">外部调用开关未开启。</p>
+          <div v-if="definition" class="external-definition">
+            <strong>{{ definition.name }}</strong>
+            <div class="service-meta">
+              <code>{{ definition.revision }}</code>
+              <span>{{ definition.billing === 'free' ? '声明免费' : '使用外部账户计费' }}</span>
+              <span v-if="definition.author_relation === 'project_example'">项目协议示例</span>
+            </div>
+            <p v-if="definition.billing === 'external_account'" class="workspace-note">运行可能产生外部账户费用；平台保守记录声明上限，无法核实外部账单。</p>
+          </div>
+          <div v-if="checked" class="external-register">
+            <p v-if="notice === '连接与版本已核对'" role="status">{{ notice }}</p>
+            <ElCheckbox v-model="confirmed" :disabled="busy">确认登记此版本；登记不启动测试</ElCheckbox>
+            <ElButton type="primary" :disabled="busy || !confirmed" @click="register">登记对象版本</ElButton>
+          </div>
+        </div>
+        <footer class="external-card-footer"><details><summary>协议与模板</summary><ExternalAgentTemplates /></details></footer>
+      </section>
+      <section v-if="role" class="external-card cases-card">
+        <header class="external-card-header">
+          <h2><Document aria-hidden="true" />对话用例</h2>
+          <div class="external-actions">
+            <ElButton v-if="role === 'operator'" :icon="Plus" type="primary" plain :disabled="busy || (!canWriteCase && !pendingDraft)" @click="openEditor">{{ pendingDraft ? '查证原草稿' : '创建测试用例' }}</ElButton>
+            <ElButton :icon="Refresh" :disabled="busy" @click="load()">刷新</ElButton>
+          </div>
+        </header>
+        <div class="external-card-body external-cases">
+          <nav v-if="cases.length" aria-label="外部对话用例">
+            <button v-for="item in cases" :key="item.id" :aria-pressed="current?.id === item.id" @click="current = item; reviewed = false">
+              <strong>{{ item.case_key }}</strong><span>{{ item.review_status === 'approved' ? '已批准' : item.review_status === 'rejected' ? '已拒绝' : '待审核' }}</span>
+            </button>
+          </nav>
+          <p v-else class="external-empty">暂无对话用例。</p>
+          <article v-if="current">
+            <h3>{{ current.case_key }}</h3>
+            <ol><li v-for="(turn, i) in current.content.turns" :key="i">{{ turn.user }}</li></ol>
+            <h4>最后一条回答</h4>
+            <dl v-for="(assertion, index) in current.content.expected.assertions" :key="index" class="case-checks">
+              <div v-if="assertion.contains?.length"><dt>应包含</dt><dd><ul><li v-for="(term, i) in assertion.contains" :key="i">{{ term }}</li></ul></dd></div>
+              <div v-if="assertion.excludes?.length"><dt>不得包含</dt><dd><ul><li v-for="(term, i) in assertion.excludes" :key="i">{{ term }}</li></ul></dd></div>
+            </dl>
+            <div v-if="role === 'reviewer' && current.review_status === 'draft'">
+              <p>批准后该修订可被运行，内容保持不可变。</p>
+              <ElCheckbox v-model="reviewed" :disabled="busy">已核对输入与预期</ElCheckbox>
+              <div class="external-actions">
+                <ElButton type="primary" :disabled="busy || !reviewed" @click="review('approved')">批准此修订</ElButton>
+                <ElButton :disabled="busy || !reviewed" @click="review('rejected')">拒绝此修订</ElButton>
+              </div>
+            </div>
+            <ElButton v-if="role === 'operator' && current.review_status === 'approved'" type="primary" :disabled="busy" @click="startFromCase(current)">使用此用例新建运行</ElButton>
+          </article>
+        </div>
+        <footer v-if="role === 'operator'" class="external-card-footer">
+          <details><summary>导入 JSON</summary><label class="external-file">导入 JSON 草稿<input type="file" accept="application/json,.json" aria-label="导入外部对话用例" :disabled="busy" @change="importFile" /></label></details>
+        </footer>
+      </section>
+    </div>
+    <ExternalConnectionDialog v-if="connectionOpen" v-model="connectionOpen" :profiles="profiles" :enabled="enabled" @registered="connectionRegistered" />
     <ExternalCaseEditor v-if="(editorOpen || pendingDraft) && editorTarget" v-model="editorOpen" :target="editorTarget" :saving="busy" :awaiting-receipt="!!pendingDraft" @save="saveDraft">
       <template #feedback><p v-if="error" role="alert" class="evidence-error">{{ error }}</p></template>
     </ExternalCaseEditor>
@@ -224,5 +298,88 @@ onBeforeUnmount(() => { alive = false; epoch++ })
 </template>
 
 <style scoped>
-.external-agents { max-width: 1320px; margin: auto; }.external-card { margin-top: 24px; padding: 24px; background: var(--el-bg-color); border: 1px solid var(--el-border-color-light); border-radius: 14px; }.external-actions,.external-definition,.external-register { display:flex; align-items:center; flex-wrap:wrap; gap:12px; }.external-actions h2 { margin:0 auto 0 0; font-size:20px; }.external-actions .el-select { width:min(360px,100%); }.external-definition { margin:24px 0; }.external-definition span { color:var(--el-text-color-secondary); }.external-register { margin:20px 0; }.external-card details { margin-top:20px; line-height:1.7; }.external-file input { display:block; max-width:220px; margin-top:8px; }.external-cases { display:grid; grid-template-columns:240px minmax(0,1fr); gap:24px; margin-top:24px; }.external-cases nav button { display:flex; justify-content:space-between; width:100%; padding:14px; gap:12px; margin-bottom:8px; border:1px solid var(--el-border-color); border-radius:8px; background:var(--el-bg-color); color:var(--el-text-color-primary); cursor:pointer; }.external-cases nav button:hover,.external-cases nav button[aria-pressed="true"] { background:var(--el-color-primary-light-9); border-color:var(--el-color-primary); }.external-cases button:focus-visible { outline:2px solid var(--el-color-primary); outline-offset:3px; }.external-cases article { min-width:0; }.case-checks { padding: 12px 16px; background: var(--el-fill-color-light); border-radius: 8px; }.case-checks dt { font-weight: 600; }.case-checks dd { margin: 4px 0 8px; }.case-checks ul { margin: 0; padding-inline-start: 20px; }.external-cases li { white-space:pre-wrap; overflow-wrap:anywhere; line-height:1.8; }@media(max-width:640px){.external-card{padding:16px;}.external-cases{grid-template-columns:1fr;}.external-cases nav{max-height:220px;overflow:auto;}.external-actions .el-select{width:100%;}}
+.external-agents { max-width: 1320px; margin: auto; container-type: inline-size; }
+.external-page-heading { margin-bottom: 22px; }
+.external-page-heading h1 { margin-top: 9px; }
+.external-back { display: inline-flex; align-items: center; gap: 6px; color: var(--ac-muted); font-size: 13px; }
+.external-back:hover { color: var(--ac-link); }
+.external-back svg { width: 14px; height: 14px; }
+.external-feedback { margin: 0 0 16px; }
+.external-layout { display: grid; grid-template-columns: minmax(0, 1fr); align-items: start; gap: 16px; }
+.external-card {
+  min-width: 0; color: var(--ac-text); background: var(--ac-surface);
+  border: 1px solid var(--ac-border); border-radius: 14px;
+}
+.external-card-header, .external-card-body, .external-card-footer { padding-inline: 20px; }
+.external-card-header {
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+  min-height: 64px; padding-block: 14px; border-bottom: 1px solid var(--ac-border);
+}
+.external-card-header h2 { display: flex; align-items: center; gap: 9px; margin: 0; color: var(--ac-ink); font-size: 17px; }
+.external-card-header h2 svg { width: 18px; height: 18px; color: var(--ac-link); }
+.external-card-body { padding-block: 18px; }
+.external-card-footer { padding-block: 11px; border-top: 1px solid var(--ac-border); }
+.external-card-footer summary { width: fit-content; color: var(--ac-muted); cursor: pointer; font-size: 13px; }
+.external-card-footer summary:hover { color: var(--ac-link); }
+.external-card-footer :deep(.templates) { margin-top: 10px; }
+.external-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.external-actions :deep(.el-button + .el-button) { margin-left: 0; }
+.service-picker { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 10px; }
+.service-picker label { display: block; margin-bottom: 6px; color: var(--ac-text); font-size: 13px; }
+.service-picker :deep(.el-select) { width: 100%; }
+.service-picker :deep(.el-select__wrapper) { min-height: 36px; }
+.service-picker :deep(.el-select__wrapper:is(.is-focused, :focus-within)) { box-shadow: inset 0 0 0 2px var(--ac-link); }
+.service-picker :deep(.el-select__input:focus-visible) { outline: none; }
+.external-definition {
+  margin-top: 14px; padding: 14px; border: 1px solid var(--ac-border); border-radius: 9px;
+  background: var(--ac-surface-raised); overflow-wrap: anywhere;
+}
+.external-definition > strong { display: block; color: var(--ac-ink); font-size: 15px; }
+.service-meta { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 5px; color: var(--ac-muted); font-size: 13px; }
+.external-definition .workspace-note { margin: 8px 0 0; }
+.external-register {
+  display: grid; justify-items: start; gap: 8px; margin-top: 14px; padding: 12px 14px;
+  border-inline-start: 3px solid var(--ac-link); border-radius: 5px; background: var(--ac-accent-soft);
+}
+.external-register > p { color: var(--ac-link); font-size: 13px; font-weight: 600; }
+.external-register :deep(.el-checkbox) { margin: 0; height: auto; white-space: normal; }
+.external-register :deep(.el-checkbox__label) { font-size: 13px; }
+.external-empty {
+  padding: 22px 14px; text-align: center; color: var(--ac-muted); font-size: 14px;
+  border: 1px dashed var(--ac-border); border-radius: 9px; background: var(--ac-surface-raised);
+}
+.external-file { display: block; padding-top: 8px; font-size: 13px; }
+.external-file input { display: block; max-width: 100%; margin-top: 8px; }
+.external-file input:focus-visible { outline-offset: -2px; }
+.external-cases { display: grid; gap: 16px; }
+.external-cases nav { max-height: 220px; overflow: auto; }
+.external-cases nav button {
+  display: flex; justify-content: space-between; align-items: center; gap: 10px; width: 100%; margin-bottom: 6px; padding: 10px 12px;
+  border: 1px solid var(--ac-border); border-radius: 8px; background: var(--ac-surface); color: var(--ac-ink); cursor: pointer;
+  text-align: left;
+}
+.external-cases nav button:last-child { margin-bottom: 0; }
+.external-cases nav button strong { min-width: 0; overflow-wrap: anywhere; }
+.external-cases nav button span { flex-shrink: 0; color: var(--ac-muted); font-size: 12px; }
+.external-cases nav button:hover, .external-cases nav button[aria-pressed="true"] {
+  border-color: var(--ac-link); background: var(--ac-accent-soft);
+}
+.external-cases nav button:focus-visible { outline: 2px solid var(--ac-link); outline-offset: -2px; }
+.external-cases article { min-width: 0; padding-top: 14px; border-top: 1px solid var(--ac-border); overflow-wrap: anywhere; }
+.external-cases h3 { margin: 0; color: var(--ac-ink); font-size: 16px; }
+.external-cases h4 { margin: 12px 0 6px; font-size: 14px; }
+.external-cases ol, .case-checks ul { margin: 6px 0 0; padding-inline-start: 20px; }
+.external-cases li { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.65; }
+.case-checks { padding: 10px 12px; background: var(--ac-surface-raised); border-radius: 8px; }
+.case-checks dt { font-weight: 600; }
+.case-checks dd { margin: 4px 0 8px; }
+@container (min-width: 790px) {
+  .operator-layout { grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr); }
+  .external-layout:not(.operator-layout) .external-cases:has(article) { grid-template-columns: 220px minmax(0, 1fr); }
+  .external-layout:not(.operator-layout) .external-cases article { border-top: 0; border-inline-start: 1px solid var(--ac-border); padding: 0 0 0 16px; }
+}
+@container (max-width: 390px) {
+  .external-card-header, .external-card-body, .external-card-footer { padding-inline: 14px; }
+  .external-actions :deep(.el-button) { padding-inline: 10px; }
+}
 </style>

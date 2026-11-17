@@ -94,6 +94,7 @@ Category = Literal[
     "normal", "tool_execution", "memory_and_tool", "retrieval", "security", "robustness"
 ]
 RunStatus = Literal["queued", "running", "cancelling", "completed", "failed", "cancelled"]
+RunResult = Literal["passed", "has_failed", "inconclusive", "error", "ended"]
 
 
 @router.get("/overview")
@@ -143,8 +144,9 @@ def runs(
     limit: Limit = 20,
     q: Search = "",
     status: RunStatus | None = None,
+    result: RunResult | None = None,
 ) -> Envelope[dict]:
     return Envelope(
-        data=service.runs(user, cursor=cursor, limit=limit, query=q, status=status),
+        data=service.runs(user, cursor=cursor, limit=limit, query=q, status=status, result=result),
         request_id=request.state.request_id,
     )

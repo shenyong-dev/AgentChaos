@@ -3,7 +3,7 @@
 from uuid import uuid4
 
 from sqlalchemy import func, select, text
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.agents.errors import AgentError
@@ -17,6 +17,7 @@ from app.external.registry import entries, entry_for
 from app.external.runner import request
 from app.external.schema import PREFIX
 from app.external.transport import Client
+from app.external.web_config import entry_for_draft, profiles_for_ui, records, save_connection
 from app.models import Target, TargetVersion, TestCase
 
 
@@ -30,6 +31,9 @@ class ExternalService:
         return {
             "role": user.role,
             "calls_enabled": self.settings.external_agent_calls_enabled,
+            "connection_profiles": profiles_for_ui(self.settings)
+            if user.role == "operator" and self.settings.external_agent_web_policy_path
+            else [],
             "items": [
                 {
                     "registered_id": entry.id,
@@ -44,11 +48,18 @@ class ExternalService:
         }
 
     def inspect(self, owner, registered_id):
+        return self.probe(owner, registered_id)
+
+    def check_configuration(self, owner, draft):
+        return self.probe(owner, draft.profile_id, draft=draft)
+
+    def probe(self, owner, registered_id, *, draft=None):
         with Session(self.engine) as session:
             CaseService.role(session, owner, "operator")
             server, database = session.execute(text("SELECT @@server_uuid,DATABASE()")).one()
         kind = PREFIX + registered_id
-        adapter = ExternalAdapter(self.engine, self.settings, kind)
+        entry = entry_for_draft(self.settings, draft) if draft is not None else None
+        adapter = ExternalAdapter(self.engine, self.settings, kind, entry=entry)
         binding = {
             "tenant": canonical_hash([server, database, owner, kind]),
             "scope": "test:probe:" + uuid4().hex,
@@ -73,9 +84,32 @@ class ExternalService:
 
     def register(self, owner, registered_id, expected_hash):
         inspected = self.inspect(owner, registered_id)
+        return self.save_registration(owner, registered_id, expected_hash, inspected)
+
+    def register_configuration(self, owner, draft, expected_hash):
+        with Session(self.engine) as session:
+            CaseService.role(session, owner, "operator")
+        entry = entry_for_draft(self.settings, draft)
+        record = records(self.settings).get(draft.profile_id)
+        if (
+            record
+            and record.connection == draft
+            and record.entry_hash == canonical_hash(entry.model_dump())
+        ):
+            # A connection is only saved after a verified capabilities receipt.
+            # Its manifest is checked again under the registration lock.
+            inspected = {"config_hash": expected_hash, "name": draft.name}
+        else:
+            inspected = self.check_configuration(owner, draft)
+        return self.save_registration(
+            owner, draft.profile_id, expected_hash, inspected, draft=draft
+        )
+
+    def save_registration(self, owner, registered_id, expected_hash, inspected, *, draft=None):
         if inspected["config_hash"] != expected_hash:
             raise AgentError("external_config_changed", "配置已变化，请重新检查连接与版本。", 409)
         kind = PREFIX + registered_id
+        configuration_saved = False
         try:
             with (
                 advisory(self.engine, "external-register"),
@@ -83,9 +117,13 @@ class ExternalService:
                 session.begin(),
             ):
                 CaseService.role(session, owner, "operator")
-                manifest = ExternalAdapter(self.engine, self.settings, kind).manifest()
+                entry = entry_for_draft(self.settings, draft) if draft is not None else None
+                manifest = ExternalAdapter(self.engine, self.settings, kind, entry=entry).manifest()
                 if manifest["config_hash"] != expected_hash:
                     raise AgentError("external_config_changed", "登记期间来源已变化。", 409)
+                if draft is not None:
+                    save_connection(self.settings, draft, manifest["external"]["entry_hash"])
+                    configuration_saved = True
                 target = session.scalar(
                     select(Target)
                     .where(
@@ -135,7 +173,15 @@ class ExternalService:
                 session.add(version)
                 session.flush()
                 return {"target_id": target.id, "version_id": version.id, "created": True}
-        except IntegrityError:
+        except SQLAlchemyError as e:
+            if configuration_saved:
+                raise AgentError(
+                    "external_web_version_pending",
+                    "服务配置已保存，版本登记暂未完成。请按原配置重试登记。",
+                    503,
+                ) from None
+            if not isinstance(e, IntegrityError):
+                raise
             raise AgentError(
                 "external_registration_conflict", "登记记录发生并发变化，请重新核对。", 409
             ) from None

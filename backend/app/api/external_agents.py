@@ -11,6 +11,7 @@ from app.api.cases import case_identity
 from app.core.config import get_settings
 from app.external.cases import CaseFile
 from app.external.service import ExternalService
+from app.external.web_config import Connection
 from app.schemas.common import Envelope
 
 router = APIRouter(prefix="/api/v1/external-agents", tags=["external-agents"])
@@ -38,6 +39,14 @@ class Review(BaseModel):
     decision: Literal["approved", "rejected"]
 
 
+class RegisterConnection(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True)
+
+    connection: Connection
+    expected_config_hash: str = Field(pattern=r"^[a-f0-9]{64}$")
+    confirmed: Literal[True]
+
+
 @router.get("")
 def definitions(request: Request, user: Identity, service: Service):
     return Envelope(data=service.definitions(user), request_id=request.state.request_id)
@@ -57,6 +66,23 @@ def check(
 def register(body: Register, request: Request, user: Identity, service: Service):
     return Envelope(
         data=service.register(user, body.registered_id, body.expected_config_hash),
+        request_id=request.state.request_id,
+    )
+
+
+@router.post("/configuration/check")
+def check_configuration(body: Connection, request: Request, user: Identity, service: Service):
+    return Envelope(
+        data=service.check_configuration(user, body), request_id=request.state.request_id
+    )
+
+
+@router.post("/configuration/register")
+def register_configuration(
+    body: RegisterConnection, request: Request, user: Identity, service: Service
+):
+    return Envelope(
+        data=service.register_configuration(user, body.connection, body.expected_config_hash),
         request_id=request.state.request_id,
     )
 

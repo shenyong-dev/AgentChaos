@@ -49,7 +49,7 @@ def address(entry, settings):
         ) from None
 
 
-def entries(settings):
+def file_entries(settings):
     path = settings.external_agent_registry_path
     if not path:
         return {}
@@ -67,6 +67,15 @@ def entries(settings):
         raise AgentError(
             "external_registry_invalid", "外部对象登记文件无效，请由维护者核对。", 503
         ) from None
+
+
+def entries(settings):
+    fixed = file_entries(settings)
+    if not settings.external_agent_web_policy_path:
+        return fixed
+    from app.external.web_config import configured_entries
+
+    return {**configured_entries(settings), **fixed}
 
 
 def entry_for(settings, kind) -> Entry:

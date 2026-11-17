@@ -46,6 +46,13 @@ for (const width of [1440, 390, 320]) test(`registration remains explicit and re
   const state = await setup(page)
   await page.goto('/external-agents')
   await expect(page.getByRole('heading', { name: '外部 Agent 接入', exact: true })).toBeVisible()
+  const [services, cases] = await Promise.all([
+    page.getByRole('heading', { name: '外部服务', exact: true }).boundingBox(),
+    page.getByRole('heading', { name: '对话用例', exact: true }).boundingBox(),
+  ])
+  expect(services && cases).toBeTruthy()
+  if (width === 1440) expect(cases!.x).toBeGreaterThan(services!.x + services!.width)
+  else expect(cases!.y).toBeGreaterThan(services!.y + services!.height)
   await page.getByRole('button', { name: '检查连接', exact: true }).click()
   await expect(page.getByRole('button', { name: '登记对象版本', exact: true })).toBeDisabled()
   expect(state.writes).toEqual([])
@@ -96,7 +103,11 @@ test('lost draft receipt is found by original content without a second write', a
   await page.getByRole('button', { name: '登记对象版本', exact: true }).click()
   await page.getByRole('button', { name: '创建测试用例', exact: true }).click()
   const dialog = page.getByRole('dialog', { name: '创建测试用例', exact: true })
+  const caseKey = dialog.getByLabel('用例编号', { exact: true })
+  await caseKey.click()
+  await expect(caseKey).toHaveCSS('outline-offset', '-2px')
   await dialog.getByLabel('第 1 轮消息', { exact: true }).fill('第一轮')
+  await expect(dialog.getByLabel('第 1 轮消息', { exact: true })).toHaveCSS('outline-offset', '-2px')
   await dialog.getByRole('button', { name: '添加一轮', exact: true }).click()
   await dialog.getByLabel('第 2 轮消息', { exact: true }).fill('第二轮')
   await dialog.getByLabel('应包含', { exact: true }).fill('收到')
@@ -133,6 +144,34 @@ test('wizard offers external target and clears unsupported fault selection', asy
   await expect(dialog.getByText('远端声明预算（人民币）', { exact: true })).toBeVisible()
   await expect(dialog.getByText('每执行消息发送上限', { exact: true })).toBeVisible()
   expect(state.writes).toEqual([]); expect(state.errors).toEqual([])
+})
+
+test('connection dialog contains mouse and keyboard focus within the field borders', async ({ page }) => {
+  const state = await setup(page)
+  await page.setViewportSize({ width: 320, height: 900 })
+  await page.route('**/api/v1/external-agents', route => route.fulfill({
+    json: { data: { role: 'operator', calls_enabled: true, items: [], connection_profiles: [{
+      id: 'example', label: '本地测试服务', endpoint: 'https://support.example.org/agentchaos/long-endpoint-path',
+      default_timeout_seconds: 10, billing: 'free',
+    }] } },
+  }))
+  await page.goto('/external-agents?configure=1')
+  const dialog = page.getByRole('dialog', { name: '接入 Agent', exact: true })
+  const destination = dialog.getByRole('combobox', { name: '服务地址', exact: true })
+  const name = dialog.getByLabel('服务名称', { exact: true })
+  const revision = dialog.getByLabel('服务版本', { exact: true })
+  await destination.focus()
+  await expect(destination).toHaveCSS('outline-offset', '-2px')
+  await page.keyboard.press('Tab')
+  await expect(name).toBeFocused()
+  await expect(name).toHaveCSS('outline-width', '2px')
+  await expect(name).toHaveCSS('outline-offset', '-2px')
+  await revision.click()
+  await expect(revision).toBeFocused()
+  await expect(revision).toHaveCSS('outline-offset', '-2px')
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
+  expect(state.writes).toEqual([])
+  expect(state.errors).toEqual([])
 })
 
 test('external overview orders messages and labels a reconciled receipt without changing execution status', async ({ page }) => {

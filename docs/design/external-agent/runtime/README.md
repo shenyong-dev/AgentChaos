@@ -2,6 +2,14 @@
 
 首版使用 AgentChaos 自己的 `agentchaos-http-1` 协议。已有 HTTP Agent 可加一层转换服务。工作台可执行多轮对话、核对回答是否包含指定文本、查证原请求和导出报告。业务事实、内部工具轨迹、检索覆盖与 AI 裁判留待能力扩展。
 
+## 在网页接入
+
+从「对象与版本 → 接入外部 Agent」打开弹窗，选择已批准服务地址，填写能力卡中的服务名称、版本及单次超时。点击「检查连接」，看到通过提示后再点击「确认登记」。用例可点「创建测试用例」直接填写。
+
+维护者将 `EXTERNAL_AGENT_WEB_POLICY_PATH` 指向[接入策略文件](web-policy.example.json)的绝对路径，替换示例域名和固定 IP。在 API、Worker、Dispatcher 为已批准地址提供同名凭据和 `EXTERNAL_AGENT_CALLS_ENABLED=true`。策略目录专用于外部接入，三个进程共享。API 需要目录写权限，受管 Docker Worker 和 Dispatcher 只读挂载该目录。不同数据库和执行命名空间使用独立的连接记录。服务配置保存后若版本登记失败，按表单原配置重试。更换批准的目标地址时使用新的地址标识。
+
+## 使用固定登记文件
+
 1. 维护者参照[登记文件](registry.example.json)配置固定 URI、固定 IP 和能力卡。将 `EXTERNAL_AGENT_REGISTRY_PATH` 指向该文件的绝对路径，并在 API、Worker、Dispatcher 配置中显式设置 `EXTERNAL_AGENT_CALLS_ENABLED=true`。服务凭据通过条目指定的环境变量注入，不写入登记文件。
 2. 操作员在「对象与版本 → 接入外部 Agent」选择已配置服务，检查连接后登记版本。点击「创建测试用例」，逐轮填写消息，再填写最终回复应包含或不得包含的文本。也可以导入[对话用例 JSON](case.example.json)。保存后由审核员核对并批准。
 3. 操作员打开已批准的用例，点击「使用此用例新建运行」。向导带入用例和对应对象，完成预检后由操作员确认发起。

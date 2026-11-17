@@ -22,6 +22,7 @@ from app.agents.versions import canonical_hash
 from app.core.config import PROJECT_ROOT, Settings
 from app.core.deployment import database_binding, execution_fingerprint, source_fingerprint
 from app.external.registry import credential, entries
+from app.external.web_config import policy
 
 LABEL = "io.agentchaos.workers"
 PACKAGES = (
@@ -33,6 +34,7 @@ PACKAGES = (
     "httpcore",
 )
 EXTERNAL_REGISTRY_MOUNT = "/run/agentchaos-external/registry.json"
+EXTERNAL_WEB_MOUNT = "/run/agentchaos-external-web"
 DOCKER = Path("D:/DockerDesktop/resources/bin/docker.exe")
 ENDPOINT = "npipe:////./pipe/dockerDesktopLinuxEngine"
 RETRY_DELAYS = (2, 4, 8)
@@ -175,6 +177,10 @@ def snapshot(folder, settings):
     values = settings.model_dump(mode="json")
     if values["external_agent_registry_path"]:
         values["external_agent_registry_path"] = EXTERNAL_REGISTRY_MOUNT
+    if values["external_agent_web_policy_path"]:
+        values["external_agent_web_policy_path"] = (
+            EXTERNAL_WEB_MOUNT + "/" + Path(values["external_agent_web_policy_path"]).name
+        )
     values.pop("demo_seed_password", None)
     for key in ("mysql_password", "redis_password", "deepseek_api_key"):
         values[key] = getattr(settings, key).get_secret_value()
@@ -258,8 +264,10 @@ def create_container(docker, role, record, release, env_file, image):
             "--mount",
             f"type=bind,source={registry},target={EXTERNAL_REGISTRY_MOUNT},readonly",
         ]
-        for name in record.get("external_credentials", []):
-            args += ["--env", name]
+    if directory := record.get("external_web_directory"):
+        args += ["--mount", f"type=bind,source={directory},target={EXTERNAL_WEB_MOUNT},readonly"]
+    for name in record.get("external_credentials", []):
+        args += ["--env", name]
     for source, target in (
         (release / "backend/app", "backend/app"),
         (release / "backend/alembic", "backend/alembic"),
@@ -340,17 +348,25 @@ def start(folder, profile, config, image, docker, *, control=False):
                 "offline_control_requires_owned_T17H_database_no_key_no_paid_switches"
             )
         registry = settings.external_agent_registry_path
+        web = settings.external_agent_web_policy_path
         credentials = []
         if registry:
-            configured = entries(settings)
             registry = str(Path(registry).resolve(strict=True))
             if "," in registry:
                 raise OperationError("external_registry_mount_path_contains_comma")
-            if settings.external_agent_calls_enabled:
-                for entry in configured.values():
-                    if entry.enabled:
-                        credential(entry)
-                        credentials.append(entry.credential_env)
+        if web:
+            web = str(Path(web).resolve(strict=True).parent)
+            if "," in web:
+                raise OperationError("external_web_mount_path_contains_comma")
+        if (registry or web) and settings.external_agent_calls_enabled:
+            for entry in entries(settings).values():
+                if entry.enabled:
+                    credential(entry)
+                    credentials.append(entry.credential_env)
+            for profile in policy(settings).values():
+                if os.environ.get(profile.credential_env):
+                    credential(profile)
+                    credentials.append(profile.credential_env)
         check_image(docker, image)
         release, env_file = snapshot(folder, settings)
         owner = hashlib.sha256((str(PROJECT_ROOT.resolve()) + profile).encode()).hexdigest()
@@ -370,6 +386,7 @@ def start(folder, profile, config, image, docker, *, control=False):
             "last_error": None,
             "control": control,
             "external_registry": registry,
+            "external_web_directory": web,
             "external_credentials": sorted(set(credentials)),
         }
         try:

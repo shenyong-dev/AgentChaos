@@ -1,6 +1,6 @@
 # AgentChaos 智能体可靠性测试平台
 
-AgentChaos 用于测试能够调用工具并改变业务数据的 Agent。平台支持**场地预约**与**模拟订单退款**，关联多轮输入、确认草稿、工具轨迹、故障及业务前后快照，分别记录规则结论、任务达成和 AI 辅助意见。退款不连接真实支付平台。两个参考 Agent 均由本项目开发者实现，尚未验证独立外部 Agent 接入。
+AgentChaos 用于测试能够调用工具并改变业务数据的 Agent。平台支持**场地预约**与**模拟订单退款**，关联多轮输入、确认草稿、工具轨迹、故障及业务前后快照，分别记录规则结论、任务达成和 AI 辅助意见。退款使用独立模拟账本。项目已用自建独立售后 Agent 验证服务登记、多轮测试和原请求回执查证。
 
 - [数据库 SQL](database/)与[接口契约](docs/architecture/contracts.md)
 
@@ -34,7 +34,64 @@ AgentChaos 用于测试能够调用工具并改变业务数据的 Agent。平台
 | 执行服务 | Celery Worker、Dispatcher；团队 Windows 脚本使用已配置的 Docker Linux 引擎 |
 | 模型 | 服务端 DeepSeek API；真实调用需要对应角色的授权和持久账本 |
 
-团队 Windows Redis 运行时位于外部 `D:\RedisSearch`，执行服务另需已有 Docker Linux 环境。启动脚本不会安装它们。根目录 `compose.yaml` 是早期模板，`deploy/cloud/compose.yaml` 使用团队私有构建镜像，均不是已验证的空白机器一键安装。
+本机开发可分别启动 API、前端、MySQL 和 Redis。Windows 团队脚本使用 `D:\RedisSearch` 与现有 Docker Linux 引擎。希望统一运行服务时，可按下节配置根目录 Compose。
+
+## Docker Compose 本地配置
+
+以下步骤适用于新检出的本地演示目录。Windows 使用 Docker Desktop 的 Linux 容器，推荐启用 WSL 2 后端。从项目根目录打开 PowerShell，先确认引擎返回 `linux`，再生成项目专用的 `.env`。[Docker Desktop 配置说明](https://docs.docker.com/desktop/features/wsl/)
+
+```powershell
+docker compose version
+docker info --format '{{.OSType}}'
+python scripts/init_env.py
+```
+
+新生成的 `.env` 含独立的 MySQL、Redis 和演示账号密码。保留 `MYSQL_DATABASE=agentchaos`，与根目录 [compose.yaml](compose.yaml) 中的初始化库一致。API、Worker 和 Dispatcher 在容器内通过 `mysql:3306` 和 `redis:6379` 访问依赖。需要修改宿主机端口时，在 `.env` 配置下列字段。
+
+| 字段 | 默认宿主机端口 | 用途 |
+| --- | --- | --- |
+| `FRONTEND_PORT` | `5173` | 页面与同源 API 代理 |
+| `API_PORT` | `8000` | 直接访问 API 与接口文档 |
+| `COMPOSE_MYSQL_PORT` | `13306` | 本机数据库客户端 |
+| `COMPOSE_REDIS_PORT` | `16379` | 本机 Redis 客户端 |
+
+**首次初始化。** 先启动数据服务，等健康检查通过。MySQL 和 Redis 数据分别写到当前检出目录的 `.local/compose/mysql` 和 `.local/compose/redis`。使用已有工作库时，请按[升级说明](#已有库升级与-sql-包维护)操作。
+
+```powershell
+docker compose config --quiet
+docker compose up -d --wait mysql redis
+docker compose build api
+```
+
+初始化容器用只读挂载取得 SQL 文件和脚本。以下三条初始化命令依次执行，每一步成功后再继续。演示用例的准备过程见[SQL 文件与初始化](#sql-文件与初始化)。[Docker Compose 单次任务说明](https://docs.docker.com/reference/cli/docker/compose/run/)
+
+```powershell
+$repo = (Get-Location).Path.Replace('\', '/')
+$initMounts = @(
+    '--volume', "${repo}/backend/scripts:/workspace/AgentChaos/backend/scripts:ro",
+    '--volume', "${repo}/database:/workspace/AgentChaos/database:ro"
+)
+docker compose run --rm --no-deps @initMounts api python scripts/database_setup.py import-schema --empty-database
+docker compose run --rm --no-deps @initMounts api python scripts/database_setup.py prepare-demo --reference-data
+docker compose run --rm --no-deps @initMounts api python scripts/database_setup.py verify
+```
+
+**启动并核对。** `worker` profile 会把 Worker 和 Dispatcher 一起启动。前端默认入口是 `http://127.0.0.1:5173`，用 `demo_operator` 或 `demo_reviewer` 登录，密码是本机 `.env` 中的 `DEMO_SEED_PASSWORD`。
+
+```powershell
+docker compose --profile worker up -d --build
+docker compose --profile worker ps
+Invoke-RestMethod http://127.0.0.1:8000/api/v1/health
+```
+
+进入「工程环境」检查数据库、Redis 的 JSON 与 Search 模块、Worker 和 Dispatcher 回执。真实模型需按[模型权限与云端](#模型权限与云端)配置后再调用。Linux 宿主使用绑定目录时，应用容器以 UID 10001 运行，应给该用户 `.local` 和 `.cache/jieba` 的写权限。
+
+```powershell
+docker compose --profile worker logs --tail 80 api worker dispatcher
+docker compose --profile worker stop
+```
+
+确认运行结束后再停止，绑定目录会保留数据库、Redis 和实验记录。团队云端使用 [deploy/cloud/compose.yaml](deploy/cloud/compose.yaml)，由维护者提供对应镜像和私有环境配置。
 
 ## 获取源码与私有配置
 
