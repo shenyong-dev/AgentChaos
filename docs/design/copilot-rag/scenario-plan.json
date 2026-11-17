@@ -1,0 +1,391 @@
+{
+  "schema": "copilot-guided-scenario-design-v0.2",
+  "status": "design_only_not_a_runtime_router",
+  "date": "2026-11-16",
+  "retrieval": "semantic_query_vector_shared_with_knowledge_search",
+  "not_embedded": true,
+  "question_examples_are_independent_evaluation": false,
+  "out_of_scope_behavior": "clarify_or_state_supported_scope",
+  "protected_page_policy": "original_deterministic_only_no_model_or_embedding",
+  "scenarios": [
+    {
+      "id": "getting_started",
+      "title": "开始使用",
+      "description": "开始使用：结合用户目标和当前可读上下文选择具体指引，不推断未取得的状态。",
+      "design_question_examples": [
+        "我第一次用，先做什么？"
+      ],
+      "context_requirements": [],
+      "tool_candidates": [
+        {
+          "name": "read_guide",
+          "guard": "always_subject_to_original_page_and_identity_policy"
+        }
+      ],
+      "action_candidates": [
+        "page.library",
+        "page.workbench"
+      ],
+      "review_status": "draft",
+      "can_grant_tool_or_action_permissions": false,
+      "reply_contract": [
+        "direct_answer_or_current_blocker",
+        "specific_current_step",
+        "expected_observation_not_claimed_as_done",
+        "recovery_branch_or_one_key_question"
+      ]
+    },
+    {
+      "id": "case_explanation",
+      "title": "理解用例",
+      "description": "理解用例：结合用户目标和当前可读上下文选择具体指引，不推断未取得的状态。",
+      "design_question_examples": [
+        "这道用例具体在测什么？"
+      ],
+      "context_requirements": [
+        "approved_dev_case"
+      ],
+      "tool_candidates": [
+        {
+          "name": "read_guide",
+          "guard": "always_subject_to_original_page_and_identity_policy"
+        },
+        {
+          "name": "read_selection",
+          "guard": "explicit_selection_allowed_by_current_schemas"
+        }
+      ],
+      "action_candidates": [
+        "case.read"
+      ],
+      "review_status": "draft",
+      "can_grant_tool_or_action_permissions": false,
+      "reply_contract": [
+        "direct_answer_or_current_blocker",
+        "specific_current_step",
+        "expected_observation_not_claimed_as_done",
+        "recovery_branch_or_one_key_question"
+      ]
+    },
+    {
+      "id": "create_run",
+      "title": "准备测试",
+      "description": "准备测试：结合用户目标和当前可读上下文选择具体指引，不推断未取得的状态。",
+      "design_question_examples": [
+        "怎样把选中的用例带进一次测试？"
+      ],
+      "context_requirements": [],
+      "tool_candidates": [
+        {
+          "name": "read_guide",
+          "guard": "always_subject_to_original_page_and_identity_policy"
+        },
+        {
+          "name": "read_selection",
+          "guard": "explicit_selection_allowed_by_current_schemas"
+        }
+      ],
+      "action_candidates": [
+        "case.prepare",
+        "page.workbench"
+      ],
+      "review_status": "draft",
+      "can_grant_tool_or_action_permissions": false,
+      "reply_contract": [
+        "direct_answer_or_current_blocker",
+        "specific_current_step",
+        "expected_observation_not_claimed_as_done",
+        "recovery_branch_or_one_key_question"
+      ]
+    },
+    {
+      "id": "environment_troubleshooting",
+      "title": "环境排障",
+      "description": "环境排障：结合用户目标和当前可读上下文选择具体指引，不推断未取得的状态。",
+      "design_question_examples": [
+        "一直不能开始，是哪一步卡住？"
+      ],
+      "context_requirements": [],
+      "tool_candidates": [
+        {
+          "name": "read_guide",
+          "guard": "always_subject_to_original_page_and_identity_policy"
+        },
+        {
+          "name": "read_environment",
+          "guard": "environment_page_and_current_schemas_allow"
+        }
+      ],
+      "action_candidates": [
+        "page.environment",
+        "environment.worker"
+      ],
+      "review_status": "draft",
+      "can_grant_tool_or_action_permissions": false,
+      "reply_contract": [
+        "direct_answer_or_current_blocker",
+        "specific_current_step",
+        "expected_observation_not_claimed_as_done",
+        "recovery_branch_or_one_key_question"
+      ]
+    },
+    {
+      "id": "run_progress",
+      "title": "查询进度",
+      "description": "查询进度：结合用户目标和当前可读上下文选择具体指引，不推断未取得的状态。",
+      "design_question_examples": [
+        "这次还在排队吗？"
+      ],
+      "context_requirements": [
+        "explicit_owned_run_or_execution"
+      ],
+      "tool_candidates": [
+        {
+          "name": "read_guide",
+          "guard": "always_subject_to_original_page_and_identity_policy"
+        },
+        {
+          "name": "read_selection",
+          "guard": "explicit_selection_allowed_by_current_schemas"
+        },
+        {
+          "name": "read_run_evidence",
+          "guard": "explicit_owned_run_or_execution_and_current_schemas_allow"
+        }
+      ],
+      "action_candidates": [
+        "run.trace"
+      ],
+      "review_status": "draft",
+      "can_grant_tool_or_action_permissions": false,
+      "reply_contract": [
+        "direct_answer_or_current_blocker",
+        "specific_current_step",
+        "expected_observation_not_claimed_as_done",
+        "recovery_branch_or_one_key_question"
+      ]
+    },
+    {
+      "id": "result_interpretation",
+      "title": "理解结果",
+      "description": "理解结果：结合用户目标和当前可读上下文选择具体指引，不推断未取得的状态。",
+      "design_question_examples": [
+        "显示结束以后还要看什么？"
+      ],
+      "context_requirements": [
+        "explicit_owned_run_or_execution_for_current_result"
+      ],
+      "tool_candidates": [
+        {
+          "name": "read_guide",
+          "guard": "always_subject_to_original_page_and_identity_policy"
+        },
+        {
+          "name": "read_selection",
+          "guard": "explicit_selection_allowed_by_current_schemas"
+        },
+        {
+          "name": "read_run_evidence",
+          "guard": "explicit_owned_run_or_execution_and_current_schemas_allow"
+        }
+      ],
+      "action_candidates": [
+        "run.assertions",
+        "run.trace"
+      ],
+      "review_status": "draft",
+      "can_grant_tool_or_action_permissions": false,
+      "reply_contract": [
+        "direct_answer_or_current_blocker",
+        "specific_current_step",
+        "expected_observation_not_claimed_as_done",
+        "recovery_branch_or_one_key_question"
+      ]
+    },
+    {
+      "id": "evidence_location",
+      "title": "查找依据",
+      "description": "查找依据：结合用户目标和当前可读上下文选择具体指引，不推断未取得的状态。",
+      "design_question_examples": [
+        "这条结论对应哪段原记录？"
+      ],
+      "context_requirements": [
+        "explicit_case_or_owned_run"
+      ],
+      "tool_candidates": [
+        {
+          "name": "read_guide",
+          "guard": "always_subject_to_original_page_and_identity_policy"
+        },
+        {
+          "name": "read_selection",
+          "guard": "explicit_selection_allowed_by_current_schemas"
+        },
+        {
+          "name": "read_run_evidence",
+          "guard": "explicit_owned_run_or_execution_and_current_schemas_allow"
+        }
+      ],
+      "action_candidates": [
+        "case.read",
+        "run.trace",
+        "run.assertions"
+      ],
+      "review_status": "draft",
+      "can_grant_tool_or_action_permissions": false,
+      "reply_contract": [
+        "direct_answer_or_current_blocker",
+        "specific_current_step",
+        "expected_observation_not_claimed_as_done",
+        "recovery_branch_or_one_key_question"
+      ]
+    },
+    {
+      "id": "version_mismatch",
+      "title": "核对版本",
+      "description": "核对版本：结合用户目标和当前可读上下文选择具体指引，不推断未取得的状态。",
+      "design_question_examples": [
+        "为什么当前版本不能用于运行？"
+      ],
+      "context_requirements": [],
+      "tool_candidates": [
+        {
+          "name": "read_guide",
+          "guard": "always_subject_to_original_page_and_identity_policy"
+        },
+        {
+          "name": "read_selection",
+          "guard": "explicit_selection_allowed_by_current_schemas"
+        }
+      ],
+      "action_candidates": [
+        "page.targets",
+        "page.environment"
+      ],
+      "review_status": "draft",
+      "can_grant_tool_or_action_permissions": false,
+      "reply_contract": [
+        "direct_answer_or_current_blocker",
+        "specific_current_step",
+        "expected_observation_not_claimed_as_done",
+        "recovery_branch_or_one_key_question"
+      ]
+    },
+    {
+      "id": "compare_runs",
+      "title": "比较运行",
+      "description": "比较运行：结合用户目标和当前可读上下文选择具体指引，不推断未取得的状态。",
+      "design_question_examples": [
+        "这两个结果能直接比较吗？"
+      ],
+      "context_requirements": [
+        "explicit_pair_of_owned_runs_in_reports_context"
+      ],
+      "tool_candidates": [
+        {
+          "name": "read_guide",
+          "guard": "always_subject_to_original_page_and_identity_policy"
+        },
+        {
+          "name": "read_comparison",
+          "guard": "explicit_pair_bound_by_original_reports_context_and_current_schemas_allow"
+        }
+      ],
+      "action_candidates": [
+        "page.reports"
+      ],
+      "review_status": "draft",
+      "can_grant_tool_or_action_permissions": false,
+      "reply_contract": [
+        "direct_answer_or_current_blocker",
+        "specific_current_step",
+        "expected_observation_not_claimed_as_done",
+        "recovery_branch_or_one_key_question"
+      ]
+    },
+    {
+      "id": "report_export",
+      "title": "导出报告",
+      "description": "导出报告：结合用户目标和当前可读上下文选择具体指引，不推断未取得的状态。",
+      "design_question_examples": [
+        "怎么把报告交给同事看？"
+      ],
+      "context_requirements": [],
+      "tool_candidates": [
+        {
+          "name": "read_guide",
+          "guard": "always_subject_to_original_page_and_identity_policy"
+        },
+        {
+          "name": "read_selection",
+          "guard": "explicit_selection_allowed_by_current_schemas"
+        }
+      ],
+      "action_candidates": [
+        "page.reports"
+      ],
+      "review_status": "draft",
+      "can_grant_tool_or_action_permissions": false,
+      "reply_contract": [
+        "direct_answer_or_current_blocker",
+        "specific_current_step",
+        "expected_observation_not_claimed_as_done",
+        "recovery_branch_or_one_key_question"
+      ]
+    },
+    {
+      "id": "defect_retest",
+      "title": "缺陷复核与复测",
+      "description": "缺陷复核与复测：结合用户目标和当前可读上下文选择具体指引，不推断未取得的状态。",
+      "design_question_examples": [
+        "找到问题后怎样核对修复？"
+      ],
+      "context_requirements": [],
+      "tool_candidates": [
+        {
+          "name": "read_guide",
+          "guard": "always_subject_to_original_page_and_identity_policy"
+        },
+        {
+          "name": "read_selection",
+          "guard": "explicit_selection_allowed_by_current_schemas"
+        }
+      ],
+      "action_candidates": [
+        "page.reports"
+      ],
+      "review_status": "draft",
+      "can_grant_tool_or_action_permissions": false,
+      "reply_contract": [
+        "direct_answer_or_current_blocker",
+        "specific_current_step",
+        "expected_observation_not_claimed_as_done",
+        "recovery_branch_or_one_key_question"
+      ]
+    },
+    {
+      "id": "integration_scope",
+      "title": "外部系统接入",
+      "description": "外部系统接入：结合用户目标和当前可读上下文选择具体指引，不推断未取得的状态。",
+      "design_question_examples": [
+        "我的系统只有网页，可以怎么测？"
+      ],
+      "context_requirements": [],
+      "tool_candidates": [
+        {
+          "name": "read_guide",
+          "guard": "always_subject_to_original_page_and_identity_policy"
+        }
+      ],
+      "action_candidates": [],
+      "review_status": "draft",
+      "can_grant_tool_or_action_permissions": false,
+      "reply_contract": [
+        "direct_answer_or_current_blocker",
+        "specific_current_step",
+        "expected_observation_not_claimed_as_done",
+        "recovery_branch_or_one_key_question"
+      ]
+    }
+  ]
+}

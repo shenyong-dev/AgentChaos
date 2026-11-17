@@ -1,0 +1,94 @@
+{
+  "schema": "p04-diagnostic-preparation-v1",
+  "status": "preparation_only",
+  "purpose": "修复后助手的单题诊断式可用性验证准备，不是AI增益对照实验。",
+  "participant_limit_proposal": 3,
+  "initial_tasks_per_participant": 1,
+  "assignment_slots_draft": [
+    "U01",
+    "U02",
+    "U03"
+  ],
+  "task_selection": "报名顺序对应固定槽位；同一人不重复计人数，回访和题目暴露须登记。额外题须另定范围。",
+  "participant_identifiers_created": false,
+  "collection_enabled": false,
+  "provider_execution_enabled": false,
+  "prelaunch_gates": {
+    "independent_human_reference_review": "pending",
+    "current_approved_dev_revision_binding": "pending",
+    "new_collector_and_source_freeze": "pending",
+    "new_copilot_budget_authorization": "pending",
+    "participant_arrangement": "pending"
+  },
+  "record": {
+    "participant_sections": [
+      "judgment",
+      "evidence",
+      "next_action"
+    ],
+    "evidence_subfields": [
+      "location",
+      "short_excerpt"
+    ],
+    "task_statuses": [
+      "completed",
+      "blocked",
+      "uncertain",
+      "withdrawn"
+    ],
+    "observer_fields": [
+      "prior_exposure",
+      "wall_seconds",
+      "interruptions",
+      "help_count",
+      "help_note",
+      "receipt_ids",
+      "model_calls",
+      "cost_estimate_microusd"
+    ],
+    "no_prefilled_answers": true,
+    "observer_fields_not_required_from_participant": true,
+    "withdrawal": "可随时结束；保存已有原记录，不要求补题或伪造本人封存。"
+  },
+  "review": {
+    "reference_authority": "实现者开发参考，须由非出题者人工核对，不能由本代理或独立代码review冒充独立真人金标准。",
+    "dimensions": [
+      "判断与轮次条件",
+      "具体证据位置及摘录",
+      "合法且可执行的只读下一步"
+    ],
+    "labels": [
+      "correct",
+      "partial",
+      "insufficient",
+      "incorrect"
+    ],
+    "critical_error_reported_separately": true,
+    "automatic_semantic_scoring": false,
+    "fully_supported": "三维均由证据支持且无关键错误才计完整正确；原自报状态另列。"
+  },
+  "analysis": {
+    "design": "single_arm_diagnostic",
+    "no_ai_gain_or_efficiency_claim": true,
+    "report": "按参与者/题目列完成、判断、证据、动作、关键错误、时间/求助/退出；分母与未知逐项保留。",
+    "time_boundary": "墙钟包含思考、阅读和空闲；记录中断，不称纯操作时间。"
+  },
+  "source_boundary": "新编任务引用旧的公开已审核dev用例，不是新业务样本、独立保留集或首次使用证明；当前数据库修订尚未绑定。",
+  "operational_boundary": "仅解释和只读导航；不创建运行、发送业务Agent、生成用例、运行裁判、预约/退款写入或修改主服务。",
+  "legacy_boundary": "不恢复T19/T19B旧轮、期限、入口或预算；旧问题仅作已知回归，不补造旧记录。",
+  "proposed_limits_not_authorized": {
+    "approved": false,
+    "role": "copilot",
+    "root_microusd": 300000,
+    "root_requests": 18,
+    "session_microusd": 100000,
+    "session_requests": 6,
+    "questions_per_task": 2,
+    "requests_per_question": 3,
+    "question_seconds": 120,
+    "request_seconds": 45,
+    "max_output_tokens": 1536,
+    "other_roles_microusd": 0,
+    "boundary": "这是拟议硬上限，不是预计费用或完成保证；不创建账本，未知只查原回执，不换键/会话重试。"
+  }
+}

@@ -50,6 +50,10 @@ def test_case_question_preloads_actual_turns_and_uses_visible_navigation(lab):
             selected = next(s for s in payload["source"] if s["tool"] == "read_selection")
             value = selected["content"]
             assert value["turns_complete"] is True
+            assert value["evidence_kind"] == "case_specification"
+            assert value["analysis_scope"]["actual_execution_observed"] is False
+            assert value["analysis_scope"]["execution_authorization"] is False
+            assert value["assertion_inventory"]["count"] == len(original["guidance"]["assertions"])
             assert [t["user"] for t in value["turns"]] == [
                 t["user"] for t in original["guidance"]["turns"]
             ]
@@ -130,6 +134,48 @@ def test_case_read_rechecks_revision_access_after_context_creation(lab, monkeypa
     with pytest.raises(AgentError, match="已不再是"):
         tools.read_selection()
     assert not tools.sources
+
+
+def test_case_inventory_retains_scope_when_optional_details_and_check_list_are_large(
+    lab, monkeypatch
+):
+    from copy import deepcopy
+
+    from app.workbench.service import WorkbenchService
+
+    tools = SourceTools(
+        lab["engine"],
+        lab["settings"],
+        1,
+        CopilotContext.model_validate(context("library", "case", lab["case"])),
+    )
+    value = deepcopy(WorkbenchService(lab["engine"], lab["settings"]).case(1, lab["case"]))
+    value["guidance"]["assertions"] = [
+        {
+            "type": "synthetic_" + str(index),
+            "title": "机械检查",
+            "meaning": "机械有界检查" * 200,
+            "parameters": {"type": "synthetic"},
+        }
+        for index in range(24)
+    ]
+    value["guidance"]["prerequisites"] = {"synthetic": "长前提" * 4000}
+    value["guidance"]["expected"] = {"synthetic": "长预期" * 4000}
+    value["guidance"]["turns"] = [{"number": index + 1, "user": "原文" * 800} for index in range(8)]
+    monkeypatch.setattr(WorkbenchService, "case", lambda *args: value)
+    selected = tools.read_selection()["content"]
+    assert selected["kind"] == "case" and selected["turns"]
+    assert selected["evidence_kind"] == "case_specification"
+    assert selected["assertion_inventory"]["count"] == 24
+    assert len(selected["assertion_inventory"]["types"]) == 16
+    assert selected["assertion_inventory"]["types_complete"] is False
+    assert selected["assertion_inventory"]["details_complete"] is False
+    assert (
+        selected["assertion_inventory"]["scope"]
+        == "current_case_declarations_not_all_business_rules"
+    )
+    assert selected["assertions"]["truncated"] is True
+    assert len(json.dumps(selected, ensure_ascii=False).encode()) <= 16000
 
 
 def test_minimal_context_rejects_urls_shell_arbitrary_files_and_comparison_without_selection():

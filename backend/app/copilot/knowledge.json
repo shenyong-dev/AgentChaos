@@ -1,0 +1,955 @@
+{
+  "revision": "copilot-help-20261116-r2",
+  "catalog_hash": "9a1be17a9ecf3a6f16ee7e9f8ff8aa0165f82c69906c3b6df5c8d98085351401",
+  "rows": [
+    {
+      "id": "page-workspace",
+      "kind": "knowledge",
+      "roles": [
+        "operator",
+        "reviewer"
+      ],
+      "pages": [
+        "workspace"
+      ],
+      "content": {
+        "title": "项目概览：怎么使用",
+        "text": "从运行概况找到实验起点，区分已保存、执行中和实际测试结果。\n操作前：使用有权限的平台账号；概览不是可靠性总分。\n需要选择或提供：无需先准备模型密钥；已有运行会按当前账号显示。\n完成后核对：运行数量、状态和最近记录；没有记录时不表示系统测试过。\n没有记录时：没有运行时先了解开发用例，再检查环境。",
+        "section_id": "page-workspace",
+        "authority": "平台操作指引，非当前业务状态",
+        "provenance": "实现者根据现有契约整理，非独立效果标签"
+      }
+    },
+    {
+      "id": "page-targets",
+      "kind": "knowledge",
+      "roles": [
+        "operator",
+        "reviewer"
+      ],
+      "pages": [
+        "targets"
+      ],
+      "content": {
+        "title": "对象与版本：怎么使用",
+        "text": "核对被测对象的冻结源码、Prompt、知识和执行配置。\n操作前：创建运行需要与当前执行环境兼容的版本。\n需要选择或提供：选择版本；比较时核对同一用例、模式、时钟、故障和限制。\n完成后核对：版本清单与配置哈希；版本号增大不证明智能体更可靠。\n没有记录时：没有兼容版本时先核对环境与源码，不能随意选择旧版本运行。",
+        "section_id": "page-targets",
+        "authority": "平台操作指引，非当前业务状态",
+        "provenance": "实现者根据现有契约整理，非独立效果标签"
+      }
+    },
+    {
+      "id": "page-library",
+      "kind": "knowledge",
+      "roles": [
+        "operator",
+        "reviewer"
+      ],
+      "pages": [
+        "library"
+      ],
+      "content": {
+        "title": "开发用例库：怎么使用",
+        "text": "先弄清每条用例测什么，再把明确修订带入未提交的运行配置。\n操作前：这里只展示已审核开发用例；校准和保留集不进入调优入口。\n需要选择或提供：选择一条用例，查看前置条件、完整轮次、独立预期及断言。\n完成后核对：确定性的用例说明和原始修订；尚未创建或执行测试。\n没有记录时：没有用例时核对筛选条件和审核状态，不把待审候选当正式用例。",
+        "section_id": "page-library",
+        "authority": "平台操作指引，非当前业务状态",
+        "provenance": "实现者根据现有契约整理，非独立效果标签"
+      }
+    },
+    {
+      "id": "page-workbench",
+      "kind": "knowledge",
+      "roles": [
+        "operator",
+        "reviewer"
+      ],
+      "pages": [
+        "workbench"
+      ],
+      "content": {
+        "title": "测试工作台：怎么使用",
+        "text": "配置运行并跟进状态，排队、执行完成和业务成功分别核对。\n操作前：Worker负责执行，Dispatcher负责投递；真实模型还需要独立预算和开关。\n需要选择或提供：选择已审核用例、兼容版本、故障、种子、次数、时限与预算。\n完成后核对：不可变运行配置和执行记录；新建前必须预检并显式确认。\n没有记录时：没有运行时从开发用例开始；阻塞时保留配置并查看环境原因。",
+        "section_id": "page-workbench",
+        "authority": "平台操作指引，非当前业务状态",
+        "provenance": "实现者根据现有契约整理，非独立效果标签"
+      }
+    },
+    {
+      "id": "page-runs",
+      "kind": "knowledge",
+      "roles": [
+        "operator",
+        "reviewer"
+      ],
+      "pages": [
+        "runs"
+      ],
+      "content": {
+        "title": "运行证据：怎么使用",
+        "text": "沿输入、工具、SQL和断言核对发生了什么，不只看最终回复。\n操作前：载入当前账号可访问的运行ID；缺少证据不等于0笔预约。\n需要选择或提供：选择某次执行或事件；查看规则判定、实际副作用和来源模式。\n完成后核对：运行快照、事件、规则断言、实际故障与受限AI辅助记录。\n没有记录时：没有载入运行时返回工作台；等待输入要走原确认流程。",
+        "section_id": "page-runs",
+        "authority": "平台操作指引，非当前业务状态",
+        "provenance": "实现者根据现有契约整理，非独立效果标签"
+      }
+    },
+    {
+      "id": "page-interactive",
+      "kind": "knowledge",
+      "roles": [
+        "operator",
+        "reviewer"
+      ],
+      "pages": [
+        "interactive"
+      ],
+      "content": {
+        "title": "Agent 测试：怎么使用",
+        "text": "选择场地预约或模拟订单与退款，与被测Agent自由对话，核对草稿与业务事实。\n操作前：模型对话按已授权额度付费；订单与退款使用独立模拟账本，不连接真实支付。\n需要选择或提供：选择测试对象，创建或载入自有会话；给出预约条件或模拟订单编号，逐轮核对草稿。\n完成后核对：完整HTTP轮次、字段来源、工具回执和当前业务快照，不是假token流。\n没有记录时：条件未就绪时先检查环境；结果未知先查原请求，不重复发送新操作。",
+        "section_id": "page-interactive",
+        "authority": "平台操作指引，非当前业务状态",
+        "provenance": "实现者根据现有契约整理，非独立效果标签"
+      }
+    },
+    {
+      "id": "page-cases",
+      "kind": "knowledge",
+      "roles": [
+        "operator",
+        "reviewer"
+      ],
+      "pages": [
+        "cases"
+      ],
+      "content": {
+        "title": "AI生成与审核：怎么使用",
+        "text": "生成候选后检查格式、语义和重复，再由有权限的人明确审核。\n操作前：生成是付费操作；候选不是已通过的测试用例。\n需要选择或提供：操作者选择生成目标；审核者查看候选、理由和验证问题。\n完成后核对：保留原输出、有限修复和逐条审核记录；批准修订才进入开发库。\n没有记录时：没有批次时可先阅读开发用例；基础指引不启动生成或替人批准。",
+        "section_id": "page-cases",
+        "authority": "平台操作指引，非当前业务状态",
+        "provenance": "实现者根据现有契约整理，非独立效果标签"
+      }
+    },
+    {
+      "id": "page-judging",
+      "kind": "knowledge",
+      "roles": [
+        "operator",
+        "reviewer"
+      ],
+      "pages": [
+        "judging"
+      ],
+      "content": {
+        "title": "辅助评价与校准：怎么使用",
+        "text": "先独立标注并封存，再比较裁判结果与分歧；原标签不被覆盖。\n操作前：人工标注未封存前，指引只说明操作和通用判据，不分析样本或建议答案。\n需要选择或提供：审核者按页面实际证据逐条标注；没有证据可选证据不足。\n完成后核对：原人工标签、AI结果、分歧和另存复核；一致率不是通用准确率。\n没有记录时：没有批次时不能填造UUID；原T17B按受限人工辅助保留。",
+        "section_id": "page-judging",
+        "authority": "平台操作指引，非当前业务状态",
+        "provenance": "实现者根据现有契约整理，非独立效果标签"
+      }
+    },
+    {
+      "id": "page-semantic",
+      "kind": "knowledge",
+      "roles": [
+        "operator",
+        "reviewer"
+      ],
+      "pages": [
+        "semantic"
+      ],
+      "content": {
+        "title": "执行AI辅助评价：怎么使用",
+        "text": "只评价回答支持性与解释合理性，业务成败仍核对规则和SQL。\n操作前：真实裁判调用需要相同裁判版本的有效校准、独立预算和开关。\n需要选择或提供：载入有权限的执行ID；缺少AI记录时先看执行证据，而不是反复点击刷新。\n完成后核对：已有评价及人工复核；刷新只读取记录，不会自动调用模型。\n没有记录时：尚无AI评价是未调用的状态，不等于评价通过或功能损坏。",
+        "section_id": "page-semantic",
+        "authority": "平台操作指引，非当前业务状态",
+        "provenance": "实现者根据现有契约整理，非独立效果标签"
+      }
+    },
+    {
+      "id": "page-reports",
+      "kind": "knowledge",
+      "roles": [
+        "operator",
+        "reviewer"
+      ],
+      "pages": [
+        "reports"
+      ],
+      "content": {
+        "title": "缺陷与报告：怎么使用",
+        "text": "将实际失败、复核、条件比较和导出连起来，核对结论依据。\n操作前：报告需要实际运行；等待或未完成不能直接确认修复。\n需要选择或提供：选择失败记录、复核结论、关联版本或两次要比较的运行。\n完成后核对：缺陷记录、条件差异和证据报告；不能因新版本名称就标已修复。\n没有记录时：没有缺陷时先看实际执行；没有运行时从开发用例开始。",
+        "section_id": "page-reports",
+        "authority": "平台操作指引，非当前业务状态",
+        "provenance": "实现者根据现有契约整理，非独立效果标签"
+      }
+    },
+    {
+      "id": "page-environment",
+      "kind": "knowledge",
+      "roles": [
+        "operator",
+        "reviewer"
+      ],
+      "pages": [
+        "environment"
+      ],
+      "content": {
+        "title": "工程环境：怎么使用",
+        "text": "分别检查基础服务、真实消费者、调度器和模型角色条件。\n操作前：连接成功不等于模型可用；管理器记录不代替Worker回执。\n需要选择或提供：点击重新检测，核对时间、阻塞项、队列/源码/数据库绑定和角色预算。\n完成后核对：有有效期的只读观察；加载失败、未检测和过期不能标为正常。\n没有记录时：API不可达仍可读基础指引；按本机已核验命令手动处理，页面不执行Shell。",
+        "section_id": "page-environment",
+        "authority": "平台操作指引，非当前业务状态",
+        "provenance": "实现者根据现有契约整理，非独立效果标签"
+      }
+    },
+    {
+      "id": "term-fc04e29214",
+      "kind": "knowledge",
+      "roles": [
+        "operator",
+        "reviewer"
+      ],
+      "pages": [],
+      "content": {
+        "title": "用例是什么意思",
+        "text": "包含输入轮次、前置条件和预期检查的测试场景；候选需审核才能作为开发用例。",
+        "section_id": "term-fc04e29214",
+        "authority": "平台操作指引，非当前业务状态",
+        "provenance": "实现者根据现有契约整理，非独立效果标签"
+      }
+    },
+    {
+      "id": "term-3c2e8a4c05",
+      "kind": "knowledge",
+      "roles": [
+        "operator",
+        "reviewer"
+      ],
+      "pages": [],
+      "content": {
+        "title": "修订是什么意思",
+        "text": "同一用例的一份固定内容。复制或运行必须说明具体修订，不能静默换输入或预期。",
+        "section_id": "term-3c2e8a4c05",
+        "authority": "平台操作指引，非当前业务状态",
+        "provenance": "实现者根据现有契约整理，非独立效果标签"
+      }
+    },
+    {
+      "id": "term-eedaebb454",
+      "kind": "knowledge",
+      "roles": [
+        "operator",
+        "reviewer"
+      ],
+      "pages": [],
+      "content": {
+        "title": "运行与执行是什么意思",
+        "text": "一次运行冻结一组配置；其中每条用例的每次重复是独立执行，数量不能混用。",
+        "section_id": "term-eedaebb454",
+        "authority": "平台操作指引，非当前业务状态",
+        "provenance": "实现者根据现有契约整理，非独立效果标签"
+      }
+    },
+    {
+      "id": "term-b7594d63bf",
+      "kind": "knowledge",
+      "roles": [
+        "operator",
+        "reviewer"
+      ],
+      "pages": [],
+      "content": {
+        "title": "断言是什么意思",
+        "text": "根据已声明规则核对工具、状态或SQL证据；只证明对应条件，不是总体智能评分。",
+        "section_id": "term-b7594d63bf",
+        "authority": "平台操作指引，非当前业务状态",
+        "provenance": "实现者根据现有契约整理，非独立效果标签"
+      }
+    },
+    {
+      "id": "term-f03d11833a",
+      "kind": "knowledge",
+      "roles": [
+        "operator",
+        "reviewer"
+      ],
+      "pages": [],
+      "content": {
+        "title": "业务事实与平台状态是什么意思",
+        "text": "排队、运行中、取消、超时是执行状态；预约是否真实发生须查看工具和SQL。",
+        "section_id": "term-f03d11833a",
+        "authority": "平台操作指引，非当前业务状态",
+        "provenance": "实现者根据现有契约整理，非独立效果标签"
+      }
+    },
+    {
+      "id": "term-237a052b92",
+      "kind": "knowledge",
+      "roles": [
+        "operator",
+        "reviewer"
+      ],
+      "pages": [],
+      "content": {
+        "title": "证据不足是什么意思",
+        "text": "已有材料不足以支持结论；没有SQL证据不能当作0条预约。",
+        "section_id": "term-237a052b92",
+        "authority": "平台操作指引，非当前业务状态",
+        "provenance": "实现者根据现有契约整理，非独立效果标签"
+      }
+    },
+    {
+      "id": "term-071fddffbe",
+      "kind": "knowledge",
+      "roles": [
+        "operator",
+        "reviewer"
+      ],
+      "pages": [],
+      "content": {
+        "title": "Worker与Dispatcher是什么意思",
+        "text": "Worker消费并执行任务；Dispatcher扫描SQL待执行记录并投递，两者都需要检查。",
+        "section_id": "term-071fddffbe",
+        "authority": "平台操作指引，非当前业务状态",
+        "provenance": "实现者根据现有契约整理，非独立效果标签"
+      }
+    },
+    {
+      "id": "term-4b25e21f4c",
+      "kind": "knowledge",
+      "roles": [
+        "operator",
+        "reviewer"
+      ],
+      "pages": [],
+      "content": {
+        "title": "租约是什么意思",
+        "text": "当前执行者的有时限占用凭证；超时不代表未知工具提交可以随意重放。",
+        "section_id": "term-4b25e21f4c",
+        "authority": "平台操作指引，非当前业务状态",
+        "provenance": "实现者根据现有契约整理，非独立效果标签"
+      }
+    },
+    {
+      "id": "term-0851890b24",
+      "kind": "knowledge",
+      "roles": [
+        "operator",
+        "reviewer"
+      ],
+      "pages": [],
+      "content": {
+        "title": "幂等与原回执是什么意思",
+        "text": "结果未知时用同一个请求标识查证；重新生成标识可能引发重复副作用。",
+        "section_id": "term-0851890b24",
+        "authority": "平台操作指引，非当前业务状态",
+        "provenance": "实现者根据现有契约整理，非独立效果标签"
+      }
+    },
+    {
+      "id": "term-dad3a78cfd",
+      "kind": "knowledge",
+      "roles": [
+        "operator",
+        "reviewer"
+      ],
+      "pages": [],
+      "content": {
+        "title": "预检与排队期限是什么意思",
+        "text": "预检短期有效，提交再次检查；仅排队仍未执行，过期不能当作新任务补跑。",
+        "section_id": "term-dad3a78cfd",
+        "authority": "平台操作指引，非当前业务状态",
+        "provenance": "实现者根据现有契约整理，非独立效果标签"
+      }
+    },
+    {
+      "id": "term-bbe7576d95",
+      "kind": "knowledge",
+      "roles": [
+        "operator",
+        "reviewer"
+      ],
+      "pages": [],
+      "content": {
+        "title": "预算与调用开关是什么意思",
+        "text": "角色额度、单次限制和开关共同约束付费；页面跳转和帮助不自动开启预算。",
+        "section_id": "term-bbe7576d95",
+        "authority": "平台操作指引，非当前业务状态",
+        "provenance": "实现者根据现有契约整理，非独立效果标签"
+      }
+    },
+    {
+      "id": "term-2a3bcf7512",
+      "kind": "knowledge",
+      "roles": [
+        "operator",
+        "reviewer"
+      ],
+      "pages": [],
+      "content": {
+        "title": "真实模型与离线控制是什么意思",
+        "text": "真实调用、明确离线流程控制、历史回看分别标记；来源不同不混为同一成绩。",
+        "section_id": "term-2a3bcf7512",
+        "authority": "平台操作指引，非当前业务状态",
+        "provenance": "实现者根据现有契约整理，非独立效果标签"
+      }
+    },
+    {
+      "id": "term-4ad685f424",
+      "kind": "knowledge",
+      "roles": [
+        "operator",
+        "reviewer"
+      ],
+      "pages": [],
+      "content": {
+        "title": "开发/校准/保留集是什么意思",
+        "text": "开发集用于调试；独立校准用于对照判断；冻结保留集不能进入开发助手调优。",
+        "section_id": "term-4ad685f424",
+        "authority": "平台操作指引，非当前业务状态",
+        "provenance": "实现者根据现有契约整理，非独立效果标签"
+      }
+    },
+    {
+      "id": "term-d594d0ff9a",
+      "kind": "knowledge",
+      "roles": [
+        "operator",
+        "reviewer"
+      ],
+      "pages": [],
+      "content": {
+        "title": "封存是什么意思",
+        "text": "将原人工标注或实验条件固定并留存哈希；事后助手意见只能另存，不能冒充原标签。",
+        "section_id": "term-d594d0ff9a",
+        "authority": "平台操作指引，非当前业务状态",
+        "provenance": "实现者根据现有契约整理，非独立效果标签"
+      }
+    },
+    {
+      "id": "term-4ba1911747",
+      "kind": "knowledge",
+      "roles": [
+        "operator",
+        "reviewer"
+      ],
+      "pages": [],
+      "content": {
+        "title": "AI辅助评价是什么意思",
+        "text": "只供人工参考回答是否有支持、解释是否合理；不能代替SQL、任务目标和规则判定。",
+        "section_id": "term-4ba1911747",
+        "authority": "平台操作指引，非当前业务状态",
+        "provenance": "实现者根据现有契约整理，非独立效果标签"
+      }
+    },
+    {
+      "id": "term-b41c66d493",
+      "kind": "knowledge",
+      "roles": [
+        "operator",
+        "reviewer"
+      ],
+      "pages": [],
+      "content": {
+        "title": "配置哈希与复现是什么意思",
+        "text": "哈希用于核对固定配置；条件相同也不保证模型逐字输出一致，复制修改需列明差异。",
+        "section_id": "term-b41c66d493",
+        "authority": "平台操作指引，非当前业务状态",
+        "provenance": "实现者根据现有契约整理，非独立效果标签"
+      }
+    },
+    {
+      "id": "help-start",
+      "kind": "knowledge",
+      "roles": [
+        "operator",
+        "reviewer"
+      ],
+      "pages": [],
+      "content": {
+        "title": "第一次使用，从哪里开始",
+        "text": "先打开开发用例库，阅读用例说明，了解输入轮次、前置和检查项。选定已审核开发用例后，使用带入运行配置（不提交）。在原向导选择兼容对象版本、核对模式和限制，检查就绪，再由本人确认创建。没有选择用例时先选用例，不随意选择别人的运行。",
+        "section_id": "help-start",
+        "authority": "平台操作指引，非当前业务状态",
+        "provenance": "实现者根据现有契约整理，非独立效果标签"
+      }
+    },
+    {
+      "id": "help-create",
+      "kind": "knowledge",
+      "roles": [
+        "operator",
+        "reviewer"
+      ],
+      "pages": [],
+      "content": {
+        "title": "怎么创建一次测试运行",
+        "text": "在测试工作台选择已审核开发用例或从用例说明带入配置。核对对象版本与当前源码兼容，查看预检返回的阻塞项；未就绪先处理对应检查。预检通过后核对最终配置，再明确创建。带入配置不会自动创建运行或调用模型。",
+        "section_id": "help-create",
+        "authority": "平台操作指引，非当前业务状态",
+        "provenance": "实现者根据现有契约整理，非独立效果标签"
+      }
+    },
+    {
+      "id": "help-blocked",
+      "kind": "knowledge",
+      "roles": [
+        "operator",
+        "reviewer"
+      ],
+      "pages": [],
+      "content": {
+        "title": "不能开始测试、执行环境卡住怎么办",
+        "text": "先看创建前预检具体阻塞项，再到工程环境检查。Worker负责执行测试，Dispatcher负责分发任务；没有响应不能直接认定没启动，可能是连接或版本问题。查看Worker与调度器检查取得实际响应与错误，处理后重新核对。助手导航不会重启服务。",
+        "section_id": "help-blocked",
+        "authority": "平台操作指引，非当前业务状态",
+        "provenance": "实现者根据现有契约整理，非独立效果标签"
+      }
+    },
+    {
+      "id": "help-queued",
+      "kind": "knowledge",
+      "roles": [
+        "operator",
+        "reviewer"
+      ],
+      "pages": [],
+      "content": {
+        "title": "排队中、执行中、等待输入怎么继续",
+        "text": "排队表示尚未开始，先核对Worker、Dispatcher及排队条件；执行中查看当前执行与事件；等待输入时核对原草稿和输入要求，通过原流程操作。不要把状态结束当作业务成功，不用更换请求标识盲目重跑未知操作。",
+        "section_id": "help-queued",
+        "authority": "平台操作指引，非当前业务状态",
+        "provenance": "实现者根据现有契约整理，非独立效果标签"
+      }
+    },
+    {
+      "id": "help-result",
+      "kind": "knowledge",
+      "roles": [
+        "operator",
+        "reviewer"
+      ],
+      "pages": [],
+      "content": {
+        "title": "显示完成是不是成功，怎样看测试结果",
+        "text": "运行completed只说明执行结束。先看规则结果，再看工具提交和业务事实，分别核对目标是否达成。规则passed不证明所有质量维度都好；inconclusive表示证据不足。没有SQL不等于零笔预约。需要解释某一次结果时先明确选择该运行。",
+        "section_id": "help-result",
+        "authority": "平台操作指引，非当前业务状态",
+        "provenance": "实现者根据现有契约整理，非独立效果标签"
+      }
+    },
+    {
+      "id": "help-evidence",
+      "kind": "knowledge",
+      "roles": [
+        "operator",
+        "reviewer"
+      ],
+      "pages": [],
+      "content": {
+        "title": "在哪里找依据、调用轨迹和SQL记录",
+        "text": "先明确选择要核对的运行或执行。调用轨迹用于查看输入、工具请求与返回；规则与SQL证据用于核对每项检查依据及业务事实。证据可能是历史快照；未知提交先按原请求查证，不直接再提交。引用可打开本轮原文，缺失或截断需保留未知。",
+        "section_id": "help-evidence",
+        "authority": "平台操作指引，非当前业务状态",
+        "provenance": "实现者根据现有契约整理，非独立效果标签"
+      }
+    },
+    {
+      "id": "help-case",
+      "kind": "knowledge",
+      "roles": [
+        "operator",
+        "reviewer"
+      ],
+      "pages": [],
+      "content": {
+        "title": "用例看不懂，如何逐轮理解",
+        "text": "用例说明按运行前条件、逐轮用户原文、预期、检查项组织。先看原条件，再逐轮分析缺少、补齐、修改或确认了什么，最后对照检查清单。补齐字段不等于确认。用例预期描述应当怎样表现，不证明已经发生了写入；判断实际执行必须查对应运行。",
+        "section_id": "help-case",
+        "authority": "平台操作指引，非当前业务状态",
+        "provenance": "实现者根据现有契约整理，非独立效果标签"
+      }
+    },
+    {
+      "id": "help-versions",
+      "kind": "knowledge",
+      "roles": [
+        "operator",
+        "reviewer"
+      ],
+      "pages": [],
+      "content": {
+        "title": "版本不兼容，怎样核对对象和源码",
+        "text": "到对象与版本核对当前实现、原登记版本以及源码或配置差异。旧版本不因版本号较小就错误；当前执行器须与所选冻结配置相容。依据界面的实际差异与就绪结果决定下一步，不由助手自动登记版本、修改配置或选择旧版本强行运行。",
+        "section_id": "help-versions",
+        "authority": "平台操作指引，非当前业务状态",
+        "provenance": "实现者根据现有契约整理，非独立效果标签"
+      }
+    },
+    {
+      "id": "help-compare",
+      "kind": "knowledge",
+      "roles": [
+        "operator",
+        "reviewer"
+      ],
+      "pages": [],
+      "content": {
+        "title": "如何比较两次运行，有什么前提",
+        "text": "在报告中明确选择两次运行，先核对用例修订、模式、时钟、故障、限制等可比条件。条件不同需解释差异和范围；完成数量或规则比例不能直接证明总体改善。证据不足或结果未知时不判胜负。助手只读取当前明确选择并有权限的运行。",
+        "section_id": "help-compare",
+        "authority": "平台操作指引，非当前业务状态",
+        "provenance": "实现者根据现有契约整理，非独立效果标签"
+      }
+    },
+    {
+      "id": "help-export",
+      "kind": "knowledge",
+      "roles": [
+        "operator",
+        "reviewer"
+      ],
+      "pages": [],
+      "content": {
+        "title": "怎样导出或分享报告",
+        "text": "在缺陷与报告中选择要导出的运行，核对当前展示的报告范围和原证据。使用该页面已提供的导出选项；导出的是已保存记录，不触发重新执行或重评。向他人分享前核对是否包含私人信息，助手不会自动上传、发布或生成公开链接。",
+        "section_id": "help-export",
+        "authority": "平台操作指引，非当前业务状态",
+        "provenance": "实现者根据现有契约整理，非独立效果标签"
+      }
+    },
+    {
+      "id": "help-repair",
+      "kind": "knowledge",
+      "roles": [
+        "operator",
+        "reviewer"
+      ],
+      "pages": [],
+      "content": {
+        "title": "发现缺陷以后怎样复核和复测",
+        "text": "先阅读缺陷关联的运行、失败对话、工具与业务证据，区分平台错误与业务目标未达成。按原修复复测流程关联修复版本并核对复测配置与原条件，实际创建与提交仍需本人确认。没有真实复测证据不能宣称缺陷已修好。",
+        "section_id": "help-repair",
+        "authority": "平台操作指引，非当前业务状态",
+        "provenance": "实现者根据现有契约整理，非独立效果标签"
+      }
+    },
+    {
+      "id": "help-integration",
+      "kind": "knowledge",
+      "roles": [
+        "operator",
+        "reviewer"
+      ],
+      "pages": [],
+      "content": {
+        "title": "怎样接入自己的Agent、业务系统或报销系统",
+        "text": "接入路径取决于可测试接口、认证方式、可观察业务事实和独立测试环境。现有预约与退款参考场景不证明任意外部系统已接入。没有该系统资料时先问有接口文档还是只能操作网页，再核对适配与证据契约；不伪造开始接入按钮。",
+        "section_id": "help-integration",
+        "authority": "平台操作指引，非当前业务状态",
+        "provenance": "实现者根据现有契约整理，非独立效果标签"
+      }
+    },
+    {
+      "id": "getting_started",
+      "kind": "scenario",
+      "roles": [
+        "operator",
+        "reviewer"
+      ],
+      "pages": [],
+      "content": {
+        "title": "开始使用",
+        "text": "开始使用。先打开开发用例库，阅读用例说明，了解输入轮次、前置和检查项。选定已审核开发用例后，使用带入运行配置（不提交）。在原向导选择兼容对象版本、核对模式和限制，检查就绪，再由本人确认创建。没有选择用例时先选用例，不随意选择别人的运行。",
+        "section_id": "getting_started",
+        "authority": "平台操作指引，非当前业务状态",
+        "provenance": "实现者根据现有契约整理，非独立效果标签",
+        "actions": [
+          "page.library",
+          "page.workbench"
+        ],
+        "requirements": [],
+        "followups": [
+          "我没有看到这个入口，具体在哪里？",
+          "完成这一步后应该核对什么？"
+        ]
+      }
+    },
+    {
+      "id": "case_explanation",
+      "kind": "scenario",
+      "roles": [
+        "operator",
+        "reviewer"
+      ],
+      "pages": [],
+      "content": {
+        "title": "理解用例",
+        "text": "理解用例。用例说明按运行前条件、逐轮用户原文、预期、检查项组织。先看原条件，再逐轮分析缺少、补齐、修改或确认了什么，最后对照检查清单。补齐字段不等于确认。用例预期描述应当怎样表现，不证明已经发生了写入；判断实际执行必须查对应运行。",
+        "section_id": "case_explanation",
+        "authority": "平台操作指引，非当前业务状态",
+        "provenance": "实现者根据现有契约整理，非独立效果标签",
+        "actions": [
+          "case.read"
+        ],
+        "requirements": [
+          "approved_dev_case"
+        ],
+        "followups": [
+          "按每一轮帮我解释条件变化",
+          "检查项对应哪段用户原话？"
+        ]
+      }
+    },
+    {
+      "id": "create_run",
+      "kind": "scenario",
+      "roles": [
+        "operator",
+        "reviewer"
+      ],
+      "pages": [],
+      "content": {
+        "title": "准备测试",
+        "text": "准备测试。在测试工作台选择已审核开发用例或从用例说明带入配置。核对对象版本与当前源码兼容，查看预检返回的阻塞项；未就绪先处理对应检查。预检通过后核对最终配置，再明确创建。带入配置不会自动创建运行或调用模型。",
+        "section_id": "create_run",
+        "authority": "平台操作指引，非当前业务状态",
+        "provenance": "实现者根据现有契约整理，非独立效果标签",
+        "actions": [
+          "case.prepare",
+          "page.workbench"
+        ],
+        "requirements": [],
+        "followups": [
+          "带入配置后先核对哪一项？",
+          "预检有阻塞项，怎样继续？"
+        ]
+      }
+    },
+    {
+      "id": "environment_troubleshooting",
+      "kind": "scenario",
+      "roles": [
+        "operator",
+        "reviewer"
+      ],
+      "pages": [],
+      "content": {
+        "title": "环境排障",
+        "text": "环境排障。先看创建前预检具体阻塞项，再到工程环境检查。Worker负责执行测试，Dispatcher负责分发任务；没有响应不能直接认定没启动，可能是连接或版本问题。查看Worker与调度器检查取得实际响应与错误，处理后重新核对。助手导航不会重启服务。",
+        "section_id": "environment_troubleshooting",
+        "authority": "平台操作指引，非当前业务状态",
+        "provenance": "实现者根据现有契约整理，非独立效果标签",
+        "actions": [
+          "page.environment",
+          "environment.worker"
+        ],
+        "requirements": [],
+        "followups": [
+          "检查仍然没有响应，先核对什么？",
+          "我没有找到检查入口，具体在哪里？"
+        ]
+      }
+    },
+    {
+      "id": "run_progress",
+      "kind": "scenario",
+      "roles": [
+        "operator",
+        "reviewer"
+      ],
+      "pages": [],
+      "content": {
+        "title": "查询进度",
+        "text": "查询进度。排队表示尚未开始，先核对Worker、Dispatcher及排队条件；执行中查看当前执行与事件；等待输入时核对原草稿和输入要求，通过原流程操作。不要把状态结束当作业务成功，不用更换请求标识盲目重跑未知操作。",
+        "section_id": "run_progress",
+        "authority": "平台操作指引，非当前业务状态",
+        "provenance": "实现者根据现有契约整理，非独立效果标签",
+        "actions": [
+          "run.trace"
+        ],
+        "requirements": [
+          "explicit_owned_run_or_execution"
+        ],
+        "followups": [
+          "我没有看到这个入口，具体在哪里？",
+          "完成这一步后应该核对什么？"
+        ]
+      }
+    },
+    {
+      "id": "result_interpretation",
+      "kind": "scenario",
+      "roles": [
+        "operator",
+        "reviewer"
+      ],
+      "pages": [],
+      "content": {
+        "title": "理解结果",
+        "text": "理解结果。运行completed只说明执行结束。先看规则结果，再看工具提交和业务事实，分别核对目标是否达成。规则passed不证明所有质量维度都好；inconclusive表示证据不足。没有SQL不等于零笔预约。需要解释某一次结果时先明确选择该运行。",
+        "section_id": "result_interpretation",
+        "authority": "平台操作指引，非当前业务状态",
+        "provenance": "实现者根据现有契约整理，非独立效果标签",
+        "actions": [
+          "run.assertions",
+          "run.trace"
+        ],
+        "requirements": [
+          "explicit_owned_run_or_execution_for_current_result"
+        ],
+        "followups": [
+          "这个结果的依据在哪里？",
+          "哪一项还缺证据，接下来怎么查？"
+        ]
+      }
+    },
+    {
+      "id": "evidence_location",
+      "kind": "scenario",
+      "roles": [
+        "operator",
+        "reviewer"
+      ],
+      "pages": [],
+      "content": {
+        "title": "查找依据",
+        "text": "查找依据。先明确选择要核对的运行或执行。调用轨迹用于查看输入、工具请求与返回；规则与SQL证据用于核对每项检查依据及业务事实。证据可能是历史快照；未知提交先按原请求查证，不直接再提交。引用可打开本轮原文，缺失或截断需保留未知。",
+        "section_id": "evidence_location",
+        "authority": "平台操作指引，非当前业务状态",
+        "provenance": "实现者根据现有契约整理，非独立效果标签",
+        "actions": [
+          "case.read",
+          "run.trace",
+          "run.assertions"
+        ],
+        "requirements": [
+          "explicit_case_or_owned_run"
+        ],
+        "followups": [
+          "我没有看到这个入口，具体在哪里？",
+          "完成这一步后应该核对什么？"
+        ]
+      }
+    },
+    {
+      "id": "version_mismatch",
+      "kind": "scenario",
+      "roles": [
+        "operator",
+        "reviewer"
+      ],
+      "pages": [],
+      "content": {
+        "title": "核对版本",
+        "text": "核对版本。到对象与版本核对当前实现、原登记版本以及源码或配置差异。旧版本不因版本号较小就错误；当前执行器须与所选冻结配置相容。依据界面的实际差异与就绪结果决定下一步，不由助手自动登记版本、修改配置或选择旧版本强行运行。",
+        "section_id": "version_mismatch",
+        "authority": "平台操作指引，非当前业务状态",
+        "provenance": "实现者根据现有契约整理，非独立效果标签",
+        "actions": [
+          "page.targets",
+          "page.environment"
+        ],
+        "requirements": [],
+        "followups": [
+          "我没有看到这个入口，具体在哪里？",
+          "完成这一步后应该核对什么？"
+        ]
+      }
+    },
+    {
+      "id": "compare_runs",
+      "kind": "scenario",
+      "roles": [
+        "operator",
+        "reviewer"
+      ],
+      "pages": [],
+      "content": {
+        "title": "比较运行",
+        "text": "比较运行。在报告中明确选择两次运行，先核对用例修订、模式、时钟、故障、限制等可比条件。条件不同需解释差异和范围；完成数量或规则比例不能直接证明总体改善。证据不足或结果未知时不判胜负。助手只读取当前明确选择并有权限的运行。",
+        "section_id": "compare_runs",
+        "authority": "平台操作指引，非当前业务状态",
+        "provenance": "实现者根据现有契约整理，非独立效果标签",
+        "actions": [
+          "page.reports"
+        ],
+        "requirements": [
+          "explicit_pair_of_owned_runs_in_reports_context"
+        ],
+        "followups": [
+          "我没有看到这个入口，具体在哪里？",
+          "完成这一步后应该核对什么？"
+        ]
+      }
+    },
+    {
+      "id": "report_export",
+      "kind": "scenario",
+      "roles": [
+        "operator",
+        "reviewer"
+      ],
+      "pages": [],
+      "content": {
+        "title": "导出报告",
+        "text": "导出报告。在缺陷与报告中选择要导出的运行，核对当前展示的报告范围和原证据。使用该页面已提供的导出选项；导出的是已保存记录，不触发重新执行或重评。向他人分享前核对是否包含私人信息，助手不会自动上传、发布或生成公开链接。",
+        "section_id": "report_export",
+        "authority": "平台操作指引，非当前业务状态",
+        "provenance": "实现者根据现有契约整理，非独立效果标签",
+        "actions": [
+          "page.reports"
+        ],
+        "requirements": [],
+        "followups": [
+          "我没有看到这个入口，具体在哪里？",
+          "完成这一步后应该核对什么？"
+        ]
+      }
+    },
+    {
+      "id": "defect_retest",
+      "kind": "scenario",
+      "roles": [
+        "operator",
+        "reviewer"
+      ],
+      "pages": [],
+      "content": {
+        "title": "缺陷复核与复测",
+        "text": "缺陷复核与复测。先阅读缺陷关联的运行、失败对话、工具与业务证据，区分平台错误与业务目标未达成。按原修复复测流程关联修复版本并核对复测配置与原条件，实际创建与提交仍需本人确认。没有真实复测证据不能宣称缺陷已修好。",
+        "section_id": "defect_retest",
+        "authority": "平台操作指引，非当前业务状态",
+        "provenance": "实现者根据现有契约整理，非独立效果标签",
+        "actions": [
+          "page.reports"
+        ],
+        "requirements": [],
+        "followups": [
+          "我没有看到这个入口，具体在哪里？",
+          "完成这一步后应该核对什么？"
+        ]
+      }
+    },
+    {
+      "id": "integration_scope",
+      "kind": "scenario",
+      "roles": [
+        "operator",
+        "reviewer"
+      ],
+      "pages": [],
+      "content": {
+        "title": "外部系统接入",
+        "text": "外部系统接入。接入路径取决于可测试接口、认证方式、可观察业务事实和独立测试环境。现有预约与退款参考场景不证明任意外部系统已接入。没有该系统资料时先问有接口文档还是只能操作网页，再核对适配与证据契约；不伪造开始接入按钮。",
+        "section_id": "integration_scope",
+        "authority": "平台操作指引，非当前业务状态",
+        "provenance": "实现者根据现有契约整理，非独立效果标签",
+        "actions": [],
+        "requirements": [],
+        "followups": [
+          "我没有看到这个入口，具体在哪里？",
+          "完成这一步后应该核对什么？"
+        ]
+      }
+    }
+  ]
+}

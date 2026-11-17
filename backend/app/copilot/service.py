@@ -7,7 +7,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from uuid import NAMESPACE_URL, UUID, uuid5
 
-from langchain_core.messages import HumanMessage, SystemMessage, ToolMessage
+from langchain_core.messages import HumanMessage, SystemMessage, ToolMessage, messages_to_dict
 from pydantic import ValidationError
 from sqlalchemy.orm import Session
 
@@ -48,7 +48,7 @@ def configuration(settings):
         "model": settings.copilot_model,
         "thinking": settings.copilot_thinking,
         "max_output_tokens": settings.copilot_max_output_tokens,
-        "protocol": "copilot-1",
+        "protocol": "copilot-rag-1",
         "sources": {
             p.relative_to(PROJECT_ROOT).as_posix(): canonical_hash(p.read_text(encoding="utf-8"))
             for p in files
@@ -60,16 +60,22 @@ def configuration(settings):
         "context_bytes": 32768,
         "cloud_binding": [settings.cloud_deployment_id, settings.cloud_approval_sha256],
     }
+    from app.copilot.rag import identity
+
+    value["knowledge"] = identity()
     return {**value, "config_hash": canonical_hash(value)}
 
 
 class CopilotService:
-    def __init__(self, engine, redis, settings, *, tools_factory=None, gateway_factory=None):
+    def __init__(
+        self, engine, redis, settings, *, tools_factory=None, gateway_factory=None, rag_factory=None
+    ):
         self.engine, self.redis, self.settings = engine, redis, settings
         self.tools_factory = tools_factory or (
             lambda owner, context: SourceTools(engine, settings, owner, context)
         )
         self.gateway_factory = gateway_factory
+        self.rag_factory = rag_factory
         self.prefix = (
             "ac:t17e:copilot:"
             + canonical_hash([str(engine.url.set(password=None)), settings.executor_namespace])[:16]
@@ -298,6 +304,22 @@ class CopilotService:
 
     def run(self, owner, binding, record, body, question, tools, result, check):
         start = time.monotonic()
+        guidance = None
+        if self.rag_factory is not None or not self.gateway_factory:
+            from app.copilot.rag import preload, query_id
+
+            if check:
+                check()
+            self.load(owner, binding, record["session_id"])
+            guidance, embedding = preload(
+                tools,
+                question,
+                query_id(record["session_id"], body.request_id),
+                start + 120,
+                self.rag_factory,
+            )
+            result["embedding"] = embedding
+            result["guidance"] = guidance
         budget = CopilotBudget(self.redis, self.settings, record["session_id"])
         gateway = (
             self.gateway_factory(budget)
@@ -309,6 +331,18 @@ class CopilotService:
                 audit_directory=PROJECT_ROOT / ".local/t17e/model-calls" / record["session_id"],
             )
         )
+        citation_keys = {}
+        source_keys = {}
+        result["citation_keys"] = citation_keys
+
+        def cited_source(source):
+            identifier = source["source_id"]
+            if identifier not in source_keys:
+                key = "C" + str(len(citation_keys) + 1)
+                citation_keys[key] = identifier
+                source_keys[identifier] = key
+            return {**source, "citation_key": source_keys[identifier]}
+
         messages = [
             SystemMessage(Path(__file__).with_name("prompt.txt").read_text(encoding="utf-8")),
             HumanMessage(
@@ -319,12 +353,15 @@ class CopilotService:
                         "selection": self.selection_metadata(tools.observation["selection"]),
                         "allowed_action_ids": tools.allowed_actions,
                         "navigation": tools.navigation(),
-                        "source": list(tools.sources.values()),
+                        "guidance": guidance,
+                        "source": [cited_source(s) for s in tools.sources.values()],
                     },
                     ensure_ascii=False,
                 )
             ),
         ]
+        payload_message = messages[-1]
+        history_message = None
         # Small discussion memory belongs to this exact object/session; it is not evidence.
         history = self.redis.lrange(self.key(record["session_id"]) + ":history", -2, -1)
         if history:
@@ -335,6 +372,7 @@ class CopilotService:
                     + json.dumps([json.loads(x) for x in history], ensure_ascii=False)
                 ),
             )
+            history_message = messages[1]
         seen_calls = set()
         for step in range(3):
             if check:
@@ -343,6 +381,50 @@ class CopilotService:
             if time.monotonic() - start >= 120:
                 raise AgentError("copilot_deadline", "助手达到本轮时限，请查看已取得的来源。", 504)
             functions = tools.schemas() if step < 2 else []
+
+            # Count exactly the gateway envelope, including schemas and metadata. Drop only
+            # optional retrieved knowledge/history; required object evidence is never trimmed.
+            def request_size(current_functions=functions):
+                return len(
+                    json.dumps(
+                        {
+                            "messages": messages_to_dict(messages),
+                            "tools": current_functions,
+                            "response_format": {"type": "json_object"},
+                        },
+                        ensure_ascii=False,
+                        default=str,
+                    ).encode()
+                )
+
+            if request_size() > 32768:
+                if history_message is not None:
+                    messages.remove(history_message)
+                    history_message = None
+                payload = json.loads(payload_message.content)
+                optional = [
+                    s
+                    for s in payload["source"]
+                    if s["tool"] == "search_knowledge" and s["content"].get("kind") == "knowledge"
+                ]
+                while optional and request_size() > 32768:
+                    item = optional.pop()
+                    payload["source"] = [
+                        s for s in payload["source"] if s["source_id"] != item["source_id"]
+                    ]
+                    tools.sources.pop(item["source_id"], None)
+                    tools.trace = [t for t in tools.trace if t["source_id"] != item["source_id"]]
+                    payload["knowledge_context_truncated"] = True
+                    result["knowledge_context_truncated"] = True
+                    position = next(
+                        i for i, message in enumerate(messages) if message is payload_message
+                    )
+                    payload_message = HumanMessage(json.dumps(payload, ensure_ascii=False))
+                    messages[position] = payload_message
+            if request_size() > 32768:
+                raise AgentError(
+                    "copilot_input_limit", "当前证据超出上下文上限，请缩小问题范围。", 400
+                )
             try:
                 message, call = gateway.invoke(messages, functions, deadline=start + 120)
             except AgentError as exc:
@@ -392,7 +474,10 @@ class CopilotService:
                     seen_calls.add(tool["id"])
                     source = tools.invoke(tool["name"], tool["args"])
                     messages.append(
-                        ToolMessage(json.dumps(source, ensure_ascii=False), tool_call_id=tool["id"])
+                        ToolMessage(
+                            json.dumps(cited_source(source), ensure_ascii=False),
+                            tool_call_id=tool["id"],
+                        )
                     )
                 continue
             answer = CopilotAnswer.model_validate_json(message.content)
@@ -401,6 +486,9 @@ class CopilotService:
             ]
             for group in (answer.facts, answer.possible_causes, answer.next_steps, cited_missing):
                 for statement in group:
+                    statement.citations = [
+                        citation_keys.get(ref, ref) for ref in statement.citations
+                    ]
                     if any(ref not in tools.sources for ref in statement.citations):
                         raise AgentError(
                             "copilot_reference_invalid",

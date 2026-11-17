@@ -37,6 +37,12 @@ const selectionKey = computed(() => selected.value ? `${selected.value.kind}:${s
 const contextLabel = computed(() => conversation.value?.selected?.title ?? (selected.value ? `${({case:'开发用例',run:'运行',execution:'执行',version:'对象版本',generation:'生成批次',calibration:'校准批次',interaction:'预约会话'} as const)[selected.value.kind]} · ${selected.value.id.slice(0,8)}` : '当前页面'))
 const prompts = computed(() => page.value === 'environment' ? ['为何不能立即运行？','下一步检查什么？'] : comparison.value ? ['这两次运行能直接比较吗？','哪些条件还缺证据？'] : selected.value?.kind === 'case' ? ['这条用例测什么？','怎样新建这条用例的运行？'] : ['run','execution'].includes(selected.value?.kind ?? '') ? ['失败在哪里？','哪些结论还缺证据？'] : ['这页怎么用？','我下一步应该做什么？'])
 const sections = [{ key:'facts', title:'' },{ key:'possible_causes', title:'可能原因' },{ key:'next_steps', title:'下一步' }] as const
+const followups = computed(() => {
+  const last = turns.value.at(-1)
+  if (last?.guidance?.ambiguous) return ['先帮我确认当前问题应该从哪里查','需要我补充哪一项信息？']
+  const items = last?.status === 'completed' ? last.guidance?.followups : undefined
+  return items?.length ? items.slice(0,2) : ['核对这条结论的依据','还有哪些信息不足？','下一步先做哪一项？']
+})
 function citedSources(turn: CopilotTurn) {
   if (!turn.answer) return []
   const ids = new Set([
@@ -204,9 +210,10 @@ watch(historyView, async () => { await nextTick(); if (thread.value) thread.valu
             </template>
             <details v-if="turn.sources.length" class="copilot-evidence"><summary>取证过程与来源 · {{ turn.trace.length }}项</summary><ol><li v-for="(step,index) in turn.trace" :key="index"><button type="button" @click="cite(turn,step.source_id)">{{ step.label }}</button><span>只读</span></li></ol></details>
             <details v-if="turn.calls.length" class="copilot-evidence"><summary>调用明细 · {{ turn.calls.length }}次</summary><div v-for="call in turn.calls" :key="call.call_id"><p>{{ call.model_requested }} · {{ call.status }}</p><p v-if="call.usage">输入 {{ call.usage.input_tokens }} / 输出 {{ call.usage.output_tokens }} token</p><p v-else>用量未知，预留保留。</p></div><small>费用为峰值估算，不是供应商账单。</small></details>
+            <details v-if="turn.embedding" class="copilot-evidence"><summary>语义检索用量</summary><p>文本向量 · {{ turn.embedding.status }}</p><p v-if="turn.embedding.usage">输入 {{ turn.embedding.usage.total_tokens }} token，独立于对话费用计量。</p><p v-else-if="turn.embedding.status === 'paused'">已暂停新向量请求，请核对原请求。</p><p v-else-if="turn.embedding.status === 'unavailable'">向量服务不可用，本轮没有可确认的向量用量。</p><p v-else>用量未知，未自动重复发送。</p></details>
           </div>
         </article>
-        <div v-if="turns.length && !historyView && !protectedPage" class="copilot-followups" aria-label="继续追问"><button v-for="text in ['核对这条结论的依据','还有哪些信息不足？','下一步先做哪一项？']" :key="text" type="button" :disabled="locked" @click="draft(text)">{{ text }}</button></div>
+        <div v-if="turns.length && !historyView && !protectedPage" class="copilot-followups" aria-label="继续追问"><button v-for="text in followups" :key="text" type="button" :disabled="locked" @click="draft(text)">{{ text }}</button></div>
       </template>
       <p v-if="copyMessage" class="copilot-copy-message" role="status">{{ copyMessage }}</p>
       <p v-if="error" class="copilot-error" role="alert">{{ error }}</p>
@@ -227,7 +234,7 @@ watch(historyView, async () => { await nextTick(); if (thread.value) thread.valu
         <ElInput id="copilot-question" ref="composerField" v-model="question" type="textarea" :autosize="{ minRows:3, maxRows:6 }" :maxlength="1500" :disabled="busy || !!pending || !!acting" placeholder="询问当前页面、用例或运行结果…" @keydown.ctrl.enter.prevent="ask()" @keydown.meta.enter.prevent="ask()" />
         <p v-if="access && !access.enabled" class="copilot-disabled" role="status">{{ access.reason }}</p>
         <div class="copilot-send">
-          <div class="copilot-budget"><span>本会话费用估算 {{ formatCny(cost) }}</span><span v-if="access?.enabled && access.limits.session_microusd !== null">会话费用上限 {{ formatCny((access.limits.session_microusd ?? 100000) / 1000000) }}</span><ElButton text size="small" :disabled="busy" @click="loadAccess">刷新调用状态</ElButton></div>
+          <div class="copilot-budget"><span>对话费用估算 {{ formatCny(cost) }}</span><span v-if="access?.enabled && access.limits.session_microusd !== null">会话费用上限 {{ formatCny((access.limits.session_microusd ?? 100000) / 1000000) }}</span><ElButton text size="small" :disabled="busy" @click="loadAccess">刷新调用状态</ElButton></div>
           <div class="copilot-send-actions"><template v-if="pending"><ElButton :disabled="busy || !!acting" @click="ask(true)">查询原问题回执</ElButton><ElButton :disabled="busy || !!acting || !access?.enabled" @click="ask(false)">按原标识重试</ElButton></template><ElButton v-else type="primary" native-type="submit" :loading="busy" :disabled="loading || !!acting || !access?.enabled || !question.trim()">询问AI</ElButton></div>
         </div>
       </form>
