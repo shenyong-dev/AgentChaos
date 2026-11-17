@@ -83,10 +83,13 @@ class ExecutionJudgeService:
         with advisory(self.engine, "judge-execution:" + str(identifier)):
             with Session(self.engine) as session, session.begin():
                 run, execution = EvaluationService.owned(session, owner, identifier, lock=True)
-                if run.manifest_json.get("adapter_type") == "reference_refund":
+                if (
+                    run.manifest_json.get("adapter_type", "langgraph_booking")
+                    != "langgraph_booking"
+                ):
                     raise AgentError(
                         "judge_domain_not_calibrated",
-                        "预约裁判未针对退款校准，本对象仅使用领域规则与人工复核。",
+                        "预约裁判未针对此对象校准，请使用已声明规则与人工复核。",
                         409,
                     )
                 bundle = load_evidence(session, run, execution)

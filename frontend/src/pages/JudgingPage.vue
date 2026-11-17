@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import { useGuideSelection } from '../guidance'
-import { computed, ref, onBeforeUnmount, onMounted } from 'vue'
+import { computed, nextTick, ref, watch, onBeforeUnmount, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElButton, ElInput, ElSelect, ElOption } from 'element-plus'
 import 'element-plus/es/components/button/style/css'
 import 'element-plus/es/components/input/style/css'
 import { sessionFetch } from '../api/session'
 import { workspace } from '../api/workspace'
+import JudgmentComparison from '../components/JudgmentComparison.vue'
+import { reasonNames, referenceTarget, reviewReasons } from '../judging-review'
+import type { ReviewReason } from '../judging-review'
 
 type Labels = { support: string; explanation: string; note: string; reviewer_username: string; execution_problem?: string }
 type AssistedReview = { recommendation: { execution_problem: string; support: string; explanation: string }; reason: string; evidence_refs: string[]; changed: boolean }
@@ -14,7 +17,8 @@ type Assessment = { label: string; confidence: number; reason: string; evidence_
 type Result = { status: string; result_hash: string; reason?: string; assessment?: { support: Assessment; explanation: Assessment; suspected_cause?: string }; needs_review: boolean }
 type Sample = { id: string; sample_hash: string; family_key: string; payload: { dialogue: unknown; dialogue_scope: string; reply: string; evidence: { id: string; kind: string; content: unknown }[] }; provenance: unknown; rule_observation: unknown }
 type Protocol = { threshold: number; model: string; prompt_hash: string }
-type Batch = { batch_id: string; frozen: { mode: string; dataset: { dataset_hash: string; samples: Sample[]; families: number; schema_version?: string; boundary?: string; view?: string }; manifest: Protocol }; evaluation_protocol: Protocol | null; seal: { labels_hash: string; sealed_at: string } | null; labels: Record<string, Labels>; label_hashes: Record<string, string>; results: Record<string, Result>; reviews: Record<string, Labels>; statistics: { dimensions: Record<string, unknown>; failure_rate: number | null; needs_review: string[] }; pending_reviews: string[] }
+type EvaluationAccess = { allowed: boolean; code: string; reason: string; completed: number; total: number; eligible_ids: string[]; unconfirmed_ids: string[]; sample_states: Record<string, 'pending' | 'unconfirmed' | 'returned' | 'error'> }
+type Batch = { batch_id: string; frozen: { mode: string; dataset: { dataset_hash: string; samples: Sample[]; families: number; schema_version?: string; boundary?: string; view?: string }; manifest: Protocol }; evaluation_protocol: Protocol | null; seal: { labels_hash: string; sealed_at: string } | null; labels: Record<string, Labels>; label_hashes: Record<string, string>; results: Record<string, Result>; reviews: Record<string, Labels>; statistics: { dimensions: Record<string, unknown>; failure_rate: number | null; needs_review: string[] }; pending_reviews: string[]; evaluation_access?: EvaluationAccess }
 
 const route = useRoute(), router = useRouter()
 const access = ref<{ role: string; username: string; judge_enabled: boolean; read_only?: boolean }>()
@@ -25,12 +29,25 @@ const sampleCount = computed(() => batch.value?.frozen.dataset.samples.length ??
 useGuideSelection(() => batch.value ? { kind: 'calibration', id: batch.value.batch_id } : undefined)
 const fullGold = computed(() => batch.value?.frozen.dataset.view === 'full_observations')
 const busy = ref(false), error = ref(''), notice = ref(''), independent = ref(false), evaluating = ref(false), pendingOnly = ref(false)
-let auth = '', active = true
+const errorDetail = ref(''), currentEvaluating = ref('')
+const reasonFilter = ref<ReviewReason | ''>(''), citationNotice = ref('')
+let auth = '', active = true, loadGeneration = 0
+const evaluation = computed(() => batch.value?.evaluation_access)
+const evaluationLabel = computed(() => {
+  if (evaluating.value) return `正在评价 ${currentEvaluating.value}`
+  const remaining = evaluation.value?.eligible_ids.length ?? sampleCount.value
+  return `${Object.keys(batch.value?.results ?? {}).length ? '继续' : '运行'} AI 评价（${remaining}条）`
+})
+const evaluationReason = computed(() => evaluation.value?.reason || (evaluation.value ? '' : '暂时无法核对本批次的运行条件，请刷新记录。'))
+const stateNames = { pending: '未评价', unconfirmed: '调用待核对', returned: '已返回', error: '评价异常' }
 const names: Record<string, string> = { supported: '有依据', contradicted: '与证据矛盾', insufficient: '证据不足', reasonable: '解释合理', unreasonable: '解释不合理', passed: 'AI认为可接受', failed: 'AI发现问题', inconclusive: 'AI不确定', error: '裁判错误', problem: '执行有问题', clear: '未发现执行问题' }
 const sample = computed(() => batch.value?.frozen.dataset.samples.find(x => x.id === selectedId.value))
-const visibleSamples = computed(() => batch.value?.frozen.dataset.samples.filter(x => !pendingOnly.value || batch.value?.pending_reviews.includes(x.id)) ?? [])
+const threshold = computed(() => batch.value?.evaluation_protocol?.threshold ?? batch.value?.frozen.manifest?.threshold)
+const sampleReasons = (id: string) => batch.value?.seal ? reviewReasons(batch.value.labels[id], batch.value.results[id], threshold.value) : []
+const visibleSamples = computed(() => batch.value?.frozen.dataset.samples.filter(x => (!pendingOnly.value || batch.value?.pending_reviews.includes(x.id)) && (!reasonFilter.value || sampleReasons(x.id).includes(reasonFilter.value))) ?? [])
+const visiblePending = computed(() => visibleSamples.value.filter(x => batch.value?.pending_reviews.includes(x.id)))
 const currentLabel = computed(() => batch.value?.labels[selectedId.value])
-const currentResult = computed(() => batch.value?.results[selectedId.value])
+const currentResult = computed(() => batch.value?.seal ? batch.value.results[selectedId.value] : undefined)
 const reviewed = computed(() => batch.value?.reviews[selectedId.value])
 const assisted = computed(() => (batch.value as (Batch & { assistant_reviews?: Record<string, AssistedReview> }) | undefined)?.assistant_reviews?.[selectedId.value])
 const canLabel = computed(() => access.value?.role === 'reviewer' && !access.value.read_only && !batch.value?.seal)
@@ -39,23 +56,43 @@ const canReview = computed(() => access.value?.role === 'reviewer' && !access.va
 async function api<T>(path: string, body?: unknown): Promise<T> {
   const response = await sessionFetch(`/api/v1/judging${path}`, { method: body ? 'POST' : 'GET', headers: { Authorization: auth, ...(body ? { 'Content-Type': 'application/json' } : {}) }, body: body ? JSON.stringify(body) : undefined, cache: 'no-store', signal: AbortSignal.timeout(body ? 60000 : 20000) })
   const value = await response.json()
-  if (!response.ok) throw new Error(`${value.error?.message ?? '请求失败'}（HTTP ${response.status}）`)
+  if (!response.ok) {
+    errorDetail.value = `${value.error?.code ?? 'request_failed'} · HTTP ${response.status}`
+    throw new Error(value.error?.message ?? '请求失败，请刷新记录核对状态。')
+  }
   return value.data as T
 }
-function choose(id: string) { selectedId.value = id; support.value = ''; explanation.value = ''; executionProblem.value = ''; note.value = ''; notice.value = '' }
-function nextPending() { const next = batch.value?.pending_reviews.find(x => x !== selectedId.value) ?? batch.value?.pending_reviews[0]; if (next) choose(next) }
-async function load() {
+function choose(id: string) { selectedId.value = id; support.value = ''; explanation.value = ''; executionProblem.value = ''; note.value = ''; notice.value = ''; citationNotice.value = '' }
+function nextPending() { const next = visiblePending.value.find(x => x.id !== selectedId.value) ?? visiblePending.value[0]; if (next) choose(next.id) }
+watch(visibleSamples, items => { if (!items.some(x => x.id === selectedId.value)) choose(items[0]?.id ?? '') })
+async function focusEvidence(reference: string) {
+  if (!sample.value) return
+  const target = referenceTarget(reference, sample.value.payload), id = selectedId.value, generation = loadGeneration
+  citationNotice.value = ''
+  if (!target) { citationNotice.value = '当前样本无法定位该引用，请核对原结果。'; return }
+  await nextTick()
+  if (!active || id !== selectedId.value || generation !== loadGeneration) return
+  const element = document.getElementById(target)
+  if (!element) { citationNotice.value = '对应证据尚未加载，请刷新记录核对。'; return }
+  if (element instanceof HTMLDetailsElement) element.open = true
+  element.tabIndex = -1; element.scrollIntoView({ block: 'start' }); element.focus({ preventScroll: true })
+}
+async function load(preserve = false) {
   if (!batchId.value) return
-  batch.value = undefined
-  const loaded = await api<Batch>(`/calibrations/${batchId.value}`)
-  if (!active) return
+  const target = batchId.value, generation = ++loadGeneration
+  if (!preserve) batch.value = undefined
+  let loaded: Batch
+  try { loaded = await api<Batch>(`/calibrations/${target}`) }
+  catch (e) { if (generation === loadGeneration) batch.value = undefined; throw e }
+  if (!active || generation !== loadGeneration || target !== batchId.value) return
   batch.value = loaded
+  if (!loaded.seal) { reasonFilter.value = ''; pendingOnly.value = false }
   if (!batch.value.frozen.dataset.samples.some(x => x.id === selectedId.value)) choose(batch.value.frozen.dataset.samples.find(x => !batch.value?.labels[x.id])?.id ?? batch.value.frozen.dataset.samples[0]!.id)
   void router.replace({ params: { batchId: batchId.value } })
 }
 async function act(work: () => Promise<void>) {
   if (busy.value) return
-  busy.value = true; error.value = ''; notice.value = ''
+  busy.value = true; error.value = ''; errorDetail.value = ''; notice.value = ''
   try { await work() } catch (e) { error.value = (e as Error).message } finally { busy.value = false }
 }
 async function login() {
@@ -78,16 +115,38 @@ async function saveLabel() {
 async function seal() { await act(async () => { await api(`/calibrations/${batchId.value}/seal`, { request_id: crypto.randomUUID(), dataset_hash: batch.value!.frozen.dataset.dataset_hash, independent_from_judge: true }); await load(); notice.value = `${sampleCount.value}条独立标签已封存，后续分歧复核会另存。` }) }
 async function evaluateAll() {
   await act(async () => {
+    const target = batchId.value
+    // Fetch current server eligibility before any paid action; a GET never starts one.
+    await load(true)
+    if (!active || target !== batchId.value || !batch.value) return
+    if (!evaluation.value?.allowed) throw new Error(evaluationReason.value)
     evaluating.value = true
     try {
-      for (const value of batch.value!.frozen.dataset.samples) {
-        if (!active) break
-        if (batch.value!.results[value.id]) continue
-        await api(`/calibrations/${batchId.value}/samples/${value.id}/evaluate`, { request_id: crypto.randomUUID() })
-        if (!active) break
-        await load()
+      const ids = [...evaluation.value.eligible_ids]
+      for (const id of ids) {
+        if (!active || target !== batchId.value || !batch.value || !evaluation.value?.allowed) break
+        if (!evaluation.value.eligible_ids.includes(id)) continue
+        currentEvaluating.value = id
+        try {
+          await api(`/calibrations/${target}/samples/${id}/evaluate`, { request_id: crypto.randomUUID() })
+        } catch (e) {
+          const detail = errorDetail.value
+          // Check saved evidence once. Never retry a POST after an unknown response.
+          if (active && target === batchId.value) {
+            try { await load(true) } catch { batch.value = undefined }
+          }
+          errorDetail.value = detail
+          const message = e instanceof TypeError || e instanceof DOMException ? '网络中断，调用结果待核对。' : (e as Error).message
+          throw new Error(`${message || '调用结果暂未确认。'} 已暂停，请刷新记录核对；不会自动重发。`)
+        }
+        if (!active || target !== batchId.value) break
+        await load(true)
+        if (batch.value?.results[id]?.status === 'error') {
+          notice.value = `${id} 评价异常，已暂停。请先查看原结果与用量，再决定是否继续剩余样本。`
+          break
+        }
       }
-    } finally { evaluating.value = false }
+    } finally { evaluating.value = false; currentEvaluating.value = '' }
   })
 }
 async function review() {
@@ -105,38 +164,45 @@ onMounted(() => { void login() })
   <div class="judging-page">
     <div class="page-heading"><div><h1>辅助评价与校准</h1></div></div>
 
-    <p v-if="error" role="alert" class="judge-error">{{ error }}</p>
+    <div v-if="error" role="alert" class="judge-error"><p>{{ error }}</p><details v-if="errorDetail"><summary>错误详情</summary><span>{{ errorDetail }}</span></details></div>
     <template v-if="access">
       <div class="judge-toolbar"><label>校准批次<ElSelect class="form-select" popper-class="form-select-dropdown" :fit-input-width="true" :empty-values="[null, undefined, '']" placeholder="请选择" v-model="batchId" aria-label="校准批次" :disabled="busy" @change="act(load)"><ElOption v-for="item in batches" :key="item.batch_id" :value="item.batch_id" :data-value="item.batch_id" :label="`${item.batch_id.slice(0, 8)} · ${item.created_at}`" /></ElSelect></label><ElButton :disabled="busy" @click="act(load)">刷新记录</ElButton><ElButton v-if="access.role === 'operator' && !access.read_only" :disabled="busy" @click="create">新建待标注批次</ElButton></div>
       <template v-if="batch">
         <p v-if="access.read_only" class="judge-boundary">原结果只读复看：人工标签、AI结果和分歧保持，不新增调用或保存复核。</p>
         <p class="judge-boundary" role="note">{{ batch.frozen.dataset.boundary ?? '校准专用：10个来源家族、30条相关样本，含真实回复与明确受控衍生。以本页给出的证据判断；缺少SQL证据不等于SQL为0。此处不产生正式保留集成绩。' }}</p>
-        <div class="judge-metrics"><div><small>真人标注</small><strong>{{ Object.keys(batch.labels).length }}<span> / {{ sampleCount }}</span></strong></div><div><small>裁判已返回</small><strong>{{ Object.keys(batch.results).length }}<span> / {{ sampleCount }}</span></strong></div><div><small>待人工复核</small><strong>{{ batch.pending_reviews.length }}</strong></div><div><small>标签状态</small><strong class="word">{{ batch.seal ? '已封存' : '待独立标注' }}</strong></div></div>
+        <div class="judge-metrics"><div><small>真人标注</small><strong>{{ Object.keys(batch.labels).length }}<span> / {{ sampleCount }}</span></strong></div><div><small>AI评价已返回</small><strong>{{ batch.seal ? Object.keys(batch.results).length : '—' }}<span> / {{ sampleCount }}</span></strong></div><div><small>待人工复核</small><strong>{{ Object.keys(batch.results).length ? batch.pending_reviews.length : '—' }}</strong></div><div><small>标签状态</small><strong class="word">{{ batch.seal ? '已封存' : '待独立标注' }}</strong></div></div>
         <div v-if="canLabel" class="seal-controls"><p>封存后原标签不可修改；后续复核另存。</p><label><input v-model="independent" type="checkbox" :disabled="busy" />我在未看到本批裁判结果时，逐条独立选择了{{ fullGold ? '三' : '两' }}项标签。</label><ElButton type="primary" :disabled="busy || !independent || Object.keys(batch.labels).length !== sampleCount" @click="seal">封存{{ sampleCount }}条人工标签</ElButton></div>
-        <div v-if="access.role === 'operator' && !access.read_only && batch.seal" class="seal-controls"><p>裁判看不到人工标签和原规则结论。本批{{ sampleCount }}条逐条调用，每条45秒；刷新后可读取已保存结果。</p><ElButton type="primary" :loading="evaluating" :disabled="busy || !access.judge_enabled || Object.keys(batch.results).length === sampleCount" @click="evaluateAll">运行独立裁判</ElButton></div>
-        <div v-if="batch.seal" class="seal-controls"><label><input v-model="pendingOnly" type="checkbox" />只看待人工复核</label><ElButton :disabled="busy || !batch.pending_reviews.length" @click="nextPending">下一条待复核</ElButton><small>分歧复核另存；一致率仍按封存前的原始标签计算。</small></div>
+        <div v-if="access.role === 'operator' && !access.read_only && batch.seal" class="judge-evaluation">
+          <div class="seal-controls"><p id="judge-paid-notice">将调用付费模型，逐条评价；每条最长45秒。AI看不到人工标签和原规则结论。</p><ElButton type="primary" :loading="evaluating" :disabled="busy || !access.judge_enabled || !evaluation?.allowed" aria-describedby="judge-paid-notice judge-run-state" @click="evaluateAll">{{ evaluationLabel }}</ElButton></div>
+          <div id="judge-run-state" role="status" aria-live="polite"><span v-if="evaluating">正在评价 {{ currentEvaluating }} · 已返回 {{ Object.keys(batch.results).length }} / {{ sampleCount }}</span><span v-else-if="evaluationReason">{{ evaluationReason }}</span><span v-else>可评价 {{ evaluation?.eligible_ids.length }} 条</span></div>
+          <details v-if="evaluation?.code && evaluation.code !== 'judge_batch_complete'"><summary>运行条件详情</summary><span>{{ evaluation.code }}</span></details>
+        </div>
+        <div v-if="batch.seal" class="seal-controls"><label class="judge-filter">复核定位<ElSelect v-model="reasonFilter" aria-label="复核定位" placeholder="全部样本" :disabled="busy"><ElOption value="" label="全部样本" /><ElOption v-for="(label, key) in reasonNames" :key="key" :value="key" :label="label" /></ElSelect></label><label><input v-model="pendingOnly" type="checkbox" />只看待人工复核</label><ElButton :disabled="busy || !visiblePending.length" @click="nextPending">下一条待复核</ElButton><small>筛选只定位原记录；一致率仍按原始标签计算。</small></div>
+        <p v-if="notice" role="status">{{ notice }}</p>
         <div class="judge-workbench">
-          <aside class="judge-list" aria-label="校准样本列表"><button v-for="item in visibleSamples" :key="item.id" :class="{ active: selectedId === item.id }" :disabled="busy" @click="choose(item.id)"><b>{{ item.id }}</b><span>{{ batch.labels[item.id] ? '已标注' : '待标注' }}</span><small v-if="batch.results[item.id]">{{ names[batch.results[item.id]!.status] }}</small></button></aside>
+          <aside class="judge-list" aria-label="校准样本列表"><button v-for="item in visibleSamples" :key="item.id" :class="{ active: selectedId === item.id }" :disabled="busy" @click="choose(item.id)"><b>{{ item.id }}</b><span>{{ batch.labels[item.id] ? '已标注' : '待标注' }}</span><small v-if="batch.seal && batch.results[item.id]">{{ names[batch.results[item.id]!.status] }}</small><small v-else-if="batch.seal && evaluation?.sample_states[item.id]">{{ stateNames[evaluation.sample_states[item.id]!] }}</small><small v-if="batch.seal && sampleReasons(item.id).length">{{ reasonNames[sampleReasons(item.id)[0]!] }}</small></button></aside><p v-if="!visibleSamples.length" class="judge-empty" role="status">当前筛选没有样本，请调整复核定位或取消待复核筛选。</p>
           <article v-if="sample" class="judge-detail" aria-label="语义评价样本">
             <h2>{{ sample.id }} <small>{{ sample.family_key }}</small></h2>
-            <section><h3>用户请求 / 对话</h3><pre>{{ JSON.stringify(sample.payload.dialogue, null, 2) }}</pre><small>{{ sample.payload.dialogue_scope }}</small></section>
-            <section class="judge-reply"><h3>待评回答</h3><p>{{ sample.payload.reply }}</p></section>
-            <section class="judge-evidence" aria-label="评价依据"><h3>给定证据</h3><details v-for="value in sample.payload.evidence" :key="value.id" :open="['sql', 'sql-before', 'sql-after', 'independent-test-criteria'].includes(value.id)"><summary>{{ value.id }} · {{ value.kind }}</summary><pre>{{ typeof value.content === 'string' ? value.content : JSON.stringify(value.content, null, 2) }}</pre></details></section>
-            <div v-if="currentLabel" class="judge-human" aria-label="原始人工标签"><h3>原始人工标注</h3><p>支持性：{{ names[currentLabel.support] }}；解释：{{ names[currentLabel.explanation] }}</p><p v-if="currentLabel.execution_problem">执行整体：{{ names[currentLabel.execution_problem] }}</p><small>{{ currentLabel.reviewer_username }} · {{ currentLabel.note }}</small></div>
-            <section v-if="currentResult" class="judge-result" aria-label="AI辅助评价"><h3>{{ names[currentResult.status] }}</h3><small>模型自报把握并非已校准概率，AI意见不能代替客观规则或人工决定。</small><p v-if="currentResult.reason">{{ currentResult.reason }}</p><div v-for="dimension in ['support', 'explanation'] as const" :key="dimension"><template v-if="currentResult.assessment"><h4>{{ dimension === 'support' ? '回答支持性' : '解释合理性' }} · {{ names[currentResult.assessment[dimension].label] }} · {{ currentResult.assessment[dimension].confidence }}</h4><p>{{ currentResult.assessment[dimension].reason }}</p><small>依据：{{ currentResult.assessment[dimension].evidence_refs.join('、') }}</small></template></div><p v-if="currentResult.assessment?.suspected_cause">根因候选：{{ currentResult.assessment.suspected_cause }}</p><small>AI辅助结论不覆盖客观规则、预约事实或人工结论。</small><details><summary>裁判原结果、错误与用量</summary><pre>{{ JSON.stringify(currentResult, null, 2) }}</pre></details></section>
+            <section id="judge-source-dialogue" class="judge-source-target" tabindex="-1"><h3>用户请求 / 对话</h3><pre>{{ JSON.stringify(sample.payload.dialogue, null, 2) }}</pre><small>{{ sample.payload.dialogue_scope }}</small></section>
+            <section id="judge-source-reply" class="judge-reply judge-source-target" tabindex="-1"><h3>待评回答</h3><p>{{ sample.payload.reply }}</p></section>
+            <section class="judge-evidence" aria-label="评价依据"><h3>给定证据</h3><details v-for="(value, index) in sample.payload.evidence" :id="`judge-source-evidence-${index}`" :key="value.id" class="judge-source-target" tabindex="-1" :open="['sql', 'sql-before', 'sql-after', 'independent-test-criteria'].includes(value.id)"><summary>{{ value.id }} · {{ value.kind }}</summary><pre>{{ typeof value.content === 'string' ? value.content : JSON.stringify(value.content, null, 2) }}</pre></details></section>
+            <div v-if="currentLabel && (!batch.seal || !currentResult)" class="judge-human" aria-label="原始人工标签"><h3>原始人工标注</h3><p>支持性：{{ names[currentLabel.support] }}；解释：{{ names[currentLabel.explanation] }}</p><p v-if="currentLabel.execution_problem">执行整体：{{ names[currentLabel.execution_problem] }}</p><small>{{ currentLabel.reviewer_username }} · {{ currentLabel.note }}</small></div>
+            <JudgmentComparison v-if="batch.seal && currentResult" :label="currentLabel" :result="currentResult" :payload="sample.payload" :threshold="threshold" @locate="focusEvidence" /><p v-if="citationNotice" role="status">{{ citationNotice }}</p>
             <section v-if="assisted" class="judge-human" aria-label="助手辅助复核"><h3>助手辅助复核 · {{ assisted.changed ? '建议修正' : '维持原判断' }}</h3><p>执行整体：{{ names[assisted.recommendation.execution_problem] }}；支持性：{{ names[assisted.recommendation.support] }}；解释：{{ names[assisted.recommendation.explanation] }}</p><p>{{ assisted.reason }}</p><small>按用户要求由助手逐条分析，另存修正意见；不是新增真人独立标签，也不是本批DeepSeek裁判。原封存与主统计保留。</small><details><summary>复核证据引用</summary><pre>{{ assisted.evidence_refs.join('\n') }}</pre></details></section>
             <div v-if="reviewed" class="judge-human"><h3>人工复核决定</h3><p>{{ names[reviewed.support] }} / {{ names[reviewed.explanation] }}</p><p>{{ reviewed.note }}</p></div>
             <form v-if="canLabel || canReview" class="judge-label-form" @submit.prevent="canLabel ? saveLabel() : review()"><h3>{{ canLabel ? '独立选择标签' : '另存人工复核' }}</h3><p>支持性：主要主张有依据 / 明确与证据冲突 / 无法核实。解释：回应请求且理由合理 / 理由不合理或误导 / 所需解释不足。不要用语气、篇幅或礼貌判断。</p><label v-if="canLabel && fullGold">执行整体是否有问题<ElSelect class="form-select" popper-class="form-select-dropdown" :fit-input-width="true" :empty-values="[null, undefined]" placeholder="请选择" v-model="executionProblem" aria-label="执行整体是否有问题" :disabled="busy"><ElOption disabled value="" data-value="" label="请选择，未预填标签" /><ElOption v-for="key in ['problem', 'clear', 'insufficient']" :key="key" :value="key" :data-value="key" :label="names[key]" /></ElSelect><small>对照冻结标准与实际SQL/工具观察判断；任务未达、执行违规和回答虚报请在说明里区分。</small></label><div class="judge-label-options"><label>回答支持性<ElSelect class="form-select" popper-class="form-select-dropdown" :fit-input-width="true" :empty-values="[null, undefined]" placeholder="请选择" v-model="support" aria-label="回答支持性" :disabled="busy"><ElOption disabled value="" data-value="" label="请选择，未预填标签" /><ElOption v-for="key in ['supported', 'contradicted', 'insufficient']" :key="key" :value="key" :data-value="key" :label="names[key]" /></ElSelect></label><label>解释合理性<ElSelect class="form-select" popper-class="form-select-dropdown" :fit-input-width="true" :empty-values="[null, undefined]" placeholder="请选择" v-model="explanation" aria-label="解释合理性" :disabled="busy"><ElOption disabled value="" data-value="" label="请选择，未预填标签" /><ElOption v-for="key in ['reasonable', 'unreasonable', 'insufficient']" :key="key" :value="key" :data-value="key" :label="names[key]" /></ElSelect></label></div><label>依据说明{{ canLabel ? '（可选）' : '（复核必填）' }}<ElInput v-model="note" type="textarea" :rows="2" aria-label="依据说明" :disabled="busy" /></label><ElButton type="primary" native-type="submit" :disabled="busy || !support || !explanation || (canLabel && fullGold && !executionProblem) || (!canLabel && !note.trim())">{{ canLabel ? '保存标签并下一条' : '保存人工复核' }}</ElButton></form>
-            <p v-if="notice" role="status">{{ notice }}</p><details><summary>来源、规则记录与哈希</summary><pre>{{ JSON.stringify({ provenance: sample.provenance, original_rule_observation: sample.rule_observation, sample_hash: sample.sample_hash }, null, 2) }}</pre></details>
+            <details><summary>来源、规则记录与哈希</summary><pre>{{ JSON.stringify({ provenance: sample.provenance, original_rule_observation: sample.rule_observation, sample_hash: sample.sample_hash }, null, 2) }}</pre></details>
           </article>
         </div>
-        <details class="judge-statistics"><summary>人工与AI分歧、失败率和版本</summary><pre>{{ JSON.stringify({ statistics: batch.statistics, pending_reviews: batch.pending_reviews, sealed: batch.seal, protocol: batch.evaluation_protocol ?? batch.frozen.manifest }, null, 2) }}</pre></details>
-      </template><p v-else-if="!busy">当前身份没有校准批次。operator可新建；人工标注完成后才允许裁判调用。</p>
+        <details v-if="batch.seal" class="judge-statistics"><summary>人工与AI分歧、失败率和版本</summary><pre>{{ JSON.stringify({ statistics: batch.statistics, pending_reviews: batch.pending_reviews, sealed: batch.seal, protocol: batch.evaluation_protocol ?? batch.frozen.manifest }, null, 2) }}</pre></details>
+      </template><p v-else-if="!busy && !error">当前身份没有校准批次。operator可新建；人工标注完成后才允许裁判调用。</p>
     </template>
   </div>
 </template>
 
 <style scoped>
+.judge-filter { display:grid; gap:6px; width:170px; }.judge-source-target { scroll-margin-top:96px; }.judge-empty { font-size:13px; line-height:1.8; color:var(--ac-muted); padding:22px; }
+.judge-evaluation { margin:20px 0;padding:16px;border:1px solid var(--ac-border);border-radius:8px;background:var(--ac-surface-soft);font-size:13px;line-height:1.8; }.judge-evaluation .seal-controls { margin:0 0 8px; }.judge-evaluation p,.judge-error p { margin:0; }.judge-evaluation details,.judge-error details { margin-top:8px; }.judge-detail,.judge-statistics,.judge-list button { background:var(--ac-surface) !important; }
 .judging-page { color:var(--ac-ink); }.judge-login,.judge-detail,.judge-statistics { padding:22px;background:white;border:1px solid var(--ac-border);border-radius:12px; }.judge-login { display:flex;align-items:end;gap:12px;flex-wrap:wrap;margin:24px 0; }.judge-login label { width:210px;display:grid;gap:7px;font-size:13px; }.judge-login small { width:100%;color:var(--ac-text); }.judge-toolbar { display:flex;align-items:end;gap:12px;flex-wrap:wrap;margin:22px 0; }.judge-toolbar label { flex:1;min-width:160px;display:grid;gap:8px; }.judge-boundary { background:#f1eee6;border-left:3px solid #b2a77d;color:#726644;padding:14px;font-size:13px;line-height:1.8; }.judge-metrics { display:grid;grid-template-columns:repeat(4,minmax(0,1fr));background:var(--ac-surface-soft);padding:20px;gap:12px;margin:20px 0;border-radius:8px; }.judge-metrics small { display:block;color:var(--ac-text);font-size:12px; }.judge-metrics strong { display:block;font-size:26px;margin-top:8px; }.judge-metrics span { font-size:15px;color:var(--ac-text); }.judge-metrics .word { font-size:19px; }.judge-workbench { display:grid;grid-template-columns:175px minmax(0,1fr);gap:18px;align-items:start; }.judge-list { display:grid;grid-template-columns:1fr 1fr;gap:7px;max-height:780px;overflow:auto; }.judge-list button { border:1px solid var(--ac-border);background:white;color:inherit;padding:12px 8px;border-radius:6px;display:grid;gap:6px;cursor:pointer; }.judge-list .active { background:var(--ac-surface-soft);border-color:var(--ac-muted); }.judge-list span,.judge-list small { font-size:12px; }.judge-detail { min-width:0;overflow-wrap:anywhere; }h2 { font-size:19px;margin:0 0 20px; }h2 small { font-size:12px;color:var(--ac-text);margin-left:12px; }h3 { font-size:14px;margin:0 0 12px; }h4 { font-size:14px; }.judge-detail section { margin:20px 0; }pre { white-space:pre-wrap;overflow-wrap:anywhere;font:12px/1.7 Consolas,monospace;max-height:360px;overflow:auto; }.judge-reply { padding:18px;background:var(--ac-surface-soft);border-left:3px solid var(--ac-muted); }.judge-reply p { white-space:pre-wrap;font-size:14px;line-height:1.8; }.judge-evidence details { padding:12px 0;border-bottom:1px solid var(--ac-border); }summary { cursor:pointer;font-size:13px;overflow-wrap:anywhere; }.judge-human { background:var(--ac-surface-soft);padding:15px;border-radius:6px;font-size:13px;margin:18px 0; }.judge-result { background:#f4f3ed;padding:18px;border-radius:6px;line-height:1.7; }.judge-result p { font-size:14px; }.judge-result small,.judge-detail>section>small { color:var(--ac-text);font-size:12px; }.judge-label-form { border-top:1px solid var(--ac-border);padding-top:20px;display:grid;gap:14px; }.judge-label-form>p { font-size:13px;line-height:1.8;color:var(--ac-text); }.judge-label-form label { display:grid;gap:8px;font-size:13px; }.judge-label-options { display:grid;grid-template-columns:1fr 1fr;gap:12px; }select { width:100%;min-width:0;padding:11px;border:1px solid var(--ac-muted);border-radius:6px;background:white;color:inherit; }.seal-controls { display:flex;align-items:center;justify-content:space-between;gap:15px;flex-wrap:wrap;margin:20px 0;font-size:13px;line-height:1.8; }.judge-error { color:#9b4036;background:#fff3ec;padding:12px; }.judge-statistics { margin-top:20px; }.judge-label-form :deep(button) { justify-self:start; }
 @media(max-width:700px) { .judge-login label { width:100%; }.judge-login,.judge-detail { padding:16px; }.judge-metrics { grid-template-columns:1fr 1fr; }.judge-workbench { grid-template-columns:1fr; }.judge-list { display:flex;overflow:auto;max-width:100%; }.judge-list button { min-width:72px; }.judge-label-options { grid-template-columns:1fr; } }
 </style>

@@ -11,16 +11,24 @@ from app.agents.errors import AgentError
 from app.agents.gateway import ModelGateway
 from app.agents.versions import canonical_hash
 from app.cases.service import CaseService
+from app.core.cloud import authorized as cloud_authorized
 from app.core.config import PROJECT_ROOT
 from app.executors.control import advisory
 from app.judging import evidence
-from app.judging.budget import PROTOCOL_AUTHORIZATION, JudgeBudget
+from app.judging.budget import JudgeBudget, authorization
 from app.judging.engine import agreement, interpret, manifest
 from app.judging.protocol import messages as judge_messages
 from app.judging.protocol import parse_response
 from app.models import Artifact
 
 DATASET = PROJECT_ROOT / "docs/fixtures/T12/samples.json"
+
+# Reviewed authorization/UI maintenance only. All other frozen fields and files
+# must match exactly. Original manifests, seals and results are never rewritten.
+COMPATIBLE_MAINTENANCE_SOURCES = {
+    "service.py": "794c6d336546e74b296a23f327de6e427db962cd6b0adf9992e1eb0d3c92e701",
+    "budget.py": "9d08b1648374531e1cde362c3e2e896ecda0c02c768a2534b86edd9fa96c0069",
+}
 
 
 def load_dataset(task="T12"):
@@ -85,6 +93,97 @@ class JudgeService:
                 s, self.settings, owner, batch, kind, data, {"phase": phase, **metadata}
             )
             return row.id
+
+    def _protocol_compatible(self, frozen, current):
+        if frozen == current:
+            return True
+        if not cloud_authorized(self.settings, "judge"):
+            return False
+        old_sources = frozen.get("sources", {})
+        new_sources = current.get("sources", {})
+        try:
+            reviewed = json.loads(
+                (PROJECT_ROOT / "docs/fixtures/T17B/maintenance-20261114.json").read_bytes()
+            )
+        except (OSError, ValueError):
+            return False
+        return (
+            frozen == {**current, "sources": old_sources}
+            and old_sources.keys() == new_sources.keys()
+            and all(
+                old_sources[name] == digest
+                for name, digest in COMPATIBLE_MAINTENANCE_SOURCES.items()
+            )
+            and reviewed.get("sources")
+            == {name: new_sources[name] for name in COMPATIBLE_MAINTENANCE_SOURCES}
+            and all(
+                digest == new_sources[name]
+                for name, digest in old_sources.items()
+                if name not in COMPATIBLE_MAINTENANCE_SOURCES
+            )
+        )
+
+    def _evaluation_access(self, role, batch, frozen, rows, seal):
+        results = self._values(rows, "result")
+        attempted = {r.metadata_json.get("sample_id") for r, _ in rows if r.kind == "judge_call"}
+        ids = [x["id"] for x in frozen["dataset"]["samples"]]
+        unconfirmed = [x for x in ids if x in attempted and x not in results]
+        eligible = [x for x in ids if x not in attempted and x not in results]
+        value = {
+            "allowed": False,
+            "code": "",
+            "reason": "",
+            "http_status": 409,
+            "completed": len(results),
+            "total": len(ids),
+            "eligible_ids": eligible,
+            "unconfirmed_ids": unconfirmed,
+            "sample_states": {
+                x: ("error" if results[x].get("status") == "error" else "returned")
+                if x in results
+                else "unconfirmed"
+                if x in attempted
+                else "pending"
+                for x in ids
+            },
+        }
+        try:
+            if role != "operator":
+                raise AgentError("judge_operator_required", "请使用操作员账号运行AI评价。", 403)
+            if not seal:
+                raise AgentError("judge_labels_not_sealed", "请先完成人工标注并封存。", 409)
+            if unconfirmed:
+                raise AgentError(
+                    "judge_call_incomplete",
+                    "有调用结果待核对，请刷新记录；未确认前暂停新调用。",
+                    409,
+                )
+            if not eligible:
+                raise AgentError("judge_batch_complete", "本批评价已返回，请查看结果。", 409)
+            current = manifest(self.settings)
+            protocol = next(
+                (v for r, v in rows if r.metadata_json.get("phase") == "protocol"),
+                seal["manifest"],
+            )
+            if (
+                seal["manifest"] != frozen["manifest"]
+                or protocol != seal["manifest"]
+                or protocol != current
+                and frozen["mode"] != "real_provider"
+                or not self._protocol_compatible(protocol, current)
+            ):
+                raise AgentError(
+                    "judge_version_changed", "评价定义与封存版本不兼容，请新建独立批次。", 409
+                )
+            if not self.gateway_factory:
+                authorization(self.settings, frozen["dataset"]["schema_version"])
+                JudgeBudget(
+                    self.redis, self.settings, str(batch), None, limits=protocol["limits"]
+                ).check_ready()
+            value["allowed"] = True
+        except AgentError as exc:
+            value.update(code=exc.code, reason=exc.message, http_status=exc.status_code)
+        return value
 
     def create(self, owner, request):
         batch = str(request.request_id)
@@ -244,35 +343,44 @@ class JudgeService:
             sample = next((x for x in frozen["dataset"]["samples"] if x["id"] == sample_id), None)
             if not sample:
                 raise AgentError("judge_sample_not_found", "找不到校准样本。", 404)
+            access = self._evaluation_access("operator", batch, frozen, rows, seal)
+            if not access["allowed"]:
+                raise AgentError(access["code"], access["reason"], access["http_status"])
             protocol = next(
                 (v for r, v in rows if r.metadata_json.get("phase") == "protocol"), None
             )
             if protocol is None:
-                protocol = manifest(self.settings)
-                if protocol != seal["manifest"]:
-                    raise AgentError(
-                        "judge_protocol_changed", "评价定义与人工标注前声明不同。", 409
-                    )
+                protocol = seal["manifest"]
                 # Freeze final implementation before the first provider request. Labels stay sealed.
                 self._append(source.owner_id, batch, "judge_result", protocol, "protocol")
-            if protocol != manifest(self.settings):
-                raise AgentError(
-                    "judge_version_changed", "当前评价器不同于批次冻结版本，需新建独立批次。", 409
+            current_protocol = manifest(self.settings)
+            if protocol != current_protocol and not any(
+                r.metadata_json.get("phase") == "compatibility" for r, _ in rows
+            ):
+                self._append(
+                    source.owner_id,
+                    batch,
+                    "judge_result",
+                    {
+                        "maintenance": "judge-cloud-authorization-20261114",
+                        "original_manifest_hash": canonical_hash(protocol),
+                        "implementation_manifest_hash": canonical_hash(current_protocol),
+                        "labels_hash": seal["labels_hash"],
+                        "original_sources": protocol["sources"],
+                        "implementation_sources": current_protocol["sources"],
+                    },
+                    "compatibility",
                 )
             payload = sample["payload"]
-            if (
-                not self.gateway_factory
-                and frozen["dataset"]["schema_version"].startswith("T17B")
-                and self.settings.judge_budget_authorization_id != PROTOCOL_AUTHORIZATION
-            ):
-                raise AgentError("judge_task_authorization", "本批需使用T17B独立裁判授权。", 403)
 
             def record(stage, value):
                 self._append(
                     source.owner_id, batch, "judge_call", value, stage, sample_id=sample_id
                 )
 
-            budget = JudgeBudget(self.redis, self.settings, str(batch), record)
+            budget = JudgeBudget(
+                self.redis, self.settings, str(batch), record, limits=protocol["limits"]
+            )
             gateway = (
                 self.gateway_factory(str(batch), sample_id)
                 if self.gateway_factory
@@ -320,6 +428,7 @@ class JudgeService:
                     "sample_id": sample_id,
                     "sample_hash": sample["sample_hash"],
                     "manifest_hash": canonical_hash(protocol),
+                    "implementation_manifest_hash": canonical_hash(current_protocol),
                     "result_hash": None,
                     "role": "judge",
                     "mode": frozen["mode"],
@@ -386,6 +495,7 @@ class JudgeService:
 
     def read(self, owner, batch):
         with Session(self.engine) as s:
+            user = self.role(s, owner)
             source, rows = self._rows(s, owner, batch)
             frozen = evidence.read(source)
         labels = self._values(rows, "label")
@@ -414,6 +524,7 @@ class JudgeService:
             "reviews": reviews,
             "statistics": stats,
             "pending_reviews": [k for k in stats["needs_review"] if k not in reviews],
+            "evaluation_access": self._evaluation_access(user.role, batch, frozen, rows, seal),
             "evidence": [
                 {
                     "id": r.id,

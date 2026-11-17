@@ -1,0 +1,16 @@
+// Mechanical UI records only; no real human labels or provider results.
+export const reviewBatchId = '00000000-0000-4000-8000-000000000053'
+export function reviewFixture(sealed = true) {
+  const assessment = (support: string, explanation: string, refs = ['sql-after'], confidence = 0.94) => ({ support: { label: support, reason: '对照给定SQL观察核对主张（机械UI控制）。', confidence, evidence_refs: refs }, explanation: { label: explanation, reason: '对照用户请求与回答说明（机械UI控制）。', confidence, evidence_refs: refs } })
+  const samples = Array.from({ length: 6 }, (_, index) => ({ id: `D0${index + 1}`, sample_hash: `offline-control-${index + 1}`, family_key: 'mechanical-ui-only', payload: { dialogue: [{ user: '请查看预约是否成功。' }], dialogue_scope: '明确离线界面控制', reply: '预约已经成功。', evidence: [{ id: 'sql-before', kind: 'sql_snapshot', content: [] }, { id: 'sql-after', kind: 'sql_snapshot', content: [] }, { id: 'unavailable', kind: 'missing', content: null }] }, provenance: { kind: 'offline_control' }, rule_observation: null }))
+  const labels = Object.fromEntries(samples.map(sample => [sample.id, { support: sample.id === 'D03' ? 'insufficient' : 'supported', explanation: sample.id === 'D03' ? 'insufficient' : 'reasonable', note: '机械UI控制原标签，不作为正确答案或真人记录。', reviewer_username: 'offline-control' }]))
+  const results = {
+    D01: { status: 'failed', assessment: assessment('contradicted', 'reasonable'), result_hash: 'offline-result-1', needs_review: false },
+    D02: { status: 'failed', assessment: assessment('supported', 'unreasonable', ['reply']), result_hash: 'offline-result-2', needs_review: false },
+    D03: { status: 'inconclusive', assessment: assessment('insufficient', 'insufficient', [], 0.55), result_hash: 'offline-result-3', needs_review: true },
+    D04: { status: 'error', reason: 'judge_unknown_reference', result_hash: 'offline-result-4', needs_review: true },
+    D05: { status: 'passed', assessment: assessment('supported', 'reasonable', ['dialogue']), result_hash: 'offline-result-5', needs_review: false },
+    D06: { status: 'failed', assessment: assessment('contradicted', 'reasonable'), result_hash: 'offline-result-6', needs_review: false },
+  }
+  return { batch_id: reviewBatchId, frozen: { mode: 'offline_ui_control', dataset: { dataset_hash: 'offline-control', boundary: '六条机械界面控制，原标签和AI结果均为合成；不是真人或供应商成绩。', samples, families: 6 }, manifest: { threshold: 0.8, model: 'offline-control', prompt_hash: 'offline-control' } }, evaluation_protocol: { threshold: 0.8, model: 'offline-control', prompt_hash: 'offline-control' }, seal: sealed ? { labels_hash: 'offline-control', sealed_at: '2026-11-15' } : null, labels: sealed ? labels : {}, label_hashes: Object.fromEntries(samples.map(sample => [sample.id, 'offline-label-hash'])), results, reviews: { D06: { ...labels.D06!, note: '另存复核，不覆盖原标签。' } }, statistics: { dimensions: { support: { n: 5, agreement: 0.6 }, explanation: { n: 5, agreement: 0.8 } }, failure_rate: 1/6, needs_review: ['D01', 'D02', 'D03', 'D04', 'D06'] }, pending_reviews: ['D01', 'D02', 'D03', 'D04'], evaluation_access: { allowed: false, code: 'offline_ui_control', reason: '离线只读预览，不调用模型。', completed: 6, total: 6, eligible_ids: [], unconfirmed_ids: [], sample_states: {} } }
+}
