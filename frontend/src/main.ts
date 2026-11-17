@@ -31,6 +31,7 @@ const router = createRouter({
     { path: '/library', component: WorkspacePage },
     { path: '/workbench', component: WorkspacePage },
     { path: '/reports', component: ReportsPage },
+    { path: '/reports/research', component: () => import('./pages/ResearchPage.vue') },
     { path: '/interactive/refund/:refundSessionId?', component: AgentTestPage },
     { path: '/interactive/:sessionId?', component: AgentTestPage },
     { path: '/environment', component: EnvironmentPage },

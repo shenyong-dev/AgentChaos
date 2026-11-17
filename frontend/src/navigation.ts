@@ -17,6 +17,7 @@ export const navigationGroups = [
 ]
 
 export function navigationPath(path: string) {
+  if (path.startsWith('/reports/')) return '/reports'
   if (path.startsWith('/runs')) return '/workbench'
   if (path.startsWith('/semantic') || path.startsWith('/judging')) return '/judging'
   if (path.startsWith('/cases')) return '/cases'
@@ -25,6 +26,7 @@ export function navigationPath(path: string) {
 }
 
 export function pageTitle(path: string) {
+  if (path.startsWith('/reports/')) return '缺陷与报告'
   if (path.startsWith('/runs') || path === '/workbench') return '测试工作台'
   if (path.startsWith('/judging') || path.startsWith('/semantic')) return '辅助评价与校准'
   if (path.startsWith('/cases')) return 'AI生成与审核'

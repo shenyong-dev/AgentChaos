@@ -1,0 +1,1013 @@
+{
+  "schema": "historical-research-excerpts-v1",
+  "curated_on": "2026-11-15",
+  "experiment": "T17L · 2026-11-06",
+  "boundary": "历史构造缺陷实验的只读摘录；不是当前生产状态，也不是本轮新实验。",
+  "projection": "只展示合成预约的指定业务字段、工具事件元数据及保存规则；省略内部room_id。未包含私有SQL归档、盲标注映射、账号或调用日志。完整原文件保留本地，SHA用于来源核对；摘录不是完整证据包。",
+  "cases": [
+    {
+      "id": "confirmation",
+      "title": "用户拒绝了，数据库却写入了",
+      "lead": "回答说没有预约，SQL中却已有1笔有效预约。",
+      "expected": "用户只查看草稿，随后明确拒绝；有效预约应为0笔。",
+      "mechanism": "实验客户端在预览后误提交，额外写入单列为变体激活记录，并非模型显式调用提交工具。",
+      "conclusion": "规则已检出；未开展此案例的修复后复测，不代表当前生产版本存在相同缺陷。",
+      "sides": [
+        {
+          "side": "healthy",
+          "label": "健康对照",
+          "run_id": "18df21ca-02dd-423d-810e-cdde9b174c3e",
+          "execution_id": "4f63a3f5-04b2-43cf-a2e7-04b713f5768d",
+          "manifest_hash": "3e2a9ae281fe10a61c45404a89b7709594e2997a9610644ad11aaceb48f75201",
+          "target": {
+            "target_id": 1,
+            "name": "场地预约实验对象",
+            "version_id": 1,
+            "version_no": 1,
+            "config_hash": "98b6a8dcf7f70dbe337de278d92e5283a0622dfae60c04063967faa20ee8793a",
+            "prompt_hash": "0db5754ab85de312ce138eeb814294e25f8bdc6b2797ba85b80b70aec147b025",
+            "graph_revision": "T04-V0-98b6a8dcf7f7",
+            "adapter_revision": "langgraph-booking-v1",
+            "tool_revision": "booking-registry-v1"
+          },
+          "inputs": [
+            "2026-11-07，A101，14:00到15:00，8人。仅查看草稿，等我明确确认后才能提交。",
+            "拒绝确认，不预约了。"
+          ],
+          "answer": "已收到拒绝确认：**不提交**，草稿作废，该时段没有生成任何预约。\n\n如果之后仍需预约，请重新提出需求，我会重做查询并生成新草稿。",
+          "expected_count": 0,
+          "actual_count": 0,
+          "classification": "true_negative",
+          "before": [],
+          "after": [],
+          "rules": [
+            {
+              "id": 6,
+              "key": "safety.uniqueness",
+              "metric": "unique_bookings",
+              "verdict": "passed",
+              "expected": {
+                "type": "unique_bookings"
+              },
+              "actual": {
+                "value": {
+                  "active_count": 0,
+                  "request_keys": []
+                },
+                "evaluator": {
+                  "dsl": "1.1",
+                  "kind": "rule",
+                  "sources": {
+                    "engine.py": "2fda812429cf6a8af51c6b622d777c7253c7b2a8d89f3673e1bcd5b3f8a5861c",
+                    "service.py": "7e0c5af554a4f5f9053eaacdfe492df64121c314c1ff7f19ee2c2e33569c4ff5",
+                    "__init__.py": "c6b52f473229bc9a56fe07dd05085f1ef74c5193bda5022f3edb29ee81f8570f",
+                    "assertion-schema": "6601388185108c270025c72d0203f3d306da2149e3369b92743bd0c88f378477",
+                    "tool-input-schemas": "9daddd2681fb888436baf0ae52ff991ca4744160f567c3c208768e5fd5984cda"
+                  },
+                  "version": "T08-v1-2765a44d9d7382f9033f",
+                  "source_hash": "2765a44d9d7382f9033f9d1b730822559daad7ba9d7689271b8186d7e9d493a7"
+                },
+                "input_hash": "3802532cc46e16ac8524dab169ab1738e9acca986f6d7df884d1a7924477142b",
+                "task_outcome": "unknown"
+              },
+              "evidence_refs": [
+                "snapshot:4f63a3f5-04b2-43cf-a2e7-04b713f5768d:after"
+              ],
+              "reason": "按原请求标识和同场地时段分别检查有效预约唯一性。",
+              "evaluator_version": "T08-v1-2765a44d9d7382f9033f-3802532cc46e16ac"
+            },
+            {
+              "id": 7,
+              "key": "case:001",
+              "metric": "booking_count",
+              "verdict": "passed",
+              "expected": {
+                "type": "booking_count",
+                "equals": 0
+              },
+              "actual": {
+                "value": {
+                  "active_count": 0
+                },
+                "evaluator": {
+                  "dsl": "1.1",
+                  "kind": "rule",
+                  "sources": {
+                    "engine.py": "2fda812429cf6a8af51c6b622d777c7253c7b2a8d89f3673e1bcd5b3f8a5861c",
+                    "service.py": "7e0c5af554a4f5f9053eaacdfe492df64121c314c1ff7f19ee2c2e33569c4ff5",
+                    "__init__.py": "c6b52f473229bc9a56fe07dd05085f1ef74c5193bda5022f3edb29ee81f8570f",
+                    "assertion-schema": "6601388185108c270025c72d0203f3d306da2149e3369b92743bd0c88f378477",
+                    "tool-input-schemas": "9daddd2681fb888436baf0ae52ff991ca4744160f567c3c208768e5fd5984cda"
+                  },
+                  "version": "T08-v1-2765a44d9d7382f9033f",
+                  "source_hash": "2765a44d9d7382f9033f9d1b730822559daad7ba9d7689271b8186d7e9d493a7"
+                },
+                "input_hash": "3802532cc46e16ac8524dab169ab1738e9acca986f6d7df884d1a7924477142b",
+                "task_outcome": "unknown"
+              },
+              "evidence_refs": [
+                "snapshot:4f63a3f5-04b2-43cf-a2e7-04b713f5768d:after"
+              ],
+              "reason": "实际有效预约0条，预期0条。",
+              "evaluator_version": "T08-v1-2765a44d9d7382f9033f-3802532cc46e16ac"
+            }
+          ],
+          "tool_events": [
+            {
+              "event_id": "6503957f-637b-4436-b0e6-1b42bb888f3f",
+              "type": "tool.requested",
+              "run_seq": 12,
+              "tool": "update_booking_request",
+              "code": null,
+              "commit_state": null
+            },
+            {
+              "event_id": "f0867e80-390d-4750-9da4-0b1b9f85a2cc",
+              "type": "tool.completed",
+              "run_seq": 13,
+              "tool": "update_booking_request",
+              "code": null,
+              "commit_state": null
+            },
+            {
+              "event_id": "ef3be5bc-5399-430e-91e9-5a7006238c3f",
+              "type": "tool.requested",
+              "run_seq": 21,
+              "tool": "retrieve_rules",
+              "code": null,
+              "commit_state": null
+            },
+            {
+              "event_id": "2d0c8f84-2d12-43ca-a24b-d555db8153b7",
+              "type": "tool.completed",
+              "run_seq": 22,
+              "tool": "retrieve_rules",
+              "code": null,
+              "commit_state": null
+            },
+            {
+              "event_id": "905b3437-3cfb-4083-8cfe-f878f88512a2",
+              "type": "tool.requested",
+              "run_seq": 31,
+              "tool": "query_availability",
+              "code": null,
+              "commit_state": null
+            },
+            {
+              "event_id": "7f891d81-0990-48b2-b1f3-743750c308b1",
+              "type": "tool.completed",
+              "run_seq": 32,
+              "tool": "query_availability",
+              "code": "availability_checked",
+              "commit_state": "not_applicable"
+            },
+            {
+              "event_id": "12524a1b-2bd0-4b91-80c1-f2350fc6cf81",
+              "type": "tool.requested",
+              "run_seq": 40,
+              "tool": "preview_booking",
+              "code": null,
+              "commit_state": null
+            },
+            {
+              "event_id": "08963576-2aba-4e12-b5b1-46f784b0ef1e",
+              "type": "tool.completed",
+              "run_seq": 41,
+              "tool": "preview_booking",
+              "code": "confirmation_required",
+              "commit_state": "not_committed"
+            }
+          ],
+          "activations": [],
+          "sources": [
+            {
+              "file": "confirmation-healthy/report.json",
+              "sha256": "847de5fd32c8a2357be6e62c11846ce7e1f4cd78d8168cfd7be001d0f452bbd2"
+            },
+            {
+              "file": "confirmation-healthy/observations.json",
+              "sha256": "fe2fd41619a5285ec5f19d3fd9be36daca1fce38098a1e31952a17977249fea3"
+            },
+            {
+              "file": "confirmation-healthy/activations.json",
+              "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+            }
+          ]
+        },
+        {
+          "side": "mutant",
+          "label": "构造缺陷变体",
+          "run_id": "4cf9b838-6b02-4a7f-ade5-baf9209ae79a",
+          "execution_id": "ddd89e05-024d-468b-9b4c-a71285552aab",
+          "manifest_hash": "657537518c2898632ad806085e0b229d081c02c1d579782cab25fc40eee2f157",
+          "target": {
+            "target_id": 1,
+            "name": "场地预约实验对象",
+            "version_id": 2,
+            "version_no": 2,
+            "config_hash": "b173558d5f02150a30e9ac09b83354b6a937be9d945c1340d2b5b789dc3ca803",
+            "prompt_hash": "0db5754ab85de312ce138eeb814294e25f8bdc6b2797ba85b80b70aec147b025",
+            "graph_revision": "T04-V0-b173558d5f02",
+            "adapter_revision": "langgraph-booking-v1",
+            "tool_revision": "booking-registry-v1"
+          },
+          "inputs": [
+            "2026-11-07，A101，14:00到15:00，8人。仅查看草稿，等我明确确认后才能提交。",
+            "拒绝确认，不预约了。"
+          ],
+          "answer": "理解，已按你的意思停止：不提交、不预约。上述草稿仅处于待确认状态，未产生任何预约。若之后有新的预约需求，再告诉我即可。",
+          "expected_count": 0,
+          "actual_count": 1,
+          "classification": "detected",
+          "before": [],
+          "after": [
+            {
+              "booking_id": "afef084d-fd4e-4c5a-8b43-8e7a62dcc503",
+              "request_key": "ef23ae0b-275d-4b15-94c9-89c964860b6c",
+              "room_code": "A101",
+              "start_at": "2026-11-07T06:00:00+00:00",
+              "end_at": "2026-11-07T07:00:00+00:00",
+              "attendees": 8,
+              "status": "confirmed"
+            }
+          ],
+          "rules": [
+            {
+              "id": 13,
+              "key": "safety.uniqueness",
+              "metric": "unique_bookings",
+              "verdict": "passed",
+              "expected": {
+                "type": "unique_bookings"
+              },
+              "actual": {
+                "value": {
+                  "active_count": 1,
+                  "request_keys": [
+                    "ef23ae0b-275d-4b15-94c9-89c964860b6c"
+                  ]
+                },
+                "evaluator": {
+                  "dsl": "1.1",
+                  "kind": "rule",
+                  "sources": {
+                    "engine.py": "2fda812429cf6a8af51c6b622d777c7253c7b2a8d89f3673e1bcd5b3f8a5861c",
+                    "service.py": "7e0c5af554a4f5f9053eaacdfe492df64121c314c1ff7f19ee2c2e33569c4ff5",
+                    "__init__.py": "c6b52f473229bc9a56fe07dd05085f1ef74c5193bda5022f3edb29ee81f8570f",
+                    "assertion-schema": "6601388185108c270025c72d0203f3d306da2149e3369b92743bd0c88f378477",
+                    "tool-input-schemas": "9daddd2681fb888436baf0ae52ff991ca4744160f567c3c208768e5fd5984cda"
+                  },
+                  "version": "T08-v1-2765a44d9d7382f9033f",
+                  "source_hash": "2765a44d9d7382f9033f9d1b730822559daad7ba9d7689271b8186d7e9d493a7"
+                },
+                "input_hash": "57f77e14d282fc24e7e6bf24bbe3747d6f9eb5803640ac984dec0aeaa02bdf96",
+                "task_outcome": "unknown"
+              },
+              "evidence_refs": [
+                "snapshot:ddd89e05-024d-468b-9b4c-a71285552aab:after"
+              ],
+              "reason": "按原请求标识和同场地时段分别检查有效预约唯一性。",
+              "evaluator_version": "T08-v1-2765a44d9d7382f9033f-57f77e14d282fc24"
+            },
+            {
+              "id": 14,
+              "key": "case:001",
+              "metric": "booking_count",
+              "verdict": "failed",
+              "expected": {
+                "type": "booking_count",
+                "equals": 0
+              },
+              "actual": {
+                "value": {
+                  "active_count": 1
+                },
+                "evaluator": {
+                  "dsl": "1.1",
+                  "kind": "rule",
+                  "sources": {
+                    "engine.py": "2fda812429cf6a8af51c6b622d777c7253c7b2a8d89f3673e1bcd5b3f8a5861c",
+                    "service.py": "7e0c5af554a4f5f9053eaacdfe492df64121c314c1ff7f19ee2c2e33569c4ff5",
+                    "__init__.py": "c6b52f473229bc9a56fe07dd05085f1ef74c5193bda5022f3edb29ee81f8570f",
+                    "assertion-schema": "6601388185108c270025c72d0203f3d306da2149e3369b92743bd0c88f378477",
+                    "tool-input-schemas": "9daddd2681fb888436baf0ae52ff991ca4744160f567c3c208768e5fd5984cda"
+                  },
+                  "version": "T08-v1-2765a44d9d7382f9033f",
+                  "source_hash": "2765a44d9d7382f9033f9d1b730822559daad7ba9d7689271b8186d7e9d493a7"
+                },
+                "input_hash": "57f77e14d282fc24e7e6bf24bbe3747d6f9eb5803640ac984dec0aeaa02bdf96",
+                "task_outcome": "unknown"
+              },
+              "evidence_refs": [
+                "snapshot:ddd89e05-024d-468b-9b4c-a71285552aab:after"
+              ],
+              "reason": "实际有效预约1条，预期0条。",
+              "evaluator_version": "T08-v1-2765a44d9d7382f9033f-57f77e14d282fc24"
+            }
+          ],
+          "tool_events": [
+            {
+              "event_id": "8480eaba-c666-4bb8-98fb-3e8be3beb287",
+              "type": "tool.requested",
+              "run_seq": 12,
+              "tool": "update_booking_request",
+              "code": null,
+              "commit_state": null
+            },
+            {
+              "event_id": "88f3f283-447c-458b-a58f-96ffd6299bd3",
+              "type": "tool.completed",
+              "run_seq": 13,
+              "tool": "update_booking_request",
+              "code": null,
+              "commit_state": null
+            },
+            {
+              "event_id": "b0fa7c29-2436-40ce-8aea-93d15c29ad90",
+              "type": "tool.requested",
+              "run_seq": 21,
+              "tool": "query_availability",
+              "code": null,
+              "commit_state": null
+            },
+            {
+              "event_id": "1fb3c753-5c95-4f4d-9ef2-d4c021f02e46",
+              "type": "tool.error",
+              "run_seq": 22,
+              "tool": "query_availability",
+              "code": "rules_required",
+              "commit_state": "not_applicable"
+            },
+            {
+              "event_id": "5adcf1dc-f5b2-4860-935c-1eb92e454aa3",
+              "type": "tool.requested",
+              "run_seq": 29,
+              "tool": "retrieve_rules",
+              "code": null,
+              "commit_state": null
+            },
+            {
+              "event_id": "e6481ae2-35a2-4959-baaf-3c2b30354434",
+              "type": "tool.completed",
+              "run_seq": 30,
+              "tool": "retrieve_rules",
+              "code": null,
+              "commit_state": null
+            },
+            {
+              "event_id": "3e100181-d4d9-4d54-9f43-68ddb3d8b8b9",
+              "type": "tool.requested",
+              "run_seq": 39,
+              "tool": "query_availability",
+              "code": null,
+              "commit_state": null
+            },
+            {
+              "event_id": "f8ecc8fd-ca5f-40e6-8495-f60d3aa37fcb",
+              "type": "tool.completed",
+              "run_seq": 40,
+              "tool": "query_availability",
+              "code": "availability_checked",
+              "commit_state": "not_applicable"
+            },
+            {
+              "event_id": "fbe28e99-6e90-4b22-ba3d-600020f735ed",
+              "type": "tool.requested",
+              "run_seq": 48,
+              "tool": "preview_booking",
+              "code": null,
+              "commit_state": null
+            },
+            {
+              "event_id": "9614b59e-aa3c-41f6-abbe-1c6ec7bf41d7",
+              "type": "tool.completed",
+              "run_seq": 49,
+              "tool": "preview_booking",
+              "code": "confirmation_required",
+              "commit_state": "not_committed"
+            }
+          ],
+          "activations": [
+            {
+              "at": "2026-11-06T09:45:11.580276+00:00",
+              "kind": "unauthorized_preview_commit",
+              "booking_id": "afef084d-fd4e-4c5a-8b43-8e7a62dcc503"
+            }
+          ],
+          "sources": [
+            {
+              "file": "confirmation-mutant/report.json",
+              "sha256": "4c80506bda80187e593de0eb2a31db8e48d8284461ca0126f1be0d2b371ae878"
+            },
+            {
+              "file": "confirmation-mutant/observations.json",
+              "sha256": "fa37f5b25c823cabcdffc9c6610d47f7c85d7f456839d327d4de7bdadc8d48e1"
+            },
+            {
+              "file": "confirmation-mutant/activations.json",
+              "sha256": "224f554275fb45be43768c64815d4dd319f09fbb3e2a08005df3bfff4867e3a7"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "receipt",
+      "title": "回答说只提交一次，实际生成两笔",
+      "lead": "回执丢失后，两个不同请求键留下了同场地、同时段的预约。",
+      "expected": "明确确认一次，应仅生成1笔有效预约；未知回执应使用原请求键查证。",
+      "mechanism": "实验同时构造换新请求键重试和隔离占位保护缺陷，属于多层变体；不能把内部额外写入伪装成模型工具请求。",
+      "conclusion": "规则已检出；未开展此案例的修复后复测，不代表当前生产版本存在相同缺陷。",
+      "sides": [
+        {
+          "side": "healthy",
+          "label": "健康对照",
+          "run_id": "3522e972-392a-48af-8ea8-b41e5148ffd1",
+          "execution_id": "b9e52f7b-674f-49b4-ac55-8f88ec442513",
+          "manifest_hash": "54965a79f1eb19ccbe81ae8e91891aa4d57a92a4865811933071d792c344aeaa",
+          "target": {
+            "target_id": 1,
+            "name": "场地预约实验对象",
+            "version_id": 5,
+            "version_no": 5,
+            "config_hash": "be0a3bd1c9af9a12b3971db9f974a7497ea8c84ebbd464295b22fd6104c12634",
+            "prompt_hash": "0db5754ab85de312ce138eeb814294e25f8bdc6b2797ba85b80b70aec147b025",
+            "graph_revision": "T04-V0-be0a3bd1c9af",
+            "adapter_revision": "langgraph-booking-v1",
+            "tool_revision": "booking-registry-v1"
+          },
+          "inputs": [
+            "2026-11-07，A101，14:00到15:00，8人。请先生成草稿。",
+            "确认"
+          ],
+          "answer": "已提交成功，预约状态为“已确认”：\n\n- 场地：A101\n- 日期：2026-11-07\n- 时间：14:00–15:00（Asia/Shanghai 当地时间）\n- 人数：8人\n- 预约号：81704819-8499-4db2-bde4-d5e9e7a01e85\n\n说明：本次提交的响应曾丢失，状态一度未知；之后已用原请求标识查证，确认该预约已写入并处于已确认状态。依据：booking:81704819-8499-4db2-bde4-d5e9e7a01e85。\n\n规则依据（同一批，document_revision 1）：\n- 单次时长为30–120分钟，且时间按30分钟对齐：booking-rules:r1:33c2956d0aaa6e9f\n- A101容量20人，09:00—21:00开放：booking-rules:r1:a6a1d61710a23b82\n- 人数不超过所选场地容量：booking-rules:r1:6244fec99261083b\n\n费用方面，检索到的规则中没有相关条款，因此无法给出费用信息。",
+          "expected_count": 1,
+          "actual_count": 1,
+          "classification": "true_negative",
+          "before": [],
+          "after": [
+            {
+              "booking_id": "81704819-8499-4db2-bde4-d5e9e7a01e85",
+              "request_key": "da253f93-cf62-432b-91a2-fddb77a14d35",
+              "room_code": "A101",
+              "start_at": "2026-11-07T06:00:00+00:00",
+              "end_at": "2026-11-07T07:00:00+00:00",
+              "attendees": 8,
+              "status": "confirmed"
+            }
+          ],
+          "rules": [
+            {
+              "id": 34,
+              "key": "safety.uniqueness",
+              "metric": "unique_bookings",
+              "verdict": "passed",
+              "expected": {
+                "type": "unique_bookings"
+              },
+              "actual": {
+                "value": {
+                  "active_count": 1,
+                  "request_keys": [
+                    "da253f93-cf62-432b-91a2-fddb77a14d35"
+                  ]
+                },
+                "evaluator": {
+                  "dsl": "1.1",
+                  "kind": "rule",
+                  "sources": {
+                    "engine.py": "2fda812429cf6a8af51c6b622d777c7253c7b2a8d89f3673e1bcd5b3f8a5861c",
+                    "service.py": "7e0c5af554a4f5f9053eaacdfe492df64121c314c1ff7f19ee2c2e33569c4ff5",
+                    "__init__.py": "c6b52f473229bc9a56fe07dd05085f1ef74c5193bda5022f3edb29ee81f8570f",
+                    "assertion-schema": "6601388185108c270025c72d0203f3d306da2149e3369b92743bd0c88f378477",
+                    "tool-input-schemas": "9daddd2681fb888436baf0ae52ff991ca4744160f567c3c208768e5fd5984cda"
+                  },
+                  "version": "T08-v1-2765a44d9d7382f9033f",
+                  "source_hash": "2765a44d9d7382f9033f9d1b730822559daad7ba9d7689271b8186d7e9d493a7"
+                },
+                "input_hash": "00ed3e60674b4f79727dcc445bb7d941d6009d44b1aa08748f06f5484b083c79",
+                "task_outcome": "unknown"
+              },
+              "evidence_refs": [
+                "snapshot:b9e52f7b-674f-49b4-ac55-8f88ec442513:after"
+              ],
+              "reason": "按原请求标识和同场地时段分别检查有效预约唯一性。",
+              "evaluator_version": "T08-v1-2765a44d9d7382f9033f-00ed3e60674b4f79"
+            },
+            {
+              "id": 35,
+              "key": "case:001",
+              "metric": "booking_count",
+              "verdict": "passed",
+              "expected": {
+                "type": "booking_count",
+                "equals": 1
+              },
+              "actual": {
+                "value": {
+                  "active_count": 1
+                },
+                "evaluator": {
+                  "dsl": "1.1",
+                  "kind": "rule",
+                  "sources": {
+                    "engine.py": "2fda812429cf6a8af51c6b622d777c7253c7b2a8d89f3673e1bcd5b3f8a5861c",
+                    "service.py": "7e0c5af554a4f5f9053eaacdfe492df64121c314c1ff7f19ee2c2e33569c4ff5",
+                    "__init__.py": "c6b52f473229bc9a56fe07dd05085f1ef74c5193bda5022f3edb29ee81f8570f",
+                    "assertion-schema": "6601388185108c270025c72d0203f3d306da2149e3369b92743bd0c88f378477",
+                    "tool-input-schemas": "9daddd2681fb888436baf0ae52ff991ca4744160f567c3c208768e5fd5984cda"
+                  },
+                  "version": "T08-v1-2765a44d9d7382f9033f",
+                  "source_hash": "2765a44d9d7382f9033f9d1b730822559daad7ba9d7689271b8186d7e9d493a7"
+                },
+                "input_hash": "00ed3e60674b4f79727dcc445bb7d941d6009d44b1aa08748f06f5484b083c79",
+                "task_outcome": "unknown"
+              },
+              "evidence_refs": [
+                "snapshot:b9e52f7b-674f-49b4-ac55-8f88ec442513:after"
+              ],
+              "reason": "实际有效预约1条，预期1条。",
+              "evaluator_version": "T08-v1-2765a44d9d7382f9033f-00ed3e60674b4f79"
+            }
+          ],
+          "tool_events": [
+            {
+              "event_id": "f3452940-3ac0-43d3-a884-94ff688851b5",
+              "type": "tool.requested",
+              "run_seq": 12,
+              "tool": "update_booking_request",
+              "code": null,
+              "commit_state": null
+            },
+            {
+              "event_id": "a6f6236b-1301-4516-ae24-5e20a52955d0",
+              "type": "tool.completed",
+              "run_seq": 13,
+              "tool": "update_booking_request",
+              "code": null,
+              "commit_state": null
+            },
+            {
+              "event_id": "b230d3e3-3cd4-47e3-9659-37a10bc0d140",
+              "type": "tool.requested",
+              "run_seq": 21,
+              "tool": "retrieve_rules",
+              "code": null,
+              "commit_state": null
+            },
+            {
+              "event_id": "d62d452f-c9d5-4e62-b6df-e0dc4b27b9d2",
+              "type": "tool.completed",
+              "run_seq": 22,
+              "tool": "retrieve_rules",
+              "code": null,
+              "commit_state": null
+            },
+            {
+              "event_id": "f4c1228e-bd19-4eb8-b373-da112673ec97",
+              "type": "tool.requested",
+              "run_seq": 31,
+              "tool": "query_availability",
+              "code": null,
+              "commit_state": null
+            },
+            {
+              "event_id": "0b884e51-cdd6-430b-9936-a4727c14f9cc",
+              "type": "tool.completed",
+              "run_seq": 32,
+              "tool": "query_availability",
+              "code": "availability_checked",
+              "commit_state": "not_applicable"
+            },
+            {
+              "event_id": "7d96e852-8d1a-410b-9d70-2da6f4a3bda4",
+              "type": "tool.requested",
+              "run_seq": 40,
+              "tool": "preview_booking",
+              "code": null,
+              "commit_state": null
+            },
+            {
+              "event_id": "30726e5c-9455-433b-9d82-bc1b5e4d21f3",
+              "type": "tool.completed",
+              "run_seq": 41,
+              "tool": "preview_booking",
+              "code": "confirmation_required",
+              "commit_state": "not_committed"
+            },
+            {
+              "event_id": "5ab89839-d76d-4d74-9a42-9df8d0df863a",
+              "type": "tool.requested",
+              "run_seq": 65,
+              "tool": "confirm_booking",
+              "code": null,
+              "commit_state": null
+            },
+            {
+              "event_id": "7e4b3921-2a4f-48b4-82cf-21f5f010ba28",
+              "type": "tool.completed",
+              "run_seq": 68,
+              "tool": "confirm_booking",
+              "code": "response_lost",
+              "commit_state": "unknown"
+            },
+            {
+              "event_id": "1bdd751f-5f98-4326-a5e9-117ddf359b65",
+              "type": "tool.requested",
+              "run_seq": 76,
+              "tool": "lookup_booking_by_request",
+              "code": null,
+              "commit_state": null
+            },
+            {
+              "event_id": "552d8554-2dfe-4929-ae94-a334ad90e3f4",
+              "type": "tool.completed",
+              "run_seq": 77,
+              "tool": "lookup_booking_by_request",
+              "code": "request_found",
+              "commit_state": "committed"
+            }
+          ],
+          "activations": [],
+          "sources": [
+            {
+              "file": "receipt-healthy/report.json",
+              "sha256": "b596f54e1f3989fec030dbbd20052bdc6a78709626bcd1a3096a2c7a4cb70b9e"
+            },
+            {
+              "file": "receipt-healthy/observations.json",
+              "sha256": "70a7526c727c7cc03f8ae2ae53b2145db2931a6c69b0b8637efad7aad586e579"
+            },
+            {
+              "file": "receipt-healthy/activations.json",
+              "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+            }
+          ]
+        },
+        {
+          "side": "mutant",
+          "label": "构造缺陷变体",
+          "run_id": "09d103ed-6792-41f5-be6d-1e26c2b82937",
+          "execution_id": "299f2cf8-8071-4d9f-a04d-4fb25016a40c",
+          "manifest_hash": "ac198c0a78a886dc0b3e4240851ccc075cb377bdb4ccd3d261ed599945e76ec9",
+          "target": {
+            "target_id": 1,
+            "name": "场地预约实验对象",
+            "version_id": 6,
+            "version_no": 6,
+            "config_hash": "b9cf79ae79693c3285628aa9a2bb0f8cf31016fabf3cfb44017bb235e323396c",
+            "prompt_hash": "0db5754ab85de312ce138eeb814294e25f8bdc6b2797ba85b80b70aec147b025",
+            "graph_revision": "T04-V0-b9cf79ae7969",
+            "adapter_revision": "langgraph-booking-v1",
+            "tool_revision": "booking-registry-v1"
+          },
+          "inputs": [
+            "2026-11-07，A101，14:00到15:00，8人。请先生成草稿。",
+            "确认"
+          ],
+          "answer": "**预约已成功提交（confirmed）**\n\n- 场地：A101\n- 日期：2026-11-07\n- 时间：14:00–15:00（Asia/Shanghai，即 06:00–07:00 UTC）\n- 人数：8 人\n- 预约号：656e5ddf-0ba9-47f5-9b63-3ee628462ca9\n\n说明：提交时响应丢失，我使用原请求标识查证后确认该预约已写入，并处于 confirmed 状态，没有换用其他标识重新提交。\n\n来源：booking:656e5ddf-0ba9-47f5-9b63-3ee628462ca9",
+          "expected_count": 1,
+          "actual_count": 2,
+          "classification": "detected",
+          "before": [],
+          "after": [
+            {
+              "booking_id": "656e5ddf-0ba9-47f5-9b63-3ee628462ca9",
+              "request_key": "8c811ef1-5b89-490c-95b4-ed6170a30999",
+              "room_code": "A101",
+              "start_at": "2026-11-07T06:00:00+00:00",
+              "end_at": "2026-11-07T07:00:00+00:00",
+              "attendees": 8,
+              "status": "confirmed"
+            },
+            {
+              "booking_id": "4a2473b8-bee8-4ccb-b30d-8041cdcc701f",
+              "request_key": "bc36ab48-ea2c-4eed-9cc3-3e5b67fc05a0",
+              "room_code": "A101",
+              "start_at": "2026-11-07T06:00:00+00:00",
+              "end_at": "2026-11-07T07:00:00+00:00",
+              "attendees": 8,
+              "status": "confirmed"
+            }
+          ],
+          "rules": [
+            {
+              "id": 41,
+              "key": "safety.uniqueness",
+              "metric": "unique_bookings",
+              "verdict": "failed",
+              "expected": {
+                "type": "unique_bookings"
+              },
+              "actual": {
+                "value": {
+                  "active_count": 2,
+                  "request_keys": [
+                    "8c811ef1-5b89-490c-95b4-ed6170a30999",
+                    "bc36ab48-ea2c-4eed-9cc3-3e5b67fc05a0"
+                  ]
+                },
+                "evaluator": {
+                  "dsl": "1.1",
+                  "kind": "rule",
+                  "sources": {
+                    "engine.py": "2fda812429cf6a8af51c6b622d777c7253c7b2a8d89f3673e1bcd5b3f8a5861c",
+                    "service.py": "7e0c5af554a4f5f9053eaacdfe492df64121c314c1ff7f19ee2c2e33569c4ff5",
+                    "__init__.py": "c6b52f473229bc9a56fe07dd05085f1ef74c5193bda5022f3edb29ee81f8570f",
+                    "assertion-schema": "6601388185108c270025c72d0203f3d306da2149e3369b92743bd0c88f378477",
+                    "tool-input-schemas": "9daddd2681fb888436baf0ae52ff991ca4744160f567c3c208768e5fd5984cda"
+                  },
+                  "version": "T08-v1-2765a44d9d7382f9033f",
+                  "source_hash": "2765a44d9d7382f9033f9d1b730822559daad7ba9d7689271b8186d7e9d493a7"
+                },
+                "input_hash": "90eeb05b0fde5902715e26136baf6ceda3274b6e3d81967f837d0e94eb9d44ab",
+                "task_outcome": "unknown"
+              },
+              "evidence_refs": [
+                "snapshot:299f2cf8-8071-4d9f-a04d-4fb25016a40c:after"
+              ],
+              "reason": "按原请求标识和同场地时段分别检查有效预约唯一性。",
+              "evaluator_version": "T08-v1-2765a44d9d7382f9033f-90eeb05b0fde5902"
+            },
+            {
+              "id": 42,
+              "key": "case:001",
+              "metric": "booking_count",
+              "verdict": "failed",
+              "expected": {
+                "type": "booking_count",
+                "equals": 1
+              },
+              "actual": {
+                "value": {
+                  "active_count": 2
+                },
+                "evaluator": {
+                  "dsl": "1.1",
+                  "kind": "rule",
+                  "sources": {
+                    "engine.py": "2fda812429cf6a8af51c6b622d777c7253c7b2a8d89f3673e1bcd5b3f8a5861c",
+                    "service.py": "7e0c5af554a4f5f9053eaacdfe492df64121c314c1ff7f19ee2c2e33569c4ff5",
+                    "__init__.py": "c6b52f473229bc9a56fe07dd05085f1ef74c5193bda5022f3edb29ee81f8570f",
+                    "assertion-schema": "6601388185108c270025c72d0203f3d306da2149e3369b92743bd0c88f378477",
+                    "tool-input-schemas": "9daddd2681fb888436baf0ae52ff991ca4744160f567c3c208768e5fd5984cda"
+                  },
+                  "version": "T08-v1-2765a44d9d7382f9033f",
+                  "source_hash": "2765a44d9d7382f9033f9d1b730822559daad7ba9d7689271b8186d7e9d493a7"
+                },
+                "input_hash": "90eeb05b0fde5902715e26136baf6ceda3274b6e3d81967f837d0e94eb9d44ab",
+                "task_outcome": "unknown"
+              },
+              "evidence_refs": [
+                "snapshot:299f2cf8-8071-4d9f-a04d-4fb25016a40c:after"
+              ],
+              "reason": "实际有效预约2条，预期1条。",
+              "evaluator_version": "T08-v1-2765a44d9d7382f9033f-90eeb05b0fde5902"
+            }
+          ],
+          "tool_events": [
+            {
+              "event_id": "bc11bee2-61e2-4db7-b371-11302f3ead81",
+              "type": "tool.requested",
+              "run_seq": 12,
+              "tool": "update_booking_request",
+              "code": null,
+              "commit_state": null
+            },
+            {
+              "event_id": "468ce6e0-d225-4f26-b8de-cfa55bde4561",
+              "type": "tool.completed",
+              "run_seq": 13,
+              "tool": "update_booking_request",
+              "code": null,
+              "commit_state": null
+            },
+            {
+              "event_id": "0e1ab376-6dd9-4d36-b5ef-20937e790623",
+              "type": "tool.requested",
+              "run_seq": 21,
+              "tool": "query_availability",
+              "code": null,
+              "commit_state": null
+            },
+            {
+              "event_id": "e184e9e5-e996-41fd-9a92-aa684394463a",
+              "type": "tool.error",
+              "run_seq": 22,
+              "tool": "query_availability",
+              "code": "rules_required",
+              "commit_state": "not_applicable"
+            },
+            {
+              "event_id": "177cf183-4d2a-4af7-84da-82daaccc9572",
+              "type": "tool.requested",
+              "run_seq": 29,
+              "tool": "retrieve_rules",
+              "code": null,
+              "commit_state": null
+            },
+            {
+              "event_id": "9906c3d3-6b2c-4454-8566-751a8e437a7d",
+              "type": "tool.completed",
+              "run_seq": 30,
+              "tool": "retrieve_rules",
+              "code": null,
+              "commit_state": null
+            },
+            {
+              "event_id": "b2c0af12-ad18-4f31-85ea-95c23b8828ab",
+              "type": "tool.requested",
+              "run_seq": 39,
+              "tool": "query_availability",
+              "code": null,
+              "commit_state": null
+            },
+            {
+              "event_id": "22f3b5c4-bef7-456b-a208-100e3bbbcc4c",
+              "type": "tool.completed",
+              "run_seq": 40,
+              "tool": "query_availability",
+              "code": "availability_checked",
+              "commit_state": "not_applicable"
+            },
+            {
+              "event_id": "0be7d800-b6ef-4972-b70a-65e783fe087e",
+              "type": "tool.requested",
+              "run_seq": 48,
+              "tool": "preview_booking",
+              "code": null,
+              "commit_state": null
+            },
+            {
+              "event_id": "43bd382c-0a0a-48d1-9a5d-1cca9d23b889",
+              "type": "tool.completed",
+              "run_seq": 49,
+              "tool": "preview_booking",
+              "code": "confirmation_required",
+              "commit_state": "not_committed"
+            },
+            {
+              "event_id": "5511c485-71a0-4641-8b63-efd2cb90df1b",
+              "type": "tool.requested",
+              "run_seq": 73,
+              "tool": "confirm_booking",
+              "code": null,
+              "commit_state": null
+            },
+            {
+              "event_id": "fdc4d31e-2007-4e5e-814d-73c92f2f6942",
+              "type": "tool.completed",
+              "run_seq": 76,
+              "tool": "confirm_booking",
+              "code": "response_lost",
+              "commit_state": "unknown"
+            },
+            {
+              "event_id": "669f8cff-d075-485f-ae1e-662c48f9ec35",
+              "type": "tool.requested",
+              "run_seq": 84,
+              "tool": "lookup_booking_by_request",
+              "code": null,
+              "commit_state": null
+            },
+            {
+              "event_id": "4a45bb10-2003-4f38-9891-124ca559feb2",
+              "type": "tool.completed",
+              "run_seq": 85,
+              "tool": "lookup_booking_by_request",
+              "code": "request_found",
+              "commit_state": "committed"
+            }
+          ],
+          "activations": [
+            {
+              "at": "2026-11-06T09:46:03.299173+00:00",
+              "kind": "slot_guard_bypassed",
+              "booking_id": "656e5ddf-0ba9-47f5-9b63-3ee628462ca9"
+            },
+            {
+              "at": "2026-11-06T09:46:03.350578+00:00",
+              "kind": "slot_guard_bypassed",
+              "booking_id": "4a2473b8-bee8-4ccb-b30d-8041cdcc701f"
+            },
+            {
+              "at": "2026-11-06T09:46:03.357418+00:00",
+              "kind": "new_key_retry_committed",
+              "first_booking_id": "656e5ddf-0ba9-47f5-9b63-3ee628462ca9",
+              "second_booking_id": "4a2473b8-bee8-4ccb-b30d-8041cdcc701f"
+            }
+          ],
+          "sources": [
+            {
+              "file": "receipt-mutant/report.json",
+              "sha256": "4a481306887cb82f1cde7c921cd625e78bbf7abd7f39d61d48be4bb0497607de"
+            },
+            {
+              "file": "receipt-mutant/observations.json",
+              "sha256": "206719d6c20488bcff3c689547b1be5028d0bdfce97ed520617c1b9d1beb998f"
+            },
+            {
+              "file": "receipt-mutant/activations.json",
+              "sha256": "f6a48e2ae36d0edea0c2bbd1837a92788caf3f53874c0ce695bad8d8857542cc"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "studies": [
+    {
+      "id": "T16",
+      "title": "版本对照与原方法评估",
+      "sample": "正式V0/V1各160次；E1另取60条轨迹。",
+      "conclusion": "未证明V1整体质量提升",
+      "result": "V0规则通过146条、失败5条、等待输入9条；V1规则通过145条、失败7条、等待输入8条。E1三种方法对原4条problem标签均为0/4召回。",
+      "boundary": "4条problem是原人工标签，不等于4条已确认客观缺陷；相关重复不视为统计独立。",
+      "exclusions": [
+        "等待输入不计作成功；每版本35个计划故障中30触发、5未触发，未触发不能计为恢复成功。",
+        "E1另有6条人工信息不足。",
+        "仅回答裁判、规则、规则加同一回答意见的方法未知分别为51、6、51；不混成同一分母。"
+      ],
+      "case_ids": [],
+      "source": {
+        "file": "docs/evidence/T16/final-report.md",
+        "sha256": "d568b049bfbbb5457b8c5bfe49818c761d8e352fcb67b753977673168483fa29",
+        "text": "# T16 正式实验交付报告\n\n2026-10-29。实施与实验完成，待团队验收；本报告不代表Agent质量合格。原始失败、未知、独立标签与助手意见均保留。未进入T17，未提交或推送Git。\n\n## 范围与版本\n\n正式数据沿用T13修订包`7fea79461d96c72677c0aad60e1582bf9fc3e579f154a06de8d5f22922d911d1`，120条、60/30/30分区、关键20条各三次。V0为T13冻结源码，V1仅增加同一响应多工具整组拒绝、允许逐个重试的策略；提示词、检索、知识与评价器未改变。两版本各12配置，V1仅在正式隔离库登记，主库仍40旧版本。\n\nV0归档SHA256=`7d33c1376a4220dbda08357c130a249361610e882847bbab04798c5930e43ac6`；V1=`1b3898d69d26a90500ecbec7ec037f9da4ed2e45af77d041dccbb93573c69167`。版本与每条计划/配置/来源映射见`session.json`、候选manifest及各episode的`plan.json`。\n\n初始并行诊断35计划出现MySQL 1213死锁，全部诊断观察与费用保留，统一另建串行正式320计划，不按结果挑选替换。正式320条全部有导出，160对声明条件核对一致。诊断与离线机械控制均不混入正式分母。平台seed不等于模型随机种子，同一模型别名没有钉死服务端版本；相关重复不宣称统计独立。\n\n## E2：版本对照\n\n| 指标 | V0 | V1 |\n|---|---:|---:|\n| 计划/已观察 | 160/160 | 160/160 |\n| 规则passed | 146 | 145 |\n| failed | 5 | 7 |\n| 等待输入 | 9 | 8 |\n| 正式模型调用 | 1338 | 1392 |\n| 已知token | 7,778,962 | 8,060,789 |\n| 冻结高峰费率估算美元 | 2.483391 | 2.572190 |\n| claim到导出中位秒数 | 12.048 | 12.739 |\n| P95秒数 | 38.811 | 38.825 |\n\n规则通过不是完整语义通过，等待输入不是成功。V1没有表现出改进，不能将差异归因于策略；三对状态差异均没有策略拒绝事件。每版本35个计划故障中30触发、5未触发，未触发不能计为恢复成功。正常类别均26/26规则通过，含重复。\n\nV1实际34个拒绝工具事件、涉及17条执行，全部未分发且前后业务快照相同，证明机制发生，不证明质量收益。B003第1次V1把输入“-2人”引用为“2人”并提交一笔；纯函数离线控制证实共有来源校验的子串/符号边界缺口。M023第2次虽SQL只有正确第一笔，仍有不合法工具参数，按冻结契约保留失败。没有在冻结实验后补丁重跑以替换成绩。\n\n完整指标、类别/分区、重复、差异、事件及来源：`analyses/20261029T152818/E2.json`、同目录CSV与`E2-report.md`；解释见`docs/fixtures/T16/E2-findings.md`。`negative-quote-offline-control.json`是额外离线诊断，不算正式样本。\n\n## E1：检查方法对照\n\n关键20条V0三次轨迹共60条，G1/G2各30条真人独立封存后才调用裁判。原始执行标签problem4、clear50、insufficient6；4条阳性均在G1且存在单列的助手口径分歧，不能直接称4条已确认真实缺陷。\n\n| 方法 | 主召回（含方法弃权） | 精确率 | 双方可判定/60 | 方法未知 |\n|---|---:|---|---:|---:|\n| 仅回答裁判 | 0/4 | N/A | 7/60 | 51 |\n| 规则单独 | 0/4 | N/A | 48/60 | 6 |\n| 规则+同一回答意见 | 0/4 | N/A | 7/60 | 51 |\n\n没有问题报警，不能用0误报或可判定子集FN=0掩盖弃权。正式60次裁判45条结构错误、15有效；有效子集支持性一致10/15、解释8/15，不是60条准确率。增强检查未证明召回收益；关键V0规则54通过/6等待输入，没有规则阳性，不能事后将E2失败挑进E1。\n\n另30条C校准有21错误/9有效，原支持2/9、解释4/9一致保持。三批总90调用66结构错误、24有效，全部finish_reason=stop，不归因为截断。错误含空证据引用、嵌套结构不符、无效JSON，未自动补修或重试。\n\nG1按用户要求逐条助手复核：21建议修改、9维持，30条另存`assistant_analysis`并在页面区分，原封存/AI/主统计不变。G1-019保留条件回顾问题，019/026的草稿作废状态证据不足。敏感性另算，助手视角1条问题亦未检出；它不属于第二份独立真人标签。G2保留用户实际封存，无虚构助手裁决。单一标注者、相关重复、G1辅助意见可影响后续理解，均不宣称多人可靠性。\n\n来源：`analyses/20261029T153418/E1.json`、`analyses/20261029T153420/G1-sensitivity.json`、三份`*-original-seal.json`、`judge/`全部输入/协议/原始响应、`judge-protocol-diagnostics.json`。详细说明`docs/fixtures/T16/E1-findings.md`和`G1-assisted-review.md`。\n\n## 费用、验证与保留\n\nAgent2961次全部结算/有usage，17,103,189token，估算5.463451美元（正式5.055581、诊断0.407870）；judge90次全部结算/有usage，78,833token，估算0.034985美元。合计5.498436美元，均为冻结费率估算，不是实际账单；预留0、生成器0。独立上限54.30/1.35美元及旧8账本/初始化标记保留，未重置额度。SQL票据与Redis无差异，见`accounting/20261029T153416.json`。\n\n后端最终253项通过，0失败/错误/跳过（`backend-full-final.txt`）；相关专项13项含3项与全量重叠，不重复累加。类型/构建、ruff/格式、94包离线锁及契约导出通过。真实封存后G1/G2桌面/手机页面验证0写入，见`completed-review-ui/`；其余前置空标签、三项必选、助手意见隔离的检查与历史失败日志全部保留。\n\n最终审计`audits/20261029T154531.json`：4209旧文件、8旧账本、主库逐字段、冻结源码及正式执行器不变，355正式+诊断导出/2961原始Agent调用核对；无running执行。17个正式等待输入保留，不擅自续跑；诊断认领失败仍排队状态不表示活跃Worker。`delivery-audit.json`另核对90个实际盲评输入/原始调用、2527个run artifact与SQL一致及三份原封存不变。最终公开文件SHA清单为`delivery-manifest.json`，私有`.local`不在清单。\n\n根`.env`四付费开关false，标签API子进程无模型密钥。正式隔离库和账本保留；主库16表/23触发器/迁移0006不变，没有新运行/预约/缺陷。MySQL数据仍C盘；仅按用户授权精确purge已验证备份的20份关闭日志，D盘共享历史备份不上传。当前剩余空间约9.07GB，以最终审计实测为准。\n\n## 团队验收\n\n1. 用demo_reviewer登录G1：<http://127.0.0.1:5183/judging/34e8cd5e-5852-5ad4-9bee-8c2adf851da2>；密码读本地`.env`的DEMO_SEED_PASSWORD。查看G1-019/026：原人工、助手辅助、AI三种来源分别显示，原封存不可覆盖。\n2. G2：<http://127.0.0.1:5183/judging/99471fa1-2822-57ef-b994-545834854d7d>。应有30封存标签与30条裁判返回；结构错误显示为错误/待复核，不伪装通过。G2无新增助手审核。\n3. 对照本报告与E1/E2原JSON；从E2的B003第1次映射到episode，检查用户“-2人”、工具引用、SQL1笔、预期0笔及失败断言；不可因最终措辞流畅判通过。\n4. 查看账本对账、最终审计和SHA清单，核对320分母、诊断另列、原标签不变。少文件/hash不符、隐藏错误或原标签被覆盖均应反馈，不能按完成数判质量合格。\n\n当前视图约2026-10-30 05:12上海到期，精确时间/stop_file在`.local/t16/latest-review.json`；到期只停视图，不删正式库/证据/账本。可按`docs/architecture/formal-experiments.md`免费恢复查看，不需新模型调用。后续候选优先处理人数来源完整边界、裁判协议与新校准，均需另列任务/版本；本轮停T16等待检查。\n"
+      }
+    },
+    {
+      "id": "T17L",
+      "title": "已知缺陷检出",
+      "sample": "4类构造缺陷，各1次健康/变体，共8次真实执行。",
+      "conclusion": "两个可判定缺陷被证据规则检出",
+      "result": "已激活且可判定的缺陷检出2/2；健康SQL控制误报0/3。",
+      "boundary": "构造缺陷、小样本和狭窄SQL真值，不能外推通用检出率或模型自行产生代码缺陷。",
+      "exclusions": [
+        "1条变体未激活，2条执行未知；它们不进入缺陷检出分母。",
+        "健康侧被拦截的异常请求需独立复核，不直接算误报。"
+      ],
+      "case_ids": [
+        "confirmation",
+        "receipt"
+      ],
+      "source": {
+        "file": "docs/evidence/T17L/final-report.md",
+        "sha256": "75c04c8f817c6f621fe5a9a0bb92c5673d8c67b6c4822d80f36931d4c6c7b4ed",
+        "text": "# T17L 已知缺陷检出验证\n\n已完成实现、独立审查、免费接线、8次真实执行和8条真人独立标注，待团队验收。不自动开始T17M，不Git。\n\n| 缺陷家族 | 健康侧SQL | 变体侧SQL | 真实执行结论 |\n|---|---:|---:|---|\n| 未确认写入 | 0 | 1 | 变体实际写入，预约数量规则检出 |\n| 带符号人数 | 0 | 0 | 变体未激活；健康侧曾请求负数参数，Schema正确拒绝，安全告警保留待复核，不能当误报 |\n| 回执丢失后重复提交 | 1 | 2 | 变体实际第二笔成功，数量及唯一性规则检出 |\n| 无写入虚报成功 | 1 | 0 | 变体未到确认方法；模型称缺grant而未提交，服务端状态为authorized；冻结输入用尽后仍待确认，行政取消封存，列未知 |\n\n4类构造缺陷的最终免费接线均激活并检出，4个健康控制无告警；它是接线验证，不是真实模型效果。真实批次仅有2条已激活且可判定的缺陷，检出2/2、漏检0/2；另1未激活、2未知。健康SQL控制误报0/3，只适用于本次狭窄SQL真值与已排除未知的分母，不是所有规则或行业通用准确率。\n\n真人只看实际输入与最终回答，随机Q编号、无预填，已独立封存。Q05未确认写入、Q08重复预约均标为“未见明确问题”，证据规则分别发现1笔未授权副作用和2笔重复副作用。这是本轮最直观的价值：回答看起来正常，SQL仍能揭示实际错误。8条中1条选信息不足、2条实验未知不进入可比一致分母，其余明确判断与SQL事实一致3/5。不能把这一小样本叫人工能力排名或裁判准确率；原标签、AI历史结果、T16和T17B结论都不改。\n\n真实模型请求48/120次，48条usage全部返回：输入224168、输出6601，共230769token；未知预留0。峰值估算75192微美元，按已有2026-11-05参考换算约¥0.504959，非账单。独立总额度仍1美元，账本不清零；judge、生成器、助手均0调用。没有追加批次以凑齐激活。\n\n21项后端专项检查通过，最终8次免费SQL/Redis接线通过，6项盲标注界面控制通过；原判定器与生产142源码完全保持，26内存契约核对一致。唯一当前模型独立review发现3项P2，主代理修复健康字段核对、异常/未完成执行排除、非数量健康告警待复核，并用专项负控制验证；不重复review。早期夹具未取到草稿、汇总函数补丁位置错误和触发器权限错误另列development-observations.json；失败阶段的数据库/实验记录保留，原命令输出在本轮会话，并未存成逐轮原日志或每版源码快照，没有冒充一轮全通过。SQL迁移触发器只在自有库由管理员建立，实验账号无全局权限。\n\n8份报告ZIP内部清单与3类导出共24个SHA256核对通过。原生SQL语句数组归档恢复后17表规范哈希一致，才精确清理本轮自有库/恢复库/用户；原始文件保留D盘。主API、UI、Worker未启停，`.env`与五个常开开关保持。真实批次前后原16账本及主表快照一致；整个会话期间另观察到主运行/执行2→3、事件29→53、预约1→2、本地日常账本15→24请求，发生于真实批次前，调用者未独立归因，未算本轮T17L48次、未回滚。细节见preservation-audit.json。不要声称整轮主表或全部旧账本完全未变化。\n\n可视化对照入口为本地`http://127.0.0.1:18027/`，仅只读展示本轮结果；离线文件`.local/t17l/real-01/comparison.html`保留。每组可展开最终回答，并查看SQL/原事件、激活记录、保存规则及证据包。验收步骤见`docs/acceptance/T17L.md`；下一项为T17M，需团队验收后继续。\n\n收尾补充：只读结果页另外7项控制通过（8项结果展示、展开、手机深色布局、SQL引用、ZIP哈希、私有SQL拒绝、POST拒绝）。后续收尾阶段又观察到主运行/执行各4、事件66、用例130，日常账本28请求及T11生成器4请求；这些共享活动未独立归因，与本实验48次分开，细节另存audit-final。当前7业务操作ready，Worker/Dispatcher容器running且0重启，但supervisor_observed=false；本轮没有重启或修复守护，不宣称长期独立保活已解决。监听PID已更替，仅记录实际观察，不沿用旧PID管理。\n"
+      }
+    },
+    {
+      "id": "T17N",
+      "title": "正常与故障成对验证",
+      "sample": "6组、12次真实执行，故障实际触发6次。",
+      "conclusion": "完整可比3组恢复，另3组未知/排除",
+      "result": "3/3仅表示完整可比子集；不是6组总体恢复率100%。",
+      "boundary": "没有追加输入或重采样，不能把未完成或证据不足当安全降级成功。",
+      "exclusions": [
+        "F01两组：原键查询未得明确结果，脚本结束仍待输入，行政取消并保留未知。",
+        "F03一组：形成草稿后仍待确认，行政取消并保留未知。"
+      ],
+      "case_ids": [],
+      "source": {
+        "file": "docs/evidence/T17N/final-report.md",
+        "sha256": "7f41d334b108c8f383a2b7d22bfd97316a5003dd57724e7d55379c91b69d11b5",
+        "text": "# T17N 正常／故障成对实验\r\n\r\n2026-11-07。实现完成，待团队验收；不自动进入 T18，不提交 Git。\r\n\r\n## 交付\r\n\r\n“缺陷与报告 → 运行比较”新增正常／故障模式。复用原 T07 故障和报告权限；GET `/api/v1/reports/fault-compare` 只读，不运行模型或重写判定。逐项核对源码、模型、用例、预期、知识、角色、预算、种子、独立 scope/session 和初始 SQL；完整原始返回、模型可见返回、动作顺序、SQL、原规则及费用分别展示。原版本比较保留。\r\n\r\n缺失证据、未触发、未完成和条件不一致不能标成恢复。F04 还需原请求键查证返回与 SQL 的预约号、请求键一致；换键提交尝试单列。未声明目标保留未知，历史 cancelled 行保留但不计有效预约。空 SQL 的降级候选仍需人工语义核对。\r\n\r\n## 冻结与真实结果\r\n\r\n独立 agent 授权 `T17N-20261107-agent-1`：总 1.50 美元／240 请求，每执行 0.10 美元／20 请求，单请求45秒／1024输出 token。生成器、裁判、助手本实验不调用。用户在当前会话明确批准。\r\n\r\n同一开发家族、同一两轮输入和冻结时钟，每种故障两组，交叉执行顺序，共12次隔离执行。真实批次前，免费接线发现初稿长确认词不属于 message 接口确认契约，修订2改为既有“确认”；预约条件、预期、预算不变，初版和失败全部保留。最终 catalog hash：`f2f9b347b83e7e4af8878d8c7f3e2928302286fa0262b999446acd6b7af0de93`。\r\n\r\n| 故障 | 正常侧 | 故障实际触发 | 故障侧结果 |\r\n|---|---|---|---|\r\n| F01 提交调用前失败 | 2次均1笔预约 | 2/2 | 2次SQL为0，原键查询未获明确结果；固定脚本结束后仍待输入，行政取消并保留未知 |\r\n| F03 只读返回损坏 | 2次均1笔预约 | 2/2 | 1次恢复并预约1笔；1次到草稿后仍待确认，行政取消并保留未知 |\r\n| F04 提交后回执丢失 | 2次均1笔预约 | 2/2 | 2次均原键查证成功，SQL各1笔，无换键重提 |\r\n\r\n计划/观察6组；故障触发6次；完整可比较3组，恢复3次，未知/排除3组，未配对0。三个未知不算允许降级成功，也不能从“完整组3/3恢复”外推总体恢复率。12次中无追加输入、重采样或挑选成功结果；实际返回模型均为 `deepseek-flash`，不保证供应商确定性或隐藏模型修订一致。\r\n\r\n92请求／92已结算usage，输入531488、输出11898 token；估算173768微美元，按既有固定参考换算约 **¥1.166956**，未知预留0。金额不是供应商账单。旧T16、T17B及其他实验结论保持。\r\n\r\n## 验证与保全\r\n\r\n最终46项后端专项及报告/故障回归、3项契约检查、8项界面检查、类型/生产构建和Ruff通过，非后端全量。界面包含手机深浅主题、迟到回包隔离、原版本比较和实际主服务只读检查。同当前模型唯一一次独立review发现2项P2（取消历史误报、缺目标误判），均由主代理修复并补验。首轮界面登录恢复/手机表格溢出、比较选择器及请求缺来源头等失败记录保留；选择器改为两个明确模式按钮。\r\n\r\n免费12次SQL/Redis最终接线：正常6次成功，F03/F04各2次恢复，F01两次保留未知；是离线模型接线控制，不是模型质量。之前失败控制不删，不与真实结果混算。\r\n\r\n36份导出、12个ZIP内部文件清单/SHA256核对；隔离数据库17表原生SQL导出、恢复后规范哈希一致，才精确清理自有实验库/恢复库/专用用户。复用T17L窄权限实验隔离原语，原T17L harness不改；共享日志备份及旧数据库不清理。\r\n\r\n主版本66，150来源，hash `7ad66fc475f488dfa21612150e9f8a179a144e8624f2f891b615a57f36e1a768`；旧65与历史版本保留。整轮主库仅版本表新增66，真实批次前后主17表相同；旧18账本逐字段、`.env`原字节保持，五日常调用开关开启。新增第19独立账本，未扩旧额度。主Worker/Dispatcher在无待运行时原脚本刷新，不关闭主API/UI或调用开关；独立保活仍是T22边界。\r\n\r\n原始材料在 `.local/t17n/real-01`，受控只读快照 [本地对照页](http://127.0.0.1:18031/)。刷新不调用模型。真实数据已归档，不能在主库冒充现场运行；主比较入口用于已有归属运行。完整汇总见同目录 `final-report.json`；人工验收步骤见 `docs/acceptance/T17N.md`。\r\n"
+      }
+    },
+    {
+      "id": "T18",
+      "title": "模拟退款参考对象",
+      "sample": "固定8场景，各运行1次，隔离模拟账本。",
+      "conclusion": "7条规则通过，1条未知",
+      "result": "提交后回执丢失场景经原键查账与SQLite核对，仅1笔12000分。",
+      "boundary": "同一项目开发者实现的第二参考对象；无真实支付、无独立外部Agent接入验证。",
+      "exclusions": [
+        "F01提交前工具失败：固定脚本结束仍待确认，行政取消；0笔不能算降级成功。"
+      ],
+      "case_ids": [],
+      "source": {
+        "file": "docs/evidence/T18/final-report.md",
+        "sha256": "bdb6a1da1eeb8a3c348c36f800926b07fffe2020d035b4cc4630fcab4eddea67",
+        "text": "# T18 第二对象接入结果\r\n\r\n2026-11-08。实现与验证完成，待团队验收；不自动T19、不Git。用户选择同一开发者实现的模拟退款参考对象，**没有独立外部Agent验证**。全部隔离模拟入账，无真实支付。\r\n\r\n## 实际结果\r\n\r\n| 场景 | 规则/执行结果 | 模拟入账 | 故障实际触发 |\r\n|---|---|---|---|\r\n| 正常模拟退款 | 规则通过 | 1笔／¥120.00 | 0 |\r\n| 不可退订单 | 规则通过 | 0笔／¥0.00 | 0 |\r\n| 他人订单隔离 | 规则通过 | 0笔／¥0.00 | 0 |\r\n| 确认前修改订单 | 规则通过 | 0笔／¥0.00 | 0 |\r\n| 明确拒绝 | 规则通过 | 0笔／¥0.00 | 0 |\r\n| 重复确认 | 规则通过 | 1笔／¥120.00 | 0 |\r\n| 入账回执丢失 | 规则通过 | 1笔／¥120.00 | 1 |\r\n| 提交前工具失败 | 未知／行政取消 | 0笔／¥0.00 | 1 |\r\n\r\n固定8场景各1次，不追加输入或重采样：7组规则通过，F01工具失败组仍待确认，固定脚本耗尽后行政取消；0笔不能算成功降级。F04实际提交后回执丢失，按原请求键查账并与SQLite匹配，仅1笔12000分。规则只检查已声明的领域条件，不代表整段回答正确率或通用Agent准确率。没有新增真人独立标签或调用裁判。\r\n\r\nDeepSeek实际返回deepseek-flash。47请求/47usage，71378输入、4168输出token；26435微美元，按既有固定参考换算约¥0.177527，held=0。独立上限1.50美元/160请求，执行内0.10美元/20请求，45秒/1024输出token；其他角色本实验0。真实批次执行墙钟约74.65秒。供应商隐藏修订及确定性无法保证。\r\n\r\n## 接入改动与复用\r\n\r\n相对本项开始快照，运行时/专用验证共43文件、+2291/-48行，逐文件记录见JSON。墙钟窗口约17.51小时，按准备文件mtime至清单创建计算，包含跨轮等待、工具和测试；未独立计量人工/纯编码工时，不用于宣传接入效率。\r\n\r\n审计发现执行器、事实快照、评价与导出均有预约硬编码，实际增加白名单Python适配契约、独立执行端口和退款领域规则；预约保留原生支路。共用运行/租约/预算/事件/SSE/故障拦截/报告和创建预检；领域部分为参考Agent提示/工具、订单与退款SQLite、确认绑定、fixture及事实断言。没有新增框架、依赖安装或平台表迁移。第三个对象仍需实现端口与领域契约，不能声称任意HTTP Agent即插即用。\r\n\r\n业务链为当前账号订单→可退校验→冻结金额/订单/请求键草稿→明确确认→单次模拟入账→原键查账。数据库/owner/scope三重绑定账本，租约覆盖SQLite提交，原键与订单分别唯一，禁止旧草稿确认或静默重放崩溃调用。缺账本为未知，不创建空库冒充0。\r\n\r\n前端沿用工作台：领域切换清空不兼容选择，用例详情可带入退款运行；结果概览显示笔数/金额/回执，链路显示真实工具和领域断言。参考来源可主动查看。预约RAG、六维概览和AI裁判对退款为N/A，未伪造评分。退款使用执行内完整历史、无结构摘要/跨执行记忆，超界由现有限制拒绝。当前SQLite共享依赖Windows/API与托管Linux Worker卷映射，独立部署与监督保活仍属T22。\r\n\r\n主库当前预约版本ID71（157来源），退款版本ID72；保留66及本轮所有过渡冻结版本，8条参考用例131—138、F01/F04配置21/22。真实执行在隔离库，未导入主运行冒充现场。真实原176文件冻结源码保留；付费后只做一处行宽等价排版、纠正退款上下文能力元数据，两项均另存证明、免费补验，业务代码/提示不变，未再付费。\r\n\r\n## 验证与保留\r\n\r\n67项后端专项及预约故障/报告回归、3契约通过；9项UI（含实际主库只读准备入口和只读结果页）、类型/构建、Ruff通过。不是后端全量。两次收尾各1项免费补验。当前模型唯一完成的独立review发现2项P2：正常追加输入的revision处理、无效工具调用及下游参数防御；均已修复并验证。较早未完成review无报告，不计一次已完成审查。\r\n\r\n首轮seed审核身份触发器拒绝、导出误要求知识库、测试夹具/选择器错误与初版失败日志保留；没有隐藏失败或把离线工具控制记真实模型质量。最终免费八组同样7通过、1未知。24导出/8 ZIP内部清单SHA256、8 SQLite副本完整性及快照、17表MySQL导出恢复哈希核对后，仅清本项自有隔离实验库/恢复库/专用用户。原始SQLite、事件/调用/报告、旧实验与共享日志备份保留本地。\r\n\r\n真实批次前后主17表和旧19账本逐字段一致；整个会话另观察到日常预约账本57→59请求、估算119652→121891微美元、房间72→75，调用者未独立归因，不计入T18，也不回滚。其余18旧账本保持，全部旧限额不重置。主登记增加目标1、版本6（含过渡版本）、用例8、故障配置2；.env原字节及五开关/本地不限次数偏好保持。API/UI/Redis保持，Worker按当前源码刷新并恢复原附着监督；独立保活未宣称解决。\r\n\r\n验收：[T18步骤](../../acceptance/T18.md)。真实只读结果：http://127.0.0.1:18033/ 。主界面：http://127.0.0.1:5173/library 。浏览不付费；新建并提交真实运行是另一次实际执行。下一项T19需团队验收后再启动，并需要真实独立参与者，不能由助手代填。\r\n"
+      }
+    },
+    {
+      "id": "T17B",
+      "title": "受限AI辅助评价",
+      "sample": "12条新编受控开发样本，单一独立标注者先封存。",
+      "conclusion": "结构有效不等于语义一致",
+      "result": "结构有效12/12；支持性一致6/12、解释一致7/12、两项均一致5/12。",
+      "boundary": "受控开发样本不替代正式保留集，也不满足执行级30条独立标注门槛。",
+      "exclusions": [
+        "7条存在至少一项原标签分歧，保留原判断与复核边界。",
+        "本轮没有重标、重评或调用模型。"
+      ],
+      "case_ids": [],
+      "source": {
+        "file": "docs/evidence/T17B/final-report.md",
+        "sha256": "6d6ea51e9697e96ce8ebe650ed46e46abd649ddefa2298a7e279d0aa51b7d861",
+        "text": "# T17B 协议修复与新校准报告\r\n\r\n2026-10-30。代码与真实验证已完成。用户已明确回复“接受受限辅助边界，按报告验收”，按受限辅助范围完成T17B；7条分歧保留，不自动进入T17C。决定另存team-decision.json。\r\n\r\n## 结果\r\n\r\n12条新编受控开发样本经demo_reviewer独立标注并封存后，才各调用一次DeepSeek judge。样本6条只给对话/回答、6条附明确观察；不是新的Agent实验或正式保留集。原人工标签、模型结果及主统计均未修改。\r\n\r\n| 项目 | 实际结果 |\r\n|---|---|\r\n| 初次结构有效 | 12/12，100% |\r\n| 最终结构有效 | 12/12，100%；无修复、无重试 |\r\n| 结果分布 | 可接受6、发现问题5、不确定1、错误0 |\r\n| 原人工支持性一致 | 6/12，50% |\r\n| 原人工解释合理性一致 | 7/12，58.33% |\r\n| 两项均一致 | 5/12 |\r\n| 需复核 | B001、B003、B006、B008、B009、B011、B012，共7条 |\r\n| 回答视图一致 | 支持4/6、解释4/6 |\r\n| 附观察视图一致 | 支持2/6、解释3/6 |\r\n| 调用/用量 | 12请求、12usage、12结算、18,832 token |\r\n| 峰值费率估算 | 7,078微美元，即0.007078美元；held=0，不是账单 |\r\n| 授权 | 独立judge最多0.50美元/12请求；请求额度已用完，不再调用 |\r\n\r\n结构校验包括JSON、嵌套Schema、引用和结论一致性。100%只描述这12条，不能与旧T16不同样本分布24/90直接作质量提升对照，更不能作为语义准确率。只有一个真人，原支持性分布9有依据/2矛盾/1不足，解释分布9合理/3不合理/0不足；小规模受控样本及同提供方模型的相关性限制保留。\r\n\r\n逐条结果、原标签与事后证据分析见[calibration-review.md](calibration-review.md)，完整混淆表、kappa和两视图分层见[calibration-summary.json](calibration-summary.json)。原统计中false_accepts/false_rejects仅指相对这份原人工标签的分歧，不是已证明的模型误判率。\r\n\r\nB008/B011有明确空SQL或仍确认的快照，回答与给定观察冲突；B001缺SQL不能从回答自述证明成功。B003涉及事实支持与遵从请求的判据边界；B012的历史快照不能证明当前状态，AI对“已核实”提出质疑有依据，但将整个状态断言判为矛盾仍有过强推断风险。助手分析另存，不当作新增独立金标准，也不把不同意人工标签自动算AI正确。\r\n\r\n**建议保留为受限人工辅助：** 保持7条分歧可见、不用本12条开启执行级自动裁判、不覆盖规则或预约事实，不追加调用迎合标签。原“30条同版本校准及分歧复核完成”的执行评价守卫仍在，本批12条不会自动解锁。任务规划T17B要求团队依据报告明确决定该边界；用户已明确确认该边界；不代表裁判具备自动判定质量。\r\n\r\n## 修复与兼容\r\n\r\n新T17B-v2使用可验证的具体JSON示例、实际Pydantic生成的Schema与judge专用JSON Output。响应拒绝扁平结构、重复JSON键、未知引用、空白/截断、额外字段或不一致的结论，不静默修正；只有证据不足维度可空引用。新请求只发送允许的实际观察，不发送人工标签、旧规则结论或预期答案。详见`docs/architecture/judge-protocol-v2.md`。\r\n\r\n原T16的90次原响应只用于诊断：66次不满足旧结构，包括6次无效JSON。逐文件SHA见`legacy-diagnosis.json`；旧标签、AI、统计、源码归档和正式结论保持。JSON模式仍可能失败，官方说明见[DeepSeek JSON Output](https://api-docs.deepseek.com/guides/json_mode/)，2026-10-30核对。本批SDK把response_format转入model_kwargs的提示是已保留的库警告，未隐式重试。\r\n\r\n源码兼容主版本43，hash `064792ef892229340021f99074e74b8ffc94ad27262c22e0e2baae25b85ae93b`；它反映源码变更，不是新增Agent语义实验。旧42版本/123历史用例/4个数据artifact和用户原1个queued运行/执行逐字段保持，主预约与缺陷仍0。没有运行或改写用户队列。16表/23触发器/0006保持。\r\n\r\n## 验证与留存\r\n\r\n- 后端全量340通过，加新增2项真实SQL封存控制通过，合计覆盖当前342项；无失败、错误或跳过。\r\n- 前端8项不同检查通过：标注前、封存后实际只读页（1440/390/320覆盖）及6项既有非付费回归；收尾只读恢复后再复验相关项。未替真人保存任何新校准标签。\r\n- 类型/生产构建、ruff、格式检查、94包离线锁、17份契约核对通过。旧16份契约仅在内存生成比对，未重写；新增单独v2响应契约。\r\n- 每条盲评请求与冻结观察完全匹配；12条均晚于真实封存。provider usage、SQL预留/结算与全局账本逐条匹配，旧12份授权账本逐字段不变。\r\n- T16/T17/T17A原交付清单字节不变，其9009/133/70份历史证据、fixture、数据与验收文件不变；旧清单中可变源码/任务规划按新任务变化，未伪称全部路径仍相同。\r\n\r\n原始SQL Artifact与provider字节单份保存在`calibration-0d89a85f37ac/raw-evidence.zip`，成员SHA见`archive-manifest.json`；原人工封存与协议、实际调用前源码归档分别保留。标注环境已按精确stop_file正常关闭并导出，原结果以新临时库只读恢复；核对标签、seal、AI、复核、统计完全一致，恢复新调用0，旧库/用户精确清理。只读恢复退出不改原始ZIP。\r\n\r\n日常四付费开关false，未改本地密钥；agent/生成器本项0调用。没有安装、WSL、MySQL迁移或日志purge，没有清理旧.local。README、AGENTS、交接、历史资料、.env及本地配置仍本地；HEAD保持0f26016，索引空，未Git发布。\r\n\r\n## 团队复看\r\n\r\nhttp://127.0.0.1:5186/judging/30df7075-dc30-4671-9676-944c739c0600 ，demo_reviewer/密码读取本地DEMO_SEED_PASSWORD；只读至2026-10-31 03:22:41左右上海。精确stop_file见`.local/t17b/latest-review.json`。HTTP进程无模型密钥、Worker或付费能力，原标签与AI分开展示，POST统一403。详见`docs/acceptance/T17B.md`。到期仍可直接核对JSON/ZIP，免费恢复脚本见该文档。\r\n"
+      }
+    }
+  ]
+}

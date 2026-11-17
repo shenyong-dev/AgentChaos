@@ -1,6 +1,11 @@
-.report-tabs { display: flex; gap: 24px; margin-bottom: 22px; border-bottom: 1px solid var(--ac-border); }
-.report-tabs button { border: 0; background: none; padding: 0 0 13px; color: var(--ac-muted); cursor: pointer; font-size:14px; border-bottom: 2px solid transparent; }
+.report-tabs { display: flex; gap: 12px 24px; flex-wrap: wrap; margin-bottom: 22px; border-bottom: 1px solid var(--ac-border); }
+.report-tabs button { border: 0; background: none; padding: 10px 4px 13px; color: var(--ac-muted); cursor: pointer; font-size:14px; border-bottom: 2px solid transparent; border-radius:5px 5px 0 0; transition:color .16s,background .16s,transform .12s; }
 .report-tabs button[aria-selected=true] { color: var(--ac-accent); border-bottom-color: var(--ac-accent); }
+.report-tabs button:hover { color:var(--ac-accent); background:var(--ac-accent-soft); }
+.report-tabs button:active { transform:translateY(1px); }
+.report-tabs button:focus-visible { outline:2px solid var(--ac-accent); outline-offset:3px; }
+@media(prefers-reduced-motion:reduce) { .report-tabs button { transition:none; }.report-tabs button:active { transform:none; } }
+@media(max-width:700px) { .report-tabs { gap:12px; }.report-tabs button { padding:10px 0 13px; font-size:12px; } }
 .report-run-picker,.report-comparison-picker { display: flex; align-items: end; gap: 12px; flex-wrap: wrap; margin: 18px 0 22px; }
 .report-run-picker label,.report-comparison-picker label { display: grid; gap: 7px; min-width: 0; flex: 1; max-width: 550px; font-size:13px; color: var(--ac-text); }
 .report-run-picker .el-select,.report-comparison-picker .el-select { width: 100%; }

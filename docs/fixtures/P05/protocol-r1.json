@@ -1,0 +1,28 @@
+{
+  "schema": "offline-retrieval-protocol-v1",
+  "frozen_at": "2026-11-15T07:26:05.544583+00:00",
+  "fixture": "docs/fixtures/P05/retrieval-r1.json",
+  "fixture_sha256": "752835e9c9e4643eeab68c841d1480c61b3644df8acf365fc4a648bcd5c6165c",
+  "sources": {
+    "backend/app/agents/retrieval.py": "bba813ba4ff150cc0d96c89f392434c4ea28d926dcbbf250dd657bb23e641561",
+    "knowledge/retrieval-terms.json": "93a9923c77320f816aeec61a0dcf996e56a8620d04b624516504054b759b528d",
+    "knowledge/booking-userdict.txt": "b6776ac5c2c73792d6a09bfb6c01618f390a7f7ae1c245bbe811e3e3011229e2",
+    "backend/benchmarks/retrieval_regression/runner.py": "b3e452055066273c773fcc2e7649d4b1a37a45cc4c10643dcadb73cd35a79264"
+  },
+  "boundary": "Implementation-authored mechanical queries and gold; not independent human labels or holdout; no answer/model quality claims.",
+  "predeclared_checks": [
+    "expected status",
+    "all declared one-clause gold chunks in top3",
+    "top1 only when declared",
+    "no forbidden documents",
+    "empty results when no gold"
+  ],
+  "metrics": [
+    "per-category passed/total",
+    "macro Recall@3 on gold-bearing queries only",
+    "wrong retrieval among no-answer queries",
+    "extra non-gold chunks shown separately"
+  ],
+  "no_tuning": "Keep all first scored results, including failures. Do not alter retrieval terms, dictionary, algorithm or these questions to replace scores.",
+  "provider_calls": 0
+}

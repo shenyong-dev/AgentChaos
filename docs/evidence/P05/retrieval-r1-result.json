@@ -1,0 +1,1174 @@
+{
+  "schema": "offline-retrieval-result-v1",
+  "boundary": "新编机械离线回归，与旧T09调优题分开；非真人独立金标准、非正式保留集，不验证模型回答。",
+  "storage": "SQLite in-memory fixture table; not MySQL integration",
+  "model_calls": 0,
+  "answer_quality": "not_evaluated",
+  "metrics": {
+    "passed": 18,
+    "total": 18,
+    "positive_queries": 10,
+    "macro_recall_at_3": 1.0,
+    "no_answer_wrong_retrieval": 0,
+    "no_answer_queries": 3
+  },
+  "categories": {
+    "改写提问": {
+      "passed": 3,
+      "total": 3
+    },
+    "相似实体": {
+      "passed": 3,
+      "total": 3
+    },
+    "有效期": {
+      "passed": 3,
+      "total": 3
+    },
+    "冲突条款": {
+      "passed": 3,
+      "total": 3
+    },
+    "无答案": {
+      "passed": 3,
+      "total": 3
+    },
+    "弱相关与不适用": {
+      "passed": 3,
+      "total": 3
+    }
+  },
+  "rows": [
+    {
+      "id": "P01",
+      "category": "改写提问",
+      "query": "Z201最多容纳几位参会者？",
+      "reference_clock": "2026-11-15T00:00:00+00:00",
+      "expected_statuses": [
+        "supported"
+      ],
+      "observed": {
+        "status": "supported",
+        "query": "Z201最多容纳几位参会者？",
+        "query_tokens": [
+          "z201",
+          "最",
+          "多",
+          "容纳",
+          "几位",
+          "参会者",
+          "容量",
+          "人数"
+        ],
+        "index_hash": "f48ac68092e953347e97ba9aafc65cfe31618eaa8c5e8a637283ac92ee3decda",
+        "chunks": [
+          {
+            "chunk_id": "p05-z201-capacity:r2:990ebb63ef6ecd15",
+            "text": "Z201容量\nZ201的容量上限为18人，参加人数不得超过18人。",
+            "document_id": 1,
+            "source_ref": "P05-fixture:document:1",
+            "document_revision": 2,
+            "document_hash": "adc6c98455f641dcc1963f3d91be0a8d989fbabb0cbaf6c837eaa00059d4750f",
+            "chunk_hash": "990ebb63ef6ecd15408701e20c6aa11a194ee06f149ed5b668e32d3aac47b3a9",
+            "score": 3.042138
+          },
+          {
+            "chunk_id": "p05-y305-capacity:r1:dba8940dffdd7881",
+            "text": "Y305容量\nY305的容量上限为48人，参加人数不得超过48人。",
+            "document_id": 2,
+            "source_ref": "P05-fixture:document:2",
+            "document_revision": 1,
+            "document_hash": "c89d13aeb6d40ae160f630a7f73e787793b5161a807247e44e08e5a73eae3f14",
+            "chunk_hash": "dba8940dffdd7881776d78ceee99cb1edf499f753e78d58280623c7bb02ae106",
+            "score": 1.838271
+          },
+          {
+            "chunk_id": "p05-advance:r1:71b25c8ae26f3228",
+            "text": "提前预订\n最多提前5天预订，超过提前期限的请求不予受理。",
+            "document_id": 4,
+            "source_ref": "P05-fixture:document:4",
+            "document_revision": 1,
+            "document_hash": "fe0cb1685734edd8b41d0b8803d578f04dea557997e8cbfafe193e11daebd1c0",
+            "chunk_hash": "71b25c8ae26f3228ff249392804512f87534a77990502d1d49bdf7cfc6206e8f",
+            "score": 1.734278
+          }
+        ]
+      },
+      "assessment": {
+        "passed": true,
+        "issues": [],
+        "gold_chunks": [
+          "p05-z201-capacity:r2:990ebb63ef6ecd15"
+        ],
+        "gold_hits": 1,
+        "gold_count": 1,
+        "recall_at_3": 1.0,
+        "extra_chunks": 2,
+        "top1_matches_gold": true
+      }
+    },
+    {
+      "id": "P02",
+      "category": "改写提问",
+      "query": "一次使用能用多久？",
+      "reference_clock": "2026-11-15T00:00:00+00:00",
+      "expected_statuses": [
+        "supported"
+      ],
+      "observed": {
+        "status": "supported",
+        "query": "一次使用能用多久？",
+        "query_tokens": [
+          "一次",
+          "使用",
+          "用",
+          "多久",
+          "时长"
+        ],
+        "index_hash": "f48ac68092e953347e97ba9aafc65cfe31618eaa8c5e8a637283ac92ee3decda",
+        "chunks": [
+          {
+            "chunk_id": "p05-duration:r1:a603328d5ff2d506",
+            "text": "单次时长\n一次使用时长为45到90分钟，不能超过90分钟。",
+            "document_id": 3,
+            "source_ref": "P05-fixture:document:3",
+            "document_revision": 1,
+            "document_hash": "05113d20431bfeccd7f7e7ac78ff585a7fbfb1d09aef00e61349e41f46ca1827",
+            "chunk_hash": "a603328d5ff2d5067c5d76902995d2fe9cd49392af03749452aea7b70b9e90bc",
+            "score": 2.885636
+          }
+        ]
+      },
+      "assessment": {
+        "passed": true,
+        "issues": [],
+        "gold_chunks": [
+          "p05-duration:r1:a603328d5ff2d506"
+        ],
+        "gold_hits": 1,
+        "gold_count": 1,
+        "recall_at_3": 1.0,
+        "extra_chunks": 0,
+        "top1_matches_gold": true
+      }
+    },
+    {
+      "id": "P03",
+      "category": "改写提问",
+      "query": "最早能提前几天订？",
+      "reference_clock": "2026-11-15T00:00:00+00:00",
+      "expected_statuses": [
+        "supported"
+      ],
+      "observed": {
+        "status": "supported",
+        "query": "最早能提前几天订？",
+        "query_tokens": [
+          "最早",
+          "提前",
+          "几天",
+          "订"
+        ],
+        "index_hash": "f48ac68092e953347e97ba9aafc65cfe31618eaa8c5e8a637283ac92ee3decda",
+        "chunks": [
+          {
+            "chunk_id": "p05-advance:r1:71b25c8ae26f3228",
+            "text": "提前预订\n最多提前5天预订，超过提前期限的请求不予受理。",
+            "document_id": 4,
+            "source_ref": "P05-fixture:document:4",
+            "document_revision": 1,
+            "document_hash": "fe0cb1685734edd8b41d0b8803d578f04dea557997e8cbfafe193e11daebd1c0",
+            "chunk_hash": "71b25c8ae26f3228ff249392804512f87534a77990502d1d49bdf7cfc6206e8f",
+            "score": 1.430345
+          }
+        ]
+      },
+      "assessment": {
+        "passed": true,
+        "issues": [],
+        "gold_chunks": [
+          "p05-advance:r1:71b25c8ae26f3228"
+        ],
+        "gold_hits": 1,
+        "gold_count": 1,
+        "recall_at_3": 1.0,
+        "extra_chunks": 0,
+        "top1_matches_gold": true
+      }
+    },
+    {
+      "id": "E01",
+      "category": "相似实体",
+      "query": "Y305的容量上限是什么？",
+      "reference_clock": "2026-11-15T00:00:00+00:00",
+      "expected_statuses": [
+        "supported"
+      ],
+      "observed": {
+        "status": "supported",
+        "query": "Y305的容量上限是什么？",
+        "query_tokens": [
+          "y305",
+          "容量",
+          "上限",
+          "容量"
+        ],
+        "index_hash": "f48ac68092e953347e97ba9aafc65cfe31618eaa8c5e8a637283ac92ee3decda",
+        "chunks": [
+          {
+            "chunk_id": "p05-y305-capacity:r1:dba8940dffdd7881",
+            "text": "Y305容量\nY305的容量上限为48人，参加人数不得超过48人。",
+            "document_id": 2,
+            "source_ref": "P05-fixture:document:2",
+            "document_revision": 1,
+            "document_hash": "c89d13aeb6d40ae160f630a7f73e787793b5161a807247e44e08e5a73eae3f14",
+            "chunk_hash": "dba8940dffdd7881776d78ceee99cb1edf499f753e78d58280623c7bb02ae106",
+            "score": 4.192509
+          },
+          {
+            "chunk_id": "p05-z201-capacity:r2:990ebb63ef6ecd15",
+            "text": "Z201容量\nZ201的容量上限为18人，参加人数不得超过18人。",
+            "document_id": 1,
+            "source_ref": "P05-fixture:document:1",
+            "document_revision": 2,
+            "document_hash": "adc6c98455f641dcc1963f3d91be0a8d989fbabb0cbaf6c837eaa00059d4750f",
+            "chunk_hash": "990ebb63ef6ecd15408701e20c6aa11a194ee06f149ed5b668e32d3aac47b3a9",
+            "score": 2.988642
+          }
+        ]
+      },
+      "assessment": {
+        "passed": true,
+        "issues": [],
+        "gold_chunks": [
+          "p05-y305-capacity:r1:dba8940dffdd7881"
+        ],
+        "gold_hits": 1,
+        "gold_count": 1,
+        "recall_at_3": 1.0,
+        "extra_chunks": 1,
+        "top1_matches_gold": true
+      }
+    },
+    {
+      "id": "E02",
+      "category": "相似实体",
+      "query": "Z201能坐几个人？",
+      "reference_clock": "2026-11-15T00:00:00+00:00",
+      "expected_statuses": [
+        "supported"
+      ],
+      "observed": {
+        "status": "supported",
+        "query": "Z201能坐几个人？",
+        "query_tokens": [
+          "z201",
+          "坐",
+          "几个",
+          "人"
+        ],
+        "index_hash": "f48ac68092e953347e97ba9aafc65cfe31618eaa8c5e8a637283ac92ee3decda",
+        "chunks": [
+          {
+            "chunk_id": "p05-z201-capacity:r2:990ebb63ef6ecd15",
+            "text": "Z201容量\nZ201的容量上限为18人，参加人数不得超过18人。",
+            "document_id": 1,
+            "source_ref": "P05-fixture:document:1",
+            "document_revision": 2,
+            "document_hash": "adc6c98455f641dcc1963f3d91be0a8d989fbabb0cbaf6c837eaa00059d4750f",
+            "chunk_hash": "990ebb63ef6ecd15408701e20c6aa11a194ee06f149ed5b668e32d3aac47b3a9",
+            "score": 2.188712
+          },
+          {
+            "chunk_id": "p05-y305-capacity:r1:dba8940dffdd7881",
+            "text": "Y305容量\nY305的容量上限为48人，参加人数不得超过48人。",
+            "document_id": 2,
+            "source_ref": "P05-fixture:document:2",
+            "document_revision": 1,
+            "document_hash": "c89d13aeb6d40ae160f630a7f73e787793b5161a807247e44e08e5a73eae3f14",
+            "chunk_hash": "dba8940dffdd7881776d78ceee99cb1edf499f753e78d58280623c7bb02ae106",
+            "score": 0.984845
+          }
+        ]
+      },
+      "assessment": {
+        "passed": true,
+        "issues": [],
+        "gold_chunks": [
+          "p05-z201-capacity:r2:990ebb63ef6ecd15"
+        ],
+        "gold_hits": 1,
+        "gold_count": 1,
+        "recall_at_3": 1.0,
+        "extra_chunks": 1,
+        "top1_matches_gold": true
+      }
+    },
+    {
+      "id": "E03",
+      "category": "相似实体",
+      "query": "请比较Z201与Y305的容量。",
+      "reference_clock": "2026-11-15T00:00:00+00:00",
+      "expected_statuses": [
+        "supported"
+      ],
+      "observed": {
+        "status": "supported",
+        "query": "请比较Z201与Y305的容量。",
+        "query_tokens": [
+          "比较",
+          "z201",
+          "与",
+          "y305",
+          "容量"
+        ],
+        "index_hash": "f48ac68092e953347e97ba9aafc65cfe31618eaa8c5e8a637283ac92ee3decda",
+        "chunks": [
+          {
+            "chunk_id": "p05-y305-capacity:r1:dba8940dffdd7881",
+            "text": "Y305容量\nY305的容量上限为48人，参加人数不得超过48人。",
+            "document_id": 2,
+            "source_ref": "P05-fixture:document:2",
+            "document_revision": 1,
+            "document_hash": "c89d13aeb6d40ae160f630a7f73e787793b5161a807247e44e08e5a73eae3f14",
+            "chunk_hash": "dba8940dffdd7881776d78ceee99cb1edf499f753e78d58280623c7bb02ae106",
+            "score": 2.354238
+          },
+          {
+            "chunk_id": "p05-z201-capacity:r2:990ebb63ef6ecd15",
+            "text": "Z201容量\nZ201的容量上限为18人，参加人数不得超过18人。",
+            "document_id": 1,
+            "source_ref": "P05-fixture:document:1",
+            "document_revision": 2,
+            "document_hash": "adc6c98455f641dcc1963f3d91be0a8d989fbabb0cbaf6c837eaa00059d4750f",
+            "chunk_hash": "990ebb63ef6ecd15408701e20c6aa11a194ee06f149ed5b668e32d3aac47b3a9",
+            "score": 2.354238
+          }
+        ]
+      },
+      "assessment": {
+        "passed": true,
+        "issues": [],
+        "gold_chunks": [
+          "p05-z201-capacity:r2:990ebb63ef6ecd15",
+          "p05-y305-capacity:r1:dba8940dffdd7881"
+        ],
+        "gold_hits": 2,
+        "gold_count": 2,
+        "recall_at_3": 1.0,
+        "extra_chunks": 0,
+        "top1_matches_gold": true
+      }
+    },
+    {
+      "id": "T01",
+      "category": "有效期",
+      "query": "Z201现在能容纳几人？",
+      "reference_clock": "2026-06-30T23:59:59+00:00",
+      "expected_statuses": [
+        "supported"
+      ],
+      "observed": {
+        "status": "supported",
+        "query": "Z201现在能容纳几人？",
+        "query_tokens": [
+          "z201",
+          "现在",
+          "容纳",
+          "几",
+          "人",
+          "容量"
+        ],
+        "index_hash": "5f8940532cbece67557fe9be6bba36b7f36cb0663b4c4d91328cd634bf378aa9",
+        "chunks": [
+          {
+            "chunk_id": "p05-z201-capacity:r1:d793c15e6f29a522",
+            "text": "Z201容量\nZ201的容量上限为8人，参加人数不得超过8人。",
+            "document_id": 5,
+            "source_ref": "P05-fixture:document:5",
+            "document_revision": 1,
+            "document_hash": "e702caa3a695ec2a54156896ee018ac8a10512752f172c525803787baefbf518",
+            "chunk_hash": "d793c15e6f29a52205a91282b3c56e31e1e7410e1ce716d9be75977baf5d05e2",
+            "score": 0.604071
+          }
+        ]
+      },
+      "assessment": {
+        "passed": true,
+        "issues": [],
+        "gold_chunks": [
+          "p05-z201-capacity:r1:d793c15e6f29a522"
+        ],
+        "gold_hits": 1,
+        "gold_count": 1,
+        "recall_at_3": 1.0,
+        "extra_chunks": 0,
+        "top1_matches_gold": true
+      }
+    },
+    {
+      "id": "T02",
+      "category": "有效期",
+      "query": "Z201容量上限8人还是18人？",
+      "reference_clock": "2026-07-01T00:00:00+00:00",
+      "expected_statuses": [
+        "supported"
+      ],
+      "observed": {
+        "status": "supported",
+        "query": "Z201容量上限8人还是18人？",
+        "query_tokens": [
+          "z201",
+          "容量",
+          "上限",
+          "8",
+          "人",
+          "还是",
+          "18",
+          "人",
+          "容量"
+        ],
+        "index_hash": "5f8940532cbece67557fe9be6bba36b7f36cb0663b4c4d91328cd634bf378aa9",
+        "chunks": [
+          {
+            "chunk_id": "p05-z201-capacity:r2:990ebb63ef6ecd15",
+            "text": "Z201容量\nZ201的容量上限为18人，参加人数不得超过18人。",
+            "document_id": 1,
+            "source_ref": "P05-fixture:document:1",
+            "document_revision": 2,
+            "document_hash": "adc6c98455f641dcc1963f3d91be0a8d989fbabb0cbaf6c837eaa00059d4750f",
+            "chunk_hash": "990ebb63ef6ecd15408701e20c6aa11a194ee06f149ed5b668e32d3aac47b3a9",
+            "score": 1.880664
+          }
+        ]
+      },
+      "assessment": {
+        "passed": true,
+        "issues": [],
+        "gold_chunks": [
+          "p05-z201-capacity:r2:990ebb63ef6ecd15"
+        ],
+        "gold_hits": 1,
+        "gold_count": 1,
+        "recall_at_3": 1.0,
+        "extra_chunks": 0,
+        "top1_matches_gold": true
+      }
+    },
+    {
+      "id": "T03",
+      "category": "有效期",
+      "query": "Z201容量上限18人还是30人？",
+      "reference_clock": "2027-01-01T00:00:00+00:00",
+      "expected_statuses": [
+        "supported"
+      ],
+      "observed": {
+        "status": "supported",
+        "query": "Z201容量上限18人还是30人？",
+        "query_tokens": [
+          "z201",
+          "容量",
+          "上限",
+          "18",
+          "人",
+          "还是",
+          "30",
+          "人",
+          "容量"
+        ],
+        "index_hash": "5f8940532cbece67557fe9be6bba36b7f36cb0663b4c4d91328cd634bf378aa9",
+        "chunks": [
+          {
+            "chunk_id": "p05-z201-capacity:r3:4573babaa115bd84",
+            "text": "Z201容量\nZ201的容量上限为30人，参加人数不得超过30人。",
+            "document_id": 6,
+            "source_ref": "P05-fixture:document:6",
+            "document_revision": 3,
+            "document_hash": "63275c820e3ee46c3501788e9ca0cfd8b9d49453a2f807156735978d162c34a5",
+            "chunk_hash": "4573babaa115bd84c3b0a5d2e77e8d66d2257f44a7b8ee570e41f87ac0aadf0e",
+            "score": 1.880664
+          }
+        ]
+      },
+      "assessment": {
+        "passed": true,
+        "issues": [],
+        "gold_chunks": [
+          "p05-z201-capacity:r3:4573babaa115bd84"
+        ],
+        "gold_hits": 1,
+        "gold_count": 1,
+        "recall_at_3": 1.0,
+        "extra_chunks": 0,
+        "top1_matches_gold": true
+      }
+    },
+    {
+      "id": "C01",
+      "category": "冲突条款",
+      "query": "Z201容量到底是多少？",
+      "reference_clock": "2026-11-15T00:00:00+00:00",
+      "expected_statuses": [
+        "evidence_conflict"
+      ],
+      "observed": {
+        "status": "evidence_conflict",
+        "chunks": [],
+        "query": "Z201容量到底是多少？",
+        "index_hash": "9d819af63d7ae5fcaadc898f6de51a4ecd622e1de97977a03fb7facb115b1f12"
+      },
+      "assessment": {
+        "passed": true,
+        "issues": [],
+        "gold_chunks": [],
+        "gold_hits": 0,
+        "gold_count": 0,
+        "recall_at_3": null,
+        "extra_chunks": 0,
+        "top1_matches_gold": null
+      }
+    },
+    {
+      "id": "C02",
+      "category": "冲突条款",
+      "query": "一次可以来几个人？",
+      "reference_clock": "2026-11-15T00:00:00+00:00",
+      "expected_statuses": [
+        "evidence_conflict"
+      ],
+      "observed": {
+        "status": "evidence_conflict",
+        "chunks": [],
+        "query": "一次可以来几个人？",
+        "index_hash": "9d819af63d7ae5fcaadc898f6de51a4ecd622e1de97977a03fb7facb115b1f12"
+      },
+      "assessment": {
+        "passed": true,
+        "issues": [],
+        "gold_chunks": [],
+        "gold_hits": 0,
+        "gold_count": 0,
+        "recall_at_3": null,
+        "extra_chunks": 0,
+        "top1_matches_gold": null
+      }
+    },
+    {
+      "id": "C03",
+      "category": "冲突条款",
+      "query": "Z201容量是多少？",
+      "reference_clock": "2026-06-30T23:59:59+00:00",
+      "expected_statuses": [
+        "supported"
+      ],
+      "observed": {
+        "status": "supported",
+        "query": "Z201容量是多少？",
+        "query_tokens": [
+          "z201",
+          "容量"
+        ],
+        "index_hash": "cb64587ede822640f4050c38341e305accb639624673f2224c1598ef36207b19",
+        "chunks": [
+          {
+            "chunk_id": "p05-z201-capacity:r1:d793c15e6f29a522",
+            "text": "Z201容量\nZ201的容量上限为8人，参加人数不得超过8人。",
+            "document_id": 5,
+            "source_ref": "P05-fixture:document:5",
+            "document_revision": 1,
+            "document_hash": "e702caa3a695ec2a54156896ee018ac8a10512752f172c525803787baefbf518",
+            "chunk_hash": "d793c15e6f29a52205a91282b3c56e31e1e7410e1ce716d9be75977baf5d05e2",
+            "score": 0.413311
+          }
+        ]
+      },
+      "assessment": {
+        "passed": true,
+        "issues": [],
+        "gold_chunks": [
+          "p05-z201-capacity:r1:d793c15e6f29a522"
+        ],
+        "gold_hits": 1,
+        "gold_count": 1,
+        "recall_at_3": 1.0,
+        "extra_chunks": 0,
+        "top1_matches_gold": true
+      }
+    },
+    {
+      "id": "N01",
+      "category": "无答案",
+      "query": "是否配有投影仪？",
+      "reference_clock": "2026-11-15T00:00:00+00:00",
+      "expected_statuses": [
+        "no_lexical_match",
+        "low_relevance"
+      ],
+      "observed": {
+        "status": "no_lexical_match",
+        "query": "是否配有投影仪？",
+        "query_tokens": [
+          "是否",
+          "配有",
+          "投影仪"
+        ],
+        "index_hash": "f48ac68092e953347e97ba9aafc65cfe31618eaa8c5e8a637283ac92ee3decda",
+        "chunks": []
+      },
+      "assessment": {
+        "passed": true,
+        "issues": [],
+        "gold_chunks": [],
+        "gold_hits": 0,
+        "gold_count": 0,
+        "recall_at_3": null,
+        "extra_chunks": 0,
+        "top1_matches_gold": null
+      }
+    },
+    {
+      "id": "N02",
+      "category": "无答案",
+      "query": "发票抬头怎么开？",
+      "reference_clock": "2026-11-15T00:00:00+00:00",
+      "expected_statuses": [
+        "no_lexical_match",
+        "low_relevance"
+      ],
+      "observed": {
+        "status": "no_lexical_match",
+        "query": "发票抬头怎么开？",
+        "query_tokens": [
+          "发票",
+          "抬头",
+          "开"
+        ],
+        "index_hash": "f48ac68092e953347e97ba9aafc65cfe31618eaa8c5e8a637283ac92ee3decda",
+        "chunks": []
+      },
+      "assessment": {
+        "passed": true,
+        "issues": [],
+        "gold_chunks": [],
+        "gold_hits": 0,
+        "gold_count": 0,
+        "recall_at_3": null,
+        "extra_chunks": 0,
+        "top1_matches_gold": null
+      }
+    },
+    {
+      "id": "N03",
+      "category": "无答案",
+      "query": "Z201的停车费多少钱？",
+      "reference_clock": "2026-11-15T00:00:00+00:00",
+      "expected_statuses": [
+        "no_lexical_match",
+        "low_relevance"
+      ],
+      "observed": {
+        "status": "low_relevance",
+        "query": "Z201的停车费多少钱？",
+        "query_tokens": [
+          "z201",
+          "停车费",
+          "钱"
+        ],
+        "index_hash": "f48ac68092e953347e97ba9aafc65cfe31618eaa8c5e8a637283ac92ee3decda",
+        "chunks": []
+      },
+      "assessment": {
+        "passed": true,
+        "issues": [],
+        "gold_chunks": [],
+        "gold_hits": 0,
+        "gold_count": 0,
+        "recall_at_3": null,
+        "extra_chunks": 0,
+        "top1_matches_gold": null
+      }
+    },
+    {
+      "id": "W01",
+      "category": "弱相关与不适用",
+      "query": "Z201预约",
+      "reference_clock": "2026-11-15T00:00:00+00:00",
+      "expected_statuses": [
+        "low_relevance"
+      ],
+      "observed": {
+        "status": "low_relevance",
+        "query": "Z201预约",
+        "query_tokens": [
+          "z201"
+        ],
+        "index_hash": "f48ac68092e953347e97ba9aafc65cfe31618eaa8c5e8a637283ac92ee3decda",
+        "chunks": []
+      },
+      "assessment": {
+        "passed": true,
+        "issues": [],
+        "gold_chunks": [],
+        "gold_hits": 0,
+        "gold_count": 0,
+        "recall_at_3": null,
+        "extra_chunks": 0,
+        "top1_matches_gold": null
+      }
+    },
+    {
+      "id": "W02",
+      "category": "弱相关与不适用",
+      "query": "模拟退款金额上限",
+      "reference_clock": "2026-11-15T00:00:00+00:00",
+      "expected_statuses": [
+        "no_applicable_evidence"
+      ],
+      "observed": {
+        "status": "no_applicable_evidence",
+        "query": "模拟退款金额上限",
+        "query_tokens": [
+          "模拟",
+          "退款",
+          "金额",
+          "上限",
+          "容量"
+        ],
+        "chunks": [],
+        "index_hash": "6ba3e332bc7aa71ca560b34444e3c40d342d512f5d2c0abf2d8ad283e88dcdde"
+      },
+      "assessment": {
+        "passed": true,
+        "issues": [],
+        "gold_chunks": [],
+        "gold_hits": 0,
+        "gold_count": 0,
+        "recall_at_3": null,
+        "extra_chunks": 0,
+        "top1_matches_gold": null
+      }
+    },
+    {
+      "id": "W03",
+      "category": "弱相关与不适用",
+      "query": "Z201容量上限",
+      "reference_clock": "2025-12-31T23:59:59+00:00",
+      "expected_statuses": [
+        "no_applicable_evidence"
+      ],
+      "observed": {
+        "status": "no_applicable_evidence",
+        "query": "Z201容量上限",
+        "query_tokens": [
+          "z201",
+          "容量",
+          "上限",
+          "容量"
+        ],
+        "chunks": [],
+        "index_hash": "f48ac68092e953347e97ba9aafc65cfe31618eaa8c5e8a637283ac92ee3decda"
+      },
+      "assessment": {
+        "passed": true,
+        "issues": [],
+        "gold_chunks": [],
+        "gold_hits": 0,
+        "gold_count": 0,
+        "recall_at_3": null,
+        "extra_chunks": 0,
+        "top1_matches_gold": null
+      }
+    }
+  ],
+  "index_manifests": [
+    {
+      "version": "rules-bm25-v2",
+      "nonpositive_idf": "log1p((N-df+0.5)/(df+0.5)); positive IDF unchanged",
+      "jieba": "0.42.1",
+      "rank_bm25": "0.2.2",
+      "k1": 1.5,
+      "b": 0.75,
+      "epsilon": 0.25,
+      "top_k": 3,
+      "minimum_score": 0.01,
+      "chunking": "heading-plus-bullet-v1",
+      "dictionary_sha256": "7197c3211ddd98962b036cdf40324d1ea2bfaa12bd028e68faa70111a88e12a8",
+      "user_dictionary_sha256": "b6776ac5c2c73792d6a09bfb6c01618f390a7f7ae1c245bbe811e3e3011229e2",
+      "terms_sha256": "93a9923c77320f816aeec61a0dcf996e56a8620d04b624516504054b759b528d",
+      "documents": [
+        {
+          "id": 4,
+          "document_key": "p05-advance",
+          "revision": 1,
+          "title": "提前预订",
+          "source_type": "offline_mechanical_fixture",
+          "source_ref": "P05-fixture:document:4",
+          "valid_from": "2026-01-01T00:00:00+00:00",
+          "valid_to": null,
+          "applicability": {
+            "scenario": "experimental_booking"
+          },
+          "content_hash": "fe0cb1685734edd8b41d0b8803d578f04dea557997e8cbfafe193e11daebd1c0"
+        },
+        {
+          "id": 3,
+          "document_key": "p05-duration",
+          "revision": 1,
+          "title": "单次时长",
+          "source_type": "offline_mechanical_fixture",
+          "source_ref": "P05-fixture:document:3",
+          "valid_from": "2026-01-01T00:00:00+00:00",
+          "valid_to": null,
+          "applicability": {
+            "scenario": "experimental_booking"
+          },
+          "content_hash": "05113d20431bfeccd7f7e7ac78ff585a7fbfb1d09aef00e61349e41f46ca1827"
+        },
+        {
+          "id": 2,
+          "document_key": "p05-y305-capacity",
+          "revision": 1,
+          "title": "Y305容量",
+          "source_type": "offline_mechanical_fixture",
+          "source_ref": "P05-fixture:document:2",
+          "valid_from": "2026-01-01T00:00:00+00:00",
+          "valid_to": null,
+          "applicability": {
+            "scenario": "experimental_booking"
+          },
+          "content_hash": "c89d13aeb6d40ae160f630a7f73e787793b5161a807247e44e08e5a73eae3f14"
+        },
+        {
+          "id": 1,
+          "document_key": "p05-z201-capacity",
+          "revision": 2,
+          "title": "Z201容量",
+          "source_type": "offline_mechanical_fixture",
+          "source_ref": "P05-fixture:document:1",
+          "valid_from": "2026-07-01T00:00:00+00:00",
+          "valid_to": "2027-01-01T00:00:00+00:00",
+          "applicability": {
+            "scenario": "experimental_booking"
+          },
+          "content_hash": "adc6c98455f641dcc1963f3d91be0a8d989fbabb0cbaf6c837eaa00059d4750f"
+        }
+      ],
+      "chunks": [
+        {
+          "chunk_id": "p05-advance:r1:71b25c8ae26f3228",
+          "document_id": 4,
+          "source_ref": "P05-fixture:document:4",
+          "document_revision": 1,
+          "document_hash": "fe0cb1685734edd8b41d0b8803d578f04dea557997e8cbfafe193e11daebd1c0",
+          "chunk_hash": "71b25c8ae26f3228ff249392804512f87534a77990502d1d49bdf7cfc6206e8f"
+        },
+        {
+          "chunk_id": "p05-duration:r1:a603328d5ff2d506",
+          "document_id": 3,
+          "source_ref": "P05-fixture:document:3",
+          "document_revision": 1,
+          "document_hash": "05113d20431bfeccd7f7e7ac78ff585a7fbfb1d09aef00e61349e41f46ca1827",
+          "chunk_hash": "a603328d5ff2d5067c5d76902995d2fe9cd49392af03749452aea7b70b9e90bc"
+        },
+        {
+          "chunk_id": "p05-y305-capacity:r1:dba8940dffdd7881",
+          "document_id": 2,
+          "source_ref": "P05-fixture:document:2",
+          "document_revision": 1,
+          "document_hash": "c89d13aeb6d40ae160f630a7f73e787793b5161a807247e44e08e5a73eae3f14",
+          "chunk_hash": "dba8940dffdd7881776d78ceee99cb1edf499f753e78d58280623c7bb02ae106"
+        },
+        {
+          "chunk_id": "p05-z201-capacity:r2:990ebb63ef6ecd15",
+          "document_id": 1,
+          "source_ref": "P05-fixture:document:1",
+          "document_revision": 2,
+          "document_hash": "adc6c98455f641dcc1963f3d91be0a8d989fbabb0cbaf6c837eaa00059d4750f",
+          "chunk_hash": "990ebb63ef6ecd15408701e20c6aa11a194ee06f149ed5b668e32d3aac47b3a9"
+        }
+      ],
+      "index_hash": "f48ac68092e953347e97ba9aafc65cfe31618eaa8c5e8a637283ac92ee3decda"
+    },
+    {
+      "version": "rules-bm25-v2",
+      "nonpositive_idf": "log1p((N-df+0.5)/(df+0.5)); positive IDF unchanged",
+      "jieba": "0.42.1",
+      "rank_bm25": "0.2.2",
+      "k1": 1.5,
+      "b": 0.75,
+      "epsilon": 0.25,
+      "top_k": 3,
+      "minimum_score": 0.01,
+      "chunking": "heading-plus-bullet-v1",
+      "dictionary_sha256": "7197c3211ddd98962b036cdf40324d1ea2bfaa12bd028e68faa70111a88e12a8",
+      "user_dictionary_sha256": "b6776ac5c2c73792d6a09bfb6c01618f390a7f7ae1c245bbe811e3e3011229e2",
+      "terms_sha256": "93a9923c77320f816aeec61a0dcf996e56a8620d04b624516504054b759b528d",
+      "documents": [
+        {
+          "id": 5,
+          "document_key": "p05-z201-capacity",
+          "revision": 1,
+          "title": "Z201容量",
+          "source_type": "offline_mechanical_fixture",
+          "source_ref": "P05-fixture:document:5",
+          "valid_from": "2026-01-01T00:00:00+00:00",
+          "valid_to": "2026-07-01T00:00:00+00:00",
+          "applicability": {
+            "scenario": "experimental_booking"
+          },
+          "content_hash": "e702caa3a695ec2a54156896ee018ac8a10512752f172c525803787baefbf518"
+        },
+        {
+          "id": 1,
+          "document_key": "p05-z201-capacity",
+          "revision": 2,
+          "title": "Z201容量",
+          "source_type": "offline_mechanical_fixture",
+          "source_ref": "P05-fixture:document:1",
+          "valid_from": "2026-07-01T00:00:00+00:00",
+          "valid_to": "2027-01-01T00:00:00+00:00",
+          "applicability": {
+            "scenario": "experimental_booking"
+          },
+          "content_hash": "adc6c98455f641dcc1963f3d91be0a8d989fbabb0cbaf6c837eaa00059d4750f"
+        },
+        {
+          "id": 6,
+          "document_key": "p05-z201-capacity",
+          "revision": 3,
+          "title": "Z201容量",
+          "source_type": "offline_mechanical_fixture",
+          "source_ref": "P05-fixture:document:6",
+          "valid_from": "2027-01-01T00:00:00+00:00",
+          "valid_to": null,
+          "applicability": {
+            "scenario": "experimental_booking"
+          },
+          "content_hash": "63275c820e3ee46c3501788e9ca0cfd8b9d49453a2f807156735978d162c34a5"
+        }
+      ],
+      "chunks": [
+        {
+          "chunk_id": "p05-z201-capacity:r1:d793c15e6f29a522",
+          "document_id": 5,
+          "source_ref": "P05-fixture:document:5",
+          "document_revision": 1,
+          "document_hash": "e702caa3a695ec2a54156896ee018ac8a10512752f172c525803787baefbf518",
+          "chunk_hash": "d793c15e6f29a52205a91282b3c56e31e1e7410e1ce716d9be75977baf5d05e2"
+        },
+        {
+          "chunk_id": "p05-z201-capacity:r2:990ebb63ef6ecd15",
+          "document_id": 1,
+          "source_ref": "P05-fixture:document:1",
+          "document_revision": 2,
+          "document_hash": "adc6c98455f641dcc1963f3d91be0a8d989fbabb0cbaf6c837eaa00059d4750f",
+          "chunk_hash": "990ebb63ef6ecd15408701e20c6aa11a194ee06f149ed5b668e32d3aac47b3a9"
+        },
+        {
+          "chunk_id": "p05-z201-capacity:r3:4573babaa115bd84",
+          "document_id": 6,
+          "source_ref": "P05-fixture:document:6",
+          "document_revision": 3,
+          "document_hash": "63275c820e3ee46c3501788e9ca0cfd8b9d49453a2f807156735978d162c34a5",
+          "chunk_hash": "4573babaa115bd84c3b0a5d2e77e8d66d2257f44a7b8ee570e41f87ac0aadf0e"
+        }
+      ],
+      "index_hash": "5f8940532cbece67557fe9be6bba36b7f36cb0663b4c4d91328cd634bf378aa9"
+    },
+    {
+      "version": "rules-bm25-v2",
+      "nonpositive_idf": "log1p((N-df+0.5)/(df+0.5)); positive IDF unchanged",
+      "jieba": "0.42.1",
+      "rank_bm25": "0.2.2",
+      "k1": 1.5,
+      "b": 0.75,
+      "epsilon": 0.25,
+      "top_k": 3,
+      "minimum_score": 0.01,
+      "chunking": "heading-plus-bullet-v1",
+      "dictionary_sha256": "7197c3211ddd98962b036cdf40324d1ea2bfaa12bd028e68faa70111a88e12a8",
+      "user_dictionary_sha256": "b6776ac5c2c73792d6a09bfb6c01618f390a7f7ae1c245bbe811e3e3011229e2",
+      "terms_sha256": "93a9923c77320f816aeec61a0dcf996e56a8620d04b624516504054b759b528d",
+      "documents": [
+        {
+          "id": 1,
+          "document_key": "p05-z201-capacity",
+          "revision": 2,
+          "title": "Z201容量",
+          "source_type": "offline_mechanical_fixture",
+          "source_ref": "P05-fixture:document:1",
+          "valid_from": "2026-07-01T00:00:00+00:00",
+          "valid_to": "2027-01-01T00:00:00+00:00",
+          "applicability": {
+            "scenario": "experimental_booking"
+          },
+          "content_hash": "adc6c98455f641dcc1963f3d91be0a8d989fbabb0cbaf6c837eaa00059d4750f"
+        },
+        {
+          "id": 7,
+          "document_key": "p05-z201-capacity",
+          "revision": 4,
+          "title": "Z201容量",
+          "source_type": "offline_mechanical_fixture",
+          "source_ref": "P05-fixture:document:7",
+          "valid_from": "2026-07-01T00:00:00+00:00",
+          "valid_to": "2027-01-01T00:00:00+00:00",
+          "applicability": {
+            "scenario": "experimental_booking"
+          },
+          "content_hash": "ba1b0f41d2518e4ea51ee6f0534b77cb3a428b9b2307bd5b9bb35341958aabaf"
+        }
+      ],
+      "chunks": [
+        {
+          "chunk_id": "p05-z201-capacity:r2:990ebb63ef6ecd15",
+          "document_id": 1,
+          "source_ref": "P05-fixture:document:1",
+          "document_revision": 2,
+          "document_hash": "adc6c98455f641dcc1963f3d91be0a8d989fbabb0cbaf6c837eaa00059d4750f",
+          "chunk_hash": "990ebb63ef6ecd15408701e20c6aa11a194ee06f149ed5b668e32d3aac47b3a9"
+        },
+        {
+          "chunk_id": "p05-z201-capacity:r4:002bffdec140177b",
+          "document_id": 7,
+          "source_ref": "P05-fixture:document:7",
+          "document_revision": 4,
+          "document_hash": "ba1b0f41d2518e4ea51ee6f0534b77cb3a428b9b2307bd5b9bb35341958aabaf",
+          "chunk_hash": "002bffdec140177b52688cbc7de61e63bb9be843b70ac0b57af0209446bea286"
+        }
+      ],
+      "index_hash": "9d819af63d7ae5fcaadc898f6de51a4ecd622e1de97977a03fb7facb115b1f12"
+    },
+    {
+      "version": "rules-bm25-v2",
+      "nonpositive_idf": "log1p((N-df+0.5)/(df+0.5)); positive IDF unchanged",
+      "jieba": "0.42.1",
+      "rank_bm25": "0.2.2",
+      "k1": 1.5,
+      "b": 0.75,
+      "epsilon": 0.25,
+      "top_k": 3,
+      "minimum_score": 0.01,
+      "chunking": "heading-plus-bullet-v1",
+      "dictionary_sha256": "7197c3211ddd98962b036cdf40324d1ea2bfaa12bd028e68faa70111a88e12a8",
+      "user_dictionary_sha256": "b6776ac5c2c73792d6a09bfb6c01618f390a7f7ae1c245bbe811e3e3011229e2",
+      "terms_sha256": "93a9923c77320f816aeec61a0dcf996e56a8620d04b624516504054b759b528d",
+      "documents": [
+        {
+          "id": 5,
+          "document_key": "p05-z201-capacity",
+          "revision": 1,
+          "title": "Z201容量",
+          "source_type": "offline_mechanical_fixture",
+          "source_ref": "P05-fixture:document:5",
+          "valid_from": "2026-01-01T00:00:00+00:00",
+          "valid_to": "2026-07-01T00:00:00+00:00",
+          "applicability": {
+            "scenario": "experimental_booking"
+          },
+          "content_hash": "e702caa3a695ec2a54156896ee018ac8a10512752f172c525803787baefbf518"
+        },
+        {
+          "id": 1,
+          "document_key": "p05-z201-capacity",
+          "revision": 2,
+          "title": "Z201容量",
+          "source_type": "offline_mechanical_fixture",
+          "source_ref": "P05-fixture:document:1",
+          "valid_from": "2026-07-01T00:00:00+00:00",
+          "valid_to": "2027-01-01T00:00:00+00:00",
+          "applicability": {
+            "scenario": "experimental_booking"
+          },
+          "content_hash": "adc6c98455f641dcc1963f3d91be0a8d989fbabb0cbaf6c837eaa00059d4750f"
+        },
+        {
+          "id": 7,
+          "document_key": "p05-z201-capacity",
+          "revision": 4,
+          "title": "Z201容量",
+          "source_type": "offline_mechanical_fixture",
+          "source_ref": "P05-fixture:document:7",
+          "valid_from": "2026-07-01T00:00:00+00:00",
+          "valid_to": "2027-01-01T00:00:00+00:00",
+          "applicability": {
+            "scenario": "experimental_booking"
+          },
+          "content_hash": "ba1b0f41d2518e4ea51ee6f0534b77cb3a428b9b2307bd5b9bb35341958aabaf"
+        }
+      ],
+      "chunks": [
+        {
+          "chunk_id": "p05-z201-capacity:r1:d793c15e6f29a522",
+          "document_id": 5,
+          "source_ref": "P05-fixture:document:5",
+          "document_revision": 1,
+          "document_hash": "e702caa3a695ec2a54156896ee018ac8a10512752f172c525803787baefbf518",
+          "chunk_hash": "d793c15e6f29a52205a91282b3c56e31e1e7410e1ce716d9be75977baf5d05e2"
+        },
+        {
+          "chunk_id": "p05-z201-capacity:r2:990ebb63ef6ecd15",
+          "document_id": 1,
+          "source_ref": "P05-fixture:document:1",
+          "document_revision": 2,
+          "document_hash": "adc6c98455f641dcc1963f3d91be0a8d989fbabb0cbaf6c837eaa00059d4750f",
+          "chunk_hash": "990ebb63ef6ecd15408701e20c6aa11a194ee06f149ed5b668e32d3aac47b3a9"
+        },
+        {
+          "chunk_id": "p05-z201-capacity:r4:002bffdec140177b",
+          "document_id": 7,
+          "source_ref": "P05-fixture:document:7",
+          "document_revision": 4,
+          "document_hash": "ba1b0f41d2518e4ea51ee6f0534b77cb3a428b9b2307bd5b9bb35341958aabaf",
+          "chunk_hash": "002bffdec140177b52688cbc7de61e63bb9be843b70ac0b57af0209446bea286"
+        }
+      ],
+      "index_hash": "cb64587ede822640f4050c38341e305accb639624673f2224c1598ef36207b19"
+    },
+    {
+      "version": "rules-bm25-v2",
+      "nonpositive_idf": "log1p((N-df+0.5)/(df+0.5)); positive IDF unchanged",
+      "jieba": "0.42.1",
+      "rank_bm25": "0.2.2",
+      "k1": 1.5,
+      "b": 0.75,
+      "epsilon": 0.25,
+      "top_k": 3,
+      "minimum_score": 0.01,
+      "chunking": "heading-plus-bullet-v1",
+      "dictionary_sha256": "7197c3211ddd98962b036cdf40324d1ea2bfaa12bd028e68faa70111a88e12a8",
+      "user_dictionary_sha256": "b6776ac5c2c73792d6a09bfb6c01618f390a7f7ae1c245bbe811e3e3011229e2",
+      "terms_sha256": "93a9923c77320f816aeec61a0dcf996e56a8620d04b624516504054b759b528d",
+      "documents": [
+        {
+          "id": 8,
+          "document_key": "p05-refund",
+          "revision": 1,
+          "title": "模拟退款",
+          "source_type": "offline_mechanical_fixture",
+          "source_ref": "P05-fixture:document:8",
+          "valid_from": "2026-01-01T00:00:00+00:00",
+          "valid_to": null,
+          "applicability": {
+            "scenario": "simulated_refund"
+          },
+          "content_hash": "a39c329635b43ba0ab70bb4301759653ef6628d4bfc241e4e1d9a4b8c11cb0d6"
+        }
+      ],
+      "chunks": [
+        {
+          "chunk_id": "p05-refund:r1:a238532a922e9a50",
+          "document_id": 8,
+          "source_ref": "P05-fixture:document:8",
+          "document_revision": 1,
+          "document_hash": "a39c329635b43ba0ab70bb4301759653ef6628d4bfc241e4e1d9a4b8c11cb0d6",
+          "chunk_hash": "a238532a922e9a501a3db414003873fec35ba9d1e302b07de812d5b295f5b833"
+        }
+      ],
+      "index_hash": "6ba3e332bc7aa71ca560b34444e3c40d342d512f5d2c0abf2d8ad283e88dcdde"
+    }
+  ],
+  "protocol_sha256": "0868e53fbd1b8362cf186e39ad04e337a6310ce23c6e8308bacc762fd32ab747",
+  "runner_sha256": "b3e452055066273c773fcc2e7649d4b1a37a45cc4c10643dcadb73cd35a79264"
+}

@@ -1,0 +1,35 @@
+{
+  "schema": "offline-retrieval-regression-v1",
+  "boundary": "新编机械离线回归，与旧T09调优题分开；非真人独立金标准、非正式保留集，不验证模型回答。",
+  "reference_clock": "2026-11-15T00:00:00+00:00",
+  "documents": [
+    {"id": 1, "key": "p05-z201-capacity", "revision": 2, "heading": "Z201容量", "clause": "Z201的容量上限为18人，参加人数不得超过18人。", "from": "2026-07-01T00:00:00+00:00", "to": "2027-01-01T00:00:00+00:00", "scenario": "experimental_booking"},
+    {"id": 2, "key": "p05-y305-capacity", "revision": 1, "heading": "Y305容量", "clause": "Y305的容量上限为48人，参加人数不得超过48人。", "from": "2026-01-01T00:00:00+00:00", "to": null, "scenario": "experimental_booking"},
+    {"id": 3, "key": "p05-duration", "revision": 1, "heading": "单次时长", "clause": "一次使用时长为45到90分钟，不能超过90分钟。", "from": "2026-01-01T00:00:00+00:00", "to": null, "scenario": "experimental_booking"},
+    {"id": 4, "key": "p05-advance", "revision": 1, "heading": "提前预订", "clause": "最多提前5天预订，超过提前期限的请求不予受理。", "from": "2026-01-01T00:00:00+00:00", "to": null, "scenario": "experimental_booking"},
+    {"id": 5, "key": "p05-z201-capacity", "revision": 1, "heading": "Z201容量", "clause": "Z201的容量上限为8人，参加人数不得超过8人。", "from": "2026-01-01T00:00:00+00:00", "to": "2026-07-01T00:00:00+00:00", "scenario": "experimental_booking"},
+    {"id": 6, "key": "p05-z201-capacity", "revision": 3, "heading": "Z201容量", "clause": "Z201的容量上限为30人，参加人数不得超过30人。", "from": "2027-01-01T00:00:00+00:00", "to": null, "scenario": "experimental_booking"},
+    {"id": 7, "key": "p05-z201-capacity", "revision": 4, "heading": "Z201容量", "clause": "Z201的容量上限为24人，参加人数不得超过24人。", "from": "2026-07-01T00:00:00+00:00", "to": "2027-01-01T00:00:00+00:00", "scenario": "experimental_booking"},
+    {"id": 8, "key": "p05-refund", "revision": 1, "heading": "模拟退款", "clause": "模拟退款金额上限为500元。", "from": "2026-01-01T00:00:00+00:00", "to": null, "scenario": "simulated_refund"}
+  ],
+  "cases": [
+    {"id": "P01", "category": "改写提问", "query": "Z201最多容纳几位参会者？", "documents": [1,2,3,4], "gold": [1], "statuses": ["supported"]},
+    {"id": "P02", "category": "改写提问", "query": "一次使用能用多久？", "documents": [1,2,3,4], "gold": [3], "statuses": ["supported"]},
+    {"id": "P03", "category": "改写提问", "query": "最早能提前几天订？", "documents": [1,2,3,4], "gold": [4], "statuses": ["supported"]},
+    {"id": "E01", "category": "相似实体", "query": "Y305的容量上限是什么？", "documents": [1,2,3,4], "gold": [2], "statuses": ["supported"], "top1_required": true},
+    {"id": "E02", "category": "相似实体", "query": "Z201能坐几个人？", "documents": [1,2,3,4], "gold": [1], "statuses": ["supported"], "top1_required": true},
+    {"id": "E03", "category": "相似实体", "query": "请比较Z201与Y305的容量。", "documents": [1,2,3,4], "gold": [1,2], "statuses": ["supported"]},
+    {"id": "T01", "category": "有效期", "query": "Z201现在能容纳几人？", "documents": [1,5,6], "clock": "2026-06-30T23:59:59+00:00", "gold": [5], "forbidden": [1,6], "statuses": ["supported"]},
+    {"id": "T02", "category": "有效期", "query": "Z201容量上限8人还是18人？", "documents": [1,5,6], "clock": "2026-07-01T00:00:00+00:00", "gold": [1], "forbidden": [5,6], "statuses": ["supported"]},
+    {"id": "T03", "category": "有效期", "query": "Z201容量上限18人还是30人？", "documents": [1,5,6], "clock": "2027-01-01T00:00:00+00:00", "gold": [6], "forbidden": [1,5], "statuses": ["supported"]},
+    {"id": "C01", "category": "冲突条款", "query": "Z201容量到底是多少？", "documents": [1,7], "gold": [], "statuses": ["evidence_conflict"]},
+    {"id": "C02", "category": "冲突条款", "query": "一次可以来几个人？", "documents": [1,7], "gold": [], "statuses": ["evidence_conflict"]},
+    {"id": "C03", "category": "冲突条款", "query": "Z201容量是多少？", "documents": [1,5,7], "clock": "2026-06-30T23:59:59+00:00", "gold": [5], "forbidden": [1,7], "statuses": ["supported"]},
+    {"id": "N01", "category": "无答案", "query": "是否配有投影仪？", "documents": [1,2,3,4], "gold": [], "statuses": ["no_lexical_match","low_relevance"]},
+    {"id": "N02", "category": "无答案", "query": "发票抬头怎么开？", "documents": [1,2,3,4], "gold": [], "statuses": ["no_lexical_match","low_relevance"]},
+    {"id": "N03", "category": "无答案", "query": "Z201的停车费多少钱？", "documents": [1,2,3,4], "gold": [], "statuses": ["no_lexical_match","low_relevance"]},
+    {"id": "W01", "category": "弱相关与不适用", "query": "Z201预约", "documents": [1,2,3,4], "gold": [], "statuses": ["low_relevance"]},
+    {"id": "W02", "category": "弱相关与不适用", "query": "模拟退款金额上限", "documents": [8], "gold": [], "statuses": ["no_applicable_evidence"]},
+    {"id": "W03", "category": "弱相关与不适用", "query": "Z201容量上限", "documents": [1,2,3,4], "clock": "2025-12-31T23:59:59+00:00", "gold": [], "statuses": ["no_applicable_evidence"]}
+  ]
+}
