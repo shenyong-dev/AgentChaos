@@ -14,6 +14,7 @@ from app.core.config import PROJECT_ROOT
 from app.evaluation.engine import Evidence, evaluate, evaluator_manifest
 from app.evidence.recorder import EVIDENCE_ROOT, append_event, redact
 from app.executors.control import TERMINAL
+from app.external.registry import is_external
 from app.models import Artifact, AssertionResult, TestExecution, TestRun, TraceEvent
 
 
@@ -173,7 +174,12 @@ def bounded(value):
 
 def persist_evaluation(session, run, execution, settings, *, closing=False, automatic=False):
     refund = run.manifest_json.get("adapter_type") == "reference_refund"
-    if refund:
+    external = is_external(run.manifest_json.get("adapter_type"))
+    if external:
+        from app.external.rules import evaluator_manifest as external_manifest
+
+        manifest = external_manifest()
+    elif refund:
         from app.adapters.refund_rules import evaluator_manifest as refund_manifest
 
         manifest = refund_manifest()
@@ -199,7 +205,11 @@ def persist_evaluation(session, run, execution, settings, *, closing=False, auto
     )
     if existing:
         return summarize(existing)
-    if refund:
+    if external:
+        from app.external.rules import evaluate as external_evaluate
+
+        outcome = external_evaluate(definitions, bundle, goal=goal)
+    elif refund:
         from app.adapters.refund_rules import evaluate as evaluate_refund
 
         outcome = evaluate_refund(definitions, bundle, goal=goal, owner=run.created_by)

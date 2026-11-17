@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import ExternalRunOverview from '../components/ExternalRunOverview.vue'
 import RefundRunOverview from '../components/RefundRunOverview.vue'
 import InfoHint from '../components/InfoHint.vue'
 import { useGuideSelection } from '../guidance'
@@ -25,6 +26,8 @@ const route = useRoute(), router = useRouter()
 const runId = ref(String(route.params.runId ?? ''))
 
 const snapshot = ref<RunSnapshot>(), facts = ref<TraceFact[]>([]), selected = ref('')
+const external = computed(() => snapshot.value?.manifest?.adapter_type?.startsWith('external_http:') ?? false)
+const booking = computed(() => !snapshot.value?.manifest?.adapter_type || snapshot.value.manifest.adapter_type === 'langgraph_booking')
 const error = ref(''), state = ref('未连接'), filter = ref(''), after = ref(''), more = ref(false)
 const busy = ref(false), live = ref(false)
 const activeTab = ref(['trace', 'diagnosis', 'assertions', 'relations', 'semantic'].includes(String(route.query.view)) ? String(route.query.view) : 'overview')
@@ -36,6 +39,7 @@ const focusedFact = ref<TraceFact>(), factsElement = ref<HTMLDetailsElement>()
 const executionFilter = ref(''), pane = ref<'cases' | 'trace' | 'detail'>('trace'), unread = ref(0)
 const detailElement = ref<HTMLElement>()
 let authorization = '', controller: AbortController | undefined, generation = 0, readGeneration = 0
+let snapshotRequest = 0
 const visible = computed(() => facts.value.filter(f => (!executionFilter.value || !f.event.execution_id || f.event.execution_id === executionFilter.value) && (!filter.value ||
   `${f.event.type} ${f.event.node ?? ''} ${f.event.execution_id ?? ''}`.includes(filter.value))))
 const currentExecution = computed(() => snapshot.value?.executions.find(e => e.execution_id === executionFilter.value))
@@ -43,7 +47,7 @@ useGuideSelection(() => snapshot.value && (!route.params.runId || snapshot.value
 const detail = computed(() => facts.value.find(f => f.event.event_id === selected.value) ?? focusedFact.value)
 const references = computed(() => detail.value?.event.evidence_refs ?? [])
 const profile = computed(() => snapshot.value?.manifest?.fault_profile)
-const observedModes = computed(() => [...new Set(snapshot.value?.executions.map(e => e.timing?.gateway_mode).filter(Boolean))].map(m => m === 'offline_test_double' ? '离线受控模型' : m === 'real_provider' ? '真实模型' : '来源待核对').join('、') || '尚未观察执行来源')
+const observedModes = computed(() => [...new Set(snapshot.value?.executions.map(e => e.timing?.gateway_mode).filter(Boolean))].map(m => m === 'offline_test_double' ? '离线受控模型' : m === 'real_provider' ? '真实模型' : m === 'external_http' ? '外部 HTTP 服务' : '来源待核对').join('、') || '尚未观察执行来源')
 const offlineModel = computed(() => snapshot.value?.executions.some(e => e.timing?.gateway_mode === 'offline_test_double'))
 const injected = computed(() => snapshot.value?.executions.reduce((n,e) => n + (e.timing?.faults?.injected ?? 0), 0) ?? 0)
 const types: Record<string, string> = {
@@ -65,10 +69,18 @@ function showAssertion(execution: string, id: number, version: string) {
   void router.replace({ query: { ...route.query, view:'assertions', execution, assertion:String(id), evaluator:version } })
 }
 async function showExecutionSnapshot(id: string) { selectExecution(id); await refreshSnapshot(); await nextTick(); showSnapshot() }
-async function refreshSnapshot() {
+async function readCurrentSnapshot(acceptSnapshot = () => true) {
   const run = snapshot.value?.run_id, ticket = readGeneration; if (!run) return
-  try { const value = await evidenceGet<RunSnapshot>(`/runs/${run}/snapshot`, authorization); if (ticket === readGeneration && snapshot.value?.run_id === run) snapshot.value = value }
-  catch (e) { if (ticket === readGeneration) error.value = (e as Error).message }
+  const request = ++snapshotRequest
+  const isCurrent = () => ticket === readGeneration && request === snapshotRequest && snapshot.value?.run_id === run && acceptSnapshot()
+  try {
+    const value = await evidenceGet<RunSnapshot>(`/runs/${run}/snapshot`, authorization)
+    if (isCurrent()) snapshot.value = value
+  } catch (e) { if (isCurrent()) throw e }
+}
+async function refreshSnapshot() {
+  try { await readCurrentSnapshot() }
+  catch (e) { error.value = (e as Error).message }
 }
 function selectExecution(id: string) { executionFilter.value = id; pane.value = 'trace'; filter.value = ''; focusedFact.value = undefined; selected.value = (id ? facts.value.find(f => f.event.execution_id === id) : facts.value[0])?.event.event_id ?? '' }
 async function selectEvent(id: string) { selected.value = id; pane.value = 'detail'; await nextTick(); detailElement.value?.focus({ preventScroll: true }) }
@@ -167,9 +179,8 @@ async function connect() {
         if (frame.event === 'stream.reset') { reset = true; throw new Error('游标已不可续传，请重新载入快照。') }
       })
       if (ended) {
-        const value = await evidenceGet<RunSnapshot>(`/runs/${targetRun}/snapshot`, authorization)
+        await readCurrentSnapshot(() => current === generation && live.value)
         if (current !== generation || !live.value || snapshot.value?.run_id !== targetRun) return
-        snapshot.value = value
         live.value = false; state.value = '事件已同步'; break
       }
     } catch (e) {
@@ -249,13 +260,14 @@ onBeforeUnmount(() => {
         <div><small>执行数量</small><strong>{{ snapshot.executions.length }}</strong></div>
         <div><small>待返回模型观察</small><strong>{{ snapshot.pending_model_observations }}</strong></div>
       </div>
-      <div class="evidence-tabs" role="tablist" aria-label="运行视图"><button role="tab" :aria-selected="activeTab === 'overview'" @click="setTab('overview')">结果概览</button><button role="tab" :aria-selected="activeTab === 'diagnosis'" @click="setTab('diagnosis'); if (!executionFilter) selectExecution(snapshot.executions[0]?.execution_id ?? '')">链路诊断</button><button role="tab" :aria-selected="activeTab === 'trace'" @click="setTab('trace')">调用轨迹</button><button role="tab" :aria-selected="activeTab === 'assertions'" @click="setTab('assertions')">判定结果</button><button v-if="snapshot.manifest?.metamorphic" role="tab" :aria-selected="activeTab === 'relations'" @click="setTab('relations')">变形对照</button><button v-if="snapshot.manifest?.adapter_type !== 'reference_refund'" role="tab" :aria-selected="activeTab === 'semantic'" @click="setTab('semantic')">AI辅助评价</button><span>证据先于结论</span></div>
-      <RefundRunOverview v-if="activeTab === 'overview' && snapshot.manifest?.adapter_type === 'reference_refund'" :snapshot="snapshot" :execution-id="executionFilter" @execution="selectExecution" @assertions="setTab('assertions')" @diagnosis="id=>{selectExecution(id);setTab('diagnosis')}" />
+      <div class="evidence-tabs" role="tablist" aria-label="运行视图"><button role="tab" :aria-selected="activeTab === 'overview'" @click="setTab('overview')">结果概览</button><button role="tab" :aria-selected="activeTab === 'diagnosis'" @click="setTab('diagnosis'); if (!executionFilter) selectExecution(snapshot.executions[0]?.execution_id ?? '')">链路诊断</button><button role="tab" :aria-selected="activeTab === 'trace'" @click="setTab('trace')">调用轨迹</button><button role="tab" :aria-selected="activeTab === 'assertions'" @click="setTab('assertions')">判定结果</button><button v-if="snapshot.manifest?.metamorphic" role="tab" :aria-selected="activeTab === 'relations'" @click="setTab('relations')">变形对照</button><button v-if="booking" role="tab" :aria-selected="activeTab === 'semantic'" @click="setTab('semantic')">AI辅助评价</button><span>证据先于结论</span></div>
+      <ExternalRunOverview v-if="external && ['overview','diagnosis'].includes(activeTab)" :snapshot="snapshot" :execution-id="executionFilter" :diagnosis="activeTab === 'diagnosis'" :refresh="refreshSnapshot" @execution="selectExecution" @assertions="setTab('assertions')" @trace="setTab('trace')" @diagnose="setTab('diagnosis')" />
+      <RefundRunOverview v-else-if="activeTab === 'overview' && snapshot.manifest?.adapter_type === 'reference_refund'" :snapshot="snapshot" :execution-id="executionFilter" @execution="selectExecution" @assertions="setTab('assertions')" @diagnosis="id=>{selectExecution(id);setTab('diagnosis')}" />
       <ReliabilityOverview v-else-if="activeTab === 'overview'" :run-id="snapshot.run_id" :authorization="authorization" :execution-id="executionFilter" :revision="`${snapshot.cursor}:${snapshot.status}:${snapshot.executions.map(e=>`${e.status}:${e.timing?.evaluation?.verdict ?? ''}`).join(',')}`" @execution="selectExecution" @locate="locate" @snapshot="showExecutionSnapshot" @assertion="showAssertion" @diagnosis="id => { selectExecution(id); setTab('diagnosis') }" @semantic="id => { semanticExecution = id; setTab('semantic') }" />
-      <ChainDiagnostics v-if="activeTab === 'diagnosis'" :snapshot="snapshot" :facts="facts" :execution-id="executionFilter" :authorization="authorization" :connection="state" :more="more" :busy="busy" @execution="selectExecution" @locate="locate" @head="load(true)" @next="nextPage(facts.length >= 500)" @assertions="setTab('assertions')" @semantic="semanticExecution = executionFilter; setTab('semantic')" @download="download" />
+      <ChainDiagnostics v-if="activeTab === 'diagnosis' && !external" :snapshot="snapshot" :facts="facts" :execution-id="executionFilter" :authorization="authorization" :connection="state" :more="more" :busy="busy" @execution="selectExecution" @locate="locate" @head="load(true)" @next="nextPage(facts.length >= 500)" @assertions="setTab('assertions')" @semantic="semanticExecution = executionFilter; setTab('semantic')" @download="download" />
       <AssertionsPanel v-if="activeTab === 'assertions'" :run-id="snapshot.run_id" :authorization="authorization" :execution-id="executionFilter" :executions="snapshot.executions" :assertion-id="Number(route.query.assertion) || undefined" :evaluator-version="String(route.query.evaluator ?? '')" @locate="locate" @snapshot="showSnapshot" />
       <RelationsPanel v-if="activeTab === 'relations'" :run-id="snapshot.run_id" :authorization="authorization" @locate="locate" @snapshot="showSnapshot" />
-      <p v-if="activeTab === 'semantic' && snapshot.manifest?.adapter_type === 'reference_refund'" role="status">模拟退款尚未校准 AI 辅助评价，请查看判定结果和账本证据。</p>
+      <p v-if="activeTab === 'semantic' && !booking" role="status">当前对象尚未校准 AI 辅助评价，请查看判定结果和原回执。</p>
       <div v-else-if="activeTab === 'semantic'">
         <div class="semantic-execution-picker">
           <div><label for="semantic-execution-select">选择语义评价的执行</label><p>按用例、执行标识或状态查找</p></div>
@@ -318,7 +330,7 @@ onBeforeUnmount(() => {
         </section>
       </div>
       </div>
-      <details ref="factsElement" class="evidence-facts"><summary>执行快照与预算</summary><div class="heading-with-info"><h3>业务查证</h3><InfoHint label="SQL快照" text="执行时记录的SQL快照；证据不足不能作为确定结论。任务达成与可靠性判定分别核对。" /></div><template v-if="currentExecution"><div class="business-comparison"><section><h4>执行前</h4><pre aria-label="业务执行前快照">{{ JSON.stringify(currentExecution.before, null, 2) }}</pre></section><section><h4>执行后</h4><pre aria-label="业务执行后快照">{{ JSON.stringify(currentExecution.after, null, 2) }}</pre></section></div><ElButton v-for="fact in facts.filter(f => f.event.execution_id === executionFilter && ['execution.completed','execution.error','execution.cancelled'].includes(f.event.type))" :key="fact.event.event_id" size="small" @click="locate(fact.event.event_id)">定位执行结束事件</ElButton></template><details><summary>全部执行、预算与版本指纹</summary><pre>{{ JSON.stringify({ executions: snapshot.executions, budget: snapshot.budget, manifest_hash: snapshot.manifest_hash }, null, 2) }}</pre></details></details>
+      <details ref="factsElement" class="evidence-facts"><summary>执行快照与预算</summary><div class="heading-with-info"><h3>{{ external ? '外部执行记录' : '业务查证' }}</h3><InfoHint v-if="!external" label="SQL快照" text="执行时记录的SQL快照；证据不足不能作为确定结论。任务达成与可靠性判定分别核对。" /></div><template v-if="currentExecution && !external"><div class="business-comparison"><section><h4>执行前</h4><pre aria-label="业务执行前快照">{{ JSON.stringify(currentExecution.before, null, 2) }}</pre></section><section><h4>执行后</h4><pre aria-label="业务执行后快照">{{ JSON.stringify(currentExecution.after, null, 2) }}</pre></section></div><ElButton v-for="fact in facts.filter(f => f.event.execution_id === executionFilter && ['execution.completed','execution.error','execution.cancelled'].includes(f.event.type))" :key="fact.event.event_id" size="small" @click="locate(fact.event.event_id)">定位执行结束事件</ElButton></template><details><summary>全部执行、预算与版本指纹</summary><pre>{{ JSON.stringify({ executions: snapshot.executions, budget: snapshot.budget, manifest_hash: snapshot.manifest_hash }, null, 2) }}</pre></details></details>
       <p class="evidence-hint">每个阅读窗口最多500条；下一窗口沿当前游标继续读取。刷新后重新载入持久记录，游标推进只依据完整事件。</p>
     </template>
     <div v-else class="empty-state"><h3>从一个真实运行开始</h3><p>输入运行标识，使用当前平台身份读取快照和持久事件流。</p></div>

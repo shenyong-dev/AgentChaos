@@ -16,6 +16,7 @@ from app.db.fixtures import ensure_rooms
 from app.evaluation.engine import evaluator_manifest
 from app.evidence.recorder import append_event
 from app.executors.control import TERMINAL, advisory, database_now, locked_pair
+from app.external.registry import is_external, supported
 from app.faults.service import frozen_profile
 from app.metamorphic.catalog import frozen_relations
 from app.models import Booking, Room, Target, TargetVersion, TestCase, TestExecution, TestRun
@@ -59,6 +60,10 @@ def frozen_case(row):
     content = case_content(row)
     if row.content_hash != canonical_hash(content):
         raise AgentError("case_hash_mismatch", "用例修订的内容哈希不一致。", 409)
+    if content["fixture"].get("fixture") == "external-dialogue-v1":
+        from app.external.cases import freeze
+
+        return freeze(row, content)
     if content["fixture"].get("fixture") == "refund-reference-v1":
         from app.adapters.refund_cases import freeze
 
@@ -118,6 +123,12 @@ def booking_snapshot(session, scope):
 
 
 def business_snapshot(session, run, scope, settings):
+    if is_external(run.manifest_json.get("adapter_type")):
+        return {
+            "status": "not_applicable",
+            "origin": "platform_observed",
+            "reason": "external_dialogue_has_no_business_fact_adapter",
+        }
     if run.manifest_json.get("adapter_type") == "reference_refund":
         from app.adapters import adapter_for
 
@@ -160,6 +171,10 @@ class RunService:
         self.adapter_type = adapter_type
 
     def current_manifest(self):
+        if is_external(self.adapter_type):
+            from app.adapters import adapter_for
+
+            return adapter_for(self.engine, self.settings, self.adapter_type).manifest()
         if self.adapter_type == "reference_refund":
             from app.adapters import adapter_for
 
@@ -194,7 +209,7 @@ class RunService:
             return cache[cache_key] == manifest["target"]["config_hash"] and manifest[
                 "roles"
             ] == role_configs(self.settings)
-        except (AgentError, KeyError, TypeError):
+        except (AgentError, KeyError, TypeError, ValueError):
             return False
 
     def can_consume(self, execution_uuid):
@@ -212,7 +227,7 @@ class RunService:
         if (
             not target
             or target.owner_id != user_id
-            or target.adapter_type not in {"langgraph_booking", "reference_refund"}
+            or not supported(self.settings, target.adapter_type)
             or target.archived_at is not None
         ):
             raise AgentError("target_version_not_found", "当前身份下找不到预约对象版本。", 404)
@@ -247,11 +262,19 @@ class RunService:
             raise AgentError(
                 "case_not_approved", "运行只接受已审核用例或绑定计划的私有验证草稿。", 409
             )
+        if any(
+            row.fixture_json.get("fixture") == "external-dialogue-v1"
+            and row.source != f"external_import:{target.adapter_type}:owner:{user_id}"
+            for row in rows
+        ):
+            raise AgentError("case_not_found", "当前账号下找不到所选外部用例。", 404)
         cases = [frozen_case(row) for row in rows]
         if any(
             c["dsl"].get("adapter_type", "langgraph_booking") != target.adapter_type for c in cases
         ):
             raise AgentError("case_adapter_mismatch", "用例领域与对象适配器不一致。", 409)
+        if is_external(target.adapter_type) and values.fault_profile_id:
+            raise AgentError("fault_adapter_mismatch", "外部对话接口未提供内部故障注入能力。", 409)
         if target.adapter_type == "reference_refund" and values.fault_profile_id:
             profile = frozen_profile(session, values.fault_profile_id)["config"]
             if profile["target_tool"] not in {
@@ -295,8 +318,14 @@ class RunService:
             "pricing": {**PRICING, "verified_on": "2026-10-26"},
             "evaluation": current.get("evaluator") or evaluator_manifest(),
         }
-        if target.adapter_type == "reference_refund":
-            manifest["adapter_type"] = "reference_refund"
+        if target.adapter_type != "langgraph_booking":
+            manifest["adapter_type"] = target.adapter_type
+        if is_external(target.adapter_type):
+            manifest["pricing"] = {
+                "mode": "external_account",
+                "basis": "conservative_declared_upper",
+                "provider_usage_verified": False,
+            }
         relations = frozen_relations(cases)
         if relations:
             manifest["metamorphic"] = relations
@@ -599,6 +628,12 @@ class RunService:
             )
             if e is None:
                 raise AgentError("execution_not_found", "找不到执行。", 404)
+            if is_external(run.manifest_json.get("adapter_type")):
+                raise AgentError(
+                    "external_recovery_requires_lookup",
+                    "外部调用只允许先查证原回执，不重发原输入。",
+                    409,
+                )
             timing = dict(e.timing_json)
             receipt = {"id": str(values.request_id), "revision": values.expected_revision}
             if receipt in timing.get("recovery_receipts", []):
@@ -746,7 +781,9 @@ class RunService:
                         {"kind": "run.started", "status": "running"},
                         settings=self.settings,
                     )
-                if run.manifest_json.get("adapter_type") == "reference_refund":
+                if is_external(run.manifest_json.get("adapter_type")):
+                    pass  # Remote preparation runs after claim, under the leased external port.
+                elif run.manifest_json.get("adapter_type") == "reference_refund":
                     if e.before_state_json is None:
                         from app.adapters import adapter_for
 

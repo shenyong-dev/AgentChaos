@@ -304,7 +304,10 @@ class ReportService:
             reports = []
             for identifier in (normal, fault):
                 run, report, _ = self._snapshot(session, owner, identifier, lock_events=False)
-                if run.manifest_json.get("adapter_type") == "reference_refund":
+                if (
+                    run.manifest_json.get("adapter_type", "langgraph_booking")
+                    != "langgraph_booking"
+                ):
                     raise AgentError(
                         "fault_comparison_domain",
                         "预约故障配对协议不适用退款；请查看退款账本与执行链路。",
@@ -728,7 +731,8 @@ class ReportService:
                     return self.export_view(old)
                 run, report, events = self._snapshot(session, owner, identifier)
                 retrieval_na = (
-                    run.manifest_json.get("adapter_type") == "reference_refund"
+                    run.manifest_json.get("adapter_type", "langgraph_booking")
+                    != "langgraph_booking"
                     and run.manifest_json["target"]["retrieval"]
                     == {"mode": "not_applicable", "documents": []}
                     and run.manifest_json["target"].get("capabilities", {}).get("retrieval")

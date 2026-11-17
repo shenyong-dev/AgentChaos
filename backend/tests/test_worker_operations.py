@@ -51,6 +51,24 @@ def state():
     }
 
 
+def test_external_registry_mount_and_environment_name_only(tmp_path, monkeypatch):
+    record = {
+        **state(),
+        "external_registry": str(tmp_path / "registry.json"),
+        "external_credentials": ["AGENTCHAOS_EXTERNAL_SAMPLE_TOKEN"],
+    }
+    docker = FakeDocker(record)
+    docker.present = False
+    monkeypatch.setattr(w, "PROJECT_ROOT", tmp_path)
+    monkeypatch.setattr(w, "folder_path", lambda _: tmp_path)
+    monkeypatch.setenv("AGENTCHAOS_EXTERNAL_SAMPLE_TOKEN", "synthetic-not-in-argv")
+    w.create_container(docker, "worker", record, tmp_path, tmp_path / "runtime.env", "image")
+    args = docker.commands[0]
+    assert any(f"target={w.EXTERNAL_REGISTRY_MOUNT},readonly" in value for value in args)
+    assert args[args.index("--env") + 1] == "AGENTCHAOS_EXTERNAL_SAMPLE_TOKEN"
+    assert all("synthetic-not-in-argv" not in value for value in args)
+
+
 def test_engine_unavailable_stop_preserves_container_identity_for_a_later_stop(tmp_path):
     record = state()
     w.write_json(tmp_path / "state.json", record)

@@ -72,18 +72,33 @@ test('record search follows bounded pages searches terms opens history read-only
  await interaction(page,true,false,false,{read_only:true,usage_available:false})
  await expect(page.locator('.interaction-usage')).toContainText('本会话模型请求 未采集');await expect(page.locator('.interaction-usage')).toContainText('峰值费用估算 未采集')
  const terms:string[]=[]
- await page.route('**/api/v1/interactive/sessions?**',route=>{const url=new URL(route.request().url());terms.push(url.searchParams.get('q')??'');return route.fulfill({json:{data:{items:url.searchParams.get('cursor')==='0'?[]:[{session_id:sid,title:'明天A101预约测试',created_at:'2026-11-05T01:00:00Z',version_id:55,revision:13,status:'ready',read_only:true,booking_count:1,sql_available:true,fields:{room_code:'A101',attendees:8}}],next_cursor:url.searchParams.get('cursor')==='0'?'123':null}}})})
- await page.getByRole('button',{name:'预约测试记录',exact:true}).click();const dialog=page.getByRole('dialog',{name:'预约测试记录',exact:true});await expect(dialog).toContainText('1 笔实际预约');await expect(dialog).toContainText('历史版本 · 只读')
+ await page.route('**/api/v1/interactive/sessions?**',route=>{const url=new URL(route.request().url());terms.push(url.searchParams.get('q')??'');return route.fulfill({json:{data:{items:url.searchParams.get('cursor')==='0'?[]:[{session_id:sid,title:'确认撤销该预约。请调用 cancel_booking，复用 booking_id 和 draft_hash。',created_at:'2026-11-05T01:00:00Z',version_id:55,revision:13,status:'ready',read_only:true,booking_count:1,sql_available:true,fields:{room_code:'A101',date:'2026-11-05',attendees:8}}],next_cursor:url.searchParams.get('cursor')==='0'?'123':null}}})})
+ await page.getByRole('button',{name:'预约测试记录',exact:true}).click();const dialog=page.getByRole('dialog',{name:'预约测试记录',exact:true});await expect(dialog).toContainText('1 笔实际预约');await expect(dialog).toContainText('历史版本 · 只读');await expect(dialog).not.toContainText(/cancel_booking|booking_id|draft_hash/)
  await dialog.getByRole('textbox',{name:'查找预约测试记录',exact:true}).fill('A101');await dialog.getByRole('button',{name:'查找',exact:true}).click();await expect.poll(()=>terms.filter(t=>t==='A101').length).toBe(2)
  await page.setViewportSize({width:390,height:844});await page.evaluate(()=>{localStorage.setItem('agentchaos.theme','dark');window.dispatchEvent(new StorageEvent('storage',{key:'agentchaos.theme',newValue:'dark'}))});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true)
  await page.screenshot({path:resolve(output,'booking-records-phone-dark.png'),animations:'disabled'})
- await dialog.getByRole('button',{name:/明天A101预约测试/}).click();await expect(dialog).not.toBeVisible();await expect(page.getByRole('textbox',{name:'预约条件',exact:true})).toBeDisabled();await expect(page.locator('.interaction-warning').filter({hasText:'此会话使用旧版本'})).toBeVisible()
+ await dialog.getByRole('button',{name:/A101 · 2026-11-05/}).click();await expect(dialog).not.toBeVisible();await expect(page.getByRole('textbox',{name:'预约条件',exact:true})).toBeDisabled();await expect(page.locator('.interaction-warning').filter({hasText:'此会话使用旧版本'})).toBeVisible()
 })
 
 test('unregistered source explains the blocked blank chat even if paid capability is ready',async({page})=>{
  await interaction(page)
  await page.route('**/api/v1/interactive/access',route=>route.fulfill({json:{data:{version_id:null,model_actions_available:true,config_hash:'a'.repeat(64),environment_id:'control',mode:'real_provider',reason:'当前源码尚未登记，不可创建会话。',limits:{session_calls:null,session_microusd:null,total_calls:null,round_seconds:120,local_unlimited:true}}}}))
  await page.goto('/interactive');await expect(page.getByRole('textbox',{name:'预约条件',exact:true})).toBeDisabled();await expect(page.locator('.interaction-warning')).toContainText('当前源码尚未登记');await expect(page.locator('.interaction-composer')).toContainText('当前源码尚未登记')
+})
+
+test('refund test records show session metadata instead of the original tool instructions', async ({ page }) => {
+  await page.route('**/api/v1/refund-interactive/sessions?**', route => route.fulfill({
+    json: { data: { items: [{
+      session_id: sid, title: '请调用 confirm_refund 并复制 request_key。',
+      created_at: '2026-11-05T01:00:00Z', version_id: 55, status: 'blocked',
+    }], next_cursor: null } },
+  }))
+  await page.goto('/interactive/refund')
+  await page.getByRole('button', { name: '退款测试记录', exact: true }).click()
+  const dialog = page.getByRole('dialog', { name: '退款测试记录', exact: true })
+  await expect(dialog.getByRole('button', { name: /退款测试 · 89197430/ })).toBeVisible()
+  await expect(dialog).toContainText('本轮未完成')
+  await expect(dialog).not.toContainText(/confirm_refund|request_key/)
 })
 
 test('leaving during first session creation does not send a message or return to the old page',async({page})=>{

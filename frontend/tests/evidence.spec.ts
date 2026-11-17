@@ -12,6 +12,11 @@ test('SSE parser keeps chunk boundaries, multiline data and ignores partial fram
 })
 
 test('empty evidence page has no invented run and handles invalid identifiers', async ({ page }) => {
+  await page.route('**/api/v1/auth/session', route => route.fulfill({ json: { data: {
+    user_id: 1, username: 'evidence-ui', role: 'operator', csrf_token: 'synthetic-csrf',
+    idle_expires_at: Date.now() / 1000 + 3600, absolute_expires_at: Date.now() / 1000 + 7200, idle_seconds: 3600,
+  } } }))
+  await page.route('**/api/v1/copilot/access', route => route.fulfill({ json: { data: { enabled: false, budget: {} } } }))
   await page.goto('/runs')
   await expect(page.getByRole('heading', { name: '从一个真实运行开始' })).toBeVisible()
   await page.getByRole('textbox', { name: '运行 UUID', exact: true }).fill('wrong')

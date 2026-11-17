@@ -28,6 +28,7 @@ const router = createRouter({
     { path: '/', redirect: '/workspace' },
     { path: '/workspace', component: WorkspacePage },
     { path: '/targets', component: WorkspacePage },
+    { path: '/external-agents', component: () => import('./pages/ExternalAgentsPage.vue') },
     { path: '/library', component: WorkspacePage },
     { path: '/workbench', component: WorkspacePage },
     { path: '/reports', component: ReportsPage },

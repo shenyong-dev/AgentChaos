@@ -91,7 +91,21 @@ onBeforeUnmount(() => generation++)
 </script>
 <template>
   <section class="workspace-page">
-    <div class="page-heading"><div class="heading-with-info"><h1>{{ titles[section] }}</h1><InfoHint v-if="section === 'targets'" label="版本兼容性" text="历史版本保持原样；源码或知识不同的版本需要对应的隔离运行环境，当前执行器不能代跑。" /><InfoHint v-if="section === 'library'" label="开发用例范围" text="仅展示已审核开发集。正式校准集和保留集不用于界面调试或Agent调优；非基础知识修订需要匹配的运行环境。" /></div><ElButton v-if="workspace.authorization.value && section !== 'targets'" type="primary" :loading="busy" @click="openCreate">新建运行</ElButton></div>
+    <div class="page-heading" :class="{ 'targets-heading': section === 'targets' }">
+      <div class="heading-with-info">
+        <h1>{{ titles[section] }}</h1>
+        <InfoHint v-if="section === 'targets'" label="版本兼容性" text="历史版本保持原样；源码或知识不同的版本需要对应的隔离运行环境，当前执行器不能代跑。" />
+        <InfoHint v-if="section === 'library'" label="开发用例范围" text="仅展示已审核开发集。正式校准集和保留集不用于界面调试或Agent调优；非基础知识修订需要匹配的运行环境。" />
+      </div>
+      <template v-if="workspace.authorization.value">
+        <RouterLink v-if="section === 'targets'" to="/external-agents" class="external-connect">
+          <Connection aria-hidden="true" />
+          <span>接入外部 Agent</span>
+          <Right class="external-connect-arrow" aria-hidden="true" />
+        </RouterLink>
+        <ElButton v-else type="primary" :loading="busy" @click="openCreate">新建运行</ElButton>
+      </template>
+    </div>
 
     <p v-if="workspace.pendingRun.value" class="workspace-note" role="status">上一次创建结果尚待查证，原始请求参数已保留。点击“新建运行”可继续核对同一次请求。</p>
     <p v-if="workspace.overview.value?.executor.observed_gateway_modes?.includes('offline_test_double')" class="offline-notice" role="note">本工作区含明确的离线模型验收记录；SQL、Redis、工具和事件为实际运行，不能计为DeepSeek模型能力成绩。</p>
@@ -107,13 +121,48 @@ onBeforeUnmount(() => generation++)
       <p v-if="busy" role="status" class="workspace-loading">正在读取真实记录…</p>
       <template v-if="section === 'targets'"><div class="version-list"><article v-for="row in versions?.items" :key="row.id" class="version-row"><div><small>{{ targetDisplayName(row.target) }}</small><ElButton text @click="guideVersion = row.id; openGuide('selection')">解释此版本</ElButton><h2>修订 {{ row.version_no }} <ElTag :type="row.compatible ? 'success' : 'info'">{{ row.compatible ? '当前源码可执行' : '历史冻结版本' }}</ElTag></h2><p>{{ row.model ?? '模型未记录' }} · {{ row.adapter_type }}<InfoHint v-if="row.adapter_type === 'reference_refund'" label="参考对象来源" text="同一项目开发者编写的模拟退款参考对象，未进行独立外部接入验证，不连接真实支付。" /></p></div><dl><dt>配置哈希</dt><dd>{{ row.config_hash }}</dd><dt>提示词哈希</dt><dd>{{ row.prompt_hash }}</dd><dt>图修订</dt><dd>{{ row.graph_revision }}</dd></dl></article></div></template>
       <template v-else-if="section === 'library'"><div class="table-scroll"><table class="workspace-table"><thead><tr><th>选择</th><th>用例目的与修订</th><th>类别</th><th>轮数</th><th>知识条件</th><th>审核</th><th>独立预期</th></tr></thead><tbody><tr v-for="row in cases?.items" :key="row.id"><td><input type="checkbox" :aria-label="`选择 ${row.case_key}`" :disabled="row.default_knowledge_compatible === false" :checked="selected.some(c => c.id === row.id)" @change="toggle(row)" /></td><td class="case-purpose-cell"><strong>{{ row.guidance?.title ?? row.case_key }}</strong><small>{{ row.case_key }} · revision {{ row.revision }}</small><small v-if="row.guidance?.status !== 'available'">说明待补充 / 待核对</small></td><td><span>{{ categories[row.category] }}</span><small class="case-risk-hint">{{ row.guidance?.risk }}</small></td><td>{{ row.turns }}</td><td>{{ knowledgeNames[row.knowledge_profile] ?? row.knowledge_profile }}<small>{{ row.default_knowledge_compatible ? '匹配当前知识条件' : '需匹配知识环境' }}</small></td><td>{{ row.adapter_type === 'reference_refund' ? '开发预期' : '已审核' }}</td><td><ElButton text @click="showCase(row)">查看用例</ElButton></td></tr></tbody></table></div><p v-if="cases && !cases.items.length && !busy" class="workspace-empty">没有匹配的已审核开发用例。</p></template>
-      <template v-else><div v-if="runs?.items.length" class="run-list"><RouterLink v-for="row in runs.items" :key="row.run_id" :to="`/runs/${row.run_id}`" class="run-row"><div class="run-state" :data-status="runState(row)">{{ runLabel(row) }}</div><div class="run-name"><strong>{{ row.run_id.slice(0, 8) }}<small>{{ row.run_id.slice(8) }}</small></strong><span>版本 {{ row.target_version_id }} · {{ row.executions }} 次执行 · {{ row.fault ?? '未配置故障' }} · {{ row.observed_modes?.length ? row.observed_modes.map(m => m === 'offline_test_double' ? '离线受控模型' : m === 'real_provider' ? '真实模型' : '来源待核对').join(' / ') : '尚无实际执行来源' }}</span></div><div class="run-event-count"><strong>{{ row.event_count }}</strong><small>持久事件</small></div><time>{{ new Date(row.created_at).toLocaleString('zh-CN', { hour12: false }) }}</time><span aria-hidden="true">→</span></RouterLink></div><div v-else-if="runs && !busy" class="workspace-empty"><h2>{{ q || filter ? '没有匹配的运行' : '还没有运行记录' }}</h2><p>选择已审核用例和可执行版本，创建第一项实验。</p><ElButton type="primary" @click="openCreate">新建运行</ElButton></div></template>
+      <template v-else><div v-if="runs?.items.length" class="run-list"><RouterLink v-for="row in runs.items" :key="row.run_id" :to="`/runs/${row.run_id}`" class="run-row"><div class="run-state" :data-status="runState(row)">{{ runLabel(row) }}</div><div class="run-name"><strong>{{ row.run_id.slice(0, 8) }}<small>{{ row.run_id.slice(8) }}</small></strong><span>版本 {{ row.target_version_id }} · {{ row.executions }} 次执行 · {{ row.fault ?? '未配置故障' }} · {{ row.observed_modes?.length ? row.observed_modes.map(m => m === 'offline_test_double' ? '离线受控模型' : m === 'real_provider' ? '真实模型' : m === 'external_http' ? '外部 HTTP 服务' : '来源待核对').join(' / ') : '尚无实际执行来源' }}</span></div><div class="run-event-count"><strong>{{ row.event_count }}</strong><small>持久事件</small></div><time>{{ new Date(row.created_at).toLocaleString('zh-CN', { hour12: false }) }}</time><span aria-hidden="true">→</span></RouterLink></div><div v-else-if="runs && !busy" class="workspace-empty"><h2>{{ q || filter ? '没有匹配的运行' : '还没有运行记录' }}</h2><p>选择已审核用例和可执行版本，创建第一项实验。</p><ElButton type="primary" @click="openCreate">新建运行</ElButton></div></template>
       <div v-if="section !== 'overview' && pageData" class="workspace-pagination"><span>第 {{ history.length + 1 }} 页 · 每页20条</span><ElButton :disabled="!history.length || busy" @click="turnPage(false)">上一页</ElButton><ElButton :disabled="!pageData.has_more || busy" @click="turnPage(true)">下一页</ElButton></div>
     </template>
     <ElDialog v-model="caseOpen" title="已审核用例与独立预期" width="min(880px, 94vw)" append-to-body><CaseReadingGuide v-if="detail" :detail="detail" /><template #footer><ElButton text @click="openGuide('selection')">解释这条用例</ElButton><ElButton @click="caseOpen = false">返回用例库</ElButton><ElButton type="primary" :disabled="!detail?.guidance.prerequisites.default_knowledge_compatible" @click="runThisCase">使用此用例新建运行</ElButton></template></ElDialog>
     <RunWizard v-if="createOpen" v-model="createOpen" :source-run-id="typeof route.query.source === 'string' ? route.query.source : undefined" :initial-target-version-id="typeof route.query.repair_version === 'string' && /^\d+$/.test(route.query.repair_version) ? Number(route.query.repair_version) : undefined" :action="route.query.action === 'rerun' ? 'rerun' : route.query.action === 'copy' ? 'copy' : 'new'" />
   </section>
 </template>
+
+<style scoped>
+.targets-heading { flex-wrap: wrap; }
+.external-connect {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 42px;
+  padding: 9px 14px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: var(--el-color-primary);
+  color: var(--ac-on-accent, #fff);
+  box-shadow: 0 2px 6px rgb(37 99 235 / 20%);
+  font-size: 14px;
+  font-weight: 600;
+  transition: box-shadow 160ms ease, background-color 160ms ease, transform 160ms ease;
+}
+.external-connect svg { width: 17px; height: 17px; flex: none; }
+.external-connect-arrow { transition: transform 160ms ease; }
+@media (hover: hover) {
+  .external-connect:hover {
+    background: color-mix(in srgb, var(--el-color-primary) 88%, #000);
+    box-shadow: 0 4px 10px rgb(37 99 235 / 30%);
+    transform: translateY(-1px);
+  }
+  .external-connect:hover .external-connect-arrow { transform: translateX(3px); }
+}
+.external-connect:active { transform: translateY(1px); box-shadow: none; }
+.external-connect:focus-visible { outline: 2px solid var(--el-color-primary); outline-offset: 4px; }
+@media (prefers-reduced-motion: reduce) {
+  .external-connect, .external-connect-arrow { transition: none; }
+  .external-connect:is(:hover, :active), .external-connect:hover .external-connect-arrow { transform: none; }
+}
+</style>
 
 <style scoped>
 .run-state[data-status=error],.run-state[data-status=failed] { color:var(--ac-danger);background:color-mix(in srgb,var(--ac-danger) 9%,var(--ac-surface));border-color:color-mix(in srgb,var(--ac-danger) 25%,var(--ac-border)); }.run-state[data-status=passed] { color:var(--ac-success);background:color-mix(in srgb,var(--ac-success) 9%,var(--ac-surface)); }.run-state[data-status=ended] { color:var(--ac-muted);background:var(--ac-surface-soft);border-color:var(--ac-border); }

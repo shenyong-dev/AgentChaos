@@ -45,7 +45,22 @@ def read(run_id: UUID, request: Request, user_id: Identity, service: Service) ->
 @router.post("/{run_id}/cancel")
 def cancel(run_id: UUID, request: Request, user_id: Identity, service: Service) -> Envelope[dict]:
     service.cancel(user_id, run_id)
+    from app.external.receipts import cancel_remote
+
+    cancel_remote(service.engine, service.settings, user_id, run_id)
     return Envelope(data=service.read(user_id, run_id), request_id=request.state.request_id)
+
+
+@router.post("/{run_id}/executions/{execution_id}/external-receipt")
+def external_receipt(
+    run_id: UUID, execution_id: UUID, request: Request, user_id: Identity, service: Service
+) -> Envelope[dict]:
+    from app.external.receipts import reconcile
+
+    return Envelope(
+        data=reconcile(service.engine, service.settings, user_id, run_id, execution_id),
+        request_id=request.state.request_id,
+    )
 
 
 @router.post("/{run_id}/dispatch")

@@ -50,6 +50,8 @@ def database_binding(settings):
 
 
 def execution_fingerprint(settings):
+    from app.external.registry import fingerprint
+
     keys = (
         "agent_model",
         "agent_thinking",
@@ -67,5 +69,7 @@ def execution_fingerprint(settings):
         {
             **{k: getattr(settings, k) for k in keys},
             "credential_present": bool(settings.deepseek_api_key.get_secret_value()),
+            "external_registry": fingerprint(settings),
+            "external_calls_enabled": settings.external_agent_calls_enabled,
         }
     )

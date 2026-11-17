@@ -14,6 +14,7 @@ from app.evidence.recorder import EvidenceRecorder
 from app.executors.budget import ExecutorBudget
 from app.executors.control import ExecutionControl
 from app.executors.service import RunService, role_configs
+from app.external.registry import is_external
 from app.faults.engine import FaultController
 
 
@@ -55,6 +56,26 @@ def run_execution(engine, redis, settings, execution_uuid, *, gateway_factory=No
             }
         if claim["manifest"]["roles"] != role_configs(settings):
             raise AgentError("run_config_mismatch", "Worker角色参数与冻结运行清单不一致。", 409)
+        if is_external(claim["manifest"].get("adapter_type")):
+            from app.external.runner import execute
+
+            if gateway_factory is not None:
+                raise AgentError(
+                    "external_offline_not_allowed", "离线模型执行器不会连接外部服务。", 409
+                )
+            with control.transaction() as (_, _, execution):
+                execution.timing_json = {**execution.timing_json, "gateway_mode": "external_http"}
+            output = execute(engine, redis, settings, claim, control, recorder)
+            waiting = output["status"] == "waiting_confirmation"
+            failed = output["status"] in {"failed", "cancelled"}
+            finished = service.finish(
+                claim["id"],
+                claim["token"],
+                "error" if failed else "waiting_input" if waiting else "inconclusive",
+                output,
+                {"category": "external", "code": "external_task_failed"} if failed else None,
+            )
+            return {"claimed": True, "status": finished or "lease_lost"}
         budget = ExecutorBudget(redis, settings, control, claim["run_uuid"], str(execution_uuid))
         if claim["recovery"]:
             with control.transaction() as (_, _, e):

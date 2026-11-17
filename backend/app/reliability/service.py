@@ -191,10 +191,10 @@ class ReliabilityService:
         with read_session(self.engine) as session:
             run = RunService.owned_run(session, owner, identifier)
             manifest = run.manifest_json
-            if manifest.get("adapter_type") == "reference_refund":
+            if manifest.get("adapter_type", "langgraph_booking") != "langgraph_booking":
                 raise AgentError(
                     "domain_coverage_not_applicable",
-                    "预约六维概览不适用于退款对象，请查看退款账本与领域判定。",
+                    "预约六维概览不适用于此对象，请查看执行回执与领域判定。",
                     409,
                 )
             if canonical_hash(manifest) != run.manifest_hash:

@@ -1,0 +1,197 @@
+{
+  "$defs": {
+    "Binding": {
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "pattern": "^backend/[A-Za-z0-9_/-]+\\.py$",
+          "title": "Path",
+          "type": "string"
+        },
+        "symbol": {
+          "pattern": "^[A-Za-z_][A-Za-z_0-9]*(\\.[A-Za-z_][A-Za-z_0-9]*)?$",
+          "title": "Symbol",
+          "type": "string"
+        },
+        "parameters": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 16,
+          "minItems": 0,
+          "title": "Parameters",
+          "type": "array"
+        },
+        "responsibility": {
+          "maxLength": 300,
+          "minLength": 1,
+          "title": "Responsibility",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "symbol",
+        "parameters",
+        "responsibility"
+      ],
+      "title": "Binding",
+      "type": "object"
+    },
+    "Capability": {
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "enum": [
+            "supported",
+            "conditional",
+            "not_applicable"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "boundary": {
+          "maxLength": 400,
+          "minLength": 1,
+          "title": "Boundary",
+          "type": "string"
+        }
+      },
+      "required": [
+        "status",
+        "boundary"
+      ],
+      "title": "Capability",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "ac-target-contract-draft-1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "target_id": {
+      "pattern": "^[a-z][a-z0-9_]{1,63}$",
+      "title": "Target Id",
+      "type": "string"
+    },
+    "stage": {
+      "enum": [
+        "reference_inventory",
+        "external_template"
+      ],
+      "title": "Stage",
+      "type": "string"
+    },
+    "author_relation": {
+      "enum": [
+        "same_project_developer",
+        "pending_external"
+      ],
+      "title": "Author Relation",
+      "type": "string"
+    },
+    "network_enabled": {
+      "const": false,
+      "title": "Network Enabled",
+      "type": "boolean"
+    },
+    "trace_schema": {
+      "const": "1.3",
+      "title": "Trace Schema",
+      "type": "string"
+    },
+    "case_schema": {
+      "maxLength": 40,
+      "minLength": 1,
+      "title": "Case Schema",
+      "type": "string"
+    },
+    "execution_shape": {
+      "enum": [
+        "worker_task",
+        "domain_port",
+        "pending_http_bridge"
+      ],
+      "title": "Execution Shape",
+      "type": "string"
+    },
+    "facts_origin": {
+      "enum": [
+        "platform_sql",
+        "reference_sqlite",
+        "pending_external"
+      ],
+      "title": "Facts Origin",
+      "type": "string"
+    },
+    "isolation": {
+      "enum": [
+        "database_owner_scope",
+        "pending_external"
+      ],
+      "title": "Isolation",
+      "type": "string"
+    },
+    "reset_policy": {
+      "const": "new_scope_only",
+      "title": "Reset Policy",
+      "type": "string"
+    },
+    "cancellation": {
+      "enum": [
+        "cooperative_no_rollback",
+        "pending_external"
+      ],
+      "title": "Cancellation",
+      "type": "string"
+    },
+    "unknown_policy": {
+      "const": "retain_key_no_replay",
+      "title": "Unknown Policy",
+      "type": "string"
+    },
+    "capabilities": {
+      "additionalProperties": {
+        "$ref": "#/$defs/Capability"
+      },
+      "title": "Capabilities",
+      "type": "object"
+    },
+    "operations": {
+      "additionalProperties": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/Binding"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "title": "Operations",
+      "type": "object"
+    }
+  },
+  "required": [
+    "schema_version",
+    "target_id",
+    "stage",
+    "author_relation",
+    "network_enabled",
+    "trace_schema",
+    "case_schema",
+    "execution_shape",
+    "facts_origin",
+    "isolation",
+    "reset_policy",
+    "cancellation",
+    "unknown_policy",
+    "capabilities",
+    "operations"
+  ],
+  "title": "Profile",
+  "type": "object"
+}

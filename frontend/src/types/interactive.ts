@@ -21,7 +21,7 @@ export type InteractionMessage = { message_id: string | null; role: string; cont
 export type InteractionReceipt = { request_id: string; status: 'completed' | 'failed' | 'processing' | 'not_registered'; observed_at: string; error?: { code: string; message: string } }
 export type PendingInteraction = { session: string; kind: 'messages' | 'resume' | 'retry'; body: Record<string, unknown> }
 export type InteractionRecord = {
-  session_id: string; title: string; created_at: string; version_id: number; revision: number
+  session_id: string; created_at: string; version_id: number; revision: number
   status: string; processing?: boolean; read_only: boolean; booking_count: number | null; sql_available: boolean
   fields: Record<string, unknown>
 }

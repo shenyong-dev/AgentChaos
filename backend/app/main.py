@@ -16,6 +16,7 @@ from app.api.copilot import router as copilot_router
 from app.api.datasets import router as datasets_router
 from app.api.evaluation import router as evaluation_router
 from app.api.evidence import router as evidence_router
+from app.api.external_agents import router as external_agents_router
 from app.api.faults import router as faults_router
 from app.api.guidance import router as guidance_router
 from app.api.interactive import router as interactive_router
@@ -44,6 +45,7 @@ def create_app() -> FastAPI:
     app.include_router(auth_router)
     app.include_router(datasets_router)
     app.include_router(workbench_router)
+    app.include_router(external_agents_router)
     app.include_router(reports_router)
     app.include_router(reductions_router)
     app.include_router(interactive_router)

@@ -14,6 +14,7 @@ assert not any(
         settings.executor_allow_paid_model_calls,
         settings.casegen_allow_paid_model_calls,
         settings.judge_allow_paid_model_calls,
+        settings.external_agent_calls_enabled,
     )
 )
 celery_app.conf.ac_gateway_mode = "offline_test_double"

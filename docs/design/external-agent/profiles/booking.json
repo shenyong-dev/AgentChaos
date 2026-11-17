@@ -1,0 +1,110 @@
+{
+  "schema_version": "ac-target-contract-draft-1",
+  "target_id": "langgraph_booking",
+  "stage": "reference_inventory",
+  "author_relation": "same_project_developer",
+  "network_enabled": false,
+  "trace_schema": "1.3",
+  "case_schema": "1.1",
+  "execution_shape": "worker_task",
+  "facts_origin": "platform_sql",
+  "isolation": "database_owner_scope",
+  "reset_policy": "new_scope_only",
+  "cancellation": "cooperative_no_rollback",
+  "unknown_policy": "retain_key_no_replay",
+  "capabilities": {
+    "dialogue": {
+      "status": "supported",
+      "boundary": "执行内交互及显式等待输入；不声称跨运行记忆。"
+    },
+    "tool_events": {
+      "status": "supported",
+      "boundary": "仅真实被观察的工具/节点事件。"
+    },
+    "business_facts": {
+      "status": "supported",
+      "boundary": "读取scope内MySQL预约快照；缺失或损坏不当零预约。"
+    },
+    "retrieval_evidence": {
+      "status": "supported",
+      "boundary": "按冻结知识修订保存检索事件；不证明回答质量。"
+    },
+    "domain_coverage": {
+      "status": "conditional",
+      "boundary": "预约规则与适用类别，不是任意业务领域的通用覆盖。"
+    },
+    "ai_judge": {
+      "status": "conditional",
+      "boundary": "仍需同协议30条独立校准及原授权；不能凭能力声明调用。"
+    }
+  },
+  "operations": {
+    "manifest": {
+      "path": "backend/app/agents/versions.py",
+      "symbol": "build_manifest",
+      "parameters": [
+        "settings",
+        "retriever",
+        "registry"
+      ],
+      "responsibility": "冻结源码、依赖、工具及知识；仅列出当前入口，不调用或重新登记。"
+    },
+    "prepare": {
+      "path": "backend/app/db/fixtures.py",
+      "symbol": "ensure_rooms",
+      "parameters": [
+        "session",
+        "scope"
+      ],
+      "responsibility": "原生执行器事务内准备，保留原scope；不是通用重置入口。"
+    },
+    "execute": {
+      "path": "backend/app/executors/runner.py",
+      "symbol": "run_execution",
+      "parameters": [
+        "engine",
+        "redis",
+        "settings",
+        "execution_uuid"
+      ],
+      "responsibility": "完整Worker任务入口，包含claim/租约/计量/finish；不同于退款内层端口。"
+    },
+    "snapshot": {
+      "path": "backend/app/executors/service.py",
+      "symbol": "booking_snapshot",
+      "parameters": [
+        "session",
+        "scope"
+      ],
+      "responsibility": "原session内读取业务事实；可信owner和scope在上游绑定。"
+    },
+    "evaluate": {
+      "path": "backend/app/evaluation/engine.py",
+      "symbol": "evaluate",
+      "parameters": [
+        "definitions",
+        "b",
+        "goal"
+      ],
+      "responsibility": "只检查原断言和事实，不执行预约或自动调用裁判。"
+    },
+    "cancel": {
+      "path": "backend/app/executors/service.py",
+      "symbol": "RunService.cancel",
+      "parameters": [
+        "user_id",
+        "run_uuid"
+      ],
+      "responsibility": "请求停止平台运行，不能撤销已提交预约；真实业务取消另走授权流程。"
+    },
+    "lookup": {
+      "path": "backend/app/services/booking.py",
+      "symbol": "BookingService.lookup_booking_by_request",
+      "parameters": [
+        "context",
+        "request_key"
+      ],
+      "responsibility": "按可信身份/scope和原键查预约事实。"
+    }
+  }
+}

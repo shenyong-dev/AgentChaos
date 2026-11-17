@@ -21,6 +21,7 @@ from uuid import uuid4
 from app.agents.versions import canonical_hash
 from app.core.config import PROJECT_ROOT, Settings
 from app.core.deployment import database_binding, execution_fingerprint, source_fingerprint
+from app.external.registry import credential, entries
 
 LABEL = "io.agentchaos.workers"
 PACKAGES = (
@@ -29,7 +30,9 @@ PACKAGES = (
     "langchain-core",
     "langchain-deepseek",
     "langgraph-checkpoint-redis",
+    "httpcore",
 )
+EXTERNAL_REGISTRY_MOUNT = "/run/agentchaos-external/registry.json"
 DOCKER = Path("D:/DockerDesktop/resources/bin/docker.exe")
 ENDPOINT = "npipe:////./pipe/dockerDesktopLinuxEngine"
 RETRY_DELAYS = (2, 4, 8)
@@ -170,6 +173,8 @@ def snapshot(folder, settings):
             shutil.copyfile(PROJECT_ROOT / name, target)
         write_json(release / "ready.json", {"source": source_fingerprint()})
     values = settings.model_dump(mode="json")
+    if values["external_agent_registry_path"]:
+        values["external_agent_registry_path"] = EXTERNAL_REGISTRY_MOUNT
     values.pop("demo_seed_password", None)
     for key in ("mysql_password", "redis_password", "deepseek_api_key"):
         values[key] = getattr(settings, key).get_secret_value()
@@ -247,6 +252,14 @@ def create_container(docker, role, record, release, env_file, image):
         "--log-opt",
         "max-file=2",
     ]
+    registry = record.get("external_registry")
+    if registry:
+        args += [
+            "--mount",
+            f"type=bind,source={registry},target={EXTERNAL_REGISTRY_MOUNT},readonly",
+        ]
+        for name in record.get("external_credentials", []):
+            args += ["--env", name]
     for source, target in (
         (release / "backend/app", "backend/app"),
         (release / "backend/alembic", "backend/alembic"),
@@ -319,12 +332,25 @@ def start(folder, profile, config, image, docker, *, control=False):
                     settings.executor_allow_paid_model_calls,
                     settings.casegen_allow_paid_model_calls,
                     settings.judge_allow_paid_model_calls,
+                    settings.external_agent_calls_enabled,
                 )
             )
         ):
             raise OperationError(
                 "offline_control_requires_owned_T17H_database_no_key_no_paid_switches"
             )
+        registry = settings.external_agent_registry_path
+        credentials = []
+        if registry:
+            configured = entries(settings)
+            registry = str(Path(registry).resolve(strict=True))
+            if "," in registry:
+                raise OperationError("external_registry_mount_path_contains_comma")
+            if settings.external_agent_calls_enabled:
+                for entry in configured.values():
+                    if entry.enabled:
+                        credential(entry)
+                        credentials.append(entry.credential_env)
         check_image(docker, image)
         release, env_file = snapshot(folder, settings)
         owner = hashlib.sha256((str(PROJECT_ROOT.resolve()) + profile).encode()).hexdigest()
@@ -343,6 +369,8 @@ def start(folder, profile, config, image, docker, *, control=False):
             "image": image,
             "last_error": None,
             "control": control,
+            "external_registry": registry,
+            "external_credentials": sorted(set(credentials)),
         }
         try:
             for role in ("worker", "dispatcher"):

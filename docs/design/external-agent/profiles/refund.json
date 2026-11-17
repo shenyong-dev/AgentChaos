@@ -1,0 +1,109 @@
+{
+  "schema_version": "ac-target-contract-draft-1",
+  "target_id": "reference_refund",
+  "stage": "reference_inventory",
+  "author_relation": "same_project_developer",
+  "network_enabled": false,
+  "trace_schema": "1.3",
+  "case_schema": "refund-1",
+  "execution_shape": "domain_port",
+  "facts_origin": "reference_sqlite",
+  "isolation": "database_owner_scope",
+  "reset_policy": "new_scope_only",
+  "cancellation": "cooperative_no_rollback",
+  "unknown_policy": "retain_key_no_replay",
+  "capabilities": {
+    "dialogue": {
+      "status": "supported",
+      "boundary": "执行内完整历史，有界上下文，不自动重放崩溃调用。"
+    },
+    "tool_events": {
+      "status": "supported",
+      "boundary": "仅模型与工具可观察节点，不伪造内部图。"
+    },
+    "business_facts": {
+      "status": "supported",
+      "boundary": "隔离SQLite模拟退款账本，不是真实支付；缺账本为未知。"
+    },
+    "retrieval_evidence": {
+      "status": "not_applicable",
+      "boundary": "参考退款未使用RAG，不伪造检索或回答利用指标。"
+    },
+    "domain_coverage": {
+      "status": "not_applicable",
+      "boundary": "原预约六维覆盖不适用于退款。"
+    },
+    "ai_judge": {
+      "status": "not_applicable",
+      "boundary": "原预约裁判未针对退款校准；仅领域规则与人工复核。"
+    }
+  },
+  "operations": {
+    "manifest": {
+      "path": "backend/app/adapters/refund.py",
+      "symbol": "RefundAdapter.manifest",
+      "parameters": [],
+      "responsibility": "冻结参考退款来源、工具、能力及领域规则。"
+    },
+    "prepare": {
+      "path": "backend/app/adapters/refund.py",
+      "symbol": "RefundAdapter.prepare",
+      "parameters": [
+        "scope",
+        "owner"
+      ],
+      "responsibility": "只在首次执行前准备绑定数据库/owner/scope的模拟账本。"
+    },
+    "execute": {
+      "path": "backend/app/adapters/refund_runner.py",
+      "symbol": "execute",
+      "parameters": [
+        "engine",
+        "redis",
+        "settings",
+        "claim",
+        "control",
+        "recorder",
+        "gateway"
+      ],
+      "responsibility": "已claim的内层执行端口；外层Worker持有租约和预算。"
+    },
+    "snapshot": {
+      "path": "backend/app/adapters/refund.py",
+      "symbol": "RefundAdapter.snapshot",
+      "parameters": [
+        "scope",
+        "owner"
+      ],
+      "responsibility": "读取原模拟账本；不存在时保留None，不prepare空库。"
+    },
+    "evaluate": {
+      "path": "backend/app/adapters/refund_rules.py",
+      "symbol": "evaluate",
+      "parameters": [
+        "definitions",
+        "bundle",
+        "goal",
+        "owner"
+      ],
+      "responsibility": "独立事实断言，核对笔数/金额/授权/唯一性。"
+    },
+    "cancel": {
+      "path": "backend/app/executors/service.py",
+      "symbol": "RunService.cancel",
+      "parameters": [
+        "user_id",
+        "run_uuid"
+      ],
+      "responsibility": "请求停止平台运行，不能撤销已提交的模拟退款；不代表真实支付网络取消。"
+    },
+    "lookup": {
+      "path": "backend/reference_agents/refund/store.py",
+      "symbol": "RefundStore.lookup",
+      "parameters": [
+        "key"
+      ],
+      "responsibility": "实例已绑定owner及scope，按原键查模拟入账。"
+    }
+  }
+}

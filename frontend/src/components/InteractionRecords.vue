@@ -32,6 +32,12 @@ async function search(more = false) {
   finally { if (ticket === generation) loading.value = false }
 }
 function select(id: string) { open.value = false; emit('select', id) }
+function recordTitle(fields: InteractionRecord['fields']) {
+  const { room_code, date } = fields
+  const room = typeof room_code === 'string' && /^[A-Z0-9][A-Z0-9_-]{0,23}$/i.test(room_code) ? room_code : ''
+  const day = typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : ''
+  return [room, day].filter(Boolean).join(' · ') || '场地预约测试'
+}
 watch([open, session.epoch], () => {
   generation++; loading.value = false; items.value = []; cursor.value = null; query.value = ''; error.value = ''; searched.value = false
   if (open.value && session.identity.value) void search()
@@ -43,8 +49,8 @@ watch([open, session.epoch], () => {
     <p v-if="error" role="alert">{{ error }}</p>
     <div class="record-list" :aria-busy="loading">
       <button v-for="item in items" :key="item.session_id" class="record-item" @click="select(item.session_id)">
-        <span class="record-top"><strong>{{ item.title }}</strong><ElTag :type="item.read_only ? 'info' : item.processing || item.status !== 'ready' ? 'warning' : 'success'">{{ item.read_only ? '历史版本 · 只读' : item.processing ? '处理中' : item.status === 'waiting_confirmation' ? '待确认' : item.status === 'error' ? '本轮未完成' : '可继续' }}</ElTag></span>
-        <span class="record-facts"><span v-if="item.fields.room_code">{{ item.fields.room_code }}</span><span v-if="item.fields.date">{{ item.fields.date }}</span><span v-if="item.fields.attendees">{{ item.fields.attendees }} 人</span><span>{{ item.sql_available ? `${item.booking_count} 笔实际预约` : '预约数量未确认' }}</span><span>{{ new Date(item.created_at).toLocaleString('zh-CN', { hour12:false }) }}</span></span>
+        <span class="record-top"><strong>{{ recordTitle(item.fields) }}</strong><ElTag :type="item.read_only ? 'info' : item.processing || item.status !== 'ready' ? 'warning' : 'success'">{{ item.read_only ? '历史版本 · 只读' : item.processing ? '处理中' : item.status === 'waiting_confirmation' ? '待确认' : item.status === 'error' ? '本轮未完成' : '可继续' }}</ElTag></span>
+        <span class="record-facts"><span v-if="typeof item.fields.attendees === 'number'">{{ item.fields.attendees }} 人</span><span>{{ item.sql_available && item.booking_count !== null ? `${item.booking_count} 笔实际预约` : '预约数量未确认' }}</span><span>{{ new Date(item.created_at).toLocaleString('zh-CN', { hour12:false }) }}</span></span>
         <span class="record-id">{{ item.session_id }} · 版本 {{ item.version_id }} · {{ item.revision }} 次修订</span>
       </button>
       <p v-if="searched && !items.length && !loading" class="record-empty">{{ cursor ? '本页暂无匹配，继续查找其余记录。' : '没有找到匹配的预约测试记录。' }}</p>

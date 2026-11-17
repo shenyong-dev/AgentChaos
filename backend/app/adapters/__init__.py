@@ -12,6 +12,12 @@ class TargetAdapter(Protocol):
 
 
 def adapter_for(engine, settings, kind):
+    from app.external.registry import is_external
+
+    if is_external(kind):
+        from app.external.adapter import ExternalAdapter
+
+        return ExternalAdapter(engine, settings, kind)
     if kind == "reference_refund":
         from app.adapters.refund import RefundAdapter
 

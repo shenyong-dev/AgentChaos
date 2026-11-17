@@ -1,5 +1,6 @@
 """Readiness is rechecked on commit; only the original run service writes runs."""
 
+import asyncio
 import json
 import secrets
 from datetime import UTC, datetime, timedelta
@@ -13,6 +14,7 @@ from app.agents.errors import AgentError
 from app.agents.versions import canonical_hash
 from app.core.deployment import database_binding, execution_fingerprint, source_fingerprint
 from app.executors.service import RunService, frozen_case
+from app.external.registry import entry_for, is_external
 from app.models import TargetVersion, TestCase, TestRun
 from app.schemas.runs import CreateRun
 from app.schemas.workflow import RunPlan
@@ -53,6 +55,7 @@ class WorkflowService:
                     settings.executor_allow_paid_model_calls,
                     settings.casegen_allow_paid_model_calls,
                     settings.judge_allow_paid_model_calls,
+                    settings.external_agent_calls_enabled,
                 )
             )
         ):
@@ -113,6 +116,7 @@ class WorkflowService:
         )
         return {
             "source_run_id": value["run_id"],
+            "adapter_type": manifest.get("adapter_type", "langgraph_booking"),
             "target_id": target_id,
             "source_manifest_hash": value["manifest_hash"],
             "configuration": configuration,
@@ -134,7 +138,10 @@ class WorkflowService:
             else []
         )
         if source and plan.action == "rerun":
-            if delta or source["gateway_modes"] and source["gateway_modes"] != [self.mode]:
+            expected_mode = (
+                "external_http" if is_external(source.get("adapter_type")) else self.mode
+            )
+            if delta or source["gateway_modes"] and source["gateway_modes"] != [expected_mode]:
                 raise AgentError(
                     "rerun_conditions_changed",
                     "原配置或模型来源不同；请选择复制并修改并核对差异，不能冒充原条件复现。",
@@ -148,7 +155,11 @@ class WorkflowService:
                     "本次运行预算必须大于0；0表示禁止模型调用。原配置为0时，请复制并修改预算后再创建。",
                     400,
                 )
-            visible = set(session.scalars(workbench._cases(session).with_only_columns(TestCase.id)))
+            visible = set(
+                session.scalars(
+                    workbench.visible_cases(session, owner).with_only_columns(TestCase.id)
+                )
+            )
             requested = set(plan.configuration.case_revision_ids)
             if plan.action != "rerun" and not requested.issubset(visible):
                 raise AgentError(
@@ -183,9 +194,13 @@ class WorkflowService:
             _, manifest, _, _ = RunService(self.engine, self.settings).prepare_configuration(
                 session, owner, plan.configuration, "preview"
             )
+            if self.mode == "offline_test_double" and is_external(manifest.get("adapter_type")):
+                raise AgentError(
+                    "external_offline_not_allowed", "离线模型执行器不会连接外部服务。", 409
+                )
         return source, delta, manifest
 
-    async def observe(self, plan):
+    async def observe(self, plan, manifest=None):
         report = await self.readiness(self.settings)
         batch = next(x for x in report.operations if x.id == "batch")
         required = (
@@ -193,6 +208,45 @@ class WorkflowService:
             if plan.dispatch == "ready"
             else ["api", "mysql", "schema", "redis", "checkpoints", "version"]
         )
+        external = bool(manifest and is_external(manifest.get("adapter_type")))
+        if external:
+            # The chosen target is validated separately; no dependency on booking checkpoints,
+            # DeepSeek credentials or its separate authorization ledger is implied.
+            required = [
+                c
+                for c in required
+                if c not in {"version", "checkpoints", "credential", "executor_budget"}
+            ]
+            if plan.dispatch == "ready":
+                from app.external.runner import request
+                from app.external.transport import Client
+                from app.services.readiness import observation
+
+                entry = entry_for(self.settings, manifest["adapter_type"])
+                binding = {
+                    "tenant": canonical_hash(["preflight", entry.id]),
+                    "scope": "test:probe:" + uuid4().hex,
+                    "session_id": str(uuid4()),
+                }
+                try:
+                    actual = await asyncio.to_thread(
+                        Client(entry, self.settings).call,
+                        request(entry, binding, "capabilities", uuid4(), {}),
+                    )
+                    ready = canonical_hash(actual) == canonical_hash(entry.card.model_dump())
+                except AgentError:
+                    ready = False
+                report.checks.append(
+                    observation(
+                        "external_target",
+                        "外部服务",
+                        "ready" if ready else "blocked",
+                        "external_ready" if ready else "external_unavailable",
+                        "外部能力与登记一致。" if ready else "外部开关、凭据、连接或版本未就绪。",
+                        "由维护者核对服务端登记与原服务版本。",
+                    )
+                )
+                required = [*required, "external_target"]
         if self.mode == "offline_test_double" and plan.dispatch == "ready":
             required = [x for x in required if x not in ("credential", "executor_budget")]
         by_id = {c.id: c for c in report.checks}
@@ -209,7 +263,7 @@ class WorkflowService:
 
     async def preview(self, owner, plan):
         source, delta, manifest = self.validate(owner, plan)
-        report, blockers = await self.observe(plan)
+        report, blockers = await self.observe(plan, manifest)
         identifier = secrets.token_hex(32)
         now = datetime.now(UTC)
         context = {
@@ -219,7 +273,9 @@ class WorkflowService:
             "source_manifest_hash": source["source_manifest_hash"] if source else None,
             "differences": delta,
             "dispatch": plan.dispatch,
-            "declared_gateway_mode": self.mode,
+            "declared_gateway_mode": "external_http"
+            if is_external(manifest.get("adapter_type"))
+            else self.mode,
             "queue_deadline": (
                 now + timedelta(seconds=plan.configuration.limits.timeout_seconds)
             ).isoformat(),
@@ -248,7 +304,9 @@ class WorkflowService:
             "configuration": plan.configuration.model_dump(mode="json"),
             "effective_limits": manifest["limits"],
             "workflow": context,
-            "mode_label": "明确离线受控模型"
+            "mode_label": "外部 HTTP 对话服务"
+            if is_external(manifest.get("adapter_type"))
+            else "明确离线受控模型"
             if self.mode == "offline_test_double"
             else "真实模型执行器",
             "boundary": "仅排队不表示已执行；Worker、模型开关和预算仍在实际执行时检查。"
@@ -290,7 +348,7 @@ class WorkflowService:
         _, _, manifest = self.validate(owner, plan)
         if canonical_hash(manifest) != record["configuration_hash"]:
             raise AgentError("run_configuration_changed", "用例或执行条件已变化，请重新检查。", 409)
-        _, blocked = await self.observe(plan)
+        _, blocked = await self.observe(plan, manifest)
         if blocked:
             raise AgentError(
                 "run_preflight_blocked", "当前执行条件未就绪：" + "、".join(blocked), 409

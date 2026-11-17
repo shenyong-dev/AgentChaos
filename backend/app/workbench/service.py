@@ -10,6 +10,7 @@ from app.agents.errors import AgentError
 from app.cases.service import CaseService
 from app.datasets.service import DatasetService
 from app.executors.service import RunService, frozen_case
+from app.external.registry import is_external
 from app.models import Artifact, Target, TargetVersion, TestCase, TestExecution, TestRun
 from app.workbench.guidance import case_guide
 
@@ -104,8 +105,20 @@ class WorkbenchService:
                 latest.case_key == TestCase.case_key,
                 latest.review_status == "approved",
                 latest.revision > TestCase.revision,
+                or_(
+                    ~TestCase.source.startswith("external_import:"),
+                    latest.source == TestCase.source,
+                ),
             )
             .exists(),
+        )
+
+    def visible_cases(self, session, owner):
+        return self._cases(session).where(
+            or_(
+                ~TestCase.source.startswith("external_import:"),
+                TestCase.source.endswith(f":owner:{owner}"),
+            )
         )
 
     def overview(self, owner):
@@ -119,7 +132,7 @@ class WorkbenchService:
                 ).all()
             )
             approved = session.scalar(
-                select(func.count()).select_from(self._cases(session).subquery())
+                select(func.count()).select_from(self.visible_cases(session, owner).subquery())
             )
             targets = session.scalar(
                 select(func.count()).select_from(Target).where(Target.owner_id == owner)
@@ -166,6 +179,19 @@ class WorkbenchService:
             if cursor:
                 query = query.where(TargetVersion.id < cursor)
             rows = session.execute(query.limit(limit + 1)).all()
+            hashes = {"langgraph_booking": current, "reference_refund": refund_current}
+            for _, target in rows:
+                if target.adapter_type not in hashes:
+                    try:
+                        hashes[target.adapter_type] = (
+                            RunService(
+                                self.engine, self.settings, adapter_type=target.adapter_type
+                            ).current_manifest()["config_hash"]
+                            if is_external(target.adapter_type)
+                            else None
+                        )
+                    except AgentError:
+                        hashes[target.adapter_type] = None
             return {
                 "items": [
                     {
@@ -180,12 +206,10 @@ class WorkbenchService:
                         "adapter_revision": v.adapter_revision,
                         "model": v.model_config_json.get("model_requested"),
                         "capabilities": t.capabilities_json,
-                        "compatible": v.config_hash
-                        == (refund_current if t.adapter_type == "reference_refund" else current)
+                        "compatible": v.config_hash == hashes.get(t.adapter_type)
                         and t.archived_at is None,
                         "availability": "current_source"
-                        if v.config_hash
-                        == (refund_current if t.adapter_type == "reference_refund" else current)
+                        if v.config_hash == hashes.get(t.adapter_type)
                         else "historical_source_required",
                     }
                     for v, t in rows[:limit]
@@ -198,7 +222,7 @@ class WorkbenchService:
     def cases(self, owner, *, cursor=0, limit=20, query="", category=None, order="oldest"):
         with Session(self.engine) as session:
             self._identity(session, owner)
-            statement = self._cases(session)
+            statement = self.visible_cases(session, owner)
             if cursor:
                 statement = statement.where(
                     TestCase.id < cursor if order == "newest" else TestCase.id > cursor
@@ -223,9 +247,12 @@ class WorkbenchService:
                         "review_status": c.review_status,
                         "guidance": reading_summary(c),
                         "knowledge_profile": "not_applicable"
-                        if c.fixture_json.get("fixture") == "refund-reference-v1"
+                        if c.fixture_json.get("fixture")
+                        in {"refund-reference-v1", "external-dialogue-v1"}
                         else c.fixture_json.get("dataset", {}).get("knowledge_profile", "base"),
-                        "adapter_type": "reference_refund"
+                        "adapter_type": c.fixture_json.get("adapter_type")
+                        if c.fixture_json.get("fixture") == "external-dialogue-v1"
+                        else "reference_refund"
                         if c.fixture_json.get("fixture") == "refund-reference-v1"
                         else "langgraph_booking",
                         "default_knowledge_compatible": c.fixture_json.get("dataset", {}).get(
@@ -243,7 +270,9 @@ class WorkbenchService:
     def case(self, owner, identifier):
         with Session(self.engine) as session:
             self._identity(session, owner)
-            row = session.scalar(self._cases(session).where(TestCase.id == identifier))
+            row = session.scalar(
+                self.visible_cases(session, owner).where(TestCase.id == identifier)
+            )
             if row is None:
                 raise AgentError("case_not_found", "找不到可浏览的已审核开发用例。", 404)
             snapshot = frozen_case(row)
