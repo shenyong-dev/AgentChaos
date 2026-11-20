@@ -5,6 +5,7 @@ import json
 import os
 import time
 from concurrent.futures import ThreadPoolExecutor
+from datetime import UTC, datetime, timedelta
 from types import SimpleNamespace
 from uuid import uuid4
 
@@ -16,23 +17,31 @@ from sqlalchemy.orm import Session
 from starlette.requests import Request
 from test_database import TEST_PASSWORD, disposable_database, migrate
 
+from app.adapters.refund_catalog import register as register_refund
 from app.agents.errors import AgentError
+from app.agents.versions import register_version
 from app.api.auth import get_session_service
 from app.api.booking import get_booking_service
 from app.api.cases import get_case_service
 from app.api.evidence import stream
+from app.api.external_agents import get_external_service
 from app.api.judging import get_judge_service
-from app.api.workbench import get_workbench_service
+from app.api.workbench import get_version_registration_service, get_workbench_service
+from app.auth.login_events import prune_login_events
 from app.auth.service import SessionService
 from app.cases.service import CaseService
 from app.core.config import Settings
+from app.core.model_access import denied_call
 from app.core.passwords import hash_password
 from app.db.seeds import seed_database
+from app.executors.service import RunService
+from app.external.service import ExternalService
 from app.judging.service import JudgeService
 from app.main import create_app
-from app.models import User
+from app.models import LoginEvent, User
 from app.services.booking import BookingService
 from app.workbench.service import WorkbenchService
+from app.workbench.versions import VersionRegistrationService
 
 pytestmark = [
     pytest.mark.integration,
@@ -79,8 +88,12 @@ def lab(engine, monkeypatch):
     app.dependency_overrides[get_session_service] = lambda: service
     app.dependency_overrides[get_booking_service] = lambda: BookingService(engine)
     app.dependency_overrides[get_case_service] = lambda: CaseService(engine, redis, settings)
+    app.dependency_overrides[get_external_service] = lambda: ExternalService(engine, settings)
     app.dependency_overrides[get_judge_service] = lambda: JudgeService(engine, redis, settings)
     app.dependency_overrides[get_workbench_service] = lambda: WorkbenchService(engine, settings)
+    app.dependency_overrides[get_version_registration_service] = lambda: VersionRegistrationService(
+        engine, settings
+    )
     with TestClient(app, headers=HEADERS) as client:
         yield SessionLab(client=client, app=app, service=service, redis=redis, clock=clock)
     keys = list(redis.scan_iter(service.prefix + "*"))
@@ -97,6 +110,175 @@ def login(lab, username="demo_operator", password=TEST_PASSWORD):
     result = response.json()["data"]
     lab.client.headers["X-CSRF-Token"] = result["csrf_token"]
     return result
+
+
+def test_created_accounts_can_read_shared_versions_with_role_appropriate_controls(engine, lab):
+    settings = lab.service.settings
+    with Session(engine) as db, db.begin():
+        seed = db.scalar(select(User).where(User.username == "demo_operator"))
+        owner = seed.id
+        db.add(User(username="version_test_admin", role="admin", password_hash=seed.password_hash))
+    register_version(engine, RunService(engine, settings).current_manifest())
+    register_refund(engine, settings, owner=owner)
+    login(lab, "version_test_admin")
+
+    for role in ("user", "operator", "reviewer"):
+        username = "new_version_" + role
+        response = lab.client.post(
+            "/api/v1/admin/accounts",
+            json={"username": username, "password": TEST_PASSWORD, "role": role},
+        )
+        assert response.status_code == 201
+        assert response.json()["data"]["model_calls_enabled"] is False
+        with TestClient(lab.app, headers=HEADERS) as account:
+            assert account.post(
+                "/api/v1/auth/login", json={"username": username, "password": TEST_PASSWORD}
+            ).status_code == 200
+            listing = account.get("/api/v1/workbench/versions")
+            assert listing.status_code == 200
+            items = listing.json()["data"]["items"]
+            compatible = {item["adapter_type"] for item in items if item["compatible"]}
+            assert compatible == {"langgraph_booking", "reference_refund"}
+            registration = account.get("/api/v1/workbench/version-registration/targets")
+            if role == "operator":
+                assert registration.status_code == 200
+                assert registration.json()["data"]["items"] == []
+            else:
+                assert registration.status_code == 403
+
+
+def test_admin_manages_accounts_without_resurrecting_old_logins(engine, lab):
+    with Session(engine) as db, db.begin():
+        db.add(User(
+            username="local_admin",
+            role="admin",
+            enabled=True,
+            password_hash=hash_password(TEST_PASSWORD),
+        ))
+    admin = login(lab, "local_admin")
+    prefix = "/api/v1/admin"
+    with TestClient(lab.app, headers=HEADERS) as member:
+        response = lab.client.post(
+            prefix + "/accounts",
+            json={"username": "ordinary_member", "password": TEST_PASSWORD, "role": "user"},
+        )
+        assert response.status_code == 201
+        account = response.json()["data"]
+        assert set(account) == {"id", "username", "role", "enabled", "model_calls_enabled"}
+        assert account["model_calls_enabled"] is False
+        assert member.post(
+            "/api/v1/auth/login", json={"username": "ordinary_member", "password": TEST_PASSWORD}
+        ).status_code == 200
+        assert member.get(prefix + "/summary").status_code == 403
+        assert member.get("/api/v1/workbench/cases").status_code == 200
+        external = member.get("/api/v1/external-agents")
+        assert external.status_code == 200 and external.json()["data"]["items"] == []
+        path = f"{prefix}/accounts/{account['id']}"
+        global_policy = prefix + "/model-calls"
+        member_policy = path + "/model-calls"
+        assert member.patch(global_policy, json={"enabled": True}).status_code == 403
+        assert lab.client.patch(member_policy, json={"enabled": True}).status_code == 200
+        with Session(engine) as db:
+            assert denied_call(db, account["id"])[0] == "model_calls_globally_disabled"
+        assert lab.client.patch(global_policy, json={"enabled": True}).status_code == 200
+        with Session(engine) as db:
+            assert denied_call(db, account["id"]) is None
+        assert lab.client.patch(member_policy, json={"enabled": False}).status_code == 200
+        with Session(engine) as db:
+            assert denied_call(db, account["id"])[0] == "model_calls_account_disabled"
+        assert member.get("/api/v1/auth/session").status_code == 200
+        assert lab.client.patch(global_policy, json={"enabled": False}).status_code == 200
+        assert lab.client.patch(path, json={"enabled": False}).status_code == 200
+        assert lab.client.patch(path, json={"enabled": True}).status_code == 200
+        assert member.get("/api/v1/auth/session").status_code == 401
+        changed = "changed-credential-for-test-only"
+        assert lab.client.patch(path, json={"password": changed}).status_code == 200
+        assert member.post(
+            "/api/v1/auth/login", json={"username": "ordinary_member", "password": TEST_PASSWORD}
+        ).status_code == 401
+        assert member.post(
+            "/api/v1/auth/login", json={"username": "ordinary_member", "password": changed}
+        ).status_code == 200
+    self_path = f"{prefix}/accounts/{admin['user_id']}"
+    assert lab.client.patch(self_path, json={"enabled": False}).status_code == 409
+
+
+def test_login_audit_shows_only_needed_metadata_to_an_administrator(engine, lab):
+    with Session(engine) as db, db.begin():
+        seed = db.get(User, 1)
+        db.add_all([
+            User(username="audit_admin", role="admin", password_hash=seed.password_hash),
+            User(username="audit_member", role="user", password_hash=seed.password_hash),
+        ])
+    path = "/api/v1/admin/login-events"
+    assert lab.client.get(path).status_code == 401
+    address = "127.0.0.8"
+    request_id = str(uuid4())
+    headers = {
+        **HEADERS,
+        "X-Forwarded-For": "8.8.8.8",
+        "X-Real-IP": "8.8.4.4",
+        "user-agent": "ExampleClient/1.2 Firefox/137.0",
+        "X-Request-ID": request_id,
+    }
+    with TestClient(lab.app, headers=headers, client=("::ffff:" + address, 5000)) as member:
+        login_path = "/api/v1/auth/login"
+        assert member.post(login_path, json={
+            "username": "audit_member", "password": "synthetic-invalid-password",
+        }).status_code == 401
+        assert member.post(login_path, json={
+            "username": "synthetic-unrecognized-input", "password": TEST_PASSWORD,
+        }).status_code == 401
+        response = member.post(
+            login_path, json={"username": "audit_member", "password": TEST_PASSWORD},
+        )
+        assert response.status_code == 200
+        user_id = response.json()["data"]["user_id"]
+        assert member.get(path).status_code == 403
+        assert member.get("/api/v1/auth/session").status_code == 200
+    login(lab, "audit_admin")
+    response = lab.client.get(path, params={"query": address})
+    assert response.status_code == 200
+    rows = response.json()["data"]["items"]
+    assert [row["outcome"] for row in rows] == ["success", "failure", "failure"]
+    assert [row["username"] for row in rows] == ["audit_member", None, "audit_member"]
+    assert all(row["ip_address"] == address and row["location"] == "本机" for row in rows)
+    assert all(row["request_id"] == request_id and row["user_agent"] == headers["user-agent"]
+               for row in rows)
+    assert all(row["created_at"].endswith("Z") or row["created_at"].endswith("+00:00")
+               for row in rows)
+    assert "synthetic-unrecognized-input" not in response.text
+    assert TEST_PASSWORD not in response.text
+    assert "password" not in rows[0] and "stamp" not in rows[0] and "csrf" not in rows[0]
+    failed = lab.client.get(path, params={"outcome": "failure", "user_id": user_id})
+    assert [row["username"] for row in failed.json()["data"]["items"]] == ["audit_member"]
+
+
+def test_login_audit_paginates_and_prunes_old_events(engine, lab):
+    now = datetime.now(UTC)
+    values = {
+        "username": "audit_pagination",
+        "outcome": "success",
+        "ip_address": "192.0.2.35",
+    }
+    with Session(engine) as db, db.begin():
+        db.add(User(
+            username="audit_paging_admin",
+            role="admin",
+            password_hash=db.get(User, 1).password_hash,
+        ))
+        db.add_all(LoginEvent(**values, created_at=now - timedelta(minutes=i)) for i in range(26))
+        db.add(LoginEvent(**values, created_at=now - timedelta(days=91)))
+    login(lab, "audit_paging_admin")
+    path = "/api/v1/admin/login-events"
+    first = lab.client.get(path, params={"query": values["username"]}).json()["data"]
+    assert len(first["items"]) == 25 and first["next_cursor"]
+    rest = lab.client.get(path, params={
+        "query": values["username"], "cursor": first["next_cursor"],
+    }).json()["data"]
+    assert len(rest["items"]) == 1 and rest["next_cursor"] is None
+    assert int(rest["items"][0]["id"]) < int(first["items"][-1]["id"])
+    assert prune_login_events(engine) == 1
 
 
 def test_cookie_and_storage_contain_no_password_or_raw_session_key(lab):

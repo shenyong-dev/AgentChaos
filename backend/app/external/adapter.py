@@ -5,13 +5,13 @@ import hashlib
 from app.agents.versions import canonical_hash
 from app.core.config import PROJECT_ROOT
 from app.external.registry import entry_for
-from app.external.schema import PROTOCOL
+from app.external.schema import HttpEntry
 
 
 class ExternalAdapter:
-    def __init__(self, engine, settings, kind, *, entry=None):
+    def __init__(self, engine, settings, kind, *, entry=None, owner=None):
         self.engine, self.settings, self.kind = engine, settings, kind
-        self.entry = entry if entry is not None else entry_for(settings, kind)
+        self.entry = entry if entry is not None else entry_for(settings, kind, owner=owner)
 
     def manifest(self):
         from app.external.rules import evaluator_manifest
@@ -27,19 +27,24 @@ class ExternalAdapter:
             for p in paths
         }
         card = self.entry.card.model_dump()
+        mapped = isinstance(self.entry, HttpEntry)
         value = {
             "adapter_type": self.kind,
-            "baseline": "external-dialogue-v1",
+            "baseline": "external-reliability-v1" if mapped else "external-dialogue-v1",
             "execution_policy": "one_remote_message_no_automatic_retry",
             "provider": "external_service",
             "model_requested": card["name"],
             "prompt_hash": canonical_hash(card),
             "sources": sources,
-            "retrieval": {"mode": "not_applicable", "documents": []},
+            "retrieval": {"mode": "external_evidence" if mapped else "not_applicable",
+                          "documents": []},
             "tools": [],
             "capabilities": {
-                "retrieval": False,
-                "business_facts": False,
+                "retrieval": mapped,
+                "tools": mapped,
+                "business_facts": mapped and bool(self.entry.http.readback_path),
+                "http_faults": mapped,
+                "tool_faults": mapped and self.entry.http.sandbox_tool_fault,
                 "domain_coverage": False,
                 "ai_judge": False,
                 "dialogue": True,
@@ -51,7 +56,7 @@ class ExternalAdapter:
             },
             "external": {
                 "id": self.entry.id,
-                "protocol": PROTOCOL,
+                "protocol": self.entry.card.protocol,
                 "card": card,
                 "entry_hash": canonical_hash(self.entry.model_dump()),
                 "billing": card["billing"],
@@ -62,6 +67,11 @@ class ExternalAdapter:
             "evaluator": evaluator_manifest(),
             "validation_boundary": "reply literal checks only; no business/semantic accuracy claim",
         }
+        if mapped:
+            value["context"]["mode"] = "http_field_mapping"
+            value["validation_boundary"] = (
+                "Observed reply, retrieval IDs, OTLP trace and request-bound read-only facts"
+            )
         value["config_hash"] = canonical_hash(value)
         return value
 

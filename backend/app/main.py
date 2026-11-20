@@ -8,6 +8,7 @@ from starlette.exceptions import HTTPException
 
 from app import __version__
 from app.agents.errors import AgentError
+from app.api.admin import router as admin_router
 from app.api.agent import router as agent_router
 from app.api.auth import router as auth_router
 from app.api.booking import router as booking_router
@@ -43,6 +44,7 @@ def create_app() -> FastAPI:
     )
     app.include_router(judging_router)
     app.include_router(auth_router)
+    app.include_router(admin_router)
     app.include_router(datasets_router)
     app.include_router(workbench_router)
     app.include_router(external_agents_router)

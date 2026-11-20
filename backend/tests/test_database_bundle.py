@@ -21,6 +21,7 @@ from scripts.database_bundle import (
     import_schema,
     prepare_demo,
     reference_cases,
+    revision,
     statements,
     verify_demo,
 )
@@ -58,12 +59,13 @@ def test_real_sql_import_matches_migrations_seed_and_actual_workbench():
     settings.demo_seed_password = SecretStr(TEST_PASSWORD)
     with disposable_database("T17J") as engine:
         import_schema(engine)
-        assert len(inspect(engine).get_table_names()) == 17
+        tables = inspect(engine).get_table_names()
+        assert len(tables) == 19 and "ac_login_events" in tables
         with pytest.raises(ValueError, match="not empty"):
             import_schema(engine)
         report = prepare_demo(engine, settings)
         assert report == {
-            "schema_revision": "20261107_0007",
+            "schema_revision": revision(),
             "targets": 2,
             "development_cases": 12,
             "fault_profiles": 6,

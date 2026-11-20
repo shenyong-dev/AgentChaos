@@ -1,11 +1,13 @@
 from app.models.base import Base
 from app.models.booking import Booking, BookingDraft, BookingSlot, Room
+from app.models.login import LoginEvent
 from app.models.platform import (
     Artifact,
     AssertionResult,
     Defect,
     FaultProfile,
     KnowledgeDocument,
+    ModelCallPolicy,
     Target,
     TargetVersion,
     TestCase,
@@ -25,6 +27,8 @@ __all__ = [
     "Defect",
     "FaultProfile",
     "KnowledgeDocument",
+    "LoginEvent",
+    "ModelCallPolicy",
     "Room",
     "Target",
     "TargetVersion",

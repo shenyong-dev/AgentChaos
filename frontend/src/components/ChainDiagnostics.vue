@@ -9,7 +9,7 @@ import { diagnosticNodes, bookingObservation, eventNames as traceEventNames, non
 import { statuses } from '../types/workbench'
 import type { RunSnapshot, TraceFact } from '../types/evidence'
 import type { AssertionPage, AssertionResult, EvaluationSummary } from '../types/evaluation'
-const props=defineProps<{ snapshot:RunSnapshot; facts:TraceFact[]; executionId:string; authorization:string; connection:string; more:boolean; busy:boolean }>()
+const props=defineProps<{ snapshot:RunSnapshot; facts:TraceFact[]; executionId:string; authorization:string; connection:string; more:boolean; busy:boolean; hideSemantic?:boolean }>()
 const emit=defineEmits<{ execution:[id:string]; locate:[id:string]; head:[]; next:[]; assertions:[]; semantic:[]; download:[reference:string] }>()
 const chosen=ref(''), eventId=ref(''), onlyAttention=ref(false), inspector=ref<HTMLElement>()
 const rows=ref<AssertionResult[]>([]), summary=ref<EvaluationSummary|null>(null), ruleError=ref(''), ruleBusy=ref(false), exportNotice=ref('')
@@ -230,7 +230,7 @@ onBeforeUnmount(()=>generation++)
 <h3>AI辅助评价</h3>
 <InfoHint label="AI评价边界" text="仅查看或按已有流程明确请求辅助评价。AI意见不替代规则或SQL事实，打开诊断页不会调用模型，也不会自动修复代码。"/>
 </header>
-<ElButton @click="emit('semantic')">查看本执行的AI记录</ElButton>
+<ElButton v-if="!hideSemantic" @click="emit('semantic')">查看本执行的AI记录</ElButton>
 </section>
    </aside>
   </div>

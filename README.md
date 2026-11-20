@@ -2,7 +2,10 @@
 
 AgentChaos 用于测试能够调用工具并改变业务数据的 Agent。平台支持**场地预约**与**模拟订单退款**，关联多轮输入、确认草稿、工具轨迹、故障及业务前后快照，分别记录规则结论、任务达成和 AI 辅助意见。退款使用独立模拟账本。项目已用自建独立售后 Agent 验证服务登记、多轮测试和原请求回执查证。
 
-- [数据库 SQL](database/)与[接口契约](docs/architecture/contracts.md)
+外部 Agent 支持通用 HTTP 和 Dify 自助接入。用例可检查检索命中、工具调用顺序与参数，以及只读业务状态。工作台支持相同用例的正常组与故障组对照。
+
+- [项目介绍与演示](https://sheny.asia/intro/) · [外部 Agent 接入手册](docs/design/external-agent/runtime/README.md)
+- [数据库 SQL](database/) · [接口契约](docs/architecture/contracts.md)
 
 ## 功能与链路
 
@@ -10,6 +13,7 @@ AgentChaos 用于测试能够调用工具并改变业务数据的 Agent。平台
 | --- | --- |
 | 项目概览 | 对象、用例和最近运行，新建运行入口 |
 | 对象与版本 | 核对当前源码及配置，查看差异并显式登记版本 |
+| 外部 Agent 接入 | 登记通用 HTTP 或 Dify 服务，建立多轮用例和证据断言 |
 | 开发用例库 | 阅读已审核开发修订、逐轮输入、前置条件与预期 |
 | 测试工作台 | 选择对象和用例，预检确认，读取结果、链路、调用与断言 |
 | Agent 测试 | 预约与退款自由聊天、草稿确认、状态读取和测试记录 |
@@ -17,6 +21,7 @@ AgentChaos 用于测试能够调用工具并改变业务数据的 Agent。平台
 | 辅助评价与校准 | 独立人工标注、封存、裁判调用和分歧复核 |
 | 缺陷与报告 | 缺陷复核、关联修复、比较、失败对话提炼及证据导出 |
 | 工程环境 | 服务状态及匹配环境的 Worker/Dispatcher 实时回执 |
+| 平台管理 | 管理账号与调用权限，查看登录日志 |
 | 平台测试助手 | 解释当前用例和运行证据，提供导航，不代替提交或审核 |
 
 **对象版本 → 开发用例 → 运行配置 → 预检确认 → 执行与取证 → 规则和任务判断 → 人工复核 → 修复登记 → 可比复验。**
@@ -93,6 +98,10 @@ docker compose --profile worker stop
 
 确认运行结束后再停止，绑定目录会保留数据库、Redis 和实验记录。团队云端使用 [deploy/cloud/compose.yaml](deploy/cloud/compose.yaml)，由维护者提供对应镜像和私有环境配置。
 
+管理员可在「平台管理 → 登录日志」查看登录活动。现有库通过 Alembic 升级，新记录自升级后开始采集。日志保留最近 90 天，由调度服务定期清理。
+
+公网地点使用本地 IP 地区库估算。下载并核对解压后的校验和，将 MMDB 放到 `.local/geoip/dbip-city-lite.mmdb`。团队云端对应宿主的 `/opt/agentchaos/data/geoip/dbip-city-lite.mmdb`，需对 API 容器可读。也可用 `LOGIN_GEOIP_DB_PATH` 配置其他路径。查不到的地点显示「地点未识别」。[DB-IP City Lite 下载与校验](https://db-ip.com/db/download/ip-to-city-lite)
+
 ## 获取源码与私有配置
 
 ```powershell
@@ -119,7 +128,7 @@ CREATE DATABASE agentchaos_demo
 
 | 文件 | 内容 |
 | --- | --- |
-| `database/schema.sql` | 从全部 Alembic 升级生成，含16张业务表、`alembic_version`、索引、约束及触发器；修订 `20261107_0007` |
+| `database/schema.sql` | 从 Alembic 迁移生成，含18张业务表及 `alembic_version`，修订 `20261120_0011` |
 | `database/demo_data.sql` | 4条预约参考用例、8条退款参考用例、6项故障；不含密码、历史运行、订单或独立标签 |
 | `database/verify.sql` | 只读核对版本、账号角色、对象、用例、故障和空历史 |
 | `database/manifest.json` | SQL SHA256、迁移源指纹及预期数量 |
@@ -145,7 +154,7 @@ cd backend
 2. 用本机私有 `DEMO_SEED_PASSWORD` 创建 `demo_operator`、`demo_reviewer`，初始化规则和三个房间，导入 `demo_data.sql`，登记两个对象的当前源码版本。
 3. 检查迁移结构、12条用例哈希、6项故障、账号角色，以及工作台里两个当前可执行对象。
 
-成功回执应显示选中的数据库名、修订 `20261107_0007`、`targets: 2`、`development_cases: 12`、`fault_profiles: 6`、`model_calls: 0`。导入不启动服务、不调用模型、不创建测试运行。重复准备不会覆盖、清空或重置已有数据。
+成功回执应显示选中的数据库名、修订 `20261120_0011`、`targets: 2`、`development_cases: 12`、`fault_profiles: 6`、`model_calls: 0`。导入不启动服务、不调用模型、不创建测试运行。重复准备不会覆盖、清空或重置已有数据。
 
 ### 手工导入方式
 

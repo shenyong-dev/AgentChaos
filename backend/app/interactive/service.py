@@ -15,6 +15,7 @@ from app.agents.runtime import AgentRuntime
 from app.agents.versions import canonical_hash
 from app.core.config import PROJECT_ROOT
 from app.core.deployment import source_fingerprint
+from app.core.model_access import denied_call, guard_model_call
 from app.db.fixtures import initialize_fixture
 from app.interactive.budget import (
     AUTHORIZATION,
@@ -76,6 +77,7 @@ class InteractionService:
                 self.settings,
                 budget,
                 audit_directory=PROJECT_ROOT / ".local/t17d/model-calls" / str(session_id),
+                authorize_call=lambda: self.authorize_session_call(session_id),
             )
         )
         return AgentRuntime(
@@ -88,10 +90,20 @@ class InteractionService:
             clock=self.clock,
         )
 
-    def access(self):
+    def authorize_session_call(self, session_id):
+        raw = self.redis.get(f"{self.prefix}:{session_id}")
+        if not raw:
+            raise AgentError("session_not_found", "当前身份下找不到该会话。", 404)
+        guard_model_call(self.engine, json.loads(raw)["owner_id"])
+
+    def access(self, user_id=None):
         runtime = self.runtime("access")
+        denied = None
+        if user_id is not None and self.gateway_factory is None:
+            with Session(self.engine) as db:
+                denied = denied_call(db, user_id)
         budget = InteractionBudget(self.redis, self.settings, "access")
-        raw = self.redis.hgetall(budget.key) if authorized(self.settings) else {}
+        raw = self.redis.hgetall(budget.key) if not denied and authorized(self.settings) else {}
         values = {(k.decode() if isinstance(k, bytes) else k): int(v) for k, v in raw.items()}
         available = (
             authorized(self.settings)
@@ -116,7 +128,9 @@ class InteractionService:
             "config_hash": runtime.manifest["config_hash"],
             "model_actions_available": bool(available or self.gateway_factory),
             "mode": "offline_control" if self.gateway_factory else "real_provider",
-            "reason": "当前源码尚未登记，不可创建会话。"
+            "reason": denied[1]
+            if denied
+            else "当前源码尚未登记，不可创建会话。"
             if runtime.version_id is None
             else "真实调用需匹配交互授权、密钥和持久账本；读历史不调用模型。"
             if not available and not self.gateway_factory
@@ -353,21 +367,26 @@ class InteractionService:
                 if not raw:
                     continue
                 metadata = json.loads(raw)
-                if metadata.get("owner_id") != user_id:
+                if metadata.get("owner_id") != user_id or metadata.get("deleted_at"):
                     continue
                 session_id = str(UUID(metadata["session_id"]))
                 if key.decode() != f"{self.prefix}:{session_id}":
                     continue
                 runtime = self.runtime(session_id)
-                _, state, _ = runtime.snapshot(user_id, session_id, read_previous_version=True)
-                title = state.get("last_user_text") or "未发送消息的会话"
-                fields = state.get("fields", {})
-                searchable = json.dumps(
-                    [session_id, metadata["created_at"], title, fields], ensure_ascii=False
-                ).casefold()
-                if query and query not in searchable:
+                try:
+                    _, state, _ = runtime.snapshot(user_id, session_id, read_previous_version=True)
+                    title = state.get("last_user_text") or "未发送消息的会话"
+                    fields = state.get("fields", {})
+                    searchable = json.dumps(
+                        [session_id, metadata["created_at"], title, fields], ensure_ascii=False
+                    ).casefold()
+                    if query and query not in searchable:
+                        continue
+                    observation = self.view(user_id, session_id)
+                except AgentError as exc:
+                    if exc.status_code != 404:
+                        raise
                     continue
-                observation = self.view(user_id, session_id)
                 items.append(
                     {
                         "session_id": session_id,
@@ -391,6 +410,29 @@ class InteractionService:
             "observed_at": datetime.now(UTC).isoformat(),
         }
 
+    def delete(self, user_id, session_id):
+        runtime = self.runtime(session_id)
+        key = runtime._key(session_id)
+        # Same lock used by messages and upgrades. A lost DELETE receipt can be retried.
+        busy = AgentError("session_busy", "请先查清当前操作的回执，再删除会话。", 409)
+        runtime._metadata(user_id, session_id, read_previous_version=True, include_deleted=True)
+        lock = self.redis.lock(key + ":operation", timeout=30, blocking_timeout=0)
+        if not lock.acquire(blocking=False):
+            raise busy
+        try:
+            meta = runtime._metadata(
+                user_id, session_id, read_previous_version=True, include_deleted=True
+            )
+            if not meta.get("deleted_at"):
+                if self.redis.exists(key + ":lock", key + ":pending"):
+                    raise busy
+                meta["deleted_at"] = datetime.now(UTC).isoformat()
+                self.redis.set(key, json.dumps(meta, ensure_ascii=False), xx=True, keepttl=True)
+            return {"deleted": True, "session_id": session_id}
+        finally:
+            if lock.owned():
+                lock.release()
+
     def act(self, user_id, session_id, body, kind):
         runtime = self.runtime(session_id)
         runtime._metadata(
@@ -404,6 +446,7 @@ class InteractionService:
         if not lock.acquire(blocking=False):
             raise AgentError("session_busy", "该会话仍有请求在处理，请先读取原回执。", 409)
         try:
+            runtime._metadata(user_id, session_id)
             old = self.redis.get(receipt_key)
             old = json.loads(old) if old else None
             if old and old["payload_hash"] != fingerprint:
@@ -429,10 +472,14 @@ class InteractionService:
                         "存在未决请求，请先查证原回执，不插入新输入。",
                         409,
                     )
-            if not self.gateway_factory and not self.access()["model_actions_available"]:
-                raise AgentError(
-                    "interactive_not_authorized", "当前交互调用条件不具备，原会话仍可读取。", 403
-                )
+            if not self.gateway_factory:
+                guard_model_call(self.engine, user_id)
+                if not self.access()["model_actions_available"]:
+                    raise AgentError(
+                        "interactive_not_authorized",
+                        "当前交互调用条件不具备，原会话仍可读取。",
+                        403,
+                    )
             receipt = {
                 "request_id": request_id,
                 "kind": kind,

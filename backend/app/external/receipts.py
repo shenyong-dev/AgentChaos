@@ -13,9 +13,10 @@ from app.cases.service import CaseService
 from app.executors.control import advisory, locked_pair
 from app.executors.service import RunService
 from app.external.adapter import ExternalAdapter
+from app.external.http_port import HttpPort
 from app.external.registry import is_external
 from app.external.runner import lookup
-from app.external.schema import Cancel
+from app.external.schema import Cancel, HttpEntry
 from app.external.transport import Client
 from app.models import TestExecution
 
@@ -25,8 +26,12 @@ def selected(engine, settings, owner, run_id, execution_id=None):
         run = RunService.owned_run(session, owner, run_id)
         if not is_external(run.manifest_json.get("adapter_type")):
             return None, []
-        CaseService.role(session, owner, "operator")
-        adapter = ExternalAdapter(engine, settings, run.manifest_json["adapter_type"])
+        user = CaseService.role(session, owner)
+        from app.external.self_service import is_self
+
+        if user.role != "user" or not is_self(run.manifest_json["adapter_type"]):
+            CaseService.role(session, owner, "operator")
+        adapter = ExternalAdapter(engine, settings, run.manifest_json["adapter_type"], owner=owner)
         if adapter.manifest()["config_hash"] != run.manifest_json["target"]["config_hash"]:
             raise AgentError(
                 "external_config_changed", "原外部对象来源已变化，请恢复原登记后查证。", 409
@@ -44,6 +49,8 @@ def reconcile(engine, settings, owner, run_id, execution_id):
     adapter, rows = selected(engine, settings, owner, run_id, execution_id)
     if adapter is None:
         raise AgentError("external_not_applicable", "此执行不是外部对象。", 409)
+    if isinstance(adapter.entry, HttpEntry):
+        return readback_reconcile(engine, settings, owner, adapter.entry, rows)
     results = []
     for identifier in rows:
         with advisory(engine, "external-receipt:" + str(identifier)):
@@ -58,7 +65,9 @@ def reconcile(engine, settings, owner, run_id, execution_id):
                 if intent["state"] == "received":
                     continue
                 try:
-                    response = lookup(Client(adapter.entry, settings), intent["request"])
+                    response = lookup(
+                        Client(adapter.entry, settings, owner=owner), intent["request"]
+                    )
                     if (
                         intent["request"]["operation"] == "execute"
                         and response["state"] == "working"
@@ -102,9 +111,42 @@ def reconcile(engine, settings, owner, run_id, execution_id):
     return {"items": results, "execution_status_unchanged": True, "inputs_resent": 0}
 
 
+def readback_reconcile(engine, settings, owner, entry, rows):
+    port = HttpPort(entry, settings, owner)
+    results = []
+    deadline = monotonic() + 15
+    for identifier in rows:
+        with advisory(engine, "external-receipt:" + str(identifier)):
+            with Session(engine) as session:
+                _, execution = locked_pair(session, identifier)
+                if execution.status not in {"error", "cancelled", "inconclusive", "failed"}:
+                    raise AgentError("external_lookup_not_terminal", "请等待执行结束后查证。", 409)
+                pending = deepcopy(execution.timing_json.get("external_intents", {}))
+            for key, intent in pending.items():
+                if intent["state"] == "received":
+                    continue
+                binding = intent["request"]["binding"]
+                fact = port.readback(key, binding["session_id"], deadline=deadline)
+                if fact["status"] != "observed":
+                    results.append({"request_id": key, **fact})
+                    continue
+                with Session(engine) as session, session.begin():
+                    _, execution = locked_pair(session, identifier)
+                    timing = deepcopy(execution.timing_json)
+                    original = timing["external_intents"].get(key)
+                    if not original or original["request_hash"] != intent["request_hash"]:
+                        raise AgentError("external_request_conflict", "原请求绑定已变化。", 409)
+                    receipts = timing.setdefault("external_readback_checks", {}).setdefault(key, [])
+                    if fact not in receipts and len(receipts) < 5:
+                        receipts.append(fact)
+                    execution.timing_json = timing
+                results.append({"request_id": key, "status": "fact_observed", "fact": fact})
+    return {"items": results, "execution_status_unchanged": True, "inputs_resent": 0}
+
+
 def cancel_remote(engine, settings, owner, run_id):
     adapter, rows = selected(engine, settings, owner, run_id)
-    if adapter is None:
+    if adapter is None or isinstance(adapter.entry, HttpEntry):
         return
     deadline = monotonic() + 15
     for identifier in rows:
@@ -147,7 +189,7 @@ def cancel_remote(engine, settings, owner, run_id):
                 execution.timing_json = timing
             try:
                 response = Cancel.model_validate(
-                    Client(adapter.entry, settings).call(envelope, deadline=deadline)
+                    Client(adapter.entry, settings, owner=owner).call(envelope, deadline=deadline)
                 ).model_dump()
                 state = "received"
             except (AgentError, ValueError):

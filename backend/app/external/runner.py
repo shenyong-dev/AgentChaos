@@ -12,13 +12,13 @@ from app.agents.errors import AgentError
 from app.agents.versions import canonical_hash
 from app.executors.control import locked_pair
 from app.external.adapter import ExternalAdapter
-from app.external.schema import PROTOCOL, Lookup, Result, Send
+from app.external.schema import HttpEntry, Lookup, Result, Send
 from app.external.transport import Client
 
 
 def request(entry, binding, operation, identifier, data):
     return {
-        "protocol": PROTOCOL,
+        "protocol": entry.card.protocol,
         "revision": entry.card.revision,
         "operation": operation,
         "request_id": str(identifier),
@@ -78,9 +78,9 @@ def lookup(client, original, *, deadline=None):
 
 
 class Calls:
-    def __init__(self, control, entry, settings, recorder=None):
+    def __init__(self, control, entry, settings, recorder=None, *, owner=None):
         self.control, self.entry, self.settings, self.recorder = control, entry, settings, recorder
-        self.client = Client(entry, settings)
+        self.client = Client(entry, settings, owner=owner)
 
     def reserve(self, original):
         key = original["request_id"]
@@ -127,7 +127,7 @@ class Calls:
             run.summary_json = summary
             return {**deepcopy(intent), "_fresh": True}
 
-    def record(self, original, response=None):
+    def record(self, original, response=None, *, transport_received=False):
         # A late receipt cannot revive an execution after cancellation or lease loss.
         with Session(self.control.engine) as session, session.begin():
             run, execution = locked_pair(session, self.control.execution_id)
@@ -150,11 +150,16 @@ class Calls:
                     response_hash=canonical_hash(response),
                     late=execution.lease_token != self.control.token,
                 )
-                if original["operation"] == "execute":
-                    summary = deepcopy(run.summary_json)
-                    summary["external"]["held_upper"] -= intent["upper"]
-                    summary["external"]["charged_upper"] += intent["upper"]
-                    run.summary_json = summary
+            if (response is not None or transport_received) and (
+                original["operation"] == "execute" and not intent.get("settled")
+            ):
+                summary = deepcopy(run.summary_json)
+                summary["external"]["held_upper"] -= intent["upper"]
+                summary["external"]["charged_upper"] += intent["upper"]
+                run.summary_json = summary
+                if transport_received:
+                    intent["settled"] = True
+                    intent["transport_observed"] = True
             execution.timing_json = timing
 
     def call(self, original, *, deadline):
@@ -201,10 +206,7 @@ class Calls:
         return response
 
 
-def execute(engine, redis, settings, claim, control, recorder, gateway=None):
-    adapter = ExternalAdapter(engine, settings, claim["manifest"]["adapter_type"])
-    if adapter.manifest()["config_hash"] != claim["manifest"]["target"]["config_hash"]:
-        raise AgentError("target_version_unavailable", "外部对象配置不匹配冻结版本。", 409)
+def execution_state(engine, claim, control, adapter):
     with engine.connect() as connection:
         server, database = connection.execute(text("SELECT @@server_uuid,DATABASE()")).one()
     binding = {
@@ -222,6 +224,20 @@ def execute(engine, redis, settings, claim, control, recorder, gateway=None):
                 - datetime.now(datetime.fromisoformat(timing["deadline"]).tzinfo)
             ).total_seconds(),
         )
+    return binding, timing, previous_output, deadline
+
+
+def execute(engine, redis, settings, claim, control, recorder, gateway=None):
+    adapter = ExternalAdapter(
+        engine, settings, claim["manifest"]["adapter_type"], owner=claim["owner_id"]
+    )
+    if adapter.manifest()["config_hash"] != claim["manifest"]["target"]["config_hash"]:
+        raise AgentError("target_version_unavailable", "外部对象配置不匹配冻结版本。", 409)
+    if isinstance(adapter.entry, HttpEntry):
+        from app.external.http_runner import execute as execute_http
+
+        return execute_http(engine, redis, settings, claim, control, recorder, adapter)
+    binding, timing, previous_output, deadline = execution_state(engine, claim, control, adapter)
     cursor = timing.get("cursor", 0)
     revision = timing.get("external_revision", 0)
     turns = claim["case"]["dsl"]["turns"]
@@ -235,7 +251,7 @@ def execute(engine, redis, settings, claim, control, recorder, gateway=None):
         )
     ):
         return previous_output
-    calls = Calls(control, adapter.entry, settings, recorder)
+    calls = Calls(control, adapter.entry, settings, recorder, owner=claim["owner_id"])
     caps = calls.client.call(
         request(
             adapter.entry,

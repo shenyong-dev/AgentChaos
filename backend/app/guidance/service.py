@@ -11,6 +11,8 @@ from sqlalchemy.orm import Session
 from app.agents.errors import AgentError
 from app.agents.versions import canonical_hash
 from app.cases.service import CaseService
+from app.core.member_targets import accessible_target_filter
+from app.core.roles import permits
 from app.executors.service import RunService
 from app.models import Artifact, Target, TargetVersion, TestExecution
 from app.workbench.service import WorkbenchService
@@ -109,7 +111,7 @@ class GuidanceService:
                     .join(Target)
                     .where(
                         TargetVersion.id == identifier,
-                        Target.owner_id == owner,
+                        accessible_target_filter(user),
                         Target.archived_at.is_(None),
                     )
                 )
@@ -137,7 +139,9 @@ class GuidanceService:
                         Artifact.metadata_json["generation_id"].as_string() == identifier,
                     )
                 )
-                if not request or (user.role != "reviewer" and request.owner_id != owner):
+                if not request or (
+                    not permits(user.role, "reviewer") and request.owner_id != owner
+                ):
                     raise AgentError("guide_object_not_found", "当前身份下找不到该批次。", 404)
                 sealed = False
                 if kind == "calibration":
@@ -221,7 +225,7 @@ class GuidanceService:
         with Session(self.engine) as session:
             user = CaseService.role(session, owner)
             role = user.role
-        allowed = role in value["pages"][values.page]["roles"]
+        allowed = any(permits(role, required) for required in value["pages"][values.page]["roles"])
         if not allowed and values.object_kind:
             raise AgentError(
                 "guide_role_required", "当前账号只能阅读通用说明，不能读取此对象。", 403
@@ -255,7 +259,7 @@ class GuidanceService:
         if action is None:
             raise AgentError("guide_action_unknown", "此动作不在已实现的导航目录内。", 400)
         context = self.context(owner, values)
-        if context["role"] not in action["roles"]:
+        if not any(permits(context["role"], required) for required in action["roles"]):
             raise AgentError("guide_role_required", "当前角色不能使用此导航入口。", 403)
         selected = context["selection"]
         required = action.get("object_kind")

@@ -3,11 +3,12 @@ import InfoHint from '../components/InfoHint.vue'
 import DefectWorkflow from '../components/DefectWorkflow.vue'
 import ReductionPanel from '../components/ReductionPanel.vue'
 import FaultPairComparison from '../components/FaultPairComparison.vue'
+import ExternalFaultComparison from '../components/ExternalFaultComparison.vue'
 import ComparisonValues from '../components/ComparisonValues.vue'
-import type { FaultComparison } from '../types/fault-pairs'
+import type { ExternalFaultPair, FaultComparison } from '../types/fault-pairs'
 import { useGuideSelection } from '../guidance'
 import { useCopilotComparison } from '../copilot'
-import { sessionFetch } from '../api/session'
+import { session, sessionFetch } from '../api/session'
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElButton, ElCheckbox, ElDialog, ElInput, ElOption, ElSelect, ElTag } from 'element-plus'
@@ -20,9 +21,10 @@ import type { Page, RunRow, VersionRow } from '../types/workbench'
 import type { Defect, ReportExport, RunComparison, RunReport, VerificationAssessment } from '../types/reports'
 
 const route = useRoute(), router = useRouter()
-const view = ref(String(route.query.tab ?? (route.query.defect ? 'defects' : 'report')))
+const basic = computed(() => session.identity.value?.role === 'user')
+const view = ref(basic.value && route.query.tab !== 'compare' ? 'report' : String(route.query.tab ?? (route.query.defect ? 'defects' : 'report')))
 const selectedRun = ref(String(route.query.run ?? '')), rightRun = ref(String(route.query.peer ?? ''))
-const comparisonMode = ref(route.query.mode === 'fault' ? 'fault' : 'version'), faultComparison = ref<FaultComparison>()
+const comparisonMode = ref(route.query.mode === 'fault' ? 'fault' : 'version'), faultComparison = ref<FaultComparison>(), externalFaultComparison = ref<ExternalFaultPair>()
 const runs = ref<RunRow[]>([]), versions = ref<VersionRow[]>([])
 const report = ref<RunReport>(), comparison = ref<RunComparison>(), exports = ref<ReportExport[]>([])
 useGuideSelection(() => view.value === 'report' && report.value ? { kind: 'run', id: report.value.run.run_id } : view.value === 'compare' && selectedRun.value ? { kind: 'run', id: selectedRun.value } : undefined)
@@ -106,11 +108,14 @@ async function download(item: ReportExport) {
 }
 async function compareRuns() {
   const left = selectedRun.value, right = rightRun.value, mode = comparisonMode.value
-  comparison.value = undefined; faultComparison.value = undefined
+  comparison.value = undefined; faultComparison.value = undefined; externalFaultComparison.value = undefined
   await perform(async (auth, valid) => {
     if (mode === 'fault') {
-      const result = await evidenceGet<FaultComparison>(`/reports/fault-compare?normal=${left}&fault=${right}`, auth)
-      if (valid() && selectedRun.value === left && rightRun.value === right && comparisonMode.value === mode) faultComparison.value = result
+      const result = await evidenceGet<FaultComparison | ExternalFaultPair>(`/reports/fault-compare?normal=${left}&fault=${right}`, auth)
+      if (valid() && selectedRun.value === left && rightRun.value === right && comparisonMode.value === mode) {
+        if ('differences' in result) externalFaultComparison.value = result
+        else faultComparison.value = result
+      }
     } else {
       const result = await evidenceGet<RunComparison>(`/reports/compare?left=${left}&right=${right}`, auth)
       if (valid() && selectedRun.value === left && rightRun.value === right && comparisonMode.value === mode) comparison.value = result
@@ -166,11 +171,11 @@ function tab(value: string) { view.value = value; void router.replace({ query: {
 watch(workspace.authorization, async auth => {
   const generation = ++epoch
   defectSequence++; verificationSequence++; assessmentSequence++; assessment.value = undefined; assessmentError.value = ''; assessmentBusy.value = false; busy.value = false
-  searchSequence++; report.value = undefined; comparison.value = undefined; faultComparison.value = undefined; defects.value = []; exports.value = []; reviewOpen.value = false; exportRequests.clear(); exportPending.value = false; selectedDefect.value = undefined; verificationReport.value = undefined; previewReview.value = undefined; note.value = ''; attestation.value = false; runs.value = []; versions.value = []
+  searchSequence++; report.value = undefined; comparison.value = undefined; faultComparison.value = undefined; externalFaultComparison.value = undefined; defects.value = []; exports.value = []; reviewOpen.value = false; exportRequests.clear(); exportPending.value = false; selectedDefect.value = undefined; verificationReport.value = undefined; previewReview.value = undefined; note.value = ''; attestation.value = false; runs.value = []; versions.value = []
   if (!auth) return
   await searchRuns()
   if (epoch !== generation || workspace.authorization.value !== auth) return
-  await perform(async (header, valid) => {
+  if (!basic.value) await perform(async (header, valid) => {
     let cursor = 0
     const items: VersionRow[] = []
     while (true) {
@@ -185,37 +190,38 @@ watch(workspace.authorization, async auth => {
   if (epoch !== generation || workspace.authorization.value !== auth) return
   if (!selectedRun.value) selectedRun.value = runs.value.find(item => ['completed','cancelled','failed'].includes(item.status))?.run_id ?? ''
   if (selectedRun.value) await loadReport()
+  if (basic.value) return
   await loadDefects()
   if (generation === epoch && workspace.authorization.value === auth && typeof route.query.defect === 'string') await openDefect({defect_key:route.query.defect})
 }, { immediate: true })
-watch([selectedRun,rightRun,comparisonMode], () => { comparison.value = undefined; faultComparison.value = undefined })
+watch([selectedRun,rightRun,comparisonMode], () => { comparison.value = undefined; faultComparison.value = undefined; externalFaultComparison.value = undefined })
 watch(() => route.query.run, value => { if (value && value !== selectedRun.value) { selectedRun.value = String(value); if (workspace.authorization.value) void loadReport() } })
-watch(() => route.query.defect, value => { defectSequence++; reviewOpen.value = false; if (typeof value === 'string' && workspace.authorization.value) void openDefect({defect_key:value}) })
+watch(() => route.query.defect, value => { defectSequence++; reviewOpen.value = false; if (!basic.value && typeof value === 'string' && workspace.authorization.value) void openDefect({defect_key:value}) })
 onBeforeUnmount(() => { epoch++; searchSequence++; defectSequence++; verificationSequence++; assessmentSequence++; exportRequests.clear() })
 </script>
 
 <template>
   <section class="reports-page workspace-page">
-    <div class="page-heading"><div><h1>缺陷与报告</h1></div></div>
+    <div class="page-heading"><div><h1>{{ basic ? '运行报告' : '缺陷与报告' }}</h1></div></div>
 
     <template v-if="workspace.authorization.value">
-      <div class="report-tabs" role="tablist" aria-label="报告视图"><button v-for="item in [{id:'report',label:'运行报告'},{id:'defects',label:'缺陷复核'},{id:'compare',label:'运行比较'}]" :key="item.id" role="tab" :aria-selected="view === item.id" @click="tab(item.id)">{{ item.label }}</button><button role="tab" :aria-selected="false" @click="router.push('/reports/research')">案例与实证</button></div>
+      <div class="report-tabs" role="tablist" aria-label="报告视图"><button v-for="item in [{id:'report',label:'运行报告'},{id:'defects',label:'缺陷复核'},{id:'compare',label:'运行比较'}].filter(item => !basic || item.id !== 'defects')" :key="item.id" role="tab" :aria-selected="view === item.id" @click="tab(item.id)">{{ item.label }}</button><button v-if="!basic" role="tab" :aria-selected="false" @click="router.push('/reports/research')">案例与实证</button></div>
       <p v-if="error" role="alert" class="evidence-error">{{ error }}<span v-if="exportPending"> 原导出标识已保留，再次点击将重试同一请求。</span></p>
       <p v-if="notice" role="status" class="report-notice">{{ notice }}</p>
       <div v-if="view !== 'defects'" class="report-run-picker"><label>选择运行<ElSelect v-model="selectedRun" aria-label="选择报告运行" popper-class="report-run-dropdown" :fit-input-width="true" placeholder="选择已结束的运行" filterable remote :remote-method="searchRuns" :disabled="busy" @change="loadReport"><ElOption v-for="item in runs" :key="item.run_id" :value="item.run_id" :label="`${item.run_id.slice(0,8)} · ${names[item.status] ?? item.status} · 版本ID ${item.target_version_id}`" :disabled="!['completed','cancelled','failed'].includes(item.status)"><span class="report-run-option">{{ item.run_id }}<small>{{ names[item.status] ?? item.status }} · 版本ID {{ item.target_version_id }}</small></span></ElOption></ElSelect></label><ElButton :disabled="busy || !selectedRun" @click="loadReport">刷新报告</ElButton><InfoHint label="查找报告" text="支持搜索完整运行UUID以查找更早记录。浏览报告不执行模型；导出保存当前快照，不重跑任务。" /></div>
       <p v-if="busy" class="workspace-loading" role="status">正在读取或保存实际记录…</p>
       <template v-if="view === 'report'">
-        <div v-if="!selectedRun && !busy" class="workspace-empty"><h2>还没有可生成报告的运行</h2><p>完成一次测试后，在这里核对结果、复核候选并导出证据。</p><RouterLink to="/workbench">前往测试工作台 →</RouterLink></div>
+        <div v-if="!selectedRun && !busy" class="workspace-empty"><h2>还没有可生成报告的运行</h2><p>运行结束后，可在这里查看结果并导出报告。</p><RouterLink to="/workbench">前往测试工作台 →</RouterLink></div>
         <template v-if="report">
           <p v-if="offline" class="offline-notice">明确离线模型控制记录：验证平台功能，不能作为真实模型成绩或正式V0/V1实验。</p>
           <p v-if="missingKnowledge" class="evidence-error">冻结知识缺失或哈希不符，当前不能导出完整证据包。请先核对来源。</p><div class="report-summary"><div><small>计划执行 / 不同用例</small><strong>{{ report.statistics.planned_executions }} / {{ report.statistics.unique_cases }}</strong></div><div><small>有效规则通过 / 分母</small><strong>{{ report.statistics.reliability.numerator }} / {{ report.statistics.reliability.denominator }}</strong></div><div><small>任务达成 / 有效分母</small><strong>{{ report.statistics.task_fulfilment.numerator }} / {{ report.statistics.task_fulfilment.denominator }}</strong></div><div><small>持久事件 / 含恢复尝试</small><strong>{{ report.source_event_count }} / {{ report.statistics.attempts_including_recovery }}</strong></div></div>
-          <div class="report-actions"><ElButton :disabled="busy" @click="collect">归并缺陷候选</ElButton><ElButton v-for="item in report.defects" :key="item.defect_key" :disabled="busy" @click="openDefect(item)">查看候选与修复 · {{ item.defect_key.slice(0,12) }}</ElButton><span class="workspace-note">规则失败与AI信号分别保留，需人工确认；取消和证据不足不自动算缺陷。</span></div>
+          <div v-if="!basic" class="report-actions"><ElButton :disabled="busy" @click="collect">归并缺陷候选</ElButton><ElButton v-for="item in report.defects" :key="item.defect_key" :disabled="busy" @click="openDefect(item)">查看候选与修复 · {{ item.defect_key.slice(0,12) }}</ElButton><span class="workspace-note">规则失败与AI信号分别保留，需人工确认；取消和证据不足不自动算缺陷。</span></div>
           <div class="table-scroll"><table class="workspace-table report-executions"><thead><tr><th>用例与执行</th><th>实际状态</th><th>证据完整性</th><th>原始依据</th></tr></thead><tbody><tr v-for="item in report.executions" :key="item.execution_id"><td><strong>{{ item.case_key }}</strong><small>{{ item.execution_id }} · 重复 {{ item.repeat_no }} / 尝试 {{ item.attempt }}</small></td><td>{{ names[item.status] ?? item.status }}</td><td>{{ item.evidence_integrity.complete ? '完整' : '存在缺口' }}<small v-if="!item.evidence_integrity.complete">{{ [...item.evidence_integrity.issues,...item.evidence_integrity.errors].join(' / ') }}</small></td><td><RouterLink :to="`/runs/${report.run.run_id}?view=assertions&execution=${item.execution_id}`">查看断言与业务快照 →</RouterLink></td></tr></tbody></table></div>
           <div class="report-export-panel"><div class="heading-with-info"><h2>报告导出</h2><InfoHint label="证据包内容" text="含原始判定、SQL快照、冻结配置与知识、事件及SHA256清单。ZIP中的verify.py可离线核对清单。" /></div><div class="report-export-controls"><label>下载有效期<ElSelect v-model="expiresHours" aria-label="报告有效期" :disabled="busy || exportPending"><ElOption :value="1" label="1小时" /><ElOption :value="24" label="24小时" /><ElOption :value="168" label="7天" /></ElSelect></label><ElButton type="primary" :disabled="busy || missingKnowledge" @click="generate">{{ exportPending ? '按原请求重试导出' : '生成报告与证据包' }}</ElButton></div><ul v-if="exports.length" class="report-downloads"><li v-for="item in exports" :key="item.artifact_id"><ElButton :disabled="busy" @click="download(item)">下载{{ names[item.kind] }}</ElButton><div><small>{{ item.bytes.toLocaleString() }} 字节 · 有效至 {{ item.expires_at }}</small><code>{{ item.sha256 }}</code></div></li></ul><p v-if="exports.length" class="workspace-note">导出为冻结快照，后续复核不改写旧报告。</p></div>
           <details class="report-details"><summary>完整来源、分母、排除项与版本</summary><pre class="workspace-json">{{ JSON.stringify(report, null, 2) }}</pre></details>
         </template>
       </template>
-      <template v-if="view === 'defects'">
+      <template v-if="!basic && view === 'defects'">
         <div class="report-defect-toolbar"><ElSelect v-model="defectStatus" aria-label="缺陷状态筛选" placeholder="全部状态" clearable @change="loadDefects(false)"><ElOption v-for="value in ['open','confirmed','rejected','fixed','verified']" :key="value" :value="value" :label="names[value]" /></ElSelect><ElButton :disabled="busy" @click="loadDefects(false)">刷新缺陷</ElButton><span>候选不等于已确认缺陷；人工复核另存。</span></div>
         <div v-if="!defects.length && !busy" class="workspace-empty"><h2>当前没有缺陷记录</h2><p>从运行报告显式归并候选，再查看原始证据并复核。</p></div>
         <div v-else class="report-defect-list"><button v-for="item in defects" :key="item.defect_key" :disabled="busy" @click="openDefect(item)"><div><strong>{{ item.defect_key }}</strong><small>{{ names[item.category] }} · 严重度 {{ names[item.severity] }}{{ item.status === 'open' ? '（待复核默认值）' : '' }}</small></div><ElTag :type="item.status === 'rejected' ? 'info' : item.status === 'verified' ? 'success' : 'warning'">{{ names[item.status] }}</ElTag><span aria-hidden="true">→</span></button></div><ElButton v-if="defectCursor" :disabled="busy" @click="loadDefects(true)">读取更多缺陷</ElButton>
@@ -223,6 +229,7 @@ onBeforeUnmount(() => { epoch++; searchSequence++; defectSequence++; verificatio
       <template v-if="view === 'compare'">
         <div class="report-comparison-picker"><div role="group" aria-label="比较方式"><ElButton :type="comparisonMode === 'version' ? 'primary' : 'default'" :aria-pressed="comparisonMode === 'version'" :disabled="busy" @click="comparisonMode = 'version'">版本比较</ElButton><ElButton :type="comparisonMode === 'fault' ? 'primary' : 'default'" :aria-pressed="comparisonMode === 'fault'" :disabled="busy" @click="comparisonMode = 'fault'">正常／故障对照</ElButton></div><label>{{ comparisonMode === 'fault' ? '故障运行（左侧选择正常运行）' : '对比运行' }}<ElSelect v-model="rightRun" aria-label="选择对比运行" popper-class="report-run-dropdown" :fit-input-width="true" filterable remote :remote-method="searchRuns" placeholder="选择另一已结束的运行" :disabled="busy"><ElOption v-for="item in runs" :key="item.run_id" :value="item.run_id" :label="`${item.run_id.slice(0,8)} · 版本ID ${item.target_version_id}`" :disabled="!['completed','cancelled','failed'].includes(item.status)"><span class="report-run-option">{{ item.run_id }}<small>{{ names[item.status] }} · 版本ID {{ item.target_version_id }}</small></span></ElOption></ElSelect></label><ElButton type="primary" :disabled="busy || !selectedRun || !rightRun" @click="compareRuns">核对比较条件</ElButton></div>
         <p v-if="comparisonMode === 'version'" class="workspace-note">比较目标版本整体变化；条件一致不代表正式V0/V1实验、单因素归因或统计显著。两边原始计数始终保留。</p>
+        <ExternalFaultComparison v-if="externalFaultComparison" :value="externalFaultComparison" />
         <FaultPairComparison v-if="faultComparison" :value="faultComparison" /><template v-if="comparison"><div class="report-comparison-status" :data-match="comparison.conditions_match"><h2>{{ comparison.conditions_match ? '记录中的对比条件一致' : '不能作为同条件对照' }}</h2><p>{{ comparison.conditions_match ? '仍需结合样本来源与重复方式解释结果。' : '存在不一致或缺失记录，暂不计算通过率差值。' }}</p></div><div class="table-scroll"><table class="workspace-table"><thead><tr><th>条件</th><th>核对</th><th>左右记录</th></tr></thead><tbody><tr v-for="item in comparison.checks" :key="item.condition"><td>{{ conditions[item.condition] ?? item.condition }}</td><td><ElTag :type="item.status === 'match' ? 'success' : 'warning'">{{ names[item.status] }}</ElTag></td><td><ComparisonValues :label="conditions[item.condition] ?? item.condition" :left="item.left" :right="item.right" :left-run="comparison.left_run" :right-run="comparison.right_run" /></td></tr></tbody></table></div><div class="report-comparison-counts"><section><h3>左侧规则通过 / 有效分母</h3><strong>{{ comparison.left_statistics.reliability.numerator }} / {{ comparison.left_statistics.reliability.denominator }}</strong></section><section><h3>右侧规则通过 / 有效分母</h3><strong>{{ comparison.right_statistics.reliability.numerator }} / {{ comparison.right_statistics.reliability.denominator }}</strong></section></div><div class="table-scroll report-paired-table"><table class="workspace-table"><thead><tr><th>用例 / 重复</th><th>左侧规则结果</th><th>右侧规则结果</th><th>执行证据</th></tr></thead><tbody><tr v-for="item in comparison.paired_executions" :key="item.left_execution"><td>{{ item.case_key }} / {{ item.repeat_no }}</td><td>{{ names[item.left_rule] ?? item.left_rule }}</td><td>{{ names[item.right_rule] ?? item.right_rule }}</td><td><RouterLink :to="`/runs/${comparison.left_run}?view=assertions&execution=${item.left_execution}`">左侧证据</RouterLink> · <RouterLink :to="`/runs/${comparison.right_run}?view=assertions&execution=${item.right_execution}`">右侧证据</RouterLink></td></tr></tbody></table></div><details class="report-details"><summary>配对执行、排除项与目标版本变化</summary><pre class="workspace-json">{{ JSON.stringify(comparison, null, 2) }}</pre></details></template>
       </template>
     </template>

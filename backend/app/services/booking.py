@@ -17,6 +17,7 @@ from sqlalchemy.exc import DBAPIError, IntegrityError
 from sqlalchemy.orm import Session
 
 from app.core.passwords import verify_password
+from app.core.roles import permits
 from app.models import Booking, BookingDraft, BookingSlot, Room, User
 from app.schemas.booking import (
     AvailabilityQuery,
@@ -576,7 +577,7 @@ class BookingService:
                     or not user.enabled
                 ):
                     raise BookingError("authentication_required", "账号或认证信息无效。", 401)
-                if user.role != "operator":
+                if not permits(user.role, "operator"):
                     raise BookingError("booking_forbidden", "当前角色无权执行预约操作。", 403)
                 return user.id
         except DBAPIError as exc:

@@ -3,14 +3,15 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElDialog, ElInput } from 'element-plus'
 import { Search, Right } from '@element-plus/icons-vue'
-import { navigationGroups } from '../navigation'
+import { session } from '../api/session'
+import { groupsFor } from '../navigation'
 
 const router = useRouter()
 const open = ref(false), query = ref('')
 const search = ref<InstanceType<typeof ElInput>>()
 const panel = ref<HTMLElement>()
-const items = navigationGroups.flatMap(group => group.items.map(item => ({ ...item, group: group.label })))
-const matches = computed(() => items.filter(item => `${item.label} ${item.hint} ${item.path}`.toLowerCase().includes(query.value.trim().toLowerCase())))
+const items = computed(() => groupsFor(session.identity.value?.role).flatMap(group => group.items.map(item => ({ ...item, group: group.label }))))
+const matches = computed(() => items.value.filter(item => `${item.label} ${item.hint} ${item.path}`.toLowerCase().includes(query.value.trim().toLowerCase())))
 function show() { query.value = ''; open.value = true }
 function keydown(event: KeyboardEvent) {
   if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k' && !event.altKey) {

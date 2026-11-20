@@ -1,7 +1,7 @@
 -- AgentChaos public schema; generated from all Alembic upgrades.
 -- EMPTY MySQL 8 database only. Never import into the local/cloud working database.
 -- No CREATE DATABASE, USE, account passwords or historical records.
--- Schema revision: 20261107_0007
+-- Schema revision: 20261120_0011
 SET NAMES utf8mb4;
 SET SESSION time_zone = '+00:00';
 
@@ -572,3 +572,112 @@ CREATE TRIGGER guard_execution_insert BEFORE INSERT ON ac_test_executions FOR EA
 DELIMITER ;
 
 UPDATE alembic_version SET version_num='20261107_0007' WHERE alembic_version.version_num = '20261028_0006';
+
+-- Running upgrade 20261107_0007 -> 20261119_0008
+
+DROP TRIGGER IF EXISTS guard_execution_insert;
+
+DELIMITER $$
+CREATE TRIGGER guard_execution_insert BEFORE INSERT ON ac_test_executions FOR EACH ROW BEGIN IF NOT (EXISTS (SELECT 1 FROM ac_test_cases WHERE id=NEW.case_revision_id AND review_status='approved') OR EXISTS (
+ SELECT 1 FROM ac_test_cases c
+ JOIN ac_test_runs r ON r.id=NEW.run_id
+ JOIN ac_artifacts a ON a.kind='reduction_revision'
+ JOIN ac_test_runs original ON original.id=a.run_id
+ WHERE c.id=NEW.case_revision_id AND c.source='reduction_trial:T17M'
+ AND c.review_status='draft' AND c.dataset_split='dev'
+ AND original.created_by=r.created_by AND original.target_version_id=r.target_version_id
+ AND a.generated_by_revision='T17M-v1'
+ AND JSON_EXTRACT(a.metadata_json,'$.private_case_id')=c.id
+ AND JSON_UNQUOTE(JSON_EXTRACT(a.metadata_json,'$.plan_id'))=
+     JSON_UNQUOTE(JSON_EXTRACT(r.manifest_json,'$.workflow.reduction_id'))
+ AND JSON_EXTRACT(r.manifest_json,'$.cases[0].case_revision_id')=c.id
+ AND JSON_UNQUOTE(JSON_EXTRACT(r.manifest_json,'$.cases[0].content_hash'))=c.content_hash
+ AND JSON_LENGTH(JSON_EXTRACT(r.manifest_json,'$.cases'))=1
+ AND JSON_CONTAINS(JSON_EXTRACT(r.manifest_json,'$.workflow.reduction_case_ids'),CAST(c.id AS JSON))
+) OR EXISTS (
+ SELECT 1 FROM ac_test_cases c
+ JOIN ac_test_runs r ON r.id=NEW.run_id
+ JOIN ac_target_versions v ON v.id=r.target_version_id
+ JOIN ac_targets t ON t.id=v.target_id
+ WHERE c.id=NEW.case_revision_id
+ AND c.review_status='draft' AND c.dataset_split='dev'
+ AND t.owner_id=r.created_by AND t.archived_at IS NULL
+ AND REGEXP_LIKE(t.adapter_type,'^external_http:user-[0-9a-f]{32}$','c')
+ AND c.source=CONCAT('external_import:',t.adapter_type,':owner:',r.created_by)
+ AND JSON_UNQUOTE(JSON_EXTRACT(c.fixture_json,'$.fixture'))='external-dialogue-v1'
+ AND JSON_UNQUOTE(JSON_EXTRACT(c.fixture_json,'$.adapter_type'))=t.adapter_type
+ AND JSON_UNQUOTE(JSON_EXTRACT(r.manifest_json,'$.adapter_type'))=t.adapter_type
+ AND JSON_CONTAINS(
+     JSON_EXTRACT(r.manifest_json,'$.cases'),
+     JSON_OBJECT('case_revision_id',c.id,'content_hash',c.content_hash)
+ )
+ AND JSON_EXTRACT(NEW.input_snapshot_json,'$.case_revision_id')=c.id
+ AND JSON_UNQUOTE(JSON_EXTRACT(NEW.input_snapshot_json,'$.content_hash'))=c.content_hash
+)) THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='approved_case_required'; END IF; END$$
+DELIMITER ;
+
+UPDATE alembic_version SET version_num='20261119_0008' WHERE alembic_version.version_num = '20261107_0007';
+
+-- Running upgrade 20261119_0008 -> 20261119_0009
+
+ALTER TABLE ac_users ADD COLUMN auth_epoch BIGINT UNSIGNED NOT NULL DEFAULT 0;
+
+ALTER TABLE ac_users DROP CHECK ck_users_role;
+
+ALTER TABLE ac_users ADD CONSTRAINT ck_users_role CHECK (role IN ('admin','operator','reviewer','user'));
+
+DROP TRIGGER IF EXISTS guard_case_insert;
+
+DELIMITER $$
+CREATE TRIGGER guard_case_insert BEFORE INSERT ON ac_test_cases FOR EACH ROW BEGIN IF NEW.review_status='approved' AND NOT EXISTS (SELECT 1 FROM ac_users WHERE id=NEW.reviewer_id AND role IN ('reviewer','admin') AND enabled=1) THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='reviewer_required'; END IF;IF NEW.review_status='approved' AND EXISTS (SELECT 1 FROM ac_test_cases WHERE family_key=NEW.family_key AND review_status='approved' AND dataset_split<>NEW.dataset_split) THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='approved_family_split_conflict'; END IF; END$$
+DELIMITER ;
+
+DROP TRIGGER IF EXISTS guard_case_update;
+
+DELIMITER $$
+CREATE TRIGGER guard_case_update BEFORE UPDATE ON ac_test_cases FOR EACH ROW BEGIN IF OLD.review_status='approved' THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='approved_case_immutable'; END IF;IF NEW.review_status='approved' AND NOT EXISTS (SELECT 1 FROM ac_users WHERE id=NEW.reviewer_id AND role IN ('reviewer','admin') AND enabled=1) THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='reviewer_required'; END IF;IF NEW.review_status='approved' AND EXISTS (SELECT 1 FROM ac_test_cases WHERE family_key=NEW.family_key AND review_status='approved' AND dataset_split<>NEW.dataset_split) THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='approved_family_split_conflict'; END IF; END$$
+DELIMITER ;
+
+UPDATE alembic_version SET version_num='20261119_0009' WHERE alembic_version.version_num = '20261119_0008';
+
+-- Running upgrade 20261119_0009 -> 20261119_0010
+
+ALTER TABLE ac_users ADD COLUMN model_calls_enabled BOOL NOT NULL DEFAULT '0';
+
+UPDATE ac_users SET model_calls_enabled = 1 WHERE role IN ('admin', 'operator');
+
+CREATE TABLE ac_model_call_policy (
+    id INTEGER NOT NULL,
+    enabled BOOL NOT NULL,
+    CONSTRAINT pk_ac_model_call_policy PRIMARY KEY (id),
+    CONSTRAINT ck_model_call_policy_singleton CHECK (id = 1)
+)ENGINE=InnoDB CHARSET=utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+
+INSERT INTO ac_model_call_policy (id, enabled) VALUES (1, 0);
+
+UPDATE alembic_version SET version_num='20261119_0010' WHERE alembic_version.version_num = '20261119_0009';
+
+-- Running upgrade 20261119_0010 -> 20261120_0011
+
+CREATE TABLE ac_login_events (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    user_id BIGINT UNSIGNED,
+    username VARCHAR(64) COLLATE utf8mb4_bin,
+    `role` VARCHAR(16),
+    outcome VARCHAR(16) NOT NULL,
+    reason VARCHAR(32),
+    ip_address VARCHAR(45) COLLATE utf8mb4_bin,
+    location VARCHAR(180),
+    location_source VARCHAR(16),
+    user_agent VARCHAR(384),
+    request_id VARCHAR(36) COLLATE utf8mb4_bin,
+    CONSTRAINT pk_ac_login_events PRIMARY KEY (id),
+    CONSTRAINT ck_login_event_outcome CHECK (outcome IN ('success','failure','limited'))
+)ENGINE=InnoDB CHARSET=utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+
+CREATE INDEX ix_login_event_created_at ON ac_login_events (created_at);
+
+CREATE INDEX ix_login_event_account ON ac_login_events (user_id, id);
+
+UPDATE alembic_version SET version_num='20261120_0011' WHERE alembic_version.version_num = '20261119_0010';

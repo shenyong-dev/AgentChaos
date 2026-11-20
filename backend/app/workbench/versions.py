@@ -1,4 +1,4 @@
-"""Owned source inspection and append-only registration; no model, seeds or deployment."""
+"""Source inspection and append-only registration for accessible project targets."""
 
 from sqlalchemy import select, text
 from sqlalchemy.exc import IntegrityError
@@ -8,6 +8,7 @@ from app.adapters.refund import RefundAdapter
 from app.agents.errors import AgentError
 from app.agents.versions import canonical_hash
 from app.cases.service import CaseService
+from app.core.member_targets import accessible_target_filter
 from app.evidence.recorder import redact
 from app.executors.service import RunService
 from app.models import Target, TargetVersion
@@ -37,10 +38,18 @@ class VersionRegistrationService:
         self.engine, self.settings = engine, settings
 
     @staticmethod
-    def owned(session, owner, target_id, *, lock=False):
-        CaseService.role(session, owner, "operator")
+    def registration_filter(user):
+        if user.role == "admin":
+            return accessible_target_filter(user)
+        return Target.owner_id == user.id
+
+    @staticmethod
+    def registration_target(session, owner, target_id, *, lock=False):
+        user = CaseService.role(session, owner, "operator")
         query = select(Target).where(
-            Target.id == target_id, Target.owner_id == owner, Target.archived_at.is_(None)
+            Target.id == target_id,
+            VersionRegistrationService.registration_filter(user),
+            Target.archived_at.is_(None),
         )
         target = session.scalar(query.with_for_update() if lock else query)
         if target is None:
@@ -51,14 +60,14 @@ class VersionRegistrationService:
 
     def targets(self, owner):
         with Session(self.engine) as session:
-            CaseService.role(session, owner, "operator")
+            user = CaseService.role(session, owner, "operator")
             return {
                 "items": [
                     {"id": t.id, "name": t.name, "adapter_type": t.adapter_type}
                     for t in session.scalars(
                         select(Target)
                         .where(
-                            Target.owner_id == owner,
+                            self.registration_filter(user),
                             Target.archived_at.is_(None),
                             Target.adapter_type.in_(SUPPORTED),
                         )
@@ -102,7 +111,7 @@ class VersionRegistrationService:
 
     def inspect(self, owner, target_id):
         with Session(self.engine) as session:
-            target = self.owned(session, owner, target_id)
+            target = self.registration_target(session, owner, target_id)
             current = self.current(target.adapter_type)
             base = self.latest(session, target_id)
             registered = self.matching(session, target_id, current["config_hash"])
@@ -165,7 +174,7 @@ class VersionRegistrationService:
                 raise AgentError("version_register_busy", "版本登记繁忙，请稍后重新核对。", 409)
             try:
                 with Session(connection) as session, session.begin():
-                    target = self.owned(session, owner, request.target_id, lock=True)
+                    target = self.registration_target(session, owner, request.target_id, lock=True)
                     current = self.current(target.adapter_type)
                     if current["config_hash"] != request.expected_config_hash:
                         raise AgentError(

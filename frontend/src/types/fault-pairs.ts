@@ -1,3 +1,24 @@
+import type { ExternalFault } from './workbench'
+
+export interface ExternalFaultPair {
+  schema: 'external-fault-pair-v1'
+  normal_run: string
+  fault_run: string
+  fault: ExternalFault | null
+  conditions_match: boolean
+  differences: string[]
+  pairs: { case_key: string; repeat_no: number; normal: ExternalFaultSide; fault: ExternalFaultSide }[]
+}
+
+interface ExternalFaultSide {
+  execution: string
+  status: string
+  transport: string | null
+  fault_observed: boolean | null
+  evidence_complete: boolean
+  checks: { key: string; metric: string; verdict: string; reason: string; actual: unknown }[]
+}
+
 export interface FaultSide {
   execution_id: string; case_key: string; status: string; gateway_mode: string
   evidence_complete: boolean; outcome: string; goal_met: boolean | null

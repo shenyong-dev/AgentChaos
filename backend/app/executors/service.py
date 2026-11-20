@@ -11,15 +11,17 @@ from sqlalchemy.orm import Session
 from app.agents.budget import PRICING
 from app.agents.errors import AgentError
 from app.agents.versions import build_manifest, canonical_hash
+from app.core.member_targets import accessible_target_filter
 from app.db.engine import read_session
 from app.db.fixtures import ensure_rooms
 from app.evaluation.engine import evaluator_manifest
 from app.evidence.recorder import append_event
 from app.executors.control import TERMINAL, advisory, database_now, locked_pair
+from app.external.cases import personal_case
 from app.external.registry import is_external, supported
 from app.faults.service import frozen_profile
 from app.metamorphic.catalog import frozen_relations
-from app.models import Booking, Room, Target, TargetVersion, TestCase, TestExecution, TestRun
+from app.models import Booking, Room, Target, TargetVersion, TestCase, TestExecution, TestRun, User
 from app.schemas.contracts import TestCaseDraft
 
 
@@ -170,15 +172,19 @@ class RunService:
         self.document_ids = document_ids
         self.adapter_type = adapter_type
 
-    def current_manifest(self):
+    def current_manifest(self, *, owner=None):
         if is_external(self.adapter_type):
             from app.adapters import adapter_for
 
-            return adapter_for(self.engine, self.settings, self.adapter_type).manifest()
+            return adapter_for(
+                self.engine, self.settings, self.adapter_type, owner=owner
+            ).manifest()
         if self.adapter_type == "reference_refund":
             from app.adapters import adapter_for
 
-            return adapter_for(self.engine, self.settings, self.adapter_type).manifest()
+            return adapter_for(
+                self.engine, self.settings, self.adapter_type, owner=owner
+            ).manifest()
         from app.agents.registry import ToolRegistry
         from app.agents.retrieval import KnowledgeRetriever
         from app.services.booking import BookingService
@@ -188,7 +194,7 @@ class RunService:
             self.settings, retriever, ToolRegistry(BookingService(self.engine), retriever)
         )
 
-    def configuration_matches(self, manifest, *, cache=None):
+    def configuration_matches(self, manifest, *, cache=None, owner=None):
         """Do not claim/mutate older work merely to discover it cannot run here.
 
         Explicit frozen knowledge variants remain supported: rebuild against
@@ -198,14 +204,14 @@ class RunService:
         try:
             identifiers = tuple(d["id"] for d in manifest["target"]["retrieval"]["documents"])
             adapter_type = manifest.get("adapter_type", "langgraph_booking")
-            cache_key = (adapter_type, identifiers)
+            cache_key = (adapter_type, identifiers, owner if is_external(adapter_type) else None)
             if cache_key not in cache:
                 cache[cache_key] = RunService(
                     self.engine,
                     self.settings,
                     document_ids=list(identifiers),
                     adapter_type=adapter_type,
-                ).current_manifest()["config_hash"]
+                ).current_manifest(owner=owner)["config_hash"]
             return cache[cache_key] == manifest["target"]["config_hash"] and manifest[
                 "roles"
             ] == role_configs(self.settings)
@@ -214,29 +220,36 @@ class RunService:
 
     def can_consume(self, execution_uuid):
         with Session(self.engine) as session:
-            manifest = session.scalar(
-                select(TestRun.manifest_json)
+            run = session.execute(
+                select(TestRun.manifest_json, TestRun.created_by)
                 .join(TestExecution)
                 .where(TestExecution.execution_uuid == str(execution_uuid))
-            )
-        return bool(manifest and self.configuration_matches(manifest))
+            ).one_or_none()
+        return bool(run and self.configuration_matches(run.manifest_json, owner=run.created_by))
 
     def prepare_configuration(self, session, user_id, values, request_hash, *, private_case_ids=()):
         version = session.get(TargetVersion, values.target_version_id)
         target = session.get(Target, version.target_id) if version else None
+        actor = session.get(User, user_id)
+        member = bool(actor and actor.role == "user")
+        accessible = actor and target and session.scalar(
+            select(Target.id).where(Target.id == target.id, accessible_target_filter(actor))
+        )
         if (
-            not target
-            or target.owner_id != user_id
-            or not supported(self.settings, target.adapter_type)
+            not accessible
+            or not supported(self.settings, target.adapter_type, owner=user_id)
             or target.archived_at is not None
         ):
-            raise AgentError("target_version_not_found", "当前身份下找不到预约对象版本。", 404)
+            raise AgentError(
+                "target_version_not_found", "当前身份下找不到可用的测试对象版本。", 404
+            )
+        shared = target.owner_id != user_id
         current = RunService(
             self.engine,
             self.settings,
             document_ids=self.document_ids,
             adapter_type=target.adapter_type,
-        ).current_manifest()
+        ).current_manifest(owner=user_id)
         if version.config_hash != current["config_hash"]:
             raise AgentError(
                 "target_version_unavailable", "当前Worker代码不能执行该历史版本。", 409
@@ -252,6 +265,7 @@ class RunService:
             raise AgentError("reduction_trial_private", "缩减验证用例只能由原提炼计划执行。", 403)
         if len(rows) != len(values.case_revision_ids) or any(
             r.review_status != "approved"
+            and not personal_case(r, user_id)
             and not (
                 r.source == "reduction_trial:T17M"
                 and r.id in private_case_ids
@@ -259,9 +273,15 @@ class RunService:
             )
             for r in rows
         ):
-            raise AgentError(
-                "case_not_approved", "运行只接受已审核用例或绑定计划的私有验证草稿。", 409
-            )
+            raise AgentError("case_not_approved", "请选择可运行的开发用例。", 409)
+        if member and any(
+            not personal_case(row, user_id)
+            and (row.dataset_split != "dev"
+            or row.review_status != "approved"
+            or row.source.startswith(("external_import:", "reduction_trial:")))
+            for row in rows
+        ):
+            raise AgentError("workflow_development_only", "请选择公开的已审核开发用例。", 403)
         if any(
             row.fixture_json.get("fixture") == "external-dialogue-v1"
             and row.source != f"external_import:{target.adapter_type}:owner:{user_id}"
@@ -275,6 +295,22 @@ class RunService:
             raise AgentError("case_adapter_mismatch", "用例领域与对象适配器不一致。", 409)
         if is_external(target.adapter_type) and values.fault_profile_id:
             raise AgentError("fault_adapter_mismatch", "外部对话接口未提供内部故障注入能力。", 409)
+        capabilities = current.get("capabilities", {})
+        if values.external_fault and not (
+            is_external(target.adapter_type) and capabilities.get("http_faults")
+            and (values.external_fault != "tool_error" or capabilities.get("tool_faults"))
+        ):
+            raise AgentError("fault_adapter_mismatch", "当前对象未启用所选外部故障。", 409)
+        if is_external(target.adapter_type) and capabilities.get("http_faults"):
+            from app.external.registry import entry_for
+
+            profile = entry_for(self.settings, target.adapter_type, owner=user_id).http
+            if not (profile.session_field or profile.history_field) and any(
+                len(case["dsl"]["turns"]) > 1 for case in cases
+            ):
+                raise AgentError(
+                    "external_session_required", "多轮用例需要配置会话标识或对话历史字段。", 409
+                )
         if target.adapter_type == "reference_refund" and values.fault_profile_id:
             profile = frozen_profile(session, values.fault_profile_id)["config"]
             if profile["target_tool"] not in {
@@ -307,6 +343,7 @@ class RunService:
             "request_hash": request_hash,
             "target_version_id": version.id,
             "target": version.model_config_json,
+            **({"shared_reference_target": True} if shared else {}),
             "cases": cases,
             "limits": limits,
             "repetitions": values.repetitions,
@@ -321,6 +358,8 @@ class RunService:
         if target.adapter_type != "langgraph_booking":
             manifest["adapter_type"] = target.adapter_type
         if is_external(target.adapter_type):
+            if capabilities.get("http_faults"):
+                manifest["external_fault"] = values.external_fault
             manifest["pricing"] = {
                 "mode": "external_account",
                 "basis": "conservative_declared_upper",
@@ -345,6 +384,8 @@ class RunService:
         request = values.model_dump(mode="json")
         if request.get("fault_profile_id") is None:
             request.pop("fault_profile_id", None)  # Preserve old control-run idempotency hashes.
+        if request.get("external_fault") is None:
+            request.pop("external_fault", None)
         if workflow:
             request["workflow"] = workflow
         request_hash = canonical_hash(request)
@@ -419,18 +460,22 @@ class RunService:
                 return run.run_uuid
 
     @staticmethod
-    def owned_run(session, user_id, run_uuid, *, lock=False):
-        query = select(TestRun).where(
-            TestRun.run_uuid == str(run_uuid), TestRun.created_by == user_id
-        )
+    def owned_run(session, user_id, run_uuid, *, lock=False, administrator=False):
+        query = select(TestRun).where(TestRun.run_uuid == str(run_uuid))
+        if administrator:
+            actor = session.get(User, user_id, with_for_update=lock)
+            if not actor or not actor.enabled or actor.role != "admin":
+                raise AgentError("admin_required", "此操作仅限平台管理员。", 403)
+        else:
+            query = query.where(TestRun.created_by == user_id)
         run = session.scalar(query.with_for_update() if lock else query)
         if run is None:
             raise AgentError("run_not_found", "当前身份下找不到运行。", 404)
         return run
 
-    def read(self, user_id, run_uuid):
+    def read(self, user_id, run_uuid, *, administrator=False):
         with read_session(self.engine) as session:
-            run = self.owned_run(session, user_id, run_uuid)
+            run = self.owned_run(session, user_id, run_uuid, administrator=administrator)
             executions = list(
                 session.scalars(
                     select(TestExecution)
@@ -469,11 +514,12 @@ class RunService:
             "task_outcome": e.task_outcome,
         }
 
-    def cancel(self, user_id, run_uuid):
+    def cancel(self, user_id, run_uuid, *, administrator=False):
         with Session(self.engine) as session, session.begin():
-            run = self.owned_run(session, user_id, run_uuid, lock=True)
+            run = self.owned_run(session, user_id, run_uuid, lock=True, administrator=administrator)
+            owner = run.created_by
             if run.status in ("completed", "failed", "cancelled"):
-                return
+                return owner
             run.status = "cancelling"
             append_event(
                 session,
@@ -509,6 +555,7 @@ class RunService:
                         settings=self.settings,
                     )
             refresh_run(session, run)
+            return owner
 
     def supply_input(self, user_id, run_uuid, execution_uuid, values):
         body = values.model_dump(mode="json")
@@ -579,7 +626,7 @@ class RunService:
             with Session(self.engine) as session, session.begin():
                 run, e = locked_pair(session, identifier)
                 if compatible_only and not self.configuration_matches(
-                    run.manifest_json, cache=compatibility
+                    run.manifest_json, cache=compatibility, owner=run.created_by
                 ):
                     continue
                 deadline = (e.timing_json or {}).get("deadline") or (e.timing_json or {}).get(
@@ -842,6 +889,10 @@ class RunService:
             e.status, e.final_output_json, e.error_json = status, output, error
             e.task_outcome = "unknown" if status != "waiting_input" else None
             e.after_state_json = business_snapshot(session, run, e.scope_id, self.settings)
+            evidence = (output or {}).get("external_evidence")
+            if evidence:
+                e.before_state_json = evidence["business"]["before"]
+                e.after_state_json = evidence["business"]["after"]
             if status == "inconclusive" and isinstance(run.manifest_json.get("evaluation"), dict):
                 from app.evaluation.service import persist_evaluation
 

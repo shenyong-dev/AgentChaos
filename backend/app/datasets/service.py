@@ -12,6 +12,7 @@ from app.agents.errors import AgentError
 from app.agents.versions import canonical_hash, register_version
 from app.cases.service import CaseService
 from app.core.config import PROJECT_ROOT
+from app.core.roles import permits
 from app.datasets.catalog import audit, experiment_plan, load_catalog
 from app.executors.control import advisory
 from app.executors.service import RunService, case_content, frozen_case, role_configs
@@ -30,7 +31,7 @@ class DatasetService:
 
     def _access(self, session, user, *, review=False):
         account = CaseService.role(session, user, "reviewer" if review else None)
-        if account.role != "reviewer" and account.id != 1:
+        if not permits(account.role, "reviewer") and account.id != 1:
             raise AgentError("dataset_not_found", "找不到当前身份可访问的数据集。", 404)
         return account
 
@@ -104,7 +105,9 @@ class DatasetService:
         with Session(self.engine) as s:
             account = self._access(s, user)
         row = next((c for c in value["cases"] if c["id"] == key), None)
-        if not row or account.role != "reviewer" and row["dsl"]["dataset_split"] != "dev":
+        if not row or (
+            not permits(account.role, "reviewer") and row["dsl"]["dataset_split"] != "dev"
+        ):
             raise AgentError("dataset_case_not_found", "找不到可访问的用例。", 404)
         return row
 

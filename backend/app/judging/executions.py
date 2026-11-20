@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 from app.agents.errors import AgentError
 from app.agents.gateway import ModelGateway
 from app.agents.versions import canonical_hash
+from app.core.roles import permits
 from app.evaluation.service import EvaluationService, load_evidence
 from app.executors.control import advisory
 from app.judging import evidence
@@ -278,7 +279,7 @@ class ExecutionJudgeService:
     def read(self, owner, identifier):
         with Session(self.engine) as s:
             account = JudgeService.role(s, owner)
-            if account.role == "reviewer":
+            if permits(account.role, "reviewer"):
                 execution = s.scalar(
                     select(TestExecution).where(TestExecution.execution_uuid == str(identifier))
                 )

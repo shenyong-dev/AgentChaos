@@ -9,6 +9,7 @@ from app.agents.errors import AgentError
 from app.agents.versions import canonical_hash
 from app.copilot.embedding import PROFILE, EmbeddingClient, normalized, private_path
 from app.core.config import PROJECT_ROOT
+from app.core.roles import permits
 from app.guidance.service import catalog
 
 RECIPE = Path(__file__).with_name("knowledge.json")
@@ -61,7 +62,7 @@ class RagIndex:
     def search(self, vector, role):
         vector = normalized(vector, PROFILE["dimension"])
         # Role filtering happens before scoring; no other owner's records are in this index.
-        eligible = [row for row in self.rows if role in row["roles"]]
+        eligible = [row for row in self.rows if any(permits(role, key) for key in row["roles"])]
         ranked = sorted(
             ((similarity(vector, row["vector"]), row) for row in eligible),
             key=lambda item: (-item[0], item[1]["id"]),
@@ -103,7 +104,7 @@ class RagRuntime:
         }
         if not self.index:
             return [], status, None, None
-        if not any(role in row["roles"] for row in self.index.rows):
+        if not any(permits(role, key) for row in self.index.rows for key in row["roles"]):
             status["status"] = "no_scope"
             return [], status, None, None
         vectors, receipt = self.client.embed([question], "query", identifier, deadline)

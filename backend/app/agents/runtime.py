@@ -25,6 +25,7 @@ from app.agents.participants import fields_for_input
 from app.agents.registry import ToolRegistry
 from app.agents.retrieval import KnowledgeRetriever
 from app.agents.versions import build_manifest, canonical_hash, register_version
+from app.core.model_access import guard_model_call
 from app.models import TargetVersion
 from app.services.booking import BookingService, utc_now
 
@@ -80,7 +81,12 @@ class AgentRuntime:
         )
         self.saver.setup()
         self.graph = build_agent_graph(
-            self.gateway, self.registry, self.saver, control=control, recorder=recorder
+            self.gateway,
+            self.registry,
+            self.saver,
+            control=control,
+            recorder=recorder,
+            authorize_call=self.authorize_call if gateway is None else None,
         )
         self.manifest = build_manifest(settings, self.retriever, self.registry)
         if auto_register:
@@ -93,6 +99,9 @@ class AgentRuntime:
                     .order_by(TargetVersion.id.desc())
                 )
 
+    def authorize_call(self, actor_key):
+        guard_model_call(self.engine, int(actor_key.removeprefix("user:")))
+
     def _key(self, session_id):
         return f"{self.prefix}:{UUID(str(session_id))}"
 
@@ -103,10 +112,15 @@ class AgentRuntime:
             configurable["deadline"] = time.monotonic() + 120
         return {"configurable": configurable, "recursion_limit": 64}
 
-    def _metadata(self, user_id, session_id, *, read_previous_version=False):
+    def _metadata(self, user_id, session_id, *, read_previous_version=False, include_deleted=False):
         raw = self.redis.get(self._key(session_id))
         metadata = json.loads(raw) if raw else None
-        if metadata is None or metadata["owner_id"] != user_id:
+        if (
+            metadata is None
+            or metadata["owner_id"] != user_id
+            or metadata.get("deleted_at")
+            and not include_deleted
+        ):
             raise AgentError("session_not_found", "当前身份下找不到该会话。", 404)
         if not read_previous_version and metadata["config_hash"] != self.manifest["config_hash"]:
             raise AgentError("session_version_mismatch", "会话绑定的不可变版本与当前代码不符。")
@@ -404,7 +418,7 @@ class AgentRuntime:
                 lock.release()
 
     def delete_test_session(self, user_id, session_id):
-        metadata = self._metadata(user_id, session_id)
+        metadata = self._metadata(user_id, session_id, include_deleted=True)
         if not metadata["scope_id"].startswith("test:"):
             raise AgentError("session_cleanup_forbidden", "只允许清理本任务明确的测试会话。", 403)
         self.saver.delete_thread(str(session_id))

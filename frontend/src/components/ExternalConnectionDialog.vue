@@ -3,11 +3,15 @@ import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { ElButton, ElDialog } from 'element-plus'
 import 'element-plus/theme-chalk/el-dialog.css'
 import { workspace, workspacePost } from '../api/workspace'
+import ExternalSelfConnect from './ExternalSelfConnect.vue'
 
 export type ConnectionProfile = { id: string; label: string; endpoint: string; default_timeout_seconds: number; billing: string }
-const props = defineProps<{ profiles: ConnectionProfile[]; enabled: boolean }>()
+const props = defineProps<{ profiles: ConnectionProfile[]; enabled: boolean; selfService?: boolean }>()
 const open = defineModel<boolean>({ required: true })
 const emit = defineEmits<{ registered: [id: string, version: number] }>()
+const useSelf = ref(props.selfService ?? false)
+const selfConnect = ref<InstanceType<typeof ExternalSelfConnect>>()
+const selfBusy = computed(() => selfConnect.value?.busy ?? false)
 const profileId = ref(props.profiles[0]?.id ?? '')
 const current = computed(() => props.profiles.find(item => item.id === profileId.value))
 const serviceName = ref(current.value?.label ?? ''), revision = ref('')
@@ -51,8 +55,14 @@ async function verify(register: boolean) {
 
 <template>
   <ElDialog v-model="open" title="接入 Agent" width="min(580px, calc(100vw - 32px))" append-to-body :close-on-click-modal="false"
-    :close-on-press-escape="!busy" :show-close="!busy">
-    <form v-if="profiles.length" id="external-connection-form" class="connection-fields" @submit.prevent="verify(false)">
+    :close-on-press-escape="!busy && !selfBusy" :show-close="!busy && !selfBusy">
+    <div v-if="selfService && profiles.length" class="connection-mode">
+      <ElButton :type="useSelf ? 'primary' : 'default'" :disabled="busy || selfBusy" @click="useSelf = true">接入自己的 Agent</ElButton>
+      <ElButton :type="!useSelf ? 'primary' : 'default'" :disabled="busy || selfBusy" @click="useSelf = false">选择共享服务</ElButton>
+    </div>
+    <ExternalSelfConnect v-if="useSelf" ref="selfConnect" :enabled="enabled"
+      @registered="(id, version) => emit('registered', id, version)" />
+    <form v-else-if="profiles.length" id="external-connection-form" class="connection-fields" @submit.prevent="verify(false)">
       <div class="connection-service">
         <label>服务地址<select v-model="profileId" :disabled="busy">
           <option v-for="item in profiles" :key="item.id" :value="item.id">{{ item.label }}</option>
@@ -72,16 +82,20 @@ async function verify(register: boolean) {
     <p v-else role="status">暂无可用服务地址。请联系维护者批准地址并配置凭据。</p>
     <template #footer>
       <div class="connection-footer">
-        <ElButton :disabled="busy" @click="open = false">关闭</ElButton>
-        <ElButton v-if="profiles.length" :type="verified ? 'default' : 'primary'" native-type="submit"
+        <ElButton :disabled="busy || selfBusy" @click="open = false">关闭</ElButton>
+        <ElButton v-if="useSelf" type="primary" native-type="submit" form="external-self-form"
+          :disabled="selfConnect?.submitDisabled ?? true" :loading="selfBusy">{{ selfConnect?.submitLabel }}</ElButton>
+        <ElButton v-if="!useSelf && profiles.length" :type="verified ? 'default' : 'primary'" native-type="submit"
           form="external-connection-form" :disabled="!canCheck || busy">检查连接</ElButton>
-        <ElButton v-if="verified" type="primary" :loading="busy" @click="verify(true)">确认登记</ElButton>
+        <ElButton v-if="!useSelf && verified" type="primary" :loading="busy" @click="verify(true)">确认登记</ElButton>
       </div>
     </template>
   </ElDialog>
 </template>
 
 <style scoped>
+.connection-mode { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+.connection-mode :deep(.el-button + .el-button) { margin-left: 0; }
 .connection-fields, .connection-fields label { display: grid; gap: 8px; min-width: 0; }
 .connection-fields { gap: 16px; }
 .connection-fields label { color: var(--ac-ink); font-size: 13px; font-weight: 500; }

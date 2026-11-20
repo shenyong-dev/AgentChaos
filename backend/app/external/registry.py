@@ -62,6 +62,10 @@ def file_entries(settings):
         )
         for entry in registry.targets:
             address(entry, settings)
+        from app.external.self_service import KEY_ID
+
+        if any(KEY_ID.fullmatch(entry.id) for entry in registry.targets):
+            raise ValueError("Reserved personal agent identifier")
         return {PREFIX + entry.id: entry for entry in registry.targets}
     except (OSError, ValueError):
         raise AgentError(
@@ -78,14 +82,27 @@ def entries(settings):
     return {**configured_entries(settings), **fixed}
 
 
-def entry_for(settings, kind) -> Entry:
-    entry = entries(settings).get(kind)
+def entry_for(settings, kind, *, owner=None) -> Entry:
+    from app.external.self_service import is_self, read
+
+    if is_self(kind):
+        saved = read(settings, owner, kind[len(PREFIX) :])
+        entry = saved.entry if saved else None
+    else:
+        entry = entries(settings).get(kind)
     if entry is None or not entry.enabled:
         raise AgentError("external_target_unavailable", "外部对象未登记或已停用。", 409)
     return entry
 
 
-def credential(entry):
+def credential(entry, settings, *, owner=None):
+    from app.external.self_service import KEY_ID, read
+
+    if KEY_ID.fullmatch(entry.id):
+        saved = read(settings, owner, entry.id)
+        if saved is None or saved.entry != entry:
+            raise AgentError("external_credential_missing", "找不到该 Agent 的凭据。", 503)
+        return saved.access_token.get_secret_value()
     value = os.environ.get(entry.credential_env, "")
     if not 16 <= len(value) <= 4096 or any(ord(c) < 33 or ord(c) > 126 for c in value):
         raise AgentError("external_credential_missing", "外部对象服务凭据尚未配置。", 503)
@@ -96,8 +113,14 @@ def fingerprint(settings):
     return canonical_hash({kind: entry.model_dump() for kind, entry in entries(settings).items()})
 
 
-def supported(settings, kind):
+def supported(settings, kind, *, owner=None):
     if kind in {"langgraph_booking", "reference_refund"}:
         return True
-    entry = entries(settings).get(kind) if is_external(kind) else None
-    return bool(entry and entry.enabled)
+    if not is_external(kind):
+        return False
+    try:
+        return bool(entry_for(settings, kind, owner=owner))
+    except AgentError as e:
+        if e.code != "external_target_unavailable":
+            raise
+        return False

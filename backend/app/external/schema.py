@@ -1,6 +1,7 @@
 """Pinned AgentChaos HTTP dialogue protocol v1, deliberately not an A2A implementation."""
 
-from typing import Literal
+import json
+from typing import Annotated, Literal
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, JsonValue, field_validator, model_validator
@@ -54,9 +55,71 @@ class Entry(Strict):
         return self
 
 
+PathField = Annotated[
+    str, Field(max_length=160, pattern=r"^[A-Za-z0-9_-]+(\.[A-Za-z0-9_-]+){0,9}$")
+]
+InputField = Annotated[str, Field(max_length=64, pattern=r"^[A-Za-z_][A-Za-z0-9_-]*$")]
+ServicePath = Annotated[
+    str, Field(max_length=240, pattern=r"^/[A-Za-z0-9_-]+(/[A-Za-z0-9_-]+)*/?$")
+]
+HttpProtocol = Literal["http-json", "dify"]
+ConnectProtocol = Literal["agentchaos-http-1", "http-json", "dify"]
+
+
+class HttpProfile(Strict):
+    message_field: InputField | None = "message"
+    answer_path: PathField = "answer"
+    session_field: InputField | None = None
+    session_path: PathField | None = None
+    history_field: InputField | None = None
+    retrieval_path: PathField | None = None
+    document_id_path: PathField = "document_id"
+    readback_path: ServicePath | None = None
+    readback_id_path: PathField = "request_id"
+    sandbox_tool_fault: bool = False
+    body_fields: dict[str, JsonValue] = Field(default_factory=dict, max_length=12)
+
+    @model_validator(mode="after")
+    def mappings(self):
+        if not (self.message_field or self.history_field):
+            raise ValueError("The request needs a message or history field")
+        keys = [k for k in (self.message_field, self.session_field, self.history_field) if k]
+        if len(keys) != len(set(keys)) or set(keys).intersection(self.body_fields):
+            raise ValueError("Each input field must have a single source")
+        if bool(self.session_field) != bool(self.session_path):
+            raise ValueError("The request and response session mappings must both be set")
+        if self.session_field and self.history_field:
+            raise ValueError("Choose a remote session or a message history")
+        if len(json.dumps(self.body_fields, ensure_ascii=False, allow_nan=False).encode()) > 4096:
+            raise ValueError("Additional JSON body fields exceed 4 KB")
+        return self
+
+
+class HttpCard(Strict):
+    protocol: HttpProtocol
+    name: str = Field(min_length=1, max_length=100)
+    revision: str = Field(pattern=r"^[a-zA-Z0-9._-]{1,64}$")
+    billing: Literal["free", "external_account"]
+
+
+class HttpEntry(Entry):
+    card: HttpCard
+    http: HttpProfile
+
+    @model_validator(mode="after")
+    def separate_readback(self):
+        from urllib.parse import urlsplit
+
+        if self.http.readback_path and (
+            self.http.readback_path.rstrip("/") == urlsplit(self.endpoint).path.rstrip("/")
+        ):
+            raise ValueError("The read-only endpoint must have a separate path")
+        return self
+
+
 class Registry(Strict):
     schema_version: Literal["agentchaos-external-registry-1"]
-    targets: list[Entry] = Field(max_length=30)
+    targets: list[Entry | HttpEntry] = Field(max_length=30)
 
     @model_validator(mode="after")
     def unique_ids(self):

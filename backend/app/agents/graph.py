@@ -25,7 +25,9 @@ def looks_like_decline(text: str):
     )
 
 
-def build_agent_graph(gateway, registry, checkpointer, *, control=None, recorder=None):
+def build_agent_graph(
+    gateway, registry, checkpointer, *, control=None, recorder=None, authorize_call=None
+):
     prompt = Path(__file__).with_name("prompt.txt").read_text(encoding="utf-8")
     schema_bytes = len(json.dumps(registry.schemas, ensure_ascii=False).encode())
     single_call = (
@@ -59,6 +61,8 @@ def build_agent_graph(gateway, registry, checkpointer, *, control=None, recorder
                 **recorder.model_metadata,
             )
         try:
+            if authorize_call is not None:
+                authorize_call(state["actor_key"])
             message, record = gateway.invoke(
                 context, registry.schemas, deadline=config["configurable"].get("deadline")
             )

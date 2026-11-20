@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import InfoHint from './InfoHint.vue'
 import { ref } from 'vue'
+import { roleLabel } from '../roles'
 import { ElButton, ElInput } from 'element-plus'
 import 'element-plus/es/components/button/style/css'
 import 'element-plus/es/components/input/style/css'
@@ -23,8 +24,8 @@ async function logout() {
 </script>
 <template>
   <div v-if="session.identity.value" class="session-identity">
-    <span class="session-username">{{ session.identity.value.username }} <small>{{ session.identity.value.role === 'operator' ? '操作员' : '审核员' }}</small></span>
-    <span class="session-compact-identity">{{ session.identity.value.role === 'operator' ? '操作员' : '审核员' }}<InfoHint label="当前账号" :text="`${session.identity.value.username} · ${session.identity.value.role === 'operator' ? '操作员' : '审核员'}`" /></span>
+    <span class="session-username">{{ session.identity.value.username }} <small>{{ roleLabel(session.identity.value.role) }}</small></span>
+    <span class="session-compact-identity">{{ roleLabel(session.identity.value.role) }}<InfoHint label="当前账号" :text="`${session.identity.value.username} · ${roleLabel(session.identity.value.role)}`" /></span>
     <ElButton text size="small" :loading="busy" aria-label="退出 / 切换账号" title="退出 / 切换账号" @click="logout"><SwitchButton class="session-exit-icon" aria-hidden="true" /><span class="session-exit-label">退出 / 切换账号</span></ElButton>
     <p v-if="error" role="alert" class="evidence-error">{{ error }}</p>
   </div>

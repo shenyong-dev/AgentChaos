@@ -1,16 +1,26 @@
-"""Operators select server registrations; only reviewers approve external case drafts."""
+"""External Agent registration, testing and receipt-bound OTLP ingestion."""
 
+import json
+import re
 from functools import lru_cache
 from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, Query, Request
 from pydantic import BaseModel, ConfigDict, Field
+from redis import Redis
+from redis.exceptions import RedisError
+from starlette.concurrency import run_in_threadpool
 
+from app.agents.errors import AgentError
 from app.api.booking import get_booking_engine
 from app.api.cases import case_identity
 from app.core.config import get_settings
 from app.external.cases import CaseFile
+from app.external.otel import BODY_LIMIT, ingest
+from app.external.schema import unique_json
+from app.external.self_service import Address, Connect
 from app.external.service import ExternalService
+from app.external.transport import invalid_number
 from app.external.web_config import Connection
 from app.schemas.common import Envelope
 
@@ -85,6 +95,64 @@ def register_configuration(
         data=service.register_configuration(user, body.connection, body.expected_config_hash),
         request_id=request.state.request_id,
     )
+
+
+@router.post("/self-service/challenge")
+def self_challenge(body: Address, request: Request, user: Identity, service: Service):
+    return Envelope(
+        data=service.self_challenge(user, body.endpoint, body.protocol),
+        request_id=request.state.request_id,
+    )
+
+
+@router.post("/self-service/connect")
+def self_connect(body: Connect, request: Request, user: Identity, service: Service):
+    return Envelope(data=service.connect(user, body), request_id=request.state.request_id)
+
+
+@router.get("/trace-setup")
+def trace_setup(
+    request: Request,
+    user: Identity,
+    service: Service,
+    registered_id: Annotated[str, Query(pattern=r"^[a-z][a-z0-9_-]{1,40}$")],
+):
+    return Envelope(
+        data=service.trace_setup(user, registered_id), request_id=request.state.request_id
+    )
+
+
+@router.post("/otlp/v1/traces")
+async def receive_traces(request: Request):
+    authorization = re.fullmatch(r"Bearer ([a-f0-9]{64})", request.headers.get("authorization", ""))
+    if not authorization:
+        raise AgentError("external_trace_auth", "请提供对象的轨迹接收凭据。", 401)
+    content_type = request.headers.get("content-type", "").split(";", 1)[0].strip().lower()
+    if (
+        content_type != "application/json"
+        or request.headers.get("content-encoding", "identity") != "identity"
+    ):
+        raise AgentError("external_trace_format", "请选择 OTLP/HTTP JSON，使用未压缩发送。", 415)
+    body = bytearray()
+    async for chunk in request.stream():
+        if len(body) + len(chunk) > BODY_LIMIT:
+            raise AgentError("external_trace_limit", "单批轨迹超过接收上限。", 413)
+        body.extend(chunk)
+
+    def write():
+        settings = get_settings()
+        payload = json.loads(body, object_pairs_hook=unique_json, parse_constant=invalid_number)
+        with Redis.from_url(
+            settings.redis_url, socket_timeout=2, socket_connect_timeout=2
+        ) as client:
+            return ingest(client, settings, authorization[1], payload)
+
+    try:
+        return await run_in_threadpool(write)
+    except (ValueError, RecursionError, TypeError, AttributeError):
+        raise AgentError("external_trace_invalid", "轨迹格式不符合 OTLP/HTTP JSON。", 400) from None
+    except RedisError:
+        raise AgentError("external_trace_unavailable", "暂时无法接收轨迹。", 503) from None
 
 
 @router.get("/cases")

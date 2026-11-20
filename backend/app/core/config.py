@@ -19,11 +19,13 @@ class Settings(BaseSettings):
     external_agent_registry_path: str = ""
     external_agent_web_policy_path: str = ""
     external_agent_calls_enabled: bool = False
+    external_agent_self_service_key: SecretStr = SecretStr("")
     cloud_deployment_id: str = Field(default="", pattern=r"^$|^[0-9a-f]{32}$")
     cloud_approval_sha256: str = Field(default="", pattern=r"^$|^[0-9a-f]{64}$")
     cloud_open_model_budget: bool = False
     session_idle_seconds: int = Field(default=1800, ge=60, le=3600)
     session_absolute_seconds: int = Field(default=28800, ge=3600, le=86400)
+    login_geoip_db_path: str = ".local/geoip/dbip-city-lite.mmdb"
     mysql_host: str = "127.0.0.1"
     mysql_port: int = Field(default=13306, ge=1, le=65535)
     mysql_database: str = "agentchaos"

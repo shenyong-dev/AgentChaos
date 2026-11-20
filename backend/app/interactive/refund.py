@@ -15,6 +15,8 @@ from app.agents.gateway import ModelGateway
 from app.agents.versions import canonical_hash
 from app.core.config import PROJECT_ROOT
 from app.core.deployment import source_fingerprint
+from app.core.member_targets import accessible_target_filter
+from app.core.model_access import denied_call, guard_model_call
 from app.interactive.budget import (
     CALL_LIMIT,
     InteractionBudget,
@@ -23,7 +25,7 @@ from app.interactive.budget import (
     local_unlimited,
 )
 from app.interactive.refund_control import RefundControl, RefundObserver
-from app.models import Target, TargetVersion
+from app.models import Target, TargetVersion, User
 from reference_agents.refund.agent import RefundAgent
 
 
@@ -44,12 +46,17 @@ class RefundInteractionService:
     def key(self, sid):
         return self.prefix + ":session:" + str(UUID(str(sid)))
 
-    def owned(self, owner, sid):
+    def owned(self, owner, sid, *, include_deleted=False):
         raw = self.redis.get(self.key(sid))
         if not raw:
             raise AgentError("refund_session_not_found", "找不到当前账号的退款会话。", 404)
         meta = json.loads(raw)
-        if meta.get("owner") != owner or meta.get("binding") != self.binding:
+        if (
+            meta.get("owner") != owner
+            or meta.get("binding") != self.binding
+            or meta.get("deleted_at")
+            and not include_deleted
+        ):
             raise AgentError("refund_session_not_found", "找不到当前账号的退款会话。", 404)
         return meta
 
@@ -64,22 +71,30 @@ class RefundInteractionService:
     def current(self, owner):
         manifest = self.adapter.manifest()
         with Session(self.engine) as session:
+            identity = session.get(User, owner)
+            if identity is None:
+                return manifest, None
             identifier = session.scalar(
                 select(TargetVersion.id)
                 .join(Target)
                 .where(
-                    Target.owner_id == owner,
+                    accessible_target_filter(identity),
+                    Target.archived_at.is_(None),
                     Target.adapter_type == "reference_refund",
                     TargetVersion.config_hash == manifest["config_hash"],
                 )
-                .order_by(TargetVersion.id.desc())
+                .order_by((Target.owner_id == owner).desc(), TargetVersion.id.desc())
             )
         return manifest, identifier
 
     def access(self, owner):
         manifest, version = self.current(owner)
+        denied = None
+        if self.gateway_factory is None:
+            with Session(self.engine) as db:
+                denied = denied_call(db, owner)
         budget = self.budget("access")
-        raw = self.redis.hgetall(budget.key) if authorized(self.settings) else {}
+        raw = self.redis.hgetall(budget.key) if not denied and authorized(self.settings) else {}
         value = {k.decode(): int(v) for k, v in raw.items()}
         available = bool(
             authorized(self.settings)
@@ -104,7 +119,9 @@ class RefundInteractionService:
             "limits": limits(self.settings),
             "mode": "offline_control" if self.gateway_factory else "real_provider",
             "model_actions_available": bool(version and (available or self.gateway_factory)),
-            "reason": "退款源码尚未登记，请由维护者登记当前版本。"
+            "reason": denied[1]
+            if denied
+            else "退款源码尚未登记，请由维护者登记当前版本。"
             if not version
             else "交互模型调用未就绪，请检查工程环境与原日常额度。"
             if not available and not self.gateway_factory
@@ -286,6 +303,8 @@ class RefundInteractionService:
                     raise AgentError(
                         "refund_confirmation_required", "请核对完整草稿后使用确认按钮。", 409
                     )
+            if self.gateway_factory is None:
+                guard_model_call(self.engine, owner)
             if not self.access(owner)["model_actions_available"]:
                 raise AgentError(
                     "refund_model_unavailable", "交互调用未就绪，未发起模型请求。", 403
@@ -309,6 +328,7 @@ class RefundInteractionService:
                     self.budget(sid),
                     control=control,
                     audit_directory=PROJECT_ROOT / ".local/refund-interactive/model-calls" / sid,
+                    authorize_call=lambda: guard_model_call(self.engine, owner),
                 )
             )
             agent = RefundAgent(
@@ -386,6 +406,19 @@ redis.call('SET',KEYS[1],ARGV[2]);redis.call('SET',KEYS[2],ARGV[3]);return 1
         after = cursor + len(items)
         return {"items": items, "next_cursor": after if after < self.redis.llen(key) else None}
 
+    def delete(self, owner, sid):
+        self.owned(owner, sid, include_deleted=True)
+        with self.locked(sid):
+            meta = self.owned(owner, sid, include_deleted=True)
+            if not meta.get("deleted_at"):
+                if meta["inflight"] or meta["status"] == "creating":
+                    raise AgentError(
+                        "refund_round_unknown", "请先查清原请求回执，再删除会话。", 409
+                    )
+                meta["deleted_at"] = now()
+                self.redis.set(self.key(sid), json.dumps(meta, ensure_ascii=False), xx=True)
+            return {"deleted": True, "session_id": sid}
+
     def records(self, owner, query="", cursor=0):
         key = self.prefix + f":owner:{owner}"
         ids = self.redis.zrevrange(key, cursor, cursor + 99)
@@ -394,7 +427,12 @@ redis.call('SET',KEYS[1],ARGV[2]);redis.call('SET',KEYS[2],ARGV[3]);return 1
         for raw in ids:
             consumed += 1
             sid = raw.decode()
-            meta = self.owned(owner, sid)
+            try:
+                meta = self.owned(owner, sid)
+            except AgentError as exc:
+                if exc.status_code != 404:
+                    raise
+                continue
             title = next(
                 (m["content"][:120] for m in meta["history"] if m["role"] == "user"), "空会话"
             )

@@ -14,8 +14,10 @@ from sqlalchemy.exc import DBAPIError
 from sqlalchemy.orm import Session
 
 from app.agents.errors import AgentError
+from app.auth.login_events import record_login
 from app.core.config import get_settings
 from app.core.passwords import verify_password
+from app.core.roles import basic_route, permits
 from app.models import User
 
 # A single Redis operation checks expiry and touches TTL. A concurrent logout cannot
@@ -49,7 +51,10 @@ def digest(value):
 
 
 def account_stamp(user):
-    return digest(json.dumps([user.id, user.password_hash, user.role, user.enabled]))
+    fields = [user.id, user.password_hash, user.role, user.enabled]
+    if getattr(user, "auth_epoch", 0):
+        fields.append(user.auth_epoch)
+    return digest(json.dumps(fields))
 
 
 def request_origin(request: Request, *, write=False):
@@ -109,30 +114,40 @@ class SessionService:
             ("ip:" + (request.client.host if request.client else "unknown"), 40),
             ("account:" + username.casefold(), 12),
         ):
-            if self._redis("eval", ATTEMPT, 1, self.prefix + "attempt:" + digest(scope)) > limit:
+            attempts = self._redis("eval", ATTEMPT, 1, self.prefix + "attempt:" + digest(scope))
+            if attempts > limit:
+                if attempts == limit + 1:
+                    record_login(
+                        self.engine, self.settings, request, outcome="limited", reason="rate_limit"
+                    )
                 raise AgentError("session_rate_limited", "登录尝试过多，请5分钟后再试。", 429)
         try:
             with Session(self.engine) as db:
                 user = db.scalar(select(User).where(User.username == username))
-                if (
-                    not user
-                    or not user.enabled
-                    or not verify_password(password, user.password_hash)
-                ):
-                    raise AgentError("session_credentials_invalid", "账号或密码不正确。", 401)
-                now = int(self.clock())
-                record = {
-                    "user_id": user.id,
-                    "username": user.username,
-                    "role": user.role,
-                    "stamp": account_stamp(user),
-                    "csrf": secrets.token_urlsafe(32),
-                    "origin": origin,
-                    "absolute": now + self.settings.session_absolute_seconds,
-                    "idle": now + self.settings.session_idle_seconds,
-                }
         except DBAPIError as exc:
             raise AgentError("session_unavailable", "账号服务暂不可用。", 503) from exc
+        if not user or not user.enabled or not verify_password(password, user.password_hash):
+            record_login(
+                self.engine,
+                self.settings,
+                request,
+                outcome="failure",
+                reason="account_disabled" if user and not user.enabled else "invalid_credentials",
+                user=user,
+            )
+            raise AgentError("session_credentials_invalid", "账号或密码不正确。", 401)
+        now = int(self.clock())
+        record = {
+            "user_id": user.id,
+            "username": user.username,
+            "role": user.role,
+            "stamp": account_stamp(user),
+            "csrf": secrets.token_urlsafe(32),
+            "origin": origin,
+            "created_at": now,
+            "absolute": now + self.settings.session_absolute_seconds,
+            "idle": now + self.settings.session_idle_seconds,
+        }
         old = self.cookie(request)
         if old:
             # Only revoke an existing cookie belonging to this exact browser origin.
@@ -143,6 +158,7 @@ class SessionService:
         self._redis(
             "set", self.key(token), json.dumps(record), ex=self.settings.session_idle_seconds
         )
+        record_login(self.engine, self.settings, request, outcome="success", user=user)
         return token, record
 
     def resolve(self, request, *, touch=True):
@@ -207,7 +223,11 @@ def browser_identity(request, *, operator=False):
     record = get_session_service().resolve(
         request, touch=request.headers.get("x-ac-activity") == "1"
     )
-    if operator and record["role"] != "operator":
+    if record["role"] == "user":
+        if not basic_route(request):
+            raise AgentError("session_role_forbidden", "普通账号无权使用此功能。", 403)
+        return record["user_id"]
+    if operator and not permits(record["role"], "operator"):
         raise AgentError(
             "session_role_forbidden", "当前审核账号无权执行操作员功能，请切换账号。", 403
         )

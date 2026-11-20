@@ -13,6 +13,7 @@ from app.agents.versions import canonical_hash
 from app.cases.service import CaseService
 from app.core.cloud import authorized as cloud_authorized
 from app.core.config import PROJECT_ROOT
+from app.core.roles import permits
 from app.executors.control import advisory
 from app.judging import evidence
 from app.judging.budget import JudgeBudget, authorization
@@ -22,13 +23,6 @@ from app.judging.protocol import parse_response
 from app.models import Artifact
 
 DATASET = PROJECT_ROOT / "docs/fixtures/T12/samples.json"
-
-# Reviewed authorization/UI maintenance only. All other frozen fields and files
-# must match exactly. Original manifests, seals and results are never rewritten.
-COMPATIBLE_MAINTENANCE_SOURCES = {
-    "service.py": "794c6d336546e74b296a23f327de6e427db962cd6b0adf9992e1eb0d3c92e701",
-    "budget.py": "9d08b1648374531e1cde362c3e2e896ecda0c02c768a2534b86edd9fa96c0069",
-}
 
 
 def load_dataset(task="T12"):
@@ -64,7 +58,7 @@ class JudgeService:
                 Artifact.metadata_json["generation_id"].as_string() == str(batch),
             )
         )
-        if not request or user.role != "reviewer" and request.owner_id != owner:
+        if not request or not permits(user.role, "reviewer") and request.owner_id != owner:
             raise AgentError("judge_batch_not_found", "找不到当前身份可访问的评价批次。", 404)
         rows = list(
             session.scalars(
@@ -99,28 +93,28 @@ class JudgeService:
             return True
         if not cloud_authorized(self.settings, "judge"):
             return False
-        old_sources = frozen.get("sources", {})
         new_sources = current.get("sources", {})
+        fixture_dir = PROJECT_ROOT / "docs/fixtures/T17B"
         try:
-            reviewed = json.loads(
-                (PROJECT_ROOT / "docs/fixtures/T17B/maintenance-20261114.json").read_bytes()
-            )
+            accounts = json.loads((fixture_dir / "maintenance-20261119-accounts.json").read_bytes())
         except (OSError, ValueError):
             return False
-        return (
-            frozen == {**current, "sources": old_sources}
-            and old_sources.keys() == new_sources.keys()
-            and all(
-                old_sources[name] == digest
-                for name, digest in COMPATIBLE_MAINTENANCE_SOURCES.items()
-            )
-            and reviewed.get("sources")
-            == {name: new_sources[name] for name in COMPATIBLE_MAINTENANCE_SOURCES}
-            and all(
-                digest == new_sources[name]
-                for name, digest in old_sources.items()
-                if name not in COMPATIBLE_MAINTENANCE_SOURCES
-            )
+        # The account-aware gateway takes an optional authorization callback only
+        # for Agent calls. The frozen judge protocol and all other sources match.
+        reviewed = accounts["current"]
+        if (
+            current["gateway_hash"] != reviewed["gateway_hash"]
+            or {name: new_sources.get(name) for name in reviewed["sources"]} != reviewed["sources"]
+        ):
+            return False
+        return any(
+            frozen
+            == {
+                **current,
+                "gateway_hash": prior["gateway_hash"],
+                "sources": {**new_sources, **prior["sources"]},
+            }
+            for prior in accounts["prior"]
         )
 
     def _evaluation_access(self, role, batch, frozen, rows, seal):
@@ -148,7 +142,7 @@ class JudgeService:
             },
         }
         try:
-            if role != "operator":
+            if not permits(role, "operator"):
                 raise AgentError("judge_operator_required", "请使用操作员账号运行AI评价。", 403)
             if not seal:
                 raise AgentError("judge_labels_not_sealed", "请先完成人工标注并封存。", 409)
@@ -542,7 +536,7 @@ class JudgeService:
             query = select(Artifact).where(
                 Artifact.kind == "judge_request", Artifact.run_id.is_(None)
             )
-            if user.role != "reviewer":
+            if not permits(user.role, "reviewer"):
                 query = query.where(Artifact.owner_id == owner)
             rows = list(s.scalars(query.order_by(Artifact.id.desc()).limit(50)))
             return [

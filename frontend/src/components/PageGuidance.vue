@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { permitsAny } from '../roles'
 import { computed, onBeforeUnmount, ref, shallowRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElButton, ElDrawer, ElInput } from 'element-plus'
@@ -38,7 +39,7 @@ function unavailable(id: string) {
   const action = catalog.actions[id]
   if (!action) return '动作未实现'
   if (!action.public && !session.identity.value) return '请先登录'
-  if (session.identity.value && !action.roles.includes(session.identity.value.role)) return '当前角色无权限'
+  if (session.identity.value && !permitsAny(session.identity.value.role, action.roles)) return '当前角色无权限'
   if (action.object_kind && (!selected.value || (action.object_kind === 'run_or_execution' ? !['run','execution'].includes(selected.value.kind) : action.object_kind !== selected.value.kind))) return '请先选择或载入对应对象'
   return ''
 }

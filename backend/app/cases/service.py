@@ -19,6 +19,7 @@ from app.cases import evidence, refund
 from app.cases.budget import GenerationBudget
 from app.cases.validation import check, templates
 from app.core.passwords import verify_password
+from app.core.roles import permits
 from app.db.seeds import RULE_PATH
 from app.evidence.recorder import redact
 from app.executors.control import advisory
@@ -162,14 +163,17 @@ class CaseService:
     def authenticate(self, username, password):
         with Session(self.engine) as session:
             user = session.scalar(select(User).where(User.username == username))
-            if not user or not user.enabled or not verify_password(password, user.password_hash):
+            if (
+                not user or not user.enabled or user.role == "user"
+                or not verify_password(password, user.password_hash)
+            ):
                 raise AgentError("case_authentication_failed", "账号或密码不正确。", 401)
             return user.id
 
     @staticmethod
     def role(session, identifier, required=None):
         user = session.get(User, identifier)
-        if not user or not user.enabled or required and user.role != required:
+        if not user or not user.enabled or required and not permits(user.role, required):
             raise AgentError("case_role_required", "当前账号没有此操作角色。", 403)
         return user
 
@@ -181,7 +185,7 @@ class CaseService:
                 Artifact.metadata_json["generation_id"].as_string() == str(batch),
             )
         )
-        if row is None or user.role != "reviewer" and row.owner_id != owner:
+        if row is None or not permits(user.role, "reviewer") and row.owner_id != owner:
             raise AgentError("generation_not_found", "找不到当前身份可访问的候选生成批次。", 404)
         return row
 
@@ -669,7 +673,7 @@ class CaseService:
         with Session(self.engine) as session:
             user = self.role(session, owner)
             query = select(Artifact).where(Artifact.kind == "casegen_request", Artifact.id > after)
-            if user.role != "reviewer":
+            if not permits(user.role, "reviewer"):
                 query = query.where(Artifact.owner_id == owner)
             if target:
                 domain = Artifact.metadata_json["target"].as_string()

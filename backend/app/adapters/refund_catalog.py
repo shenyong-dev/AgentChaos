@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.adapters.refund import RefundAdapter
 from app.agents.versions import canonical_hash
+from app.core.roles import permits
 from app.executors.service import case_content
 from app.models import Target, TargetVersion, TestCase, User
 
@@ -61,7 +62,7 @@ def register(engine, settings, owner=1):
     manifest = RefundAdapter(engine, settings).manifest()
     with Session(engine) as session, session.begin():
         user = session.get(User, owner)
-        if not user or user.role != "operator":
+        if not user or not permits(user.role, "operator"):
             raise ValueError("Reference target requires an existing operator")
         target = session.scalar(
             select(Target).where(

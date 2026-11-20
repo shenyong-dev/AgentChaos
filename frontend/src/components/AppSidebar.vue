@@ -4,13 +4,14 @@ import { useRoute } from 'vue-router'
 import { ElTooltip } from 'element-plus'
 import 'element-plus/es/components/tooltip/style/css'
 import { Close } from '@element-plus/icons-vue'
-import { navigationPath, navigationGroups } from '../navigation'
+import { session } from '../api/session'
+import { navigationPath, groupsFor } from '../navigation'
 
 defineProps<{ collapsed?: boolean; drawer?: boolean }>()
 const emit = defineEmits<{ navigate: []; close: [] }>()
 const route = useRoute()
 const active = computed(() => navigationPath(route.path))
-const groups = navigationGroups
+const groups = computed(() => groupsFor(session.identity.value?.role))
 const teamCloud = import.meta.env.VITE_DEPLOYMENT_MODE === 'team'
 </script>
 

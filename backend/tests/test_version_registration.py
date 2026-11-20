@@ -20,10 +20,12 @@ from app.api.cases import get_case_service
 from app.api.workbench import get_version_registration_service
 from app.cases.service import CaseService
 from app.core.config import Settings
+from app.core.member_targets import REFERENCE_NAMES
 from app.db.seeds import seed_database
 from app.main import create_app
 from app.models import Target, TargetVersion, TestCase, TestRun, User
 from app.schemas.versions import RegisterVersion
+from app.workbench.service import WorkbenchService
 from app.workbench.versions import VersionRegistrationService
 
 pytestmark = pytest.mark.skipif(os.getenv("AC_INTEGRATION") != "1", reason="disposable MySQL")
@@ -85,14 +87,48 @@ def fingerprint(value):
     return {**value, "config_hash": canonical_hash(value)}
 
 
-def request(service, target):
-    result = service.inspect(1, target)
+def request(service, target, owner=1):
+    result = service.inspect(owner, target)
     return RegisterVersion(
         target_id=target,
         expected_config_hash=result["current_config_hash"],
         base_version_id=result["base_version"]["id"] if result["base_version"] else None,
         confirmed=True,
     )
+
+
+def test_administrator_reads_and_registers_shared_targets_without_taking_private_targets(setup):
+    engine, service, ids, _, other = setup
+    with Session(engine) as db, db.begin():
+        admin = User(
+            username="version_admin", password_hash=db.get(User, 1).password_hash, role="admin",
+        )
+        refund = Target(
+            name=REFERENCE_NAMES["reference_refund"], adapter_type="reference_refund", owner_id=1,
+        )
+        db.add_all([admin, refund])
+        db.flush()
+        admin_id, refund_id = admin.id, refund.id
+        booking_id = db.scalar(
+            select(Target.id).where(
+                Target.name == REFERENCE_NAMES["langgraph_booking"], Target.owner_id == 1,
+            )
+        )
+    assert booking_id
+    canonical = {booking_id, refund_id}
+    assert {item["id"] for item in service.targets(admin_id)["items"]} == canonical
+    assert service.targets(other)["items"] == []
+    for target in canonical:
+        receipt = service.register(admin_id, request(service, target, admin_id))
+        assert receipt["created"]
+    versions = WorkbenchService(engine, service.settings).versions(admin_id)["items"]
+    assert {row["target_id"] for row in versions} == canonical
+    operator_versions = WorkbenchService(engine, service.settings).versions(other)["items"]
+    assert {row["target_id"] for row in operator_versions} == canonical
+    with pytest.raises(AgentError, match="找不到可登记"):
+        service.inspect(other, booking_id)
+    with pytest.raises(AgentError, match="找不到可登记"):
+        service.inspect(admin_id, ids[0])
 
 
 def count(engine, model):

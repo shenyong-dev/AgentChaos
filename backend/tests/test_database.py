@@ -277,7 +277,7 @@ def test_upgrade_downgrade_upgrade_and_metadata_drift():
         migrate(engine, "downgrade", "base")
         assert inspect(engine).get_table_names() == ["alembic_version"]
         migrate(engine)
-        assert len(inspect(engine).get_table_names()) == 17
+        assert set(inspect(engine).get_table_names()) == set(tables)
         with engine.connect() as connection:
             config.attributes["connection"] = connection
             command.check(config)

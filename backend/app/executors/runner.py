@@ -10,6 +10,7 @@ from app.agents.errors import AgentError
 from app.agents.gateway import ModelGateway
 from app.agents.runtime import AgentRuntime
 from app.core.config import PROJECT_ROOT
+from app.core.model_access import guard_model_call
 from app.evidence.recorder import EvidenceRecorder
 from app.executors.budget import ExecutorBudget
 from app.executors.control import ExecutionControl
@@ -76,6 +77,12 @@ def run_execution(engine, redis, settings, execution_uuid, *, gateway_factory=No
                 {"category": "external", "code": "external_task_failed"} if failed else None,
             )
             return {"claimed": True, "status": finished or "lease_lost"}
+
+        def authorize_call():
+            guard_model_call(engine, claim["owner_id"])
+
+        if gateway_factory is None:
+            authorize_call()
         budget = ExecutorBudget(redis, settings, control, claim["run_uuid"], str(execution_uuid))
         if claim["recovery"]:
             with control.transaction() as (_, _, e):
@@ -93,6 +100,7 @@ def run_execution(engine, redis, settings, execution_uuid, *, gateway_factory=No
                 settings,
                 budget,
                 control=control,
+                authorize_call=authorize_call,
                 audit_directory=PROJECT_ROOT
                 / ".local/t05/model-calls"
                 / claim["run_uuid"]

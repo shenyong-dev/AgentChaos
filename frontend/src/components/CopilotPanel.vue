@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { ElButton, ElInput, ElTag } from 'element-plus'
 import { Plus, CopyDocument } from '@element-plus/icons-vue'
 import { session, sessionFetch } from '../api/session'
+import { permitsAny } from '../roles'
 import { catalog, catalogHash, checkedRoute, guidanceGet, assistantOpen, openGuide, useCurrentGuide, type GuideDecision } from '../guidance'
 import { copilotRequest, useCurrentComparison, type CopilotAccess, type CopilotSession, type CopilotTurn, type Source } from '../copilot'
 import InfoHint from './InfoHint.vue'
@@ -28,7 +29,7 @@ const accessFresh = computed(() => !!accessReceivedAt.value && now.value - acces
 const recent = computed(() => discussions.value.map(d => ({ id:d.id, title:d.title, count:d.turns.length, recordedAt:d.recordedAt })))
 const quickActions = computed(() => entry.value.actions.filter(id => {
   const action = catalog.actions[id], identity = session.identity.value
-  if (!action || !identity || !action.roles.includes(identity.role)) return false
+  if (!action || !identity || !permitsAny(identity.role, action.roles)) return false
   return !action.object_kind || (!!selected.value && (action.object_kind === 'run_or_execution' ? ['run','execution'].includes(selected.value.kind) : action.object_kind === selected.value.kind))
 }).slice(0,3))
 const entry = computed(() => catalog.pages[page.value]), protectedPage = computed(() => ['judging','semantic'].includes(page.value))

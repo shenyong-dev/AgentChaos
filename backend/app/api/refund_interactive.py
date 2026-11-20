@@ -68,6 +68,11 @@ def view(sid: UUID, request: Request, user: Identity, service: Service) -> Envel
     return Envelope(data=service.view(user, str(sid)), request_id=request.state.request_id)
 
 
+@router.delete("/sessions/{sid}")
+def delete(sid: UUID, request: Request, user: Identity, service: Service) -> Envelope[dict]:
+    return Envelope(data=service.delete(user, str(sid)), request_id=request.state.request_id)
+
+
 @router.post("/sessions/{sid}/messages")
 def message(
     sid: UUID, body: DemoMessage, request: Request, user: Identity, service: Service

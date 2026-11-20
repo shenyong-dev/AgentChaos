@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { targetDisplayName } from '../types/workbench'
+import { externalFaultNames, targetDisplayName, type ExternalFault } from '../types/workbench'
 import { CNY_PER_USD, cnyToMicroUsd, formatMicroCny } from '../money'
-import { computed, onBeforeUnmount, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, ref, useId, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElButton, ElDialog, ElInput, ElOption, ElSelect } from 'element-plus'
+import { session } from '../api/session'
 import { workspace, workspacePost, WorkspaceHttpError } from '../api/workspace'
 import { evidenceGet } from '../api/evidence'
 import InfoHint from './InfoHint.vue'
@@ -11,11 +12,12 @@ import { categories, knowledgeNames } from '../types/workbench'
 import type { CaseRow, FaultRow, Overview, Page, VersionRow } from '../types/workbench'
 
 function clone<T>(value: T): T { return JSON.parse(JSON.stringify(value)) as T }
-const props = defineProps<{ modelValue: boolean; sourceRunId?: string; action?: 'new' | 'rerun' | 'copy'; initialTargetVersionId?: number; initialCase?: { id: number; adapterType: string } }>()
+
+const props = defineProps<{ modelValue: boolean; sourceRunId?: string; action?: 'new' | 'rerun' | 'copy'; initialTargetVersionId?: number; initialCase?: { id: number; adapterType: string }; initialExternalFault?: ExternalFault }>()
 const emit = defineEmits<{ 'update:modelValue': [value: boolean] }>()
 const router = useRouter()
 const visible = computed({ get: () => props.modelValue, set: value => emit('update:modelValue', value) })
-interface Config { request_id: string; target_version_id: number; case_revision_ids: number[]; repetitions: number; seed: number; limits: { concurrency: number; timeout_seconds: number; max_steps: number; max_model_calls: number; max_tokens: number }; budgets: { agent_microusd: number; case_generator_microusd: 0; judge_microusd: 0 }; fault_profile_id: number | null }
+interface Config { request_id: string; target_version_id: number; case_revision_ids: number[]; repetitions: number; seed: number; limits: { concurrency: number; timeout_seconds: number; max_steps: number; max_model_calls: number; max_tokens: number }; budgets: { agent_microusd: number; case_generator_microusd: 0; judge_microusd: 0 }; fault_profile_id: number | null; external_fault?: ExternalFault | null }
 interface Source { target_id?: number; source_run_id: string; source_manifest_hash: string; configuration: Config; cases: { case_revision_id: number; content: { case_key: string; revision: number; category: string } }[]; gateway_modes: string[]; boundary: string }
 interface Plan { plan_id: string | null; request_id: string; expires_at: string; queue_deadline: string; ready: boolean; blockers: string[]; checks: { id: string; label: string; message: string; next_step: string }[]; configuration: Config; effective_limits: Config['limits']; workflow: { dispatch: 'ready' | 'queue_only'; differences: { field: string; before: unknown; after: unknown }[] }; mode_label: string; boundary: string }
 const config = ref<Config>(), source = ref<Source>(), plan = ref<Plan>(), options = ref<CaseRow[]>([]), versions = ref<VersionRow[]>([]), faults = ref<FaultRow[]>([])
@@ -24,17 +26,85 @@ let generation = 0
 const timer = setInterval(() => { now.value = Date.now() }, 1000)
 const action = computed(() => props.action ?? 'new')
 const exact = computed(() => action.value === 'rerun')
+const basic = computed(() => session.identity.value?.role === 'user')
 const pendingContext = ref(false)
 const pending = computed(() => Boolean(workspace.pendingRun.value))
 const stale = computed(() => !plan.value || now.value >= Date.parse(plan.value.expires_at))
 const title = computed(() => pendingContext.value ? '查证原创建回执' : exact.value ? '按原配置再次运行' : action.value === 'copy' ? '复制并修改运行' : '新建运行')
 const missingCaseIds = computed(() => config.value?.case_revision_ids.filter(id => !options.value.some(c => c.id === id)) ?? [])
-const domain = computed({get:()=>versions.value.find(v=>v.id===config.value?.target_version_id)?.adapter_type ?? 'langgraph_booking',set:value=>{if(config.value){config.value.target_version_id=versions.value.find(v=>v.compatible&&v.adapter_type===value)?.id??0;config.value.case_revision_ids=[];config.value.fault_profile_id=null}}})
+const version = computed(() => versions.value.find(v => v.id === config.value?.target_version_id))
+const domain = computed({
+  get: () => version.value?.adapter_type ?? 'langgraph_booking',
+  set: value => {
+    if (!config.value) return
+    config.value.target_version_id = versions.value.find(v => v.compatible && v.adapter_type === value)?.id ?? 0
+    config.value.case_revision_ids = []
+    config.value.fault_profile_id = null
+    delete config.value.external_fault
+  },
+})
 const isExternal = computed(() => domain.value.startsWith('external_http:'))
+const supportsHttpFaults = computed(() => version.value?.capabilities?.http_faults === true)
+const externalFaults = computed<ExternalFault[]>(() => !supportsHttpFaults.value ? [] :
+  version.value?.capabilities?.tool_faults === true ? ['response_timeout', 'tool_error'] : ['response_timeout'])
 const externalDomains = computed(() => [...new Map(versions.value.filter(v => v.adapter_type.startsWith('external_http:')).map(v => [v.adapter_type, v])).values()])
 const domainFaults = computed(()=>isExternal.value ? [] : faults.value.filter(f=>domain.value === 'reference_refund' ? ['query_order','check_refund','confirm_refund','lookup_refund_by_request'].includes(f.target_tool) : !['query_order','check_refund','confirm_refund','lookup_refund_by_request'].includes(f.target_tool)))
 const candidates = computed(() => options.value.filter(row => (row.adapter_type??'langgraph_booking')===domain.value).filter(row => `${row.case_key} ${row.guidance?.title ?? ''}`.toLowerCase().includes(query.value.toLowerCase())).sort((a,b)=>b.id-a.id))
-const faultSelection = computed({ get: () => config.value?.fault_profile_id ? String(config.value.fault_profile_id) : 'none', set: value => { if (config.value) config.value.fault_profile_id = value === 'none' ? null : Number(value) } })
+const faultHintId = useId()
+const faultToolNames: Record<string, string> = {
+  confirm_booking: '确认预约', confirm_refund: '确认退款', retrieve_rules: '规则查询',
+  query_availability: '空闲时段查询', lookup_booking_by_request: '预约查证',
+  query_order: '订单查询', check_refund: '退款资格查询', lookup_refund_by_request: '退款查证',
+}
+function describeFault(fault: FaultRow) {
+  const tool = faultToolNames[fault.target_tool]
+  const business = fault.target_tool === 'confirm_refund' ? '退款' : '预约'
+  switch (fault.fault_type) {
+    case 'F01':
+      return {
+        name: tool ? `${tool}超时` : '调用前超时',
+        hint: fault.target_tool.startsWith('confirm_')
+          ? `确认调用尚未发出，${business}没有提交。` : '查询尚未发出，Agent 会收到超时提示。',
+      }
+    case 'F02':
+      return { name: '预约提交前回滚', hint: '预约写入在提交前被撤销，本次没有新增预约。' }
+    case 'F03':
+      return { name: `${tool ?? '查询'}结果损坏`, hint: '查询已执行，但 Agent 收到的结果无法解析。' }
+    case 'F04':
+      return { name: `${business}提交后回执丢失`, hint: `${business}已提交，但 Agent 收不到成功回执，需要查证原请求。` }
+    default:
+      return { name: fault.profile_key, hint: '' }
+  }
+}
+const faultOptions = computed(() => {
+  const annotated = domainFaults.value.map(row => {
+    const { name, hint } = describeFault(row)
+    return { id: row.id, label: `${row.fault_type} · ${name}`, hint, reference: `${row.profile_key} / ${row.revision}` }
+  })
+  return annotated.map(fault => ({
+    ...fault,
+    label: annotated.some(other => other.id !== fault.id && other.label === fault.label)
+      ? `${fault.label}（${fault.reference}）` : fault.label,
+  }))
+})
+const faultHint = computed(() => {
+  if (config.value?.external_fault === 'response_timeout') return '最后一轮发送一次，模拟平台未收到回执，保留原请求用于只读查证。'
+  if (config.value?.external_fault === 'tool_error') return '最后一轮请求测试工具触发故障，通过实际轨迹确认是否发生。'
+  return config.value?.fault_profile_id ? faultOptions.value.find(fault => fault.id === config.value?.fault_profile_id)?.hint || '' : '正常运行。'
+})
+const faultSelection = computed({
+  get: () => config.value?.external_fault ?? String(config.value?.fault_profile_id ?? 'none'),
+  set: value => {
+    if (!config.value) return
+    if (externalFaults.value.includes(value as ExternalFault)) {
+      config.value.external_fault = value as ExternalFault
+      config.value.fault_profile_id = null
+    } else {
+      delete config.value.external_fault
+      config.value.fault_profile_id = value === 'none' ? null : Number(value)
+    }
+  },
+})
 const amount = computed({ get: () => (config.value?.budgets.agent_microusd ?? 0) / 1e6 * CNY_PER_USD, set: value => { if (config.value) config.value.budgets.agent_microusd = cnyToMicroUsd(Number(value)) } })
 const budgetValid = computed(() => Boolean(config.value && Number.isInteger(config.value.budgets.agent_microusd) && config.value.budgets.agent_microusd > 0))
 const blockers = computed(() => plan.value?.blockers.map(id => plan.value!.checks.find(c => c.id === id)).filter((x): x is Plan['checks'][number] => Boolean(x)) ?? [])
@@ -54,14 +124,17 @@ async function load() {
     let selected = workspace.selection.value
     if (!original && props.initialCase) {
       const picked = rows.find(row => row.id === props.initialCase?.id
-        && row.adapter_type === props.initialCase.adapterType && row.review_status === 'approved'
+        && row.adapter_type === props.initialCase.adapterType && (row.runnable || row.review_status === 'approved')
         && row.default_knowledge_compatible)
-      if (!picked) throw new Error('该用例修订当前不可运行，请刷新用例并核对审核状态。')
+      if (!picked) throw new Error('该用例当前不可运行，请刷新后重新选择。')
       selected = [picked]
     }
     const matchingVersion = versions.value.find(v => v.compatible && v.adapter_type === (selected[0]?.adapter_type ?? 'langgraph_booking'))
     if (!original && props.initialCase && !matchingVersion) throw new Error('该外部对象暂无可执行版本，请先检查连接并登记版本。')
     config.value = original ? clone(original.configuration) : { request_id: crypto.randomUUID(), target_version_id: matchingVersion?.id ?? versions.value.find(v=>v.compatible)?.id ?? 0, case_revision_ids: selected.map(c => c.id), repetitions: 1, seed: 13029, limits: { concurrency: 1, timeout_seconds: 300, max_steps: 100, max_model_calls: 20, max_tokens: 500000 }, budgets: { agent_microusd: 100_000, case_generator_microusd: 0, judge_microusd: 0 }, fault_profile_id: null }
+    if (original && action.value === 'copy' && props.initialExternalFault && externalFaults.value.includes(props.initialExternalFault)) {
+      faultSelection.value = props.initialExternalFault
+    }
     if (props.initialTargetVersionId && original && action.value === 'copy') {
       const candidate = versions.value.find(v => v.id === props.initialTargetVersionId && v.compatible && v.target_id === original.target_id)
       if (!candidate) throw new Error('关联修复版本当前不可执行，未替换来源配置。请核对源码登记与对象后再选择版本。')
@@ -115,8 +188,15 @@ onBeforeUnmount(() => { generation++; clearInterval(timer) })
       <nav class="wizard-steps" aria-label="创建运行步骤"><span :aria-current="step === 1 ? 'step' : undefined">01 选择用例</span><span :aria-current="step === 2 ? 'step' : undefined">02 配置条件</span><span :aria-current="step === 3 ? 'step' : undefined">03 预检与确认</span></nav>
       <div v-if="source" class="workspace-note">来源运行 {{ source.source_run_id.slice(0,8) }} · {{ source.boundary }}<small>原执行来源：{{ source.gateway_modes.length ? source.gateway_modes.map(m => m === 'offline_test_double' ? '离线受控模型' : m === 'real_provider' ? '真实模型' : m).join('、') : '尚无执行观察' }}；原记录不会被覆盖；人工追加输入不会自动回放，仍需在新运行中重新确认。</small></div>
       <section v-if="step === 1"><div class="wizard-case-heading"><h3>选择开发用例 · 已选 {{ config.case_revision_ids.length }} 条</h3><ElButton v-if="!exact" text :disabled="pending || !config.case_revision_ids.length" @click="config.case_revision_ids = []">清空选择</ElButton></div><div v-if="!exact"><label for="run-target-domain">测试对象</label><ElSelect id="run-target-domain" v-model="domain" aria-label="测试对象领域" :disabled="pending"><ElOption value="langgraph_booking" label="场地预约" /><ElOption value="reference_refund" label="订单售后与模拟退款" :disabled="!versions.some(v=>v.compatible&&v.adapter_type==='reference_refund')" /><ElOption v-for="item in externalDomains" :key="item.adapter_type" :value="item.adapter_type" :label="item.target" :disabled="!versions.some(v => v.adapter_type === item.adapter_type && v.compatible)" /></ElSelect></div><template v-if="exact"><p>按原配置保留以下用例修订；无法取得原条件时会阻塞，不自动替换。</p><ul><li v-for="row in source?.cases" :key="row.case_revision_id">{{ row.content.case_key }} · 修订 {{ row.content.revision }}</li></ul></template><template v-else><p v-if="missingCaseIds.length" class="workspace-note">来源中有 {{ missingCaseIds.length }} 条修订不在当前开发列表，请清空后重新选择；不会静默替换原修订。</p><ElInput v-model="query" aria-label="筛选待运行用例" placeholder="按编号或测试目的筛选" clearable /><div class="run-case-picker"><label v-for="row in candidates" :key="row.id"><input type="checkbox" :aria-label="`运行用例 ${row.case_key}`" :checked="config.case_revision_ids.includes(row.id)" :disabled="!row.default_knowledge_compatible || pending" @change="toggle(row)" /><span>{{ row.guidance?.title ?? row.case_key }}<small>{{ row.case_key }} · 修订 {{ row.revision }} · {{ categories[row.category] }} · {{ row.turns }}轮 · {{ knowledgeNames[row.knowledge_profile] ?? row.knowledge_profile }}{{ !row.default_knowledge_compatible ? '（需匹配知识环境）' : '' }}</small></span></label></div></template></section>
-      <section v-else-if="step === 2"><h3>核对版本、故障与运行限制</h3><p v-if="exact" class="workspace-note">这是原配置再次运行；如需更换版本、费用或条件，请返回使用“复制并修改”。</p><p v-if="!versions.some(v => v.compatible)" class="evidence-error">当前没有与源码匹配的可执行版本，请由维护者核对版本登记；不会自动选用历史源码。</p><div class="run-form"><label>对象版本<ElSelect v-model="config.target_version_id" aria-label="对象版本" :disabled="exact || pending"><ElOption v-for="v in versions" :key="v.id" :value="v.id" :disabled="!v.compatible || v.adapter_type !== domain" :label="`${targetDisplayName(v.target)} · V${v.version_no} · ${v.compatible ? '当前可执行' : '历史源码不可用'}`" /></ElSelect></label><label>故障配置<ElSelect v-model="faultSelection" aria-label="故障配置" :disabled="exact || pending"><ElOption value="none" label="无故障控制组" /><ElOption v-for="f in domainFaults" :key="f.id" :value="String(f.id)" :label="`${f.fault_type} · ${f.profile_key} / ${f.revision}`" /></ElSelect><small v-if="config.fault_profile_id === null">无故障控制组</small></label><label>重复次数<input v-model.number="config.repetitions" aria-label="重复次数" type="number" min="1" max="5" :disabled="exact || pending" /></label><label>随机种子<input v-model.number="config.seed" aria-label="随机种子" type="number" min="0" max="2000000000" :disabled="exact || pending" /></label><label>{{ isExternal ? '远端声明预算（人民币）' : '本次运行预算（人民币）' }}<InfoHint label="预算与峰值预留" :text="isExternal ? '按登记的请求上限保守记账；外部用量为服务自报，无法核实外部账单。' : '每次调用先按峰值预留，余额不足会停止；按实际返回用量结算，未查明的调用保留预留。'" /><input v-model.number="amount" aria-label="运行金额上限" :aria-invalid="!budgetValid" :aria-describedby="!budgetValid ? 'run-budget-error' : undefined" type="number" min="0.000001" :max="CNY_PER_USD" step="0.000001" :disabled="exact || pending" /><small v-if="!budgetValid" id="run-budget-error" role="alert">{{ exact ? '原配置预算为0，请复制并修改运行。' : '预算必须大于0；0表示禁止模型调用。' }}</small></label><label>排队有效期 / 执行时限（秒）<input v-model.number="config.limits.timeout_seconds" aria-label="执行时限" type="number" min="10" max="900" :disabled="exact || pending" /></label><label>{{ isExternal ? '每执行消息发送上限' : '每执行模型调用上限' }}<input v-model.number="config.limits.max_model_calls" aria-label="模型调用上限" type="number" min="1" max="100" :disabled="exact || pending" /></label><label>并发上限<input v-model.number="config.limits.concurrency" aria-label="并发上限" type="number" min="1" max="5" :disabled="exact || pending" /></label></div><details><summary>高级限制</summary><div class="run-form"><label>步骤上限<input v-model.number="config.limits.max_steps" aria-label="步骤上限" type="number" min="1" max="500" :disabled="exact || pending" /></label><label>Token上限<input v-model.number="config.limits.max_tokens" aria-label="Token上限" type="number" min="1" max="2000000" :disabled="exact || pending" /></label></div></details><fieldset class="wizard-dispatch" :disabled="pending"><legend>创建方式</legend><label><input v-model="dispatch" type="radio" value="ready" /> 检查执行条件后创建（推荐）</label><label><input v-model="dispatch" type="radio" value="queue_only" /> 仅保存并排队</label><p>仅排队不会启动Worker或修改模型调用开关，排队成功不表示模型已执行。未在有效期内领取的任务会超时。</p></fieldset></section>
-      <section v-else-if="plan" class="wizard-review"><p v-if="isExternal" role="note">将向已登记外部服务发送所选用例。外部账户可能产生费用，平台不能核实外部账单；本次仅检查回答文本。</p><h3>{{ plan.ready ? '预检完成，请最后核对' : '条件未就绪，尚未创建运行' }}</h3><p><strong>{{ plan.mode_label }}</strong> · {{ dispatch === 'queue_only' ? '仅排队' : '核对执行条件后创建' }} · {{ config.case_revision_ids.length }}条 × {{ config.repetitions }}次</p><p>预算上限 {{ formatMicroCny(config.budgets.agent_microusd) }} · 排队有效至 {{ new Date(plan.queue_deadline).toLocaleTimeString('zh-CN', { hour12: false }) }} · 实际并发上限 {{ plan.effective_limits.concurrency }}</p><p class="workspace-note">{{ plan.boundary }}</p><ul v-if="blockers.length" class="wizard-blockers"><li v-for="check in blockers" :key="check.id"><strong>{{ check.label }}</strong><p>{{ check.message }}</p><small>{{ check.next_step }}</small></li></ul><RouterLink v-if="blockers.length" to="/environment">查看工程环境与启动指引 →</RouterLink><div v-if="action === 'copy'"><h4>与来源配置的差异</h4><ul v-if="plan.workflow.differences.length"><li v-for="diff in plan.workflow.differences" :key="diff.field">{{ diff.field }}：{{ diff.before }} → {{ diff.after }}</li></ul><p v-else>尚无参数差异，仍会创建独立新运行。</p></div><p v-if="stale && !pending" role="status">预检已过期，请重新检查。配置已保留。</p><small v-else>预检有效至 {{ new Date(plan.expires_at).toLocaleTimeString('zh-CN', { hour12: false }) }}；提交时服务端还会再次检查。</small><details><summary>完整配置与原请求标识</summary><pre class="workspace-json">{{ JSON.stringify(plan.configuration, null, 2) }}</pre></details></section>
+      <section v-else-if="step === 2"><h3>核对版本、故障与运行限制</h3><p v-if="exact" class="workspace-note">这是原配置再次运行；如需更换版本、费用或条件，请返回使用“复制并修改”。</p><p v-if="!versions.some(v => v.compatible)" class="evidence-error">当前没有与源码匹配的可执行版本，请由维护者核对版本登记；不会自动选用历史源码。</p><div class="run-form"><label>对象版本<ElSelect v-model="config.target_version_id" aria-label="对象版本" :disabled="exact || pending"><ElOption v-for="v in versions" :key="v.id" :value="v.id" :disabled="!v.compatible || v.adapter_type !== domain" :label="`${targetDisplayName(v.target)} · V${v.version_no} · ${v.compatible ? '当前可执行' : '历史源码不可用'}`" /></ElSelect></label><label>故障配置
+        <ElSelect v-model="faultSelection" aria-label="故障配置" :aria-describedby="faultHint ? faultHintId : undefined" :disabled="exact || pending">
+          <ElOption value="none" label="无故障控制组" />
+          <ElOption v-for="fault in externalFaults" :key="fault" :value="fault" :label="externalFaultNames[fault] + ' · 故障组'" />
+          <ElOption v-for="fault in faultOptions" :key="fault.id" :value="String(fault.id)" :label="fault.label" :title="fault.reference" />
+        </ElSelect>
+        <small v-if="faultHint" :id="faultHintId" aria-live="polite">{{ faultHint }}</small>
+      </label><label>重复次数<input v-model.number="config.repetitions" aria-label="重复次数" type="number" min="1" max="5" :disabled="exact || pending" /></label><label>随机种子<input v-model.number="config.seed" aria-label="随机种子" type="number" min="0" max="2000000000" :disabled="exact || pending" /></label><label>{{ isExternal ? '远端声明预算（人民币）' : '本次运行预算（人民币）' }}<InfoHint label="预算与峰值预留" :text="isExternal ? '按登记的请求上限保守记账；外部用量为服务自报，无法核实外部账单。' : '每次调用先按峰值预留，余额不足会停止；按实际返回用量结算，未查明的调用保留预留。'" /><input v-model.number="amount" aria-label="运行金额上限" :aria-invalid="!budgetValid" :aria-describedby="!budgetValid ? 'run-budget-error' : undefined" type="number" min="0.000001" :max="CNY_PER_USD" step="0.000001" :disabled="exact || pending" /><small v-if="!budgetValid" id="run-budget-error" role="alert">{{ exact ? '原配置预算为0，请复制并修改运行。' : '预算必须大于0；0表示禁止模型调用。' }}</small></label><label>排队有效期 / 执行时限（秒）<input v-model.number="config.limits.timeout_seconds" aria-label="执行时限" type="number" min="10" max="900" :disabled="exact || pending" /></label><label>{{ isExternal ? '每执行消息发送上限' : '每执行模型调用上限' }}<input v-model.number="config.limits.max_model_calls" aria-label="模型调用上限" type="number" min="1" max="100" :disabled="exact || pending" /></label><label>并发上限<input v-model.number="config.limits.concurrency" aria-label="并发上限" type="number" min="1" max="5" :disabled="exact || pending" /></label></div><details><summary>高级限制</summary><div class="run-form"><label>步骤上限<input v-model.number="config.limits.max_steps" aria-label="步骤上限" type="number" min="1" max="500" :disabled="exact || pending" /></label><label>Token上限<input v-model.number="config.limits.max_tokens" aria-label="Token上限" type="number" min="1" max="2000000" :disabled="exact || pending" /></label></div></details><fieldset class="wizard-dispatch" :disabled="pending"><legend>创建方式</legend><label><input v-model="dispatch" type="radio" value="ready" /> 检查执行条件后创建（推荐）</label><label><input v-model="dispatch" type="radio" value="queue_only" /> 仅保存并排队</label><p>仅排队不会启动Worker或修改模型调用开关，排队成功不表示模型已执行。未在有效期内领取的任务会超时。</p></fieldset></section>
+      <section v-else-if="plan" class="wizard-review"><p v-if="isExternal" role="note">将向已登记外部服务发送所选用例。外部账户可能产生费用。{{ supportsHttpFaults ? '按用例读取证据并计算断言。' : '按用例检查回答文本。' }}</p><h3>{{ plan.ready ? '预检完成，请最后核对' : '条件未就绪，尚未创建运行' }}</h3><p><strong>{{ plan.mode_label }}</strong> · {{ dispatch === 'queue_only' ? '仅排队' : '核对执行条件后创建' }} · {{ config.case_revision_ids.length }}条 × {{ config.repetitions }}次</p><p>预算上限 {{ formatMicroCny(config.budgets.agent_microusd) }} · 排队有效至 {{ new Date(plan.queue_deadline).toLocaleTimeString('zh-CN', { hour12: false }) }} · 实际并发上限 {{ plan.effective_limits.concurrency }}</p><p class="workspace-note">{{ plan.boundary }}</p><ul v-if="blockers.length" class="wizard-blockers"><li v-for="check in blockers" :key="check.id"><strong>{{ check.label }}</strong><p>{{ check.message }}</p><small>{{ check.next_step }}</small></li></ul><RouterLink v-if="blockers.length && !basic" to="/environment">查看工程环境与启动指引 →</RouterLink><p v-else-if="blockers.length">执行条件暂未就绪，可以返回修改配置，或请管理员检查环境。</p><div v-if="action === 'copy'"><h4>与来源配置的差异</h4><ul v-if="plan.workflow.differences.length"><li v-for="diff in plan.workflow.differences" :key="diff.field">{{ diff.field }}：{{ diff.before }} → {{ diff.after }}</li></ul><p v-else>尚无参数差异，仍会创建独立新运行。</p></div><p v-if="stale && !pending" role="status">预检已过期，请重新检查。配置已保留。</p><small v-else>预检有效至 {{ new Date(plan.expires_at).toLocaleTimeString('zh-CN', { hour12: false }) }}；提交时服务端还会再次检查。</small><details><summary>完整配置与原请求标识</summary><pre class="workspace-json">{{ JSON.stringify(plan.configuration, null, 2) }}</pre></details></section>
     </template>
     <template #footer><ElButton :disabled="committing" @click="visible = false">关闭</ElButton><ElButton v-if="step > 1 && !pending" :disabled="busy || committing" @click="step--; plan = undefined">上一步</ElButton><ElButton v-if="step === 1" type="primary" :disabled="!config?.case_revision_ids.length || busy" @click="step = 2">下一步：运行条件</ElButton><ElButton v-else-if="step === 2 || (step === 3 && !pending && (stale || !plan?.ready))" type="primary" :loading="busy" @click="preview">检查环境与配置</ElButton><ElButton v-else type="primary" :loading="committing" :disabled="!pending && (!plan?.ready || stale)" @click="commit">{{ pending ? '查证原创建回执' : dispatch === 'queue_only' ? '确认仅保存并排队' : '确认并创建运行' }}</ElButton></template>
   </ElDialog>

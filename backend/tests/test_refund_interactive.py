@@ -9,6 +9,7 @@ from uuid import uuid4
 
 import pytest
 from fastapi.testclient import TestClient
+from sqlalchemy.orm import Session
 from test_database import TEST_PASSWORD
 from test_reports import lab  # noqa: F401
 
@@ -19,6 +20,7 @@ from app.api.booking import get_booking_service
 from app.api.refund_interactive import get_refund_interaction_service
 from app.interactive.refund import RefundInteractionService
 from app.main import create_app
+from app.models import User
 from app.services.booking import BookingService
 from benchmarks.t18.offline import OfflineGateway
 
@@ -81,6 +83,23 @@ def test_access_create_and_records_never_invoke_model_or_initialize_budget(servi
     assert service.redis.hgetall(budget.key) == before
 
 
+def test_administrator_uses_shared_refund_version_with_separate_sessions(service):
+    with Session(service.engine) as db, db.begin():
+        admin = User(
+            username="refund_admin", role="admin", password_hash=db.get(User, 1).password_hash,
+        )
+        db.add(admin)
+        db.flush()
+        admin_id = admin.id
+    version = service.access(1)["version_id"]
+    assert version and service.access(admin_id)["version_id"] == version
+    view = service.create(admin_id, {"version_id": version, "request_id": str(uuid4())})
+    assert service.view(admin_id, view["session_id"])["ledger"] == []
+    with pytest.raises(AgentError) as error:
+        service.view(1, view["session_id"])
+    assert error.value.status_code == 404
+
+
 def test_preview_confirm_receipt_duplicate_and_history(service):
     view = draft(service)
     body = decision(view)
@@ -94,6 +113,23 @@ def test_preview_confirm_receipt_duplicate_and_history(service):
     assert service.receipt(1, view["session_id"], body["request_id"])["view"]["ledger"] == rows
     assert len(service.history(1, view["session_id"])["items"]) == 4
     assert service.events(1, view["session_id"])["items"]
+
+
+def test_delete_own_refund_conversation_retains_posted_ledger(service):
+    view = draft(service)
+    sid = view["session_id"]
+    result = service.act(1, sid, decision(view), "decision")["view"]
+    original = service.adapter.snapshot(view["scope_id"], 1)
+    assert result["ledger"]
+    with pytest.raises(AgentError) as missing:
+        service.delete(9999, sid)
+    assert missing.value.status_code == 404
+    assert service.delete(1, sid) == service.delete(1, sid)
+    assert not service.records(1, sid)["items"]
+    with pytest.raises(AgentError) as deleted:
+        service.history(1, sid)
+    assert deleted.value.status_code == 404
+    assert service.adapter.snapshot(view["scope_id"], 1) == original
 
 
 def test_message_cannot_bypass_explicit_confirmation_and_stale_draft_rejected(service):

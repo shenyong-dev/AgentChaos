@@ -1,4 +1,4 @@
-import { Grid, Connection, Collection, VideoPlay, EditPen, CircleCheck, Monitor, Document, ChatDotRound } from '@element-plus/icons-vue'
+import { Grid, Connection, Collection, VideoPlay, EditPen, CircleCheck, Monitor, Document, ChatDotRound, User } from '@element-plus/icons-vue'
 
 export const navigationGroups = [
   { label: '工作区', items: [
@@ -16,6 +16,22 @@ export const navigationGroups = [
   { label: '管理', items: [{ path: '/environment', label: '工程环境', hint: '检查服务与模型角色配置', icon: Monitor }] },
 ]
 
+export function accessible(path: string, role?: string) {
+  const group = navigationPath(path)
+  if (group === '/admin') return role === 'admin'
+  if (role === 'user') return ['/reports', '/targets', '/external-agents'].includes(path) || ['/workspace', '/library', '/interactive', '/workbench'].includes(group)
+  return true
+}
+export function groupsFor(role?: string) {
+  const groups = navigationGroups.map(group => ({ ...group, items: group.items.filter(item => accessible(item.path, role)) })).filter(group => group.items.length)
+  if (role === 'user') {
+    const reports = groups.find(group => group.label === '质量与审阅')
+    if (reports) { reports.label = '结果'; reports.items = reports.items.map(item => ({ ...item, label: '运行报告', hint: '查看、比较和导出我的测试报告' })) }
+  }
+  if (role === 'admin') groups.find(group => group.label === '管理')?.items.push({ path: '/admin', label: '平台管理', hint: '管理账号、登录会话和全站运行', icon: User })
+  return groups
+}
+
 export function navigationPath(path: string) {
   if (path === '/external-agents') return '/targets'
   if (path.startsWith('/reports/')) return '/reports'
@@ -26,7 +42,9 @@ export function navigationPath(path: string) {
   return path
 }
 
-export function pageTitle(path: string) {
+export function pageTitle(path: string, role?: string) {
+  if (path === '/reports' && role === 'user') return '运行报告'
+  if (path === '/admin') return '平台管理'
   if (path === '/external-agents') return '外部 Agent 接入'
   if (path.startsWith('/reports/')) return '缺陷与报告'
   if (path.startsWith('/runs') || path === '/workbench') return '测试工作台'

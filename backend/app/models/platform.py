@@ -25,12 +25,25 @@ class User(Row, Base):
     __tablename__ = "ac_users"
     __table_args__ = table_args(
         UniqueConstraint("username"),
-        CheckConstraint("role IN ('operator','reviewer')", name="ck_users_role"),
+        CheckConstraint("role IN ('admin','operator','reviewer','user')", name="ck_users_role"),
     )
     username: Mapped[str] = mapped_column(key_string())
     password_hash: Mapped[str] = mapped_column(String(255))
     role: Mapped[str] = mapped_column(String(16))
     enabled: Mapped[bool] = mapped_column(Boolean, default=True, server_default=text("1"))
+    auth_epoch: Mapped[int] = mapped_column(
+        BIGINT(unsigned=True), default=0, server_default=text("0")
+    )
+    model_calls_enabled: Mapped[bool] = mapped_column(
+        Boolean, default=False, server_default=text("0")
+    )
+
+
+class ModelCallPolicy(Base):
+    __tablename__ = "ac_model_call_policy"
+    __table_args__ = table_args(CheckConstraint("id = 1", name="ck_model_call_policy_singleton"))
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=False)
+    enabled: Mapped[bool] = mapped_column(Boolean, nullable=False)
 
 
 class Target(Row, Base):

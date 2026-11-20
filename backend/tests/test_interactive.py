@@ -24,7 +24,7 @@ from app.db.seeds import seed_database
 from app.interactive.budget import AUTHORIZATION, InteractionBudget
 from app.interactive.service import InteractionService
 from app.main import create_app
-from app.models import Room
+from app.models import Booking, ModelCallPolicy, Room, User
 from app.services.booking import BookingError, BookingService
 
 pytestmark = [
@@ -137,6 +137,23 @@ def test_confirmation_receipt_replay_and_reconnect_do_not_repeat_booking(fixture
     with pytest.raises(AgentError) as error:
         service.act(1, view["session_id"], {**body, "decision": "reject"}, "resume")
     assert error.value.code == "action_id_conflict"
+
+
+def test_delete_own_booking_conversation_retains_committed_booking(fixture):
+    service, gateway, view = preview(fixture)
+    sid = view["session_id"]
+    gateway.confirm(view)
+    service.act(1, sid, resume(view), "resume")
+    with pytest.raises(AgentError) as missing:
+        service.delete(9999, sid)
+    assert missing.value.status_code == 404
+    assert service.delete(1, sid) == service.delete(1, sid)
+    assert not service.records(1, sid)["items"]
+    with pytest.raises(AgentError) as deleted:
+        service.history(1, sid, 0, 10)
+    assert deleted.value.status_code == 404
+    with Session(service.engine) as db:
+        assert db.scalar(select(Booking.id).where(Booking.scope_id == view["scope_id"]))
 
 
 def test_missing_attendees_then_modified_attendees_invalidates_old_confirmation(fixture):
@@ -339,12 +356,21 @@ def test_paid_switch_off_keeps_view_readable_and_sends_no_model(fixture):
     real = InteractionService(
         service.engine, service.redis, service.settings, clock=lambda: REFERENCE
     )
-    assert not real.access()["model_actions_available"]
-    assert real.view(1, view["session_id"])["sql_observation"]["booking_count"] == 0
-    with pytest.raises(AgentError) as error:
-        real.act(1, view["session_id"], message(view, "预约"), "message")
-    assert error.value.code == "interactive_not_authorized"
-    assert not gateways[view["session_id"]].calls
+    # Exercise the service-level switch after the platform policy admits the account.
+    with Session(service.engine) as db, db.begin():
+        policy, user = db.get(ModelCallPolicy, 1), db.get(User, 1)
+        previous = (policy.enabled, user.model_calls_enabled)
+        policy.enabled = user.model_calls_enabled = True
+    try:
+        assert not real.access(1)["model_actions_available"]
+        assert real.view(1, view["session_id"])["sql_observation"]["booking_count"] == 0
+        with pytest.raises(AgentError) as error:
+            real.act(1, view["session_id"], message(view, "预约"), "message")
+        assert error.value.code == "interactive_not_authorized"
+        assert not gateways[view["session_id"]].calls
+    finally:
+        with Session(service.engine) as db, db.begin():
+            db.get(ModelCallPolicy, 1).enabled, db.get(User, 1).model_calls_enabled = previous
 
 
 def test_closed_budget_still_replays_a_completed_request_without_new_call(fixture):

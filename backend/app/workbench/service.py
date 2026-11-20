@@ -8,10 +8,16 @@ from sqlalchemy.orm import Session, aliased
 
 from app.agents.errors import AgentError
 from app.cases.service import CaseService
+from app.core.member_targets import (
+    accessible_target_filter,
+    personal_target_filter,
+    reference_target_filter,
+)
 from app.datasets.service import DatasetService
 from app.executors.service import RunService, frozen_case
+from app.external.cases import personal_case, personal_case_query
 from app.external.registry import is_external
-from app.models import Artifact, Target, TargetVersion, TestCase, TestExecution, TestRun
+from app.models import Artifact, Target, TargetVersion, TestCase, TestExecution, TestRun, User
 from app.workbench.guidance import case_guide
 
 
@@ -53,6 +59,9 @@ class WorkbenchService:
         self.engine, self.settings = engine, settings
 
     def _identity(self, session, owner):
+        user = CaseService.role(session, owner)
+        if user.role == "user":
+            return user
         return CaseService.role(session, owner, "operator")
 
     def _cloud_imports(self, session):
@@ -106,14 +115,14 @@ class WorkbenchService:
                 continue
         return imports
 
-    def _cases(self, session):
+    def _cases(self, session, owner):
         # Formal calibration/holdout are not a browsing or tuning library.
         dataset = DatasetService(self.engine, self.settings)
         frozen = dataset._read(dataset._row(session, "freeze"))
         ids = [c["id"] for c in frozen["cases"].values()] if frozen else []
         latest = aliased(TestCase)
         return select(TestCase).where(
-            TestCase.review_status == "approved",
+            or_(TestCase.review_status == "approved", personal_case_query(TestCase, owner)),
             TestCase.dataset_split == "dev",
             TestCase.source != "reduction_trial:T17M",
             or_(
@@ -124,7 +133,7 @@ class WorkbenchService:
             ~select(latest.id)
             .where(
                 latest.case_key == TestCase.case_key,
-                latest.review_status == "approved",
+                or_(latest.review_status == "approved", personal_case_query(latest, owner)),
                 latest.revision > TestCase.revision,
                 or_(
                     ~TestCase.source.startswith("external_import:"),
@@ -135,7 +144,17 @@ class WorkbenchService:
         )
 
     def visible_cases(self, session, owner):
-        return self._cases(session).where(
+        actor = session.get(User, owner)
+        if actor and actor.role == "user":
+            return self._cases(session, owner).where(
+                or_(
+                    personal_case_query(TestCase, owner),
+                    (TestCase.review_status == "approved")
+                    & ~TestCase.source.startswith("external_import:")
+                    & ~TestCase.source.startswith("reduction_trial:"),
+                ),
+            )
+        return self._cases(session, owner).where(
             or_(
                 ~TestCase.source.startswith("external_import:"),
                 TestCase.source.endswith(f":owner:{owner}"),
@@ -155,9 +174,12 @@ class WorkbenchService:
             approved = session.scalar(
                 select(func.count()).select_from(self.visible_cases(session, owner).subquery())
             )
-            targets = session.scalar(
-                select(func.count()).select_from(Target).where(Target.owner_id == owner)
+            target_count = (
+                select(func.count()).select_from(Target).where(accessible_target_filter(user))
             )
+            if user.role in {"user", "admin"}:
+                target_count = target_count.where(Target.archived_at.is_(None))
+            targets = session.scalar(target_count)
             modes = list(
                 session.scalars(
                     select(TestExecution.timing_json["gateway_mode"].as_string())
@@ -190,24 +212,40 @@ class WorkbenchService:
 
         refund_current = RefundAdapter(self.engine, self.settings).manifest()["config_hash"]
         with Session(self.engine) as session:
-            self._identity(session, owner)
+            user = CaseService.role(session, owner)
+            scope = (
+                reference_target_filter()
+                if user.role == "reviewer"
+                else accessible_target_filter(user)
+            )
+            hashes = {"langgraph_booking": current, "reference_refund": refund_current}
             query = (
                 select(TargetVersion, Target)
                 .join(Target)
-                .where(Target.owner_id == owner)
+                .where(scope)
                 .order_by(TargetVersion.id.desc())
             )
+            if user.role in {"user", "reviewer"}:
+                query = query.where(
+                    Target.archived_at.is_(None),
+                    or_(
+                        personal_target_filter() if user.role == "user" else False,
+                        *(
+                            (Target.adapter_type == adapter) & (TargetVersion.config_hash == digest)
+                            for adapter, digest in hashes.items()
+                        )
+                    ),
+                )
             if cursor:
                 query = query.where(TargetVersion.id < cursor)
             rows = session.execute(query.limit(limit + 1)).all()
-            hashes = {"langgraph_booking": current, "reference_refund": refund_current}
             for _, target in rows:
                 if target.adapter_type not in hashes:
                     try:
                         hashes[target.adapter_type] = (
                             RunService(
                                 self.engine, self.settings, adapter_type=target.adapter_type
-                            ).current_manifest()["config_hash"]
+                            ).current_manifest(owner=owner)["config_hash"]
                             if is_external(target.adapter_type)
                             else None
                         )
@@ -266,6 +304,7 @@ class WorkbenchService:
                         "content_hash": c.content_hash,
                         "turns": len(c.turns_json),
                         "review_status": c.review_status,
+                        "runnable": c.review_status == "approved" or personal_case(c, owner),
                         "guidance": reading_summary(c),
                         "knowledge_profile": "not_applicable"
                         if c.fixture_json.get("fixture")
@@ -285,7 +324,7 @@ class WorkbenchService:
                 ],
                 "has_more": len(rows) > limit,
                 "next_cursor": rows[limit - 1].id if len(rows) > limit else None,
-                "boundary": "Approved development revisions only; no formal holdout content.",
+                "boundary": "Approved development and owned personal cases only.",
             }
 
     def case(self, owner, identifier):
@@ -295,7 +334,7 @@ class WorkbenchService:
                 self.visible_cases(session, owner).where(TestCase.id == identifier)
             )
             if row is None:
-                raise AgentError("case_not_found", "找不到可浏览的已审核开发用例。", 404)
+                raise AgentError("case_not_found", "找不到你可访问的开发用例。", 404)
             snapshot = frozen_case(row)
             return {**snapshot, "guidance": case_guide(snapshot)}
 
@@ -347,6 +386,7 @@ class WorkbenchService:
                         "status": r.status,
                         "display_status": display_status,
                         "target_version_id": r.target_version_id,
+                        "adapter_type": r.manifest_json.get("adapter_type", "langgraph_booking"),
                         "created_at": r.created_at.isoformat(),
                         "executions": executions.get(r.id, 0),
                         "execution_counts": execution_counts.get(r.id, {}),
@@ -357,9 +397,9 @@ class WorkbenchService:
                         "declared_gateway_mode": (r.manifest_json.get("workflow") or {}).get(
                             "declared_gateway_mode"
                         ),
-                        "fault": (r.manifest_json.get("fault_profile") or {})
-                        .get("config", {})
-                        .get("fault_type"),
+                        "fault": (r.manifest_json.get("external_fault") or
+                                  (r.manifest_json.get("fault_profile") or {})
+                                  .get("config", {}).get("fault_type")),
                     }
                     for r, display_status in rows[:limit]
                 ],

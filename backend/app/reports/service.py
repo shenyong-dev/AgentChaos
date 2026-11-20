@@ -142,7 +142,8 @@ class ReportService:
         ):
             raise AgentError("report_target_integrity", "目标版本与冻结配置不一致。", 503)
         target = session.get(Target, version.target_id)
-        if target.owner_id != owner:
+        shared = run.manifest_json.get("shared_reference_target") is True
+        if target.owner_id != owner and not shared:
             raise AgentError("run_not_found", "找不到运行。", 404)
         executions = list(
             session.scalars(
@@ -204,7 +205,10 @@ class ReportService:
         assertion_refs = {"assertion:" + str(row.id) for row in rows}
         defects = []
         for row in session.scalars(
-            select(Defect).where(Defect.target_id == target.id).order_by(Defect.id)
+            select(Defect)
+            .where(Defect.target_id == target.id, Target.owner_id == owner)
+            .join(Target)
+            .order_by(Defect.id)
         ):
             if not assertion_refs.intersection(row.evidence_refs_json):
                 continue
@@ -298,19 +302,25 @@ class ReportService:
             return compare(before, after)
 
     def fault_comparison(self, owner, normal, fault):
+        from app.reports.analysis import compare_external_faults
         from app.reports.fault_pairs import compare_faults
 
         with Session(self.engine) as session:
+            runs = [self._snapshot(session, owner, identifier, lock_events=False)
+                    for identifier in (normal, fault)]
+            if all("external_fault" in run.manifest_json for run, _, _ in runs):
+                if any(len(report["executions"]) > 120 for _, report, _ in runs):
+                    raise AgentError("fault_comparison_limit", "每侧最多比较 120 条执行。", 413)
+                return compare_external_faults(*(report for _, report, _ in runs))
             reports = []
-            for identifier in (normal, fault):
-                run, report, _ = self._snapshot(session, owner, identifier, lock_events=False)
+            for run, report, _ in runs:
                 if (
                     run.manifest_json.get("adapter_type", "langgraph_booking")
                     != "langgraph_booking"
                 ):
                     raise AgentError(
                         "fault_comparison_domain",
-                        "预约故障配对协议不适用退款；请查看退款账本与执行链路。",
+                        "请选择同一对象的正常运行和故障运行，支持预约及通用 HTTP 对象。",
                         409,
                     )
                 if len(report["executions"]) > 120:
@@ -738,7 +748,8 @@ class ReportService:
                     and run.manifest_json["target"].get("capabilities", {}).get("retrieval")
                     is False
                 )
-                if (not report["knowledge"] and not retrieval_na) or any(
+                external_retrieval = "external_fault" in run.manifest_json
+                if (not report["knowledge"] and not (retrieval_na or external_retrieval)) or any(
                     not item["available"] for item in report["knowledge"]
                 ):
                     raise AgentError(

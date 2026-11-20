@@ -2,6 +2,13 @@
 import { computed, ref } from 'vue'
 import { ElButton, ElDialog } from 'element-plus'
 
+type Scalar = string | number | boolean | null
+export type ExternalAssertion =
+  | { type: 'reply_literals'; contains: string[]; excludes: string[] }
+  | { type: 'external_retrieval_top_k'; document_ids: string[]; k: number; turn: number | null }
+  | { type: 'external_tool_sequence'; steps: { name: string; arguments: Record<string, Scalar> }[]; turn: number | null }
+  | { type: 'external_fact_equals'; path: string; value: Scalar; phase: 'before' | 'after' }
+
 export type ExternalCaseDraft = {
   target_kind: string
   case: {
@@ -12,13 +19,14 @@ export type ExternalCaseDraft = {
     dataset_split: 'dev'
     reference_clock: string
     turns: { user: string }[]
-    assertions: { type: 'reply_literals'; contains: string[]; excludes: string[] }[]
+    schema_version?: 'external-reliability-1'
+    assertions: ExternalAssertion[]
     review_status: 'draft'
   }
 }
 
 const open = defineModel<boolean>({ required: true })
-const props = defineProps<{ target: { id: string; name: string }; saving: boolean; awaitingReceipt: boolean }>()
+const props = defineProps<{ target: { id: string; name: string; personal?: boolean; mapped?: boolean; readback?: boolean }; saving: boolean; awaitingReceipt: boolean }>()
 const emit = defineEmits<{ save: [body: ExternalCaseDraft] }>()
 const form = ref<HTMLFormElement>()
 const caseKey = ref('EXT-' + crypto.randomUUID().slice(0, 12).toUpperCase())
@@ -27,7 +35,55 @@ const messages = ref([{ id: 1, text: '' }])
 let nextId = 2
 const includes = ref(''), excludes = ref(''), error = ref('')
 const terms = (value: string) => [...new Set(value.split(/\r?\n/).map(line => line.trim()).filter(Boolean))]
-const canSave = computed(() => messages.value.every(row => row.text.trim()) && Boolean(includes.value.trim() || excludes.value.trim()))
+const retrieval = ref(false), tools = ref(false), facts = ref(false)
+const ids = ref(''), topK = ref(3), retrievalTurn = ref(0), toolTurn = ref(0)
+const toolSteps = ref([{ id: 1, name: '', parameters: '' }])
+const factPath = ref(''), factValue = ref(''), factPhase = ref<'before' | 'after'>('after')
+const canSave = computed(() => messages.value.every(row => row.text.trim()) &&
+  Boolean(includes.value.trim() || excludes.value.trim() || retrieval.value || tools.value || facts.value))
+
+function scalar(input: string): Scalar {
+  const text = input.trim()
+  if (text === 'null') return null
+  if (text === 'true' || text === 'false') return text === 'true'
+  if (/^-?(0|[1-9]\d*)$/.test(text) && Number.isSafeInteger(Number(text))) return Number(text)
+  if (text.startsWith('"') && text.endsWith('"')) {
+    const value: unknown = JSON.parse(text)
+    if (typeof value === 'string') return value
+  }
+  return text
+}
+
+function evidenceAssertions(): ExternalAssertion[] {
+  const result: ExternalAssertion[] = []
+  if (!props.target.mapped) return result
+  if (retrieval.value) {
+    const expected = terms(ids.value)
+    if (!expected.length || expected.length > topK.value) throw new Error('文档 ID 数量须在 1 到 K 条之间。')
+    result.push({ type: 'external_retrieval_top_k', document_ids: expected, k: topK.value, turn: retrievalTurn.value || null })
+  }
+  if (tools.value) {
+    const steps = toolSteps.value.map(step => {
+      const name = step.name.trim()
+      if (!name) throw new Error('请填写每一步的工具名称。')
+      const fields = terms(step.parameters).map(line => {
+        const separator = line.indexOf('=')
+        if (separator < 1 || !line.slice(0, separator).trim()) throw new Error('每行工具参数使用 字段=期望值。')
+        return [line.slice(0, separator).trim(), scalar(line.slice(separator + 1))] as const
+      })
+      if (new Set(fields.map(([key]) => key)).size !== fields.length) throw new Error('同一步的工具参数字段不能重名。')
+      return { name, arguments: Object.fromEntries(fields) }
+    })
+    result.push({ type: 'external_tool_sequence', steps, turn: toolTurn.value || null })
+  }
+  if (facts.value) {
+    if (!factPath.value.trim() || !factValue.value.trim()) throw new Error('请填写业务字段及期望值。')
+    result.push({ type: 'external_fact_equals', path: factPath.value.trim(), value: scalar(factValue.value), phase: factPhase.value })
+  }
+  if (result.some(check => 'turn' in check && (check.turn ?? 0) > messages.value.length))
+    throw new Error('断言引用的对话轮次不存在。')
+  return result
+}
 
 function save() {
   if (props.saving || !canSave.value) return
@@ -39,6 +95,11 @@ function save() {
     return
   }
   if (contains.some(word => forbidden.includes(word))) { error.value = '同一段文字不能同时要求包含和排除。'; return }
+  let checks: ExternalAssertion[]
+  try { checks = evidenceAssertions() }
+  catch (cause) { error.value = cause instanceof SyntaxError ? '期望值中的引号格式有误。' : (cause as Error).message; return }
+  const assertions: ExternalAssertion[] = contains.length || forbidden.length
+    ? [{ type: 'reply_literals', contains, excludes: forbidden }, ...checks] : checks
   error.value = ''
   const draft: ExternalCaseDraft = {
     target_kind: 'external_http:' + props.target.id,
@@ -46,7 +107,8 @@ function save() {
       case_key: code, revision: 1, family_key: code, category: 'normal',
       dataset_split: 'dev', reference_clock: referenceClock, review_status: 'draft',
       turns: messages.value.map(row => ({ user: row.text })),
-      assertions: [{ type: 'reply_literals', contains, excludes: forbidden }],
+      assertions,
+      ...(checks.length ? { schema_version: 'external-reliability-1' } as const : {}),
     },
   }
   if (new TextEncoder().encode(JSON.stringify(draft)).byteLength > 65536) {
@@ -80,13 +142,49 @@ function save() {
           <label>不得包含<textarea v-model="excludes" rows="2" maxlength="30030" placeholder="每行一条，可留空" /></label>
         </div>
       </fieldset>
+      <fieldset v-if="target.mapped" class="evidence-checks" :disabled="saving || awaitingReceipt">
+        <legend>证据断言</legend>
+        <div class="evidence-check">
+          <label class="evidence-toggle"><input v-model="retrieval" type="checkbox" />检索命中</label>
+          <div v-if="retrieval" class="check-fields">
+            <div class="case-expectations">
+              <label>前 K 条<input v-model.number="topK" type="number" min="1" max="20" required /></label>
+              <label>对话轮次<select v-model="retrievalTurn"><option :value="0">最后一轮</option><option v-for="index in messages.length" :key="index" :value="index">第 {{ index }} 轮</option></select></label>
+            </div>
+            <label>预期文档 ID<textarea v-model="ids" rows="2" placeholder="每行一个文档 ID" required /></label>
+          </div>
+        </div>
+        <div class="evidence-check">
+          <label class="evidence-toggle"><input v-model="tools" type="checkbox" />工具调用顺序与参数</label>
+          <div v-if="tools" class="check-fields">
+            <label>工具检查轮次<select v-model="toolTurn"><option :value="0">最后一轮</option><option v-for="index in messages.length" :key="index" :value="index">第 {{ index }} 轮</option></select></label>
+            <div v-for="(tool, index) in toolSteps" :key="tool.id" class="tool-step">
+              <label>第 {{ index + 1 }} 个工具<input v-model="tool.name" maxlength="120" placeholder="例如 lookup_order" required /></label>
+              <label>关键参数<textarea v-model="tool.parameters" rows="2" placeholder="例如 order_id=O-1001，每行一项" /></label>
+              <ElButton v-if="toolSteps.length > 1" text :aria-label="'移除第 ' + (index + 1) + ' 个工具'" @click="toolSteps.splice(index, 1)">移除</ElButton>
+            </div>
+            <ElButton :disabled="toolSteps.length >= 12" @click="toolSteps.push({ id: nextId++ + 1, name: '', parameters: '' })">添加工具</ElButton>
+          </div>
+        </div>
+        <div class="evidence-check">
+          <label class="evidence-toggle"><input v-model="facts" type="checkbox" />只读业务查证</label>
+          <div v-if="facts" class="check-fields">
+            <p v-if="!target.readback" class="small">服务尚未配置只读接口，本项会显示证据不足。</p>
+            <label>查证时点<select v-model="factPhase"><option value="after">最后一轮之后</option><option value="before">最后一轮之前</option></select></label>
+            <div class="case-expectations">
+              <label>业务字段<input v-model="factPath" maxlength="160" placeholder="例如 write_count" required /></label>
+              <label>业务期望值<input v-model="factValue" maxlength="322" placeholder="例如 1 或 confirmed" required /></label>
+            </div>
+          </div>
+        </div>
+      </fieldset>
       <p v-if="error" role="alert" class="evidence-error">{{ error }}</p>
       <slot name="feedback" />
     </form>
     <template #footer>
       <div class="case-footer">
         <ElButton :disabled="saving" @click="open = false">{{ awaitingReceipt ? '稍后查证' : '取消' }}</ElButton>
-        <ElButton type="primary" :loading="saving" :disabled="!canSave" @click="form?.requestSubmit()">{{ awaitingReceipt ? '查证或重试原草稿' : '保存待审核用例' }}</ElButton>
+        <ElButton type="primary" :loading="saving" :disabled="!canSave" @click="form?.requestSubmit()">{{ awaitingReceipt ? (target.personal ? '查证或重试原用例' : '查证或重试原草稿') : (target.personal ? '保存测试用例' : '保存待审核用例') }}</ElButton>
       </div>
     </template>
   </ElDialog>
@@ -102,7 +200,7 @@ fieldset { min-width: 0; margin: 0; padding: 12px; border: 1px solid var(--el-bo
 legend { padding-inline: 6px; font-weight: 600; }
 .case-message { margin-bottom: 12px; }
 .case-message > div { justify-content: space-between; margin-bottom: 6px; }
-.external-case-editor :is(input, textarea) {
+.external-case-editor :is(input:not([type=checkbox]), textarea, select) {
   box-sizing: border-box; width: 100%; min-width: 0; padding: 9px 11px; font: inherit;
   color: var(--el-text-color-primary); background: var(--el-bg-color);
   border: 1px solid var(--ac-border); border-radius: 8px;
@@ -112,5 +210,13 @@ textarea { display: block; resize: vertical; }
 .case-expectations { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .case-footer { justify-content: flex-end; }
 .case-footer :deep(.el-button + .el-button) { margin-left: 0; }
+.evidence-check + .evidence-check { border-top: 1px solid var(--ac-border); }
+.evidence-check { padding: 9px 0; }
+.evidence-check:last-child { padding-bottom: 0; }
+.evidence-toggle { display: flex; align-items: center; }
+.check-fields, .tool-step { display: grid; gap: 10px; margin-block: 10px 2px; }
+.tool-step { padding: 10px; background: var(--el-fill-color-light); border-radius: 8px; }
+.check-fields .el-button { justify-self: start; }
+.small { margin: 0; color: var(--el-text-color-secondary); font-size: 13px; }
 @media (max-width: 540px) { .case-expectations { grid-template-columns: 1fr; } }
 </style>

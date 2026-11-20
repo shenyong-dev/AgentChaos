@@ -2,7 +2,7 @@
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { ElButton } from 'element-plus'
 import { workspace, workspacePost } from '../api/workspace'
-import { statuses } from '../types/workbench'
+import { externalFaultNames, statuses } from '../types/workbench'
 import type { RunSnapshot } from '../types/evidence'
 const props = defineProps<{ snapshot: RunSnapshot; executionId?: string; diagnosis: boolean; refresh: () => Promise<void> }>()
 const emit = defineEmits<{ execution: [id: string]; assertions: []; trace: []; diagnose: [] }>()
@@ -11,6 +11,18 @@ const busy = ref(false), error = ref(''), lookupMessage = ref('')
 const reconciled = ref(new Map<string, unknown>())
 let lookupGeneration = 0
 const record = (value: unknown) => value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : {}
+const mapped = computed(() => props.snapshot.manifest && 'external_fault' in props.snapshot.manifest)
+const fault = computed(() => props.snapshot.manifest?.external_fault)
+const source = computed(() => props.snapshot.manifest?.workflow?.source_run_id)
+const evidence = computed(() => record(record(selected.value?.output).external_evidence))
+const transport = computed(() => record(evidence.value.transport))
+const rounds = computed(() => Array.isArray(evidence.value.rounds) ? evidence.value.rounds.map(record) : [])
+const business = computed(() => record(evidence.value.business))
+const lateFacts = computed(() => Object.entries(record(record(selected.value?.timing).external_readback_checks)))
+const toolsFor = (item: Record<string, unknown>) => {
+  const trace = record(item.trace)
+  return Array.isArray(trace.tools) ? trace.tools.map(record) : []
+}
 const savedIntents = computed(() => record(record(selected.value?.timing).external_intents))
 const intents = computed(() => Object.fromEntries(Object.entries(savedIntents.value).map(([id, value]) => {
   const intent = record(value)
@@ -35,7 +47,8 @@ const finalAnswer = computed(() => {
 })
 const showFinal = computed(() => finalAnswer.value !== null && turns.value.filter(turn => turn.received && !turn.late).at(-1)?.answer !== finalAnswer.value)
 const executionStatus = computed(() => selected.value?.status ?? '')
-const terminalLookup = computed(() => ['error', 'cancelled', 'inconclusive'].includes(executionStatus.value))
+const terminalLookup = computed(() => ['error', 'cancelled', 'inconclusive'].includes(executionStatus.value) ||
+  (mapped.value && executionStatus.value === 'failed'))
 const terminal = computed(() => terminalLookup.value || ['passed', 'failed', 'skipped'].includes(executionStatus.value))
 const pending = computed(() => Object.values(intents.value).some(value => record(value).state !== 'received'))
 const remoteStates: Record<string, string> = {
@@ -88,8 +101,10 @@ async function lookup() {
         reconciled.value.set(item.request_id, item.response)
     }
     const received = found.length
-    const unresolved = result.items.length - received
-    lookupMessage.value = received ? `已查到 ${received} 条原回执${unresolved ? `，${unresolved} 条仍待查明` : ''}。`
+    const facts = result.items.filter(item => item.status === 'fact_observed').length
+    const unresolved = result.items.length - received - facts
+    lookupMessage.value = facts ? `已查到 ${facts} 条原请求的业务状态。`
+      : received ? `已查到 ${received} 条原回执${unresolved ? `，${unresolved} 条仍待查明` : ''}。`
       : unresolved ? '原回执仍待查明。' : '当前没有待查证的原回执。'
     await props.refresh()
   } catch (e) { if (current === lookupGeneration) error.value = (e as Error).message }
@@ -102,8 +117,10 @@ async function lookup() {
       <label>执行<select :value="selected?.execution_id" aria-label="选择外部执行" :disabled="!selected" @change="emit('execution', ($event.target as HTMLSelectElement).value)">
         <option v-for="e in snapshot.executions" :key="e.execution_id" :value="e.execution_id">{{ e.case_key ?? e.execution_id.slice(0, 8) }}{{ e.repeat_no == null ? '' : ` · 重复 ${e.repeat_no}` }} · {{ statuses[e.status] ?? e.status }}</option>
       </select></label>
-      <ElButton v-if="selected && !diagnosis" type="primary" @click="emit('assertions')">查看文本判定</ElButton>
+      <ElButton v-if="selected && !diagnosis" type="primary" @click="emit('assertions')">{{ mapped ? '查看证据判定' : '查看文本判定' }}</ElButton>
       <ElButton v-if="selected && diagnosis" @click="emit('trace')">查看调用轨迹</ElButton>
+      <RouterLink v-if="mapped && snapshot.status === 'completed' && !fault" class="compare-link" :to="{ path: '/workbench', query: { source: snapshot.run_id, action: 'copy', external_fault: 'response_timeout' } }">复制为回执超时组 →</RouterLink>
+      <RouterLink v-if="mapped && snapshot.status === 'completed' && fault && source" class="compare-link" :to="{ path: '/reports', query: { tab: 'compare', mode: 'fault', run: source, peer: snapshot.run_id } }">与来源运行对照 →</RouterLink>
     </div>
     <section v-if="selected && !diagnosis" class="external-result">
       <header><h2>多轮对话</h2></header>
@@ -119,7 +136,40 @@ async function lookup() {
       <section v-if="showFinal" class="external-final"><h3>已保存的回答</h3><p>{{ finalAnswer || '回答文本为空' }}</p></section>
       <p v-else-if="!turns.length">尚无已记录的对话。</p>
       <ElButton v-if="pending && terminalLookup" class="diagnosis-link" text type="primary" @click="emit('diagnose')">前往链路诊断</ElButton>
-      <p class="external-boundary">回答来自外部服务，平台按用例约定检查文本。</p>
+      <section v-if="mapped && rounds.length" class="observations">
+        <h3>本次证据</h3>
+        <p v-if="fault" class="evidence-note">{{ externalFaultNames[fault] }}故障组 · {{ transport.reason }}</p>
+        <div class="observation-grid">
+          <div>
+            <h4>检索来源</h4>
+            <ul v-if="rounds.some(round => Array.isArray(round.documents))">
+              <template v-for="round in rounds" :key="String(round.turn)">
+                <li v-if="Array.isArray(round.documents)">第 {{ round.turn }} 轮 · {{ round.documents.join('、') || '返回空列表' }}</li>
+              </template>
+            </ul>
+            <p v-else>本次无可用检索来源。</p>
+          </div>
+          <div>
+            <h4>工具调用 <small>OpenTelemetry</small></h4>
+            <ul v-if="rounds.some(round => toolsFor(round).length)">
+              <template v-for="round in rounds" :key="String(round.turn)">
+                <li v-for="(tool, index) in toolsFor(round)" :key="index">第 {{ round.turn }} 轮 · {{ tool.name }}<span v-if="tool.status === 'error'"> · 工具失败</span></li>
+              </template>
+            </ul>
+            <p v-else>本次无可用工具轨迹。</p>
+          </div>
+        </div>
+        <details v-if="Object.keys(business).length" class="business-evidence">
+          <summary>只读业务快照</summary>
+          <div class="observation-grid">
+            <div v-for="stage in ['before','after']" :key="stage">
+              <h4>{{ stage === 'before' ? '调用前' : '调用后' }}</h4>
+              <pre v-if="record(business[stage]).status === 'observed'">{{ JSON.stringify(record(business[stage]).data, null, 2) }}</pre>
+              <p v-else>{{ record(business[stage]).reason ?? '无可用证据' }}</p>
+            </div>
+          </div>
+        </details>
+      </section>
     </section>
     <section v-else-if="selected" class="external-result">
       <header class="request-heading">
@@ -127,10 +177,14 @@ async function lookup() {
           <h2>请求与回执</h2>
           <p v-if="requests.length">{{ requests.length - awaiting }} 条已收回执<span v-if="awaiting"> · {{ awaiting }} 条尚无回执</span></p>
         </div>
-        <ElButton v-if="pending && terminalLookup" type="primary" :loading="busy" @click="lookup">查证原回执</ElButton>
+        <ElButton v-if="pending && terminalLookup" type="primary" :loading="busy" @click="lookup">{{ mapped ? '查证原请求' : '查证原回执' }}</ElButton>
       </header>
       <p v-if="error" role="alert" class="evidence-error">{{ error }}</p>
       <p v-if="lookupMessage" role="status">{{ lookupMessage }}</p>
+      <details v-if="lateFacts.length" class="business-evidence">
+        <summary>补录的业务查证</summary>
+        <pre>{{ JSON.stringify(Object.fromEntries(lateFacts), null, 2) }}</pre>
+      </details>
       <ol v-if="requests.length" class="request-list" aria-label="外部请求阶段">
         <li v-for="request in requests" :key="request.id">
           <details>
@@ -170,7 +224,15 @@ async function lookup() {
 .external-final { margin-top:20px; }
 .external-result summary { cursor:pointer; }
 .external-result pre { white-space:pre-wrap; overflow-wrap:anywhere; max-height:480px; overflow:auto; }
-.external-boundary { font-size:13px; color:var(--el-text-color-secondary); margin:16px 0 0; }
+.compare-link { color:var(--ac-link); padding: 6px 2px; }
+.observations { margin-top:24px; border-top:1px solid var(--el-border-color-light); padding-top:16px; }
+.observations h3, .observations h4 { margin:0 0 8px; }
+.observation-grid { display:grid; gap:12px; grid-template-columns:repeat(2, minmax(0, 1fr)); margin-block:12px; }
+.observation-grid > div { padding:12px; background:var(--el-fill-color-light); border-radius:8px; min-width:0; overflow-wrap:anywhere; }
+.observation-grid ul { margin:0; padding-inline-start:1.25em; }
+.observation-grid p { margin:0; color:var(--el-text-color-secondary); }
+.observations small, .evidence-note { color:var(--el-text-color-secondary); font-size:13px; }
+.business-evidence { margin-top:12px; border-top:1px solid var(--el-border-color-light); padding-top:12px; }
 .diagnosis-link { margin-top:12px; }
 .request-heading { display:flex; align-items:start; justify-content:space-between; gap:12px; flex-wrap:wrap; }
 .request-heading p { margin:6px 0 0; color:var(--el-text-color-secondary); font-size:14px; }
@@ -184,6 +246,7 @@ async function lookup() {
 .request-list dd { margin:4px 0 0; overflow-wrap:anywhere; }
 .request-list pre { margin-top:12px; padding:12px; background:var(--el-fill-color-light); border-radius:6px; }
 @media(max-width:540px) {
+  .observation-grid { grid-template-columns:minmax(0,1fr); }
   .external-result { padding:16px; }
   .external-turn dl { grid-template-columns:minmax(0, 1fr); }
   .external-turn dl > div + div { border-inline-start:0; border-top:1px solid var(--el-border-color-light); }

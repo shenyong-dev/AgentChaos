@@ -15,16 +15,21 @@ from sqlalchemy.orm import Session
 from app.agents.errors import AgentError
 from app.agents.versions import register_version
 from app.core.config import Settings
+from app.core.passwords import hash_password
 from app.db.seeds import seed_database
 from app.executors.dispatch import dispatch_pending
 from app.executors.service import RunService
+from app.models import Target, TargetVersion, User
 from app.models import TestCase as Case
 from app.models import TestExecution as Execution
 from app.models import TestRun as Run
+from app.reports.service import ReportService
 from app.schemas.readiness import OperationReadiness, ReadinessReport
+from app.schemas.reports import ExportReport
 from app.schemas.runs import CreateRun
 from app.schemas.workflow import CommitPlan, RunPlan
 from app.services.readiness import observation
+from app.workbench.service import WorkbenchService
 from app.workbench.workflow import WorkflowService
 
 pytestmark = pytest.mark.skipif(os.getenv("AC_INTEGRATION") != "1", reason="disposable MySQL")
@@ -121,6 +126,69 @@ def commit(service, plan):
     return asyncio.run(
         service.commit(1, CommitPlan(request_id=plan["request_id"], plan_id=plan["plan_id"]))
     )
+
+
+@pytest.mark.parametrize("role", ["user", "operator"])
+def test_new_accounts_run_seeded_reference_and_own_export(context, role):
+    engine, settings, workflow, config, _ = context
+    with Session(engine) as db, db.begin():
+        first = User(username="member01", role=role, password_hash=hash_password("test-pass-one"))
+        peer = User(username="member02", role=role, password_hash=hash_password("test-pass-two"))
+        db.add_all([first, peer])
+        db.flush()
+        first_id, peer_id = first.id, peer.id
+        original = db.get(TargetVersion, config.target_version_id)
+        target = Target(
+            owner_id=1,
+            name="团队私有预约",
+            adapter_type="langgraph_booking",
+            capabilities_json={},
+        )
+        db.add(target)
+        db.flush()
+        private = TargetVersion(
+            target_id=target.id,
+            version_no=1,
+            model_config_json=original.model_config_json,
+            prompt_hash=original.prompt_hash,
+            graph_revision=original.graph_revision,
+            kb_manifest_json=original.kb_manifest_json,
+            tool_revision=original.tool_revision,
+            adapter_revision=original.adapter_revision,
+            config_hash=original.config_hash,
+        )
+        db.add(private)
+        db.flush()
+        private_id = private.id
+    workbench = WorkbenchService(engine, settings)
+    assert [r["id"] for r in workbench.versions(first_id)["items"]] == [config.target_version_id]
+    spoofed = config.model_copy(update={"target_version_id": private_id})
+    with pytest.raises(AgentError) as denied:
+        workflow.validate(first_id, RunPlan(configuration=spoofed))
+    assert denied.value.status_code == 404
+    plan = asyncio.run(workflow.preview(first_id, RunPlan(configuration=config)))
+    assert plan["ready"]
+    commit_request = CommitPlan(request_id=plan["request_id"], plan_id=plan["plan_id"])
+    with pytest.raises(AgentError) as denied:
+        asyncio.run(workflow.commit(peer_id, commit_request))
+    assert denied.value.status_code == 409
+    run_id = asyncio.run(workflow.commit(first_id, commit_request))["run_id"]
+    assert workbench.runs(first_id)["items"][0]["run_id"] == run_id
+    assert workbench.runs(peer_id)["items"] == []
+    RunService(engine, settings).cancel(first_id, run_id)
+    reports = ReportService(engine, settings)
+    assert reports.read(first_id, run_id)["run"]["status"] == "cancelled"
+    with pytest.raises(AgentError) as denied:
+        reports.read(peer_id, run_id)
+    assert denied.value.status_code == 404
+    request = ExportReport(request_id=uuid4(), expires_hours=1)
+    exports = reports.export(first_id, run_id, request)
+    assert len(exports["items"]) == 3
+    identifier = exports["items"][0]["artifact_id"]
+    assert reports.download(first_id, identifier)[0]
+    with pytest.raises(AgentError) as denied:
+        reports.download(peer_id, identifier)
+    assert denied.value.status_code == 404
 
 
 def test_preflight_does_not_create_and_offline_worker_cannot_be_assumed(context):

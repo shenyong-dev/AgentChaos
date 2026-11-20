@@ -34,7 +34,7 @@ Identity = Annotated[int, Depends(booking_identity)]
 
 @router.get("/access")
 def access(request: Request, user: Identity, service: Service) -> Envelope[dict]:
-    return Envelope(data=service.access(), request_id=request.state.request_id)
+    return Envelope(data=service.access(user), request_id=request.state.request_id)
 
 
 @router.post("/sessions", status_code=201)
@@ -60,6 +60,11 @@ def records(
 @router.get("/sessions/{session_id}")
 def read(session_id: UUID, request: Request, user: Identity, service: Service) -> Envelope[dict]:
     return Envelope(data=service.view(user, str(session_id)), request_id=request.state.request_id)
+
+
+@router.delete("/sessions/{session_id}")
+def delete(session_id: UUID, request: Request, user: Identity, service: Service) -> Envelope[dict]:
+    return Envelope(data=service.delete(user, str(session_id)), request_id=request.state.request_id)
 
 
 @router.get("/sessions/{session_id}/history")

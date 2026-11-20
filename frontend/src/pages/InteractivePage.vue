@@ -25,6 +25,8 @@ const messageList = ref<HTMLDivElement>()
 const evidenceToggle = ref<InstanceType<typeof ElButton>>()
 const evidenceOpen = ref(true), recordsOpen = ref(false), newChatOpen = ref(false)
 const upgradeOpen = ref(false)
+const basic = computed(() => session.identity.value?.role === 'user')
+const tabs = computed(() => basic.value ? [['fields','当前字段'],['sql','业务查证']] : [['fields','当前字段'],['tools','工具与规则'],['sql','业务查证']])
 let upgradeBinding: { id: string; identity: number; revision: number } | undefined
 function openUpgrade() {
   if (!view.value || navigationBlocked.value) return
@@ -40,6 +42,14 @@ async function newChat(force = false) {
   newChatOpen.value = false
   if (sessionId.value) await router.push('/interactive')
   else { text.value = ''; await nextTick(); document.getElementById('interaction-input')?.focus() }
+}
+async function recordDeleted(id: string) {
+  forgetReceipt(id)
+  if (id !== sessionId.value) return
+  recordsOpen.value = false
+  text.value = ''
+  await nextTick()
+  await newChat(true)
 }
 async function openRecord(id: string) {
   if (navigationBlocked.value) return
@@ -141,7 +151,12 @@ async function load() {
       const requestId = receiptId(id) ?? snapshot.pending_request
       if (requestId) await checkReceipt(id, requestId, ticket)
     }
-  } catch (e) { if (ticket === epoch) { uncertain.value = Boolean(id); fail(e) } }
+  } catch (e) {
+    if (ticket === epoch) {
+      uncertain.value = Boolean(id) && !(e instanceof InteractionError && e.status === 404)
+      fail(e)
+    }
+  }
   finally { if (ticket === epoch) loading.value = false }
 }
 async function create(firstText: string) {
@@ -290,7 +305,7 @@ onBeforeUnmount(() => { epoch++; if (timer) clearInterval(timer); compactQuery?.
   <section class="interaction-page">
     <div v-if="!props.embedded" class="page-heading"><div><h1>场地预约</h1></div><RouterLink to="/environment" class="interaction-environment">检查环境 <ArrowRight aria-hidden="true" /></RouterLink></div>
 
-    <p v-if="error" role="alert" class="evidence-error">{{ error }}</p>
+    <p v-if="error" role="alert" class="evidence-error">{{ error }} <RouterLink v-if="sessionId && !view && !uncertain" to="/interactive">返回新会话</RouterLink></p>
     <p v-if="notice" role="status" class="interaction-notice">{{ notice }}</p>
     <template v-if="workspace.authorization.value">
       <div v-if="loading" class="interaction-loading" role="status">正在读取会话与当前业务事实…</div>
@@ -298,9 +313,9 @@ onBeforeUnmount(() => { epoch++; if (timer) clearInterval(timer); compactQuery?.
       <template v-if="view">
         <div class="interaction-session-bar"><div><ElTag :type="view.status === 'error' ? 'warning' : 'info'">{{ view.read_only ? '历史只读' : statusNames[view.status] ?? view.status }}</ElTag><span v-if="sessionId">版本 {{ view.version_id }} · revision {{ view.revision }}</span><span v-else>新会话</span></div><div class="interaction-view-actions"><ElButton :disabled="navigationBlocked" @click="newChat()">新建会话</ElButton><ElButton :disabled="navigationBlocked" @click="recordsOpen = true">预约测试记录</ElButton><ElButton ref="evidenceToggle" :aria-expanded="evidenceOpen" aria-controls="interaction-evidence" @click="setEvidence(!evidenceOpen)"><component :is="evidenceOpen ? Fold : Expand" aria-hidden="true" />{{ evidenceOpen ? '收起证据' : '查看证据' }}</ElButton><ElButton :loading="loading" :disabled="busy" @click="load"><Refresh aria-hidden="true" />重新读取状态</ElButton></div></div>
         <div v-if="sessionId" class="interaction-usage"><span>本会话模型请求 {{ view.usage_available === false ? '未采集' : view.usage.calls_started ?? 0 }}<template v-if="access?.limits.session_calls !== null && access?.limits.session_calls !== undefined"> / {{ access.limits.session_calls }}</template></span><span>峰值费用估算 {{ formatMicroCny(view.usage_available === false ? undefined : view.usage.charged_estimate ?? 0) }}</span><span v-if="view.usage.held_upper">未知／处理中预留 {{ formatMicroCny(view.usage.held_upper) }}</span></div>
-        <div v-if="view.read_only" class="interaction-warning" role="status">此会话使用旧版本。<ElButton :disabled="navigationBlocked || !access?.version_id" @click="openUpgrade">保留对话并升级</ElButton></div>
+        <div v-if="view.read_only" class="interaction-warning" role="status">此会话使用旧版本。<ElButton v-if="!basic" :disabled="navigationBlocked || !access?.version_id" @click="openUpgrade">保留对话并升级</ElButton></div>
         <p v-if="view.mode === 'offline_control'" class="interaction-warning" role="note">明确离线模型控制：SQL、Redis与工具真实运行，固定模型回复不代表 DeepSeek 效果。</p>
-        <p v-if="!access?.version_id || !access.model_actions_available" class="interaction-warning">{{ access?.reason }} <RouterLink to="/environment">查看就绪条件</RouterLink></p>
+        <p v-if="!access?.version_id || !access.model_actions_available" class="interaction-warning">{{ access?.reason }} <RouterLink v-if="!basic" to="/environment">查看就绪条件</RouterLink></p>
         <p v-if="uncertain || view.processing" class="interaction-warning" role="status">原请求处理中或回执未定。先读取状态，不使用新标识重复发送。<ElButton size="small" :disabled="busy || !interactionPending" @click="interactionPending && execute(interactionPending)">重发同一请求</ElButton></p>
         <div class="interaction-layout" :class="{ 'evidence-collapsed': !evidenceOpen }">
           <section class="interaction-conversation" aria-label="预约Agent对话">
@@ -315,7 +330,7 @@ onBeforeUnmount(() => { epoch++; if (timer) clearInterval(timer); compactQuery?.
             <div v-if="view.last_error" class="interaction-round-error"><strong>{{ view.last_error.code }}</strong><p>{{ view.last_error.message }}</p><ElButton v-if="view.next_nodes.length && view.status !== 'waiting_confirmation'" :disabled="!mayAct" @click="retry">显式恢复失败节点</ElButton></div>
           </section>
           <aside v-show="evidenceOpen" id="interaction-evidence" class="interaction-evidence" aria-label="会话字段与业务查证">
-            <div class="interaction-tabs" role="tablist" aria-label="调试证据"><button v-for="tab in [['fields','当前字段'],['tools','工具与规则'],['sql','业务查证']]" :key="tab[0]" role="tab" :aria-selected="selectedTab === tab[0]" :tabindex="selectedTab === tab[0] ? 0 : -1" @keydown="tabKey" @click="selectedTab = tab[0]!">{{ tab[1] }}</button></div>
+            <div class="interaction-tabs" role="tablist" aria-label="对话证据"><button v-for="tab in tabs" :key="tab[0]" role="tab" :aria-selected="selectedTab === tab[0]" :tabindex="selectedTab === tab[0] ? 0 : -1" @keydown="tabKey" @click="selectedTab = tab[0]!">{{ tab[1] }}</button></div>
             <section v-if="selectedTab === 'fields'" class="interaction-fields" role="tabpanel" aria-label="当前字段"><header><small>采集于 {{ time(view.observed_at) }}</small></header><dl><div v-for="field in fields" :key="field.key"><dt>{{ fieldNames[field.key] }}</dt><dd>{{ field.value ?? (field.key === 'duration_minutes' ? '未单独提供（可用起止时间）' : '待补充') }}<button v-if="field.source_turn" class="interaction-source" @click="sourceTurn(field.source_turn)">第 {{ field.source_turn }} 轮 · {{ field.source_quote }}</button></dd></div></dl></section>
             <section v-if="selectedTab === 'tools'" class="interaction-tools" role="tabpanel" aria-label="工具与规则"><header><h2>实际调用记录</h2><small>最近 {{ view.trace.length }} 条；完整轨迹按需读取</small></header><p v-if="!view.trace.length" class="interaction-subtle">尚无工具或模型记录，不推断已执行。</p><details v-for="(entry,index) in view.trace" :key="index"><summary>{{ entry.type === 'tool' ? entry.name : entry.type }} <span>第 {{ entry.source_turn ?? '—' }} 轮</span></summary><pre>{{ pretty(entry) }}</pre></details><details v-if="view.last_retrieval"><summary>最近规则检索</summary><pre>{{ pretty(view.last_retrieval) }}</pre></details><ElButton :disabled="traceCursor === null" @click="moreTrace">{{ traceCursor === null ? '完整轨迹已读完' : '读取完整轨迹下一页' }}</ElButton><details v-if="traceItems.length"><summary>已读取的完整轨迹（{{ traceItems.length }}）</summary><pre>{{ pretty(traceItems) }}</pre></details></section>
             <section v-if="selectedTab === 'sql'" class="interaction-sql" role="tabpanel" aria-label="当前SQL事实"><header><h2>当前 SQL 查证</h2><small>{{ time(view.sql_observation.observed_at) }} · 仅本会话实验范围</small></header><div class="interaction-sql-count"><strong>{{ view.sql_observation.available ? view.sql_observation.booking_count : '未知' }}</strong><span>{{ view.sql_observation.available ? '笔实际预约记录' : '读取失败，不能推定为 0' }}</span></div><InfoHint label="业务事实" text="以当前SQL查证为准；草稿和模型回答不能作为预约成功的凭据。" /><details v-if="view.sql_observation.available"><summary>预约与草稿的当前状态</summary><pre>{{ pretty(view.sql_observation) }}</pre></details><div v-if="view.unknown_submission" class="interaction-warning">提交回执未定，保留原请求键。只读查证不会重新预约。<pre>{{ pretty(view.unknown_submission) }}</pre><details><summary>原键查证结果</summary><pre>{{ pretty(view.request_lookup ?? { status: 'unknown' }) }}</pre></details></div><details v-if="view.business_result"><summary>检查点记录的业务结果／原键复查</summary><pre>{{ pretty(view.business_result) }}</pre></details></section>
@@ -325,7 +340,7 @@ onBeforeUnmount(() => { epoch++; if (timer) clearInterval(timer); compactQuery?.
         <details v-if="sessionId" class="interaction-session-details"><summary>会话与用量边界</summary><dl><div><dt>会话 ID</dt><dd>{{ view.session_id }}</dd></div><div><dt>独立范围</dt><dd>{{ view.scope_id }}</dd></div><div><dt>参考时钟</dt><dd>{{ time(view.reference_clock) }}</dd></div><div><dt>版本哈希</dt><dd>{{ view.config_hash }}</dd></div></dl><pre>{{ pretty(view.usage) }}</pre><p>人民币为参考换算估算，非实际账单；未知用量保留预留。</p></details>
       </template>
     </template>
-    <InteractionRecords v-model="recordsOpen" @select="openRecord" />
+    <InteractionRecords v-model="recordsOpen" @select="openRecord" @deleted="recordDeleted" />
     <ElDialog v-model="newChatOpen" title="开始新会话？" width="min(420px, calc(100vw - 32px))" append-to-body><p>当前未发送的输入将清空，已有对话和预约记录会保留。</p><template #footer><ElButton @click="newChatOpen = false">继续编辑</ElButton><ElButton type="primary" @click="newChat(true)">清空输入并新建</ElButton></template></ElDialog>
     <ElDialog v-model="upgradeOpen" title="保留对话并升级？" width="min(480px, calc(100vw - 32px))" append-to-body><p>聊天和已提交预约会保留；未提交草稿及旧确认将失效。升级不会调用模型或自动修改预约。</p><template #footer><ElButton @click="upgradeOpen = false">返回</ElButton><ElButton type="primary" :disabled="navigationBlocked" @click="upgradeSession">升级并保留对话</ElButton></template></ElDialog>
     <ElDialog v-model="reviewOpen" :title="confirmTitle(reviewedDraft)" width="min(540px, calc(100vw - 32px))" append-to-body class="interaction-confirm-dialog"><template v-if="reviewedDraft"><p>{{ confirmBody(reviewedDraft) }}</p><dl><div v-if="reviewedDraft.booking_id"><dt>原预约</dt><dd>{{ reviewedDraft.booking_id }}</dd></div><div><dt>场地／人数</dt><dd>{{ reviewedDraft.room_code }} · <template v-if="reviewedDraft.operation === 'attendee_change'">{{ reviewedDraft.previous_attendees }} → </template>{{ reviewedDraft.attendees }} 人</dd></div><div><dt>时间</dt><dd>{{ time(reviewedDraft.start_at) }} — {{ time(reviewedDraft.end_at) }}</dd></div><div><dt>草稿版本</dt><dd>{{ reviewedConfirmation }} · revision {{ reviewedRevision }}</dd></div></dl></template><template #footer><ElButton @click="reviewOpen = false">返回修改</ElButton><ElButton :type="reviewedDraft?.operation === 'cancel' ? 'danger' : 'primary'" :disabled="!mayAct" @click="decision('confirm')">{{ confirmAction(reviewedDraft) }}</ElButton></template></ElDialog>

@@ -8,6 +8,7 @@ from uuid import uuid4
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.auth.login_events import PRUNE_LIMIT, prune_login_events
 from app.core.config import get_settings
 from app.db.engine import create_database_engine
 from app.executors.control import database_now, locked_pair
@@ -48,7 +49,9 @@ def dispatch_pending(engine, settings, *, publisher=None, force=False, only_run=
                 "running",
             ):
                 continue
-            if not service.configuration_matches(run.manifest_json, cache=compatibility):
+            if not service.configuration_matches(
+                run.manifest_json, cache=compatibility, owner=run.created_by
+            ):
                 counts["incompatible"] += 1
                 continue
             if e.status != "queued" and not (
@@ -91,6 +94,7 @@ def main():
     engine = create_database_engine(settings)
     from app.workers.presence import DispatcherPresence
 
+    next_auth_cleanup = 0.0
     with DispatcherPresence(settings) as presence:
         while True:
             try:
@@ -102,6 +106,14 @@ def main():
                 print({"dispatch_scan_error": type(exc).__name__}, flush=True)
             if args.once:
                 break
+            if time.monotonic() >= next_auth_cleanup:
+                delay = 3600
+                try:
+                    if prune_login_events(engine) == PRUNE_LIMIT:
+                        delay = 10
+                except Exception as exc:
+                    print({"login_audit_cleanup_error": type(exc).__name__}, flush=True)
+                next_auth_cleanup = time.monotonic() + delay
             time.sleep(3)
 
 

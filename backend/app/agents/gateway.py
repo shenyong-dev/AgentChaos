@@ -30,6 +30,7 @@ class ModelGateway:
         audit_directory: Path | None = None,
         control=None,
         role="agent",
+        authorize_call=None,
     ):
         if role not in ("agent", "case_generator", "judge", "copilot"):
             raise ValueError("Unsupported role")
@@ -46,6 +47,7 @@ class ModelGateway:
         self.max_output = getattr(settings, prefix + "_max_output_tokens")
         self.audit_directory = audit_directory or PROJECT_ROOT / ".local/t04/model-calls"
         self.control = control
+        self.authorize_call = authorize_call
 
     def invoke(self, messages, tools, *, deadline=None, tool_choice=None):
         from contextlib import nullcontext
@@ -87,6 +89,8 @@ class ModelGateway:
         if self.role == "judge" or self.role == "copilot" and not tools:
             request["response_format"] = {"type": "json_object"}
         request_bytes = len(json.dumps(request, ensure_ascii=False, default=str).encode())
+        if self.authorize_call is not None:
+            self.authorize_call()
         ticket = self.budget.reserve(request_bytes, self.max_output)
         record = {
             "call_id": ticket["call_id"],

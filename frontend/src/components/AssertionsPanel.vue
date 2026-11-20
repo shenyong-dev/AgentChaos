@@ -19,6 +19,11 @@ const metrics: Record<string, string> = {
   booking_count: '有效预约数量', booking_matches: '预约条件', no_booking_on: '指定日期无预约',
   tool_calls: '工具请求与参数', state_matches: '最终状态字段', reply_literals: '回复字面检查',
   reply_booking_consistent: '预约回复与事实',
+  external_retrieval_top_k: '检索命中',
+  external_tool_sequence: '工具调用顺序与参数',
+  external_fact_equals: '只读业务状态',
+  external_receipt: '外部请求回执',
+  external_tool_fault: '测试工具故障证据',
 }
 const outcomes: Record<string, string> = { fulfilled: '任务已达成', not_fulfilled: '任务未达成', unknown: '任务达成情况未知', safely_degraded: '安全降级' }
 const visible = computed(() => rows.value.filter(r => filter.value === 'all' ||

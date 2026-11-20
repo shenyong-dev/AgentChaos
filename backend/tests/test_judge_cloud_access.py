@@ -17,7 +17,7 @@ from app.core import cloud, cloud_init
 from app.judging import service as module
 from app.judging.budget import AUTHORIZATION, PROTOCOL_AUTHORIZATION, JudgeBudget, authorization
 from app.judging.engine import manifest
-from app.judging.service import COMPATIBLE_MAINTENANCE_SOURCES, JudgeService
+from app.judging.service import JudgeService
 from app.schemas.judging import RequestID, SealLabels
 
 
@@ -40,13 +40,26 @@ def test_authorization_accepts_cloud_but_not_old_open_approval_for_t17b(policy):
         authorization(settings.model_copy(update={"cloud_approval_sha256": "0" * 64}), "T17B")
 
 
+def prior_manifests(current):
+    reviewed = json.loads(
+        (module.PROJECT_ROOT / "docs/fixtures/T17B/maintenance-20261119-accounts.json").read_bytes()
+    )
+    return [
+        {
+            **current,
+            "gateway_hash": prior["gateway_hash"],
+            "sources": {**current["sources"], **prior["sources"]},
+        }
+        for prior in reviewed["prior"]
+    ]
+
+
 def test_compatibility_is_exact_and_never_accepts_prompt_model_or_unlisted_source_changes(policy):
     settings, _ = policy
     svc = JudgeService(None, None, settings)
     current = manifest(settings)
-    previous = deepcopy(current)
-    previous["sources"].update(COMPATIBLE_MAINTENANCE_SOURCES)
-    assert svc._protocol_compatible(previous, current)
+    for previous in prior_manifests(current):
+        assert svc._protocol_compatible(previous, current)
     for field in ("model", "prompt_hash", "schema_hash", "gateway_hash", "max_output_tokens"):
         changed = {**previous, field: "changed"}
         assert not svc._protocol_compatible(changed, current)
@@ -80,10 +93,9 @@ def owned(lab, policy, monkeypatch):
 
 def sealed(svc, monkeypatch, previous=False):
     current = manifest(svc.settings)
-    old = deepcopy(current)
-    old["sources"].update(COMPATIBLE_MAINTENANCE_SOURCES)
     with monkeypatch.context() as patch:
         if previous:
+            old = prior_manifests(current)[0]
             patch.setattr(module, "manifest", lambda _: old)
         batch = svc.create(1, RequestID(request_id=uuid4()))
         label_all(svc, batch)

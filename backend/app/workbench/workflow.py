@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 from app.agents.errors import AgentError
 from app.agents.versions import canonical_hash
 from app.core.deployment import database_binding, execution_fingerprint, source_fingerprint
+from app.core.model_access import require_model_call
 from app.executors.service import RunService, frozen_case
 from app.external.registry import entry_for, is_external
 from app.models import TargetVersion, TestCase, TestRun
@@ -27,6 +28,8 @@ def normalized(values):
     result.pop("request_id", None)
     if result.get("fault_profile_id") is None:
         result.pop("fault_profile_id", None)
+    if result.get("external_fault") is None:
+        result.pop("external_fault", None)
     return result
 
 
@@ -106,6 +109,8 @@ class WorkflowService:
                 for k in ("agent_microusd", "case_generator_microusd", "judge_microusd")
             },
             "fault_profile_id": (manifest.get("fault_profile") or {}).get("id"),
+            **({"external_fault": manifest["external_fault"]} if manifest.get("external_fault")
+               else {}),
         }
         modes = sorted(
             {
@@ -194,13 +199,15 @@ class WorkflowService:
             _, manifest, _, _ = RunService(self.engine, self.settings).prepare_configuration(
                 session, owner, plan.configuration, "preview"
             )
+            if self.mode == "real_provider" and not is_external(manifest.get("adapter_type")):
+                require_model_call(session, owner)
             if self.mode == "offline_test_double" and is_external(manifest.get("adapter_type")):
                 raise AgentError(
                     "external_offline_not_allowed", "离线模型执行器不会连接外部服务。", 409
                 )
         return source, delta, manifest
 
-    async def observe(self, plan, manifest=None):
+    async def observe(self, plan, manifest=None, *, owner=None):
         report = await self.readiness(self.settings)
         batch = next(x for x in report.operations if x.id == "batch")
         required = (
@@ -218,22 +225,28 @@ class WorkflowService:
                 if c not in {"version", "checkpoints", "credential", "executor_budget"}
             ]
             if plan.dispatch == "ready":
+                from app.external.http_port import HttpPort
                 from app.external.runner import request
+                from app.external.schema import HttpEntry
                 from app.external.transport import Client
                 from app.services.readiness import observation
 
-                entry = entry_for(self.settings, manifest["adapter_type"])
+                entry = entry_for(self.settings, manifest["adapter_type"], owner=owner)
                 binding = {
                     "tenant": canonical_hash(["preflight", entry.id]),
                     "scope": "test:probe:" + uuid4().hex,
                     "session_id": str(uuid4()),
                 }
                 try:
-                    actual = await asyncio.to_thread(
-                        Client(entry, self.settings).call,
-                        request(entry, binding, "capabilities", uuid4(), {}),
-                    )
-                    ready = canonical_hash(actual) == canonical_hash(entry.card.model_dump())
+                    if isinstance(entry, HttpEntry):
+                        await asyncio.to_thread(HttpPort(entry, self.settings, owner).verify)
+                        ready = self.settings.external_agent_calls_enabled
+                    else:
+                        actual = await asyncio.to_thread(
+                            Client(entry, self.settings, owner=owner).call,
+                            request(entry, binding, "capabilities", uuid4(), {}),
+                        )
+                        ready = canonical_hash(actual) == canonical_hash(entry.card.model_dump())
                 except AgentError:
                     ready = False
                 report.checks.append(
@@ -242,8 +255,11 @@ class WorkflowService:
                         "外部服务",
                         "ready" if ready else "blocked",
                         "external_ready" if ready else "external_unavailable",
-                        "外部能力与登记一致。" if ready else "外部开关、凭据、连接或版本未就绪。",
-                        "由维护者核对服务端登记与原服务版本。",
+                        (
+                            "已核对接口配置，试跑时检查回复字段。"
+                            if isinstance(entry, HttpEntry) else "外部能力与登记一致。"
+                        ) if ready else "外部开关、凭据、连接或版本未就绪。",
+                        "先到外部 Agent 接入页检查连接，再核对服务版本。",
                     )
                 )
                 required = [*required, "external_target"]
@@ -263,7 +279,7 @@ class WorkflowService:
 
     async def preview(self, owner, plan):
         source, delta, manifest = self.validate(owner, plan)
-        report, blockers = await self.observe(plan, manifest)
+        report, blockers = await self.observe(plan, manifest, owner=owner)
         identifier = secrets.token_hex(32)
         now = datetime.now(UTC)
         context = {
@@ -348,7 +364,7 @@ class WorkflowService:
         _, _, manifest = self.validate(owner, plan)
         if canonical_hash(manifest) != record["configuration_hash"]:
             raise AgentError("run_configuration_changed", "用例或执行条件已变化，请重新检查。", 409)
-        _, blocked = await self.observe(plan, manifest)
+        _, blocked = await self.observe(plan, manifest, owner=owner)
         if blocked:
             raise AgentError(
                 "run_preflight_blocked", "当前执行条件未就绪：" + "、".join(blocked), 409

@@ -31,11 +31,15 @@ Service = Annotated[ReportService, Depends(get_report_service)]
 
 
 def report_identity(
+    request: Request,
     identifier: Annotated[int, Depends(case_identity)],
     service: Annotated[CaseService, Depends(get_case_service)],
 ):
     with Session(service.engine) as session:
-        CaseService.role(session, identifier, "operator")
+        account = CaseService.role(session, identifier)
+        # The browser route allowlist grants only own-run report and export operations.
+        if not (account.role == "user" and getattr(request.state, "browser_session", False)):
+            CaseService.role(session, identifier, "operator")
     return identifier
 
 

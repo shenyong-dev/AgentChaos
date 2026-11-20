@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { canOperate, canReview as hasReviewRole } from '../roles'
 import InfoHint from '../components/InfoHint.vue'
 import { useGuideSelection } from '../guidance'
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
@@ -49,7 +50,7 @@ const generationFailure = computed(() => {
     model_output_truncated: '模型输出被截断，未形成完整候选。',
   } as Record<string, string>)[code] ?? '本次生成未完成，具体原因见批次证据。'
 })
-const canReview = computed(() => access.value?.role === 'reviewer' && !selectedItem.value?.review)
+const canReview = computed(() => hasReviewRole(access.value?.role) && !selectedItem.value?.review)
 class CaseRequestError extends Error {
   constructor(message: string, readonly code?: string) { super(message) }
 }
@@ -155,9 +156,9 @@ onMounted(() => { void login() })
     <template v-if="access">
       <label class="generation-target">测试对象<ElSelect v-model="target" aria-label="生成测试对象" class="form-select" popper-class="form-select-dropdown" :disabled="busy || !!pendingGeneration" @change="selectTarget"><ElOption v-for="(name, key) in targetNames" :key="key" :label="name" :value="key" /></ElSelect></label>
       <section class="case-generator-card" aria-label="生成候选配置">
-        <div><div class="heading-with-info"><h2>{{ access.role === 'reviewer' ? '审核工作区' : '生成一批候选' }}</h2><InfoHint label="生成限制" text="每批最多3个风险、2次调用（含修复）、90秒。真实生成将调用模型并消耗生成器预算。" /></div></div>
-        <div v-if="access.role === 'operator'" class="generation-actions"><label v-for="(name, key) in riskNames" :key="key"><input v-model="profiles" type="checkbox" :value="key" :disabled="busy || !!pendingGeneration || (!profiles.includes(String(key)) && profiles.length >= 3)" />{{ name }}</label><ElButton type="primary" :loading="busy" :disabled="!access.generation_enabled || !profiles.length" @click="generate">真实生成候选</ElButton></div>
-        <small v-if="!access.generation_enabled">生成调用已关闭</small><small v-else-if="access.role === 'operator'">将调用模型并消耗生成器预算。</small>
+        <div><div class="heading-with-info"><h2>{{ !canOperate(access.role) ? '审核工作区' : '生成一批候选' }}</h2><InfoHint label="生成限制" text="每批最多3个风险、2次调用（含修复）、90秒。真实生成将调用模型并消耗生成器预算。" /></div></div>
+        <div v-if="canOperate(access.role)" class="generation-actions"><label v-for="(name, key) in riskNames" :key="key"><input v-model="profiles" type="checkbox" :value="key" :disabled="busy || !!pendingGeneration || (!profiles.includes(String(key)) && profiles.length >= 3)" />{{ name }}</label><ElButton type="primary" :loading="busy" :disabled="!access.generation_enabled || !profiles.length" @click="generate">真实生成候选</ElButton></div>
+        <small v-if="!access.generation_enabled">生成调用已关闭</small><small v-else-if="canOperate(access.role)">将调用模型并消耗生成器预算。</small>
       </section>
       <div class="case-batch-picker"><label>选择批次<ElSelect class="form-select" popper-class="form-select-dropdown" :fit-input-width="true" :empty-values="[null, undefined, '']" placeholder="请选择" v-model="batch" aria-label="选择批次" :disabled="busy || !!pendingGeneration" @change="selectBatch"><ElOption v-for="value in batches" :key="value.generation_id" :value="value.generation_id" :data-value="value.generation_id" :label="`${value.generation_id.slice(0, 8)} · ${value.mode === 'verified_reduction' ? '已验证缩减' : value.mode === 'real_provider' ? '真实模型' : '离线控制'} · ${value.created_at}`" /></ElSelect></label><ElButton :disabled="busy || !!pendingGeneration" @click="selectBatch">刷新当前批次</ElButton><ElButton v-if="more" :disabled="busy || !!pendingGeneration" @click="pages(true)">更多批次</ElButton></div>
       <template v-if="generation">

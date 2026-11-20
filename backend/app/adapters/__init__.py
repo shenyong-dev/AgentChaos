@@ -11,13 +11,13 @@ class TargetAdapter(Protocol):
     def snapshot(self, scope: str, owner: int) -> list | None: ...
 
 
-def adapter_for(engine, settings, kind):
+def adapter_for(engine, settings, kind, *, owner=None):
     from app.external.registry import is_external
 
     if is_external(kind):
         from app.external.adapter import ExternalAdapter
 
-        return ExternalAdapter(engine, settings, kind)
+        return ExternalAdapter(engine, settings, kind, owner=owner)
     if kind == "reference_refund":
         from app.adapters.refund import RefundAdapter
 

@@ -68,13 +68,12 @@ onBeforeUnmount(() => { alive = false; sequence++ })
 </script>
 
 <template>
-  <section class="version-registration" aria-label="核对与登记版本">
-    <div class="registration-toolbar">
-      <label>测试对象<ElSelect v-model="target" aria-label="登记测试对象" :disabled="busy || !!pending" @change="reset"><ElOption v-for="item in targets" :key="item.id" :value="item.id" :label="targetDisplayName(item.name)" /></ElSelect></label>
+  <section v-if="targets.length || error" class="version-registration" aria-label="核对与登记版本">
+    <div v-if="targets.length" class="registration-toolbar">
+      <label>测试对象<ElSelect v-model="target" aria-label="登记测试对象" placeholder="选择测试对象" :disabled="busy || !!pending || !targets.length" @change="reset"><ElOption v-for="item in targets" :key="item.id" :value="item.id" :label="targetDisplayName(item.name)" /></ElSelect></label>
       <ElButton :loading="busy && !pending" :disabled="busy || !!pending || !target" @click="inspect">核对当前源码</ElButton>
       <InfoHint label="版本登记范围" text="登记保存源码指纹与配置记录，不备份或部署源码。更改源码或配置后先重启API，测试前在工程环境核对Worker。" />
     </div>
-    <p v-if="!targets.length && !busy && !error" class="registration-muted">当前账号没有可登记的测试对象。</p>
     <p v-if="error" class="evidence-error" role="alert">{{ error }}</p>
     <template v-if="result">
       <div class="registration-result"><ElTag :type="result.registered_version ? 'success' : 'warning'">{{ result.registered_version ? `已登记 · 修订 ${result.registered_version.version_no}` : '待登记' }}</ElTag><span>{{ result.source_count }} 个源码文件</span><span>{{ result.changes.length }} 项配置变更 · {{ result.source_changes.length }} 个文件变更</span><ElButton text :disabled="!changeCount || !!pending || busy" @click="changesOpen = true">查看变更</ElButton></div>

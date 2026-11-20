@@ -32,6 +32,7 @@ class CreateRun(BaseModel):
     limits: Limits = Field(default_factory=Limits)
     budgets: RoleBudgets = Field(default_factory=RoleBudgets)
     fault_profile_id: int | None = Field(default=None, ge=1)
+    external_fault: Literal["response_timeout", "tool_error"] | None = None
 
     @field_validator("case_revision_ids")
     @classmethod

@@ -3,6 +3,7 @@ import ExternalRunOverview from '../components/ExternalRunOverview.vue'
 import RefundRunOverview from '../components/RefundRunOverview.vue'
 import InfoHint from '../components/InfoHint.vue'
 import { useGuideSelection } from '../guidance'
+import { session } from '../api/session'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElButton, ElInput, ElTag, ElSelect, ElOption } from 'element-plus'
@@ -30,7 +31,12 @@ const external = computed(() => snapshot.value?.manifest?.adapter_type?.startsWi
 const booking = computed(() => !snapshot.value?.manifest?.adapter_type || snapshot.value.manifest.adapter_type === 'langgraph_booking')
 const error = ref(''), state = ref('未连接'), filter = ref(''), after = ref(''), more = ref(false)
 const busy = ref(false), live = ref(false)
-const activeTab = ref(['trace', 'diagnosis', 'assertions', 'relations', 'semantic'].includes(String(route.query.view)) ? String(route.query.view) : 'overview')
+const basic = computed(() => session.identity.value?.role === 'user')
+function allowedTab(value: unknown) {
+  const tabs = basic.value ? ['trace', 'diagnosis', 'assertions'] : ['trace', 'diagnosis', 'assertions', 'relations', 'semantic']
+  return tabs.includes(String(value)) || value === 'overview' ? String(value) : 'overview'
+}
+const activeTab = ref(allowedTab(route.query.view))
 const semanticExecution = ref(''), semanticQuery = ref('')
 const semanticOptions = computed(() => (snapshot.value?.executions ?? []).filter(item =>
   `${item.case_key ?? ''} ${item.execution_id} ${item.status} ${statuses[item.status] ?? ''}`.toLowerCase().includes(semanticQuery.value)))
@@ -63,7 +69,7 @@ const types: Record<string, string> = {
   'fault.scheduled': '故障触发已登记', 'fault.injected': '故障已注入', 'fault.not_applied': '故障条件未达成',
   'assertion.completed': '断言判定', 'evaluation.completed': '评价完成',
 }
-function setTab(value: string) { activeTab.value = value; void router.replace({ query: { ...route.query, view: value === 'overview' ? undefined : value } }) }
+function setTab(value: string) { if (allowedTab(value) !== value) return; activeTab.value = value; void router.replace({ query: { ...route.query, view: value === 'overview' ? undefined : value } }) }
 function showAssertion(execution: string, id: number, version: string) {
   selectExecution(execution); activeTab.value = 'assertions'
   void router.replace({ query: { ...route.query, view:'assertions', execution, assertion:String(id), evaluator:version } })
@@ -213,7 +219,7 @@ function online() { if (live.value) { state.value = '等待重连'; error.value 
 onMounted(() => { window.addEventListener('offline', offline); window.addEventListener('online', online); if (workspace.authorization.value && runId.value) void load() })
 watch(() => route.params.runId, value => { if (value && value !== runId.value) { stop(); runId.value = String(value); snapshot.value = undefined; if (workspace.authorization.value) void load() } })
 watch(workspace.authorization, (value, old) => { if (value !== old) { stop(); readGeneration++; authorization = ''; snapshot.value = undefined; facts.value = []; focusedFact.value = undefined; selected.value = ''; error.value = ''; busy.value = false } })
-watch(() => route.query.view, value => { activeTab.value = ['trace','diagnosis','assertions','relations','semantic'].includes(String(value)) ? String(value) : 'overview' })
+watch(() => route.query.view, value => { activeTab.value = allowedTab(value) })
 onBeforeUnmount(() => {
   stop(); readGeneration++; authorization = ''
   window.removeEventListener('offline', offline); window.removeEventListener('online', online)
@@ -244,7 +250,7 @@ onBeforeUnmount(() => {
     </details>
     <p v-if="error" class="evidence-error" role="alert">{{ error }}</p>
     <template v-if="snapshot">
-      <div class="run-context-bar"><strong>{{ snapshot.run_id.slice(0,8) }}</strong><span>版本ID {{ snapshot.manifest?.target_version_id ?? '未记录' }}</span><span>{{ statuses[snapshot.status] ?? snapshot.status }}</span><span>{{ currentExecution?.case_key ?? '全部执行' }}</span><RouterLink :to="`/reports?run=${snapshot.run_id}`">缺陷与报告 →</RouterLink></div>
+      <div class="run-context-bar"><strong>{{ snapshot.run_id.slice(0,8) }}</strong><span>版本ID {{ snapshot.manifest?.target_version_id ?? '未记录' }}</span><span>{{ statuses[snapshot.status] ?? snapshot.status }}</span><span>{{ currentExecution?.case_key ?? '全部执行' }}</span><RouterLink v-if="!basic || ['completed','cancelled','failed'].includes(snapshot.status)" :to="`/reports?run=${snapshot.run_id}`">{{ basic ? '查看报告' : '缺陷与报告' }} →</RouterLink><span v-else>运行结束后可导出报告</span></div>
       <ExecutionControls :snapshot="snapshot" :authorization="authorization" :execution="executionFilter" :facts="facts" @refresh="refreshSnapshot" />
       <aside v-if="profile && !['diagnosis','overview'].includes(activeTab)" class="fault-profile" aria-label="冻结故障配置">
         <div><strong>{{ profile.config.fault_type }} · {{ profile.config.trigger_stage }}</strong>
@@ -260,11 +266,11 @@ onBeforeUnmount(() => {
         <div><small>执行数量</small><strong>{{ snapshot.executions.length }}</strong></div>
         <div><small>待返回模型观察</small><strong>{{ snapshot.pending_model_observations }}</strong></div>
       </div>
-      <div class="evidence-tabs" role="tablist" aria-label="运行视图"><button role="tab" :aria-selected="activeTab === 'overview'" @click="setTab('overview')">结果概览</button><button role="tab" :aria-selected="activeTab === 'diagnosis'" @click="setTab('diagnosis'); if (!executionFilter) selectExecution(snapshot.executions[0]?.execution_id ?? '')">链路诊断</button><button role="tab" :aria-selected="activeTab === 'trace'" @click="setTab('trace')">调用轨迹</button><button role="tab" :aria-selected="activeTab === 'assertions'" @click="setTab('assertions')">判定结果</button><button v-if="snapshot.manifest?.metamorphic" role="tab" :aria-selected="activeTab === 'relations'" @click="setTab('relations')">变形对照</button><button v-if="booking" role="tab" :aria-selected="activeTab === 'semantic'" @click="setTab('semantic')">AI辅助评价</button><span>证据先于结论</span></div>
+      <div class="evidence-tabs" role="tablist" aria-label="运行视图"><button role="tab" :aria-selected="activeTab === 'overview'" @click="setTab('overview')">结果概览</button><button role="tab" :aria-selected="activeTab === 'diagnosis'" @click="setTab('diagnosis'); if (!executionFilter) selectExecution(snapshot.executions[0]?.execution_id ?? '')">链路诊断</button><button role="tab" :aria-selected="activeTab === 'trace'" @click="setTab('trace')">调用轨迹</button><button role="tab" :aria-selected="activeTab === 'assertions'" @click="setTab('assertions')">判定结果</button><button v-if="!basic && snapshot.manifest?.metamorphic" role="tab" :aria-selected="activeTab === 'relations'" @click="setTab('relations')">变形对照</button><button v-if="booking && !basic" role="tab" :aria-selected="activeTab === 'semantic'" @click="setTab('semantic')">AI辅助评价</button><span>证据先于结论</span></div>
       <ExternalRunOverview v-if="external && ['overview','diagnosis'].includes(activeTab)" :snapshot="snapshot" :execution-id="executionFilter" :diagnosis="activeTab === 'diagnosis'" :refresh="refreshSnapshot" @execution="selectExecution" @assertions="setTab('assertions')" @trace="setTab('trace')" @diagnose="setTab('diagnosis')" />
       <RefundRunOverview v-else-if="activeTab === 'overview' && snapshot.manifest?.adapter_type === 'reference_refund'" :snapshot="snapshot" :execution-id="executionFilter" @execution="selectExecution" @assertions="setTab('assertions')" @diagnosis="id=>{selectExecution(id);setTab('diagnosis')}" />
-      <ReliabilityOverview v-else-if="activeTab === 'overview'" :run-id="snapshot.run_id" :authorization="authorization" :execution-id="executionFilter" :revision="`${snapshot.cursor}:${snapshot.status}:${snapshot.executions.map(e=>`${e.status}:${e.timing?.evaluation?.verdict ?? ''}`).join(',')}`" @execution="selectExecution" @locate="locate" @snapshot="showExecutionSnapshot" @assertion="showAssertion" @diagnosis="id => { selectExecution(id); setTab('diagnosis') }" @semantic="id => { semanticExecution = id; setTab('semantic') }" />
-      <ChainDiagnostics v-if="activeTab === 'diagnosis' && !external" :snapshot="snapshot" :facts="facts" :execution-id="executionFilter" :authorization="authorization" :connection="state" :more="more" :busy="busy" @execution="selectExecution" @locate="locate" @head="load(true)" @next="nextPage(facts.length >= 500)" @assertions="setTab('assertions')" @semantic="semanticExecution = executionFilter; setTab('semantic')" @download="download" />
+      <ReliabilityOverview v-else-if="activeTab === 'overview'" :hide-semantic="basic" :run-id="snapshot.run_id" :authorization="authorization" :execution-id="executionFilter" :revision="`${snapshot.cursor}:${snapshot.status}:${snapshot.executions.map(e=>`${e.status}:${e.timing?.evaluation?.verdict ?? ''}`).join(',')}`" @execution="selectExecution" @locate="locate" @snapshot="showExecutionSnapshot" @assertion="showAssertion" @diagnosis="id => { selectExecution(id); setTab('diagnosis') }" @semantic="id => { semanticExecution = id; setTab('semantic') }" />
+      <ChainDiagnostics v-if="activeTab === 'diagnosis' && !external" :hide-semantic="basic" :snapshot="snapshot" :facts="facts" :execution-id="executionFilter" :authorization="authorization" :connection="state" :more="more" :busy="busy" @execution="selectExecution" @locate="locate" @head="load(true)" @next="nextPage(facts.length >= 500)" @assertions="setTab('assertions')" @semantic="semanticExecution = executionFilter; setTab('semantic')" @download="download" />
       <AssertionsPanel v-if="activeTab === 'assertions'" :run-id="snapshot.run_id" :authorization="authorization" :execution-id="executionFilter" :executions="snapshot.executions" :assertion-id="Number(route.query.assertion) || undefined" :evaluator-version="String(route.query.evaluator ?? '')" @locate="locate" @snapshot="showSnapshot" />
       <RelationsPanel v-if="activeTab === 'relations'" :run-id="snapshot.run_id" :authorization="authorization" @locate="locate" @snapshot="showSnapshot" />
       <p v-if="activeTab === 'semantic' && !booking" role="status">当前对象尚未校准 AI 辅助评价，请查看判定结果和原回执。</p>

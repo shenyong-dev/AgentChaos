@@ -116,7 +116,9 @@ def condition_projection(report):
         else None,
         "repetitions": manifest.get("repetitions"),
         "seed": manifest.get("seed"),
-        "fault": fault.get("config_hash")
+        "fault": manifest["external_fault"] or "control"
+        if "external_fault" in manifest
+        else fault.get("config_hash")
         if isinstance(fault, dict)
         else "control"
         if "fault_profile" in manifest
@@ -163,6 +165,61 @@ def condition_projection(report):
             ]
             for execution in report["executions"]
         ),
+    }
+
+
+def compare_external_faults(normal, fault):
+    """Pair terminal executions of the same mapped case with one declared fault difference."""
+    baseline, comparison = normal["run"]["manifest"], fault["run"]["manifest"]
+    keys = ("target_version_id", "repetitions", "seed", "limits", "evaluation")
+    different = [key for key in keys if baseline.get(key) != comparison.get(key)]
+    if baseline["target"].get("config_hash") != comparison["target"].get("config_hash"):
+        different.append("target_config")
+    if baseline.get("cases") != comparison.get("cases"):
+        different.append("cases")
+    if normal["run"]["budget"] != fault["run"]["budget"]:
+        different.append("budget")
+    if baseline["external_fault"] is not None or comparison["external_fault"] not in {
+        "response_timeout", "tool_error",
+    }:
+        different.append("fault_design")
+    right = {(x["case_hash"], x["repeat_no"]): x for x in fault["executions"]}
+    pairs = []
+
+    def evidence_view(item):
+        output = (item.get("output") or {}).get("external_evidence") or {}
+        transport = output.get("transport", {})
+        return {
+            "execution": item["execution_id"],
+            "status": item["status"],
+            "transport": transport.get("status"),
+            "fault_observed": transport.get("tool_fault_observed"),
+            "evidence_complete": item.get("evidence_integrity", {}).get("complete", False),
+            "checks": [
+                {"key": row["key"], "metric": row["metric"], "verdict": row["verdict"],
+                 "reason": row["reason"], "actual": row.get("actual", {}).get("value")}
+                for row in latest_rows(item["assertions"])
+                if row["metric"].startswith("external") or row["metric"] == "reply_literals"
+            ],
+        }
+
+    for execution in normal["executions"]:
+        peer = right.get((execution["case_hash"], execution["repeat_no"]))
+        if peer:
+            pairs.append({
+                "case_key": execution["case_key"], "repeat_no": execution["repeat_no"],
+                "normal": evidence_view(execution), "fault": evidence_view(peer),
+            })
+    if len(pairs) != len(normal["executions"]) or len(pairs) != len(right):
+        different.append("execution_pair")
+    return {
+        "schema": "external-fault-pair-v1",
+        "normal_run": normal["run"]["run_id"],
+        "fault_run": fault["run"]["run_id"],
+        "fault": comparison["external_fault"],
+        "conditions_match": not different,
+        "differences": different,
+        "pairs": pairs,
     }
 
 

@@ -85,7 +85,11 @@ def policy(settings):
         result = {item.id: item for item in profiles}
         if len(result) != len(profiles):
             raise ValueError("Duplicate profile")
+        from app.external.self_service import KEY_ID
+
         for profile in profiles:
+            if KEY_ID.fullmatch(profile.id):
+                raise ValueError("Reserved personal agent identifier")
             draft = Connection(
                 profile_id=profile.id,
                 name=profile.label,

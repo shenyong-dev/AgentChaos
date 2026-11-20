@@ -15,9 +15,9 @@ onSessionReset(() => {
 export class InteractionError extends Error {
   constructor(message: string, public status: number, public code: string) { super(message) }
 }
-export async function interactionRequest<T>(path: string, body?: unknown): Promise<T> {
+export async function interactionRequest<T>(path: string, body?: unknown, method = body === undefined ? 'GET' : 'POST'): Promise<T> {
   const response = await sessionFetch('/api/v1/interactive' + path, {
-    method: body === undefined ? 'GET' : 'POST', cache: 'no-store',
+    method, cache: 'no-store',
     headers: { Authorization: workspace.authorization.value, ...(body === undefined ? {} : { 'Content-Type': 'application/json' }) },
     body: body === undefined ? undefined : JSON.stringify(body),
     signal: AbortSignal.timeout(body === undefined ? 30000 : 150000),

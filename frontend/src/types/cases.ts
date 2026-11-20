@@ -1,4 +1,4 @@
-export interface CaseAccess { username: string; role: 'operator' | 'reviewer'; generation_enabled: boolean }
+export interface CaseAccess { username: string; role: 'operator' | 'reviewer' | 'admin'; generation_enabled: boolean }
 export type GenerationTarget = 'booking' | 'refund'
 export interface CandidateValue {
   profile: 'normal' | 'capacity' | 'correction' | 'refund_normal' | 'refund_ineligible' | 'refund_owner' | 'refund_change' | 'refund_decline' | 'refund_duplicate'; title: string; rationale: string
